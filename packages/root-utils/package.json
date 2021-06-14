@@ -23,5 +23,8 @@
     "should": "13.2.3",
     "sinon": "11.1.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "caller": "^1.0.1",
+    "find-root": "^1.1.0"
+  }
 }
