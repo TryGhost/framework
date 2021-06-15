@@ -337,6 +337,14 @@
     ghost-ignition "^4.6.1"
     lodash "^4.17.21"
 
+"@tryghost/root-utils@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@tryghost/root-utils/-/root-utils-0.1.0.tgz#7578cb5e57953316fef58edd43a152a86b719a8f"
+  integrity sha512-zy3PSviwytjvjdMso86RYZLE2I4e2yL/s83fIEf/g17C8V8hsCcgE83cFOpCw3ISWDFX3Qi0IX9kI3or2pfGLg==
+  dependencies:
+    caller "^1.0.1"
+    find-root "^1.1.0"
+
 "@tryghost/tpl@^0.1.1":
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/@tryghost/tpl/-/tpl-0.1.1.tgz#41435d29cfd1cb3addd0edcd05083815a20b2ac2"
