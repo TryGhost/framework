@@ -15,6 +15,23 @@ const GhostPrettyStream = require('./PrettyStream');
  * The logger handles any stdout/stderr logs and streams it into the configured transports.
  */
 class GhostLogger {
+    /**
+     * Properties in the options bag:
+     * 
+     * name:            Name of the logger. The name will appear in the raw log files with {"name": String...}
+     * domain:          Is used for creating the file name.
+     * env:             Is used for creating the file name.
+     * mode:            Is used to print short or long log.
+     * level:           The level defines the default level of all transports except of stderr.
+     * logBody:         Disable or enable if the body of a request should be logged to the target stream.
+     * transports:      An array of comma separated transports (e.g. stdout, stderr, geld, loggly, file)
+     * rotation:        Enable or disable file rotation.
+     * path:            Path where to store log files.
+     * loggly:          Loggly transport configuration.
+     * elasticsearch:   Elasticsearch transport configuration
+     * gelf:            Gelf transport configuration.
+     * @param {object} options Bag of options
+     */
     constructor(options) {
         options = options || {};
 
