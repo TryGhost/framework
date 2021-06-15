@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const findRoot = require('find-root');
 const caller = require('caller');
 
@@ -27,10 +29,39 @@ exports.getCallerRoot = function getCallerRoot() {
  * Used to find the root directory (where a package.json exists) nearest to the current
  * working directory of the process. This means that configuration that exists at the root
  * of the project can be accessed by any of the modules required by the project.
+ * 
+ * Includes logic to determine whether a `current` symlink exists in the working directory,
+ * which will be used rather than walking up the file tree if it exists
  */
 exports.getProcessRoot = function getProcessRoot() {
     try {
         return findRoot(process.cwd());
+    } catch (err) {
+        return;
+    }
+};
+
+/**
+ * @description Special case of getProcessRoot specifically for use within Ghost.
+ * 
+ * Checks whether there is a `current` directory in the working dir, and uses that as
+ * the "current working directory" instead of the actual working directory. This allows
+ * for Ghost managed by the CLI to work properly.
+ * 
+ * This is implemented as a separate function because it includes application-specific
+ * functionality.
+ */
+exports.getGhostRoot = function getGhostRoot() {
+    try {
+        let workingDirectory = process.cwd();
+        const currentFolder = path.join(workingDirectory, 'current');
+        const folderInfo = fs.statSync(currentFolder, {
+            throwIfNoEntry: false
+        });
+        if (folderInfo && folderInfo.isDirectory()) {
+            workingDirectory = currentFolder;
+        }
+        return findRoot(workingDirectory);
     } catch (err) {
         return;
     }
