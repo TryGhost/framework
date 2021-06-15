@@ -20,18 +20,18 @@ describe('getProcessRoot', function () {
 });
 
 describe('getGhostRoot', function () {
-    before(function () {
+    it('Gets the `current` root directory of the process', function () {
         fs.mkdirSync('current');
         fs.closeSync(fs.openSync(path.join('current', 'package.json'), 'w'));
-    });
 
-    after(function () {
+        // `current` directory contains a package.json, and is picked over `root-utils`
+        getGhostRoot().should.endWith('current');
+
         fs.rmSync(path.join('current', 'package.json'));
         fs.rmdirSync('current');
     });
 
-    it('Gets the `current` root directory of the process', function () {
-        // `current` directory contains a package.json, and is picked over `root-utils`
-        getGhostRoot().should.endWith('current');
+    it('Gets the root when no `current` directory exists', function () {
+        getGhostRoot().should.endWith('root-utils');
     });
 });

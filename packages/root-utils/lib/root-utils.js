@@ -52,15 +52,17 @@ exports.getProcessRoot = function getProcessRoot() {
  * functionality.
  */
 exports.getGhostRoot = function getGhostRoot() {
+    let workingDirectory = process.cwd();
+    const currentFolder = path.join(workingDirectory, 'current');
     try {
-        let workingDirectory = process.cwd();
-        const currentFolder = path.join(workingDirectory, 'current');
-        const folderInfo = fs.statSync(currentFolder, {
-            throwIfNoEntry: false
-        });
-        if (folderInfo && folderInfo.isDirectory()) {
+        const folderInfo = fs.statSync(currentFolder);
+        if (folderInfo.isDirectory()) {
             workingDirectory = currentFolder;
         }
+    } catch (err) {
+        // No-op - continue with normal working directory
+    }
+    try {   
         return findRoot(workingDirectory);
     } catch (err) {
         return;
