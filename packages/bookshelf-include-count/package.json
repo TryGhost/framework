@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-include-count",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/bookshelf-include-count",
   "author": "Ghost Foundation",
   "license": "MIT",
