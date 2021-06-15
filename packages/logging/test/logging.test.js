@@ -1,14 +1,32 @@
-var PrettyStream = require('../lib/PrettyStream');
-var GhostLogger = require('../lib/GhostLogger');
-var Writable = require('stream').Writable;
-var includes = require('lodash/includes');
-var {errors} = require('ghost-ignition');
-var sinon = require('sinon');
-var should = require('should');
-var Bunyan2Loggly = require('bunyan-loggly');
-var GelfStream = require('gelf-stream').GelfStream;
-var ElasticSearch = require('@tryghost/elasticsearch-bunyan');
-var sandbox = sinon.createSandbox();
+const fs = require('fs');
+const PrettyStream = require('../lib/PrettyStream');
+const GhostLogger = require('../lib/GhostLogger');
+const Writable = require('stream').Writable;
+const includes = require('lodash/includes');
+const {errors} = require('ghost-ignition');
+const sinon = require('sinon');
+const should = require('should');
+const Bunyan2Loggly = require('bunyan-loggly');
+const GelfStream = require('gelf-stream').GelfStream;
+const ElasticSearch = require('@tryghost/elasticsearch-bunyan');
+const sandbox = sinon.createSandbox();
+
+describe('Logging config', function () {
+    it('Reads file called loggingrc.js', function () {
+        const loggerName = 'Logging test';
+        const loggingRc = `module.exports = {
+            name: "${loggerName}"
+        };`;
+
+        fs.writeFileSync('loggingrc.js', loggingRc);
+
+        const ghostLogger = require('../index');
+
+        ghostLogger.name.should.eql(loggerName);
+
+        fs.unlinkSync('loggingrc.js');
+    });
+});
 
 describe('Logging', function () {
     afterEach(function () {
