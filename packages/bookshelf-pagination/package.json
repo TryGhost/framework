@@ -20,8 +20,13 @@
   },
   "devDependencies": {
     "mocha": "9.0.0",
+    "rewire": "^5.0.0",
     "should": "13.2.3",
     "sinon": "11.1.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@tryghost/errors": "^0.2.12",
+    "@tryghost/tpl": "^0.1.1",
+    "ghost-ignition": "^4.6.3"
+  }
 }
