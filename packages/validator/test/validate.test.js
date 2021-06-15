@@ -1,6 +1,6 @@
-const should = require('should');
+require('./utils');
 
-const validator = require('../../../../core/server/data/validator');
+const validator = require('../');
 
 // Validate our customizations
 describe('Validate', function () {

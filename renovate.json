@@ -1,5 +1,9 @@
 {
   "extends": [
     "@tryghost:quietJS"
+  ],
+  "ignoreDeps": [
+    "moment-timezone",
+    "validator"
   ]
 }
