@@ -1,4 +1,4 @@
-const debug = require('ghost-ignition').debug('models:plugins:filter');
+const debug = require('@tryghost/debug')('models:plugins:filter');
 const errors = require('@tryghost/errors');
 const tpl = require('@tryghost/tpl');
 

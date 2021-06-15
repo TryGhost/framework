@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const _debug = require('ghost-ignition').debug._base;
+const _debug = require('@tryghost/debug')._base;
 const debug = _debug('ghost-query');
 
 const addHasPostsWhere = (tableName, config) => {

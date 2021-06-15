@@ -26,7 +26,6 @@
   "dependencies": {
     "@nexes/nql": "^0.5.2",
     "@tryghost/errors": "^0.2.12",
-    "@tryghost/tpl": "^0.1.1",
-    "ghost-ignition": "^4.6.3"
+    "@tryghost/tpl": "^0.1.1"
   }
 }
