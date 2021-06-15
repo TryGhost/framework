@@ -1,0 +1,38 @@
+{
+  "name": "@tryghost/logging",
+  "version": "0.0.0",
+  "repository": "https://github.com/TryGhost/framework/tree/master/packages/logging",
+  "author": "Ghost Foundation",
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "dev": "echo \"Implement me!\"",
+    "test": "NODE_ENV=testing mocha './test/**/*.test.js'",
+    "lint": "eslint . --ext .js --cache",
+    "posttest": "yarn lint"
+  },
+  "files": [
+    "index.js",
+    "lib"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "mocha": "9.0.0",
+    "should": "13.2.3",
+    "sinon": "11.1.1"
+  },
+  "dependencies": {
+    "@tryghost/bunyan-rotating-filestream": "^0.0.7",
+    "@tryghost/elasticsearch-bunyan": "^0.1.1",
+    "bunyan": "^1.8.15",
+    "bunyan-loggly": "^1.4.2",
+    "fs-extra": "^10.0.0",
+    "gelf-stream": "^1.1.1",
+    "json-stringify-safe": "^5.0.1",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.1",
+    "prettyjson": "^1.2.1"
+  }
+}
