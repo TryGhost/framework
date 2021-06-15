@@ -34,24 +34,6 @@ exports.getCallerRoot = function getCallerRoot() {
  * which will be used rather than walking up the file tree if it exists
  */
 exports.getProcessRoot = function getProcessRoot() {
-    try {
-        return findRoot(process.cwd());
-    } catch (err) {
-        return;
-    }
-};
-
-/**
- * @description Special case of getProcessRoot specifically for use within Ghost.
- * 
- * Checks whether there is a `current` directory in the working dir, and uses that as
- * the "current working directory" instead of the actual working directory. This allows
- * for Ghost managed by the CLI to work properly.
- * 
- * This is implemented as a separate function because it includes application-specific
- * functionality.
- */
-exports.getGhostRoot = function getGhostRoot() {
     let workingDirectory = process.cwd();
     const currentFolder = path.join(workingDirectory, 'current');
     try {
