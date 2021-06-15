@@ -1,8 +1,6 @@
-const should = require('should');
 const sinon = require('sinon');
-const Promise = require('bluebird');
 const rewire = require('rewire');
-const pagination = rewire('../../../../core/server/models/plugins/pagination');
+const pagination = rewire('../lib/bookshelf-pagination');
 
 describe('pagination', function () {
     let paginationUtils;
