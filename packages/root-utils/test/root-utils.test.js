@@ -27,7 +27,7 @@ describe('getGhostRoot', function () {
         // `current` directory contains a package.json, and is picked over `root-utils`
         getGhostRoot().should.endWith('current');
 
-        fs.rmSync(path.join('current', 'package.json'));
+        fs.unlinkSync(path.join('current', 'package.json'));
         fs.rmdirSync('current');
     });
 
