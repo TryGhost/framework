@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/validator",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/validator",
   "author": "Ghost Foundation",
   "license": "MIT",
