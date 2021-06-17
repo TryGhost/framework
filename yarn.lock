@@ -349,6 +349,14 @@
     ghost-ignition "^4.6.1"
     lodash "^4.17.21"
 
+"@tryghost/errors@^0.2.13":
+  version "0.2.13"
+  resolved "https://registry.yarnpkg.com/@tryghost/errors/-/errors-0.2.13.tgz#819550c347f5634706b5a4834dd2db0e7cb0a6f2"
+  integrity sha512-RXREWxDy69LC5t8sW6UuSnUNED1ZT9wKTNCJ2VDdrdS1CTaxmZroaWoKOrGjrQDx/M2IBHJSNZHbnRtkHoJ4hw==
+  dependencies:
+    "@tryghost/ignition-errors" "^0.1.0"
+    lodash "^4.17.21"
+
 "@tryghost/root-utils@^0.1.0":
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/@tryghost/root-utils/-/root-utils-0.1.0.tgz#7578cb5e57953316fef58edd43a152a86b719a8f"
