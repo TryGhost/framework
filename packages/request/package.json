@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/request",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/request",
   "author": "Ghost Foundation",
   "license": "MIT",
@@ -27,8 +27,8 @@
   },
   "dependencies": {
     "@tryghost/errors": "^0.2.12",
-    "@tryghost/validator": "^0.1.1",
-    "@tryghost/version": "^0.1.0",
+    "@tryghost/validator": "^0.1.2",
+    "@tryghost/version": "^0.1.1",
     "got": "9.6.0",
     "lodash": "^4.17.21"
   }
