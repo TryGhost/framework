@@ -26,6 +26,13 @@ describe('Logging config', function () {
 
         fs.unlinkSync('loggingrc.js');
     });
+
+    it('Works without loggingrc.js', function () {
+        const ghostLogger = require('../index');
+        should.doesNotThrow(() => {
+            ghostLogger.info('Checking logging works');
+        });
+    });
 });
 
 describe('Logging', function () {
@@ -227,7 +234,7 @@ describe('Logging', function () {
     });
 
     it('loggly does stream errors that match regex', function () {
-        sandbox.spy(Bunyan2Loggly.prototype, 'write');
+        sandbox.stub(Bunyan2Loggly.prototype, 'write').callsFake(function () {});
 
         var ghostLogger = new GhostLogger({
             transports: ['loggly'],
