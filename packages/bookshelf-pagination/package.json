@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@tryghost/errors": "^0.2.12",
-    "@tryghost/tpl": "^0.1.1"
+    "@tryghost/tpl": "^0.1.1",
+    "lodash": "^4.17.21"
   }
 }
