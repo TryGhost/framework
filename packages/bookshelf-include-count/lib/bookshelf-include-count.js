@@ -25,6 +25,17 @@ module.exports = function (Bookshelf) {
                 });
             }
         },
+        labels: {
+            members: function addMemberCountToLabels(model) {
+                model.query('columns', 'labels.*', function (qb) {
+                    qb.count('members.id')
+                        .from('members')
+                        .leftOuterJoin('members_labels', 'members.id', 'members_labels.member_id')
+                        .whereRaw('members_labels.label_id = labels.id')
+                        .as('count__members');
+                });
+            }
+        },
         users: {
             posts: function addPostCountToUsers(model, options) {
                 model.query('columns', 'users.*', function (qb) {
@@ -58,6 +69,13 @@ module.exports = function (Bookshelf) {
 
                 // Call the query builder
                 countQueryBuilder[tableName].posts(this, options);
+            }
+            if (options.withRelated && options.withRelated.indexOf('count.members') > -1) {
+                // remove post_count from withRelated
+                options.withRelated = _.pull([].concat(options.withRelated), 'count.members');
+
+                // Call the query builder
+                countQueryBuilder[tableName].members(this, options);
             }
         },
         fetch: function () {
