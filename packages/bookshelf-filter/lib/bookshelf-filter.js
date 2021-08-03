@@ -6,80 +6,6 @@ const messages = {
     errorParsing: 'Error parsing filter'
 };
 
-const RELATIONS = {
-    tags: {
-        tableName: 'tags',
-        type: 'manyToMany',
-        joinTable: 'posts_tags',
-        joinFrom: 'post_id',
-        joinTo: 'tag_id'
-    },
-    authors: {
-        tableName: 'users',
-        tableNameAs: 'authors',
-        type: 'manyToMany',
-        joinTable: 'posts_authors',
-        joinFrom: 'post_id',
-        joinTo: 'author_id'
-    },
-    labels: {
-        tableName: 'labels',
-        type: 'manyToMany',
-        joinTable: 'members_labels',
-        joinFrom: 'member_id',
-        joinTo: 'label_id'
-    },
-    products: {
-        tableName: 'products',
-        type: 'manyToMany',
-        joinTable: 'members_products',
-        joinFrom: 'member_id',
-        joinTo: 'product_id'
-    },
-    posts_meta: {
-        tableName: 'posts_meta',
-        type: 'oneToOne',
-        joinFrom: 'post_id'
-    }
-};
-
-const EXPANSIONS = {
-    posts: [{
-        key: 'primary_tag',
-        replacement: 'tags.slug',
-        expansion: 'posts_tags.sort_order:0+tags.visibility:public'
-    }, {
-        key: 'primary_author',
-        replacement: 'authors.slug',
-        expansion: 'posts_authors.sort_order:0+authors.visibility:public'
-    }, {
-        key: 'authors',
-        replacement: 'authors.slug'
-    }, {
-        key: 'author',
-        replacement: 'authors.slug'
-    }, {
-        key: 'tag',
-        replacement: 'tags.slug'
-    }, {
-        key: 'tags',
-        replacement: 'tags.slug'
-    }],
-    members: [{
-        key: 'label',
-        replacement: 'labels.slug'
-    }, {
-        key: 'labels',
-        replacement: 'labels.slug'
-    }, {
-        key: 'product',
-        replacement: 'products.slug'
-    }, {
-        key: 'products',
-        replacement: 'products.slug'
-    }]
-};
-
 /**
  * @param {import('bookshelf')} Bookshelf
  */
@@ -92,6 +18,7 @@ const filter = function filter(Bookshelf) {
         defaultFilters() {},
         extraFilters() {},
         filterExpansions() {},
+        filterRelations() {},
         /**
          * Method which makes the necessary query builder calls (through knex) for the filters set on this model
          * instance.
@@ -101,10 +28,6 @@ const filter = function filter(Bookshelf) {
 
             const expansions = [];
 
-            if (EXPANSIONS[this.tableName]) {
-                expansions.push(...EXPANSIONS[this.tableName]);
-            }
-
             if (this.filterExpansions()) {
                 expansions.push(...this.filterExpansions());
             }
@@ -113,6 +36,7 @@ const filter = function filter(Bookshelf) {
             let extra = this.extraFilters(options);
             let overrides = this.enforcedFilters(options);
             let defaults = this.defaultFilters(options);
+            let relations = this.filterRelations(options) || {};
             let transformer = options.mongoTransformer;
 
             debug('custom', custom);
@@ -131,7 +55,7 @@ const filter = function filter(Bookshelf) {
             try {
                 this.query((qb) => {
                     nql(custom, {
-                        relations: RELATIONS,
+                        relations: relations,
                         expansions: expansions,
                         overrides: overrides,
                         defaults: defaults,
