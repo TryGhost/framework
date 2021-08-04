@@ -25,7 +25,7 @@
     "sinon": "11.1.1"
   },
   "dependencies": {
-    "@nexes/nql": "^0.5.2",
+    "@nexes/nql": "0.6.0",
     "@tryghost/debug": "^0.1.4",
     "@tryghost/errors": "^0.2.12",
     "@tryghost/tpl": "^0.1.1"
