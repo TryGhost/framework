@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-eager-load",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/bookshelf-eager-load",
   "author": "Ghost Foundation",
   "license": "MIT",
@@ -25,7 +25,7 @@
     "sinon": "11.1.1"
   },
   "dependencies": {
-    "@tryghost/debug": "^0.1.4",
+    "@tryghost/debug": "^0.1.5",
     "lodash": "^4.17.21"
   }
 }

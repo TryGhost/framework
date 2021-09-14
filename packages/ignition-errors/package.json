@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/ignition-errors",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/ignition-errors",
   "author": "Ghost Foundation",
   "license": "MIT",
