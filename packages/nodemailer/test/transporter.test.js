@@ -15,6 +15,16 @@ describe('Transporter', function () {
         transporter.transporter.name.should.equal('Sendmail');
     });
 
+    it('can create an Sendmail transporter', function () {
+        const transporter = nodemailer('Sendmail', {});
+        transporter.transporter.name.should.equal('Sendmail');
+    });
+
+    it('can create an SES transporter', function () {
+        const transporter = nodemailer('SES', {});
+        transporter.transporter.name.should.equal('SESTransport');
+    });
+
     it('can create a Direct transporter', function () {
         const transporter = nodemailer('direct', {});
         transporter.transporter.name.should.equal('SMTP (direct)');

@@ -13,16 +13,42 @@ const messages = {
  * @param {Object} options
  * @returns {import('nodemailer').Transporter} Nodemailer Transporter
  */
-module.exports = function (transport, options) {
+module.exports = function (transport, options = {}) {
     let transportOptions;
 
+    transport = transport.toLowerCase();
+
     switch (transport) {
-    case 'SMTP':
+    case 'smtp':
         transportOptions = options;
 
-        if (options.service && options.service === 'Sendmail') {
+        if (options.service && options.service.toLowerCase() === 'sendmail') {
             transportOptions.sendmail = true;
         }
+        break;
+    case 'sendmail':
+        transportOptions = options;
+        transportOptions.sendmail = true;
+        break;
+    case 'ses':
+        const aws = require('@aws-sdk/client-ses');
+
+        const pattern = /(.*)email(.*)\.(.*).amazonaws.com/i;
+        const result = pattern.exec(options.ServiceUrl);
+
+        const sesOptions = options || {};
+        sesOptions.accessKeyId = sesOptions.accessKeyId || sesOptions.AWSAccessKeyID;
+        sesOptions.secretAccessKey = sesOptions.secretAccessKey || sesOptions.AWSSecretKey;
+        sesOptions.sessionToken = sesOptions.sessionToken || sesOptions.AWSSecurityToken;
+        sesOptions.apiVersion = '2010-12-01';
+        sesOptions.region = sesOptions.region || (result && result[3]) || 'us-east-1';
+
+        const ses = new aws.SES(sesOptions);
+
+        transportOptions = {
+            SES: {ses, aws}
+        };
+
         break;
     case 'direct':
         const directTransport = require('nodemailer-direct-transport');
