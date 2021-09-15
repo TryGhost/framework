@@ -54,6 +54,10 @@ module.exports = function (transport, options = {}) {
         const directTransport = require('nodemailer-direct-transport');
         transportOptions = directTransport(options);
         break;
+    case 'stub':
+        const stubTransport = require('nodemailer-stub-transport');
+        transportOptions = stubTransport(options);
+        break;
     default:
         throw new errors.EmailError({
             message: tpl(messages.unknownTransport, {transport})

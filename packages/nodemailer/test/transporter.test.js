@@ -30,6 +30,11 @@ describe('Transporter', function () {
         transporter.transporter.name.should.equal('SMTP (direct)');
     });
 
+    it('can create a Stub transporter', function () {
+        const transporter = nodemailer('stub', {});
+        transporter.transporter.name.should.equal('Stub');
+    });
+
     it('should throw an error when creating an unknown transporter', function () {
         try {
             const transporter = nodemailer('unknown', {});
