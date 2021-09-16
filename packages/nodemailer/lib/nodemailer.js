@@ -22,6 +22,17 @@ module.exports = function (transport, options = {}) {
     case 'smtp':
         transportOptions = options;
 
+        /**
+         * @deprecated `secureConnection` was removed in Nodemailer 1.0.2
+         * in favor of `secure` but Ghost has been recommending `secureConnection`
+         * and it's difficult to get everyone to switch at this point
+         *
+         * Therefore, we have to alias it here to keep things working
+         */
+        if (options.secureConnection === true) {
+            transportOptions.secure = true;
+        }
+
         if (options.service && options.service.toLowerCase() === 'sendmail') {
             transportOptions.sendmail = true;
         }
