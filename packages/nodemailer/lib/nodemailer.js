@@ -75,5 +75,11 @@ module.exports = function (transport, options = {}) {
         });
     }
 
-    return nodemailer.createTransport(transportOptions);
+    const transporter = nodemailer.createTransport(transportOptions);
+
+    if (transport === 'smtp') {
+        Object.assign(transporter.transporter.options, options);
+    }
+
+    return transporter;
 };
