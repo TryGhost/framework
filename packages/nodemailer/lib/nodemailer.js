@@ -46,15 +46,15 @@ module.exports = function (transport, options = {}) {
 
         const pattern = /(.*)email(.*)\.(.*).amazonaws.com/i;
         const result = pattern.exec(options.ServiceUrl);
+        const region = options.region || (result && result[3]) || 'us-east-1';
 
-        const sesOptions = options || {};
-        sesOptions.accessKeyId = sesOptions.accessKeyId || sesOptions.AWSAccessKeyID;
-        sesOptions.secretAccessKey = sesOptions.secretAccessKey || sesOptions.AWSSecretKey;
-        sesOptions.sessionToken = sesOptions.sessionToken || sesOptions.AWSSecurityToken;
-        sesOptions.apiVersion = '2010-12-01';
-        sesOptions.region = sesOptions.region || (result && result[3]) || 'us-east-1';
+        process.env.AWS_ACCESS_KEY_ID = options.accessKeyId || options.AWSAccessKeyID;
+        process.env.AWS_SECRET_ACCESS_KEY = options.secretAccessKey || options.AWSSecretKey;
 
-        const ses = new aws.SES(sesOptions);
+        const ses = new aws.SES({
+            apiVersion: '2010-12-01',
+            region
+        });
 
         transportOptions = {
             SES: {ses, aws}
