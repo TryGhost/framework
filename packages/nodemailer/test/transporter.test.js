@@ -10,10 +10,16 @@ describe('Transporter', function () {
         transporter.transporter.name.should.equal('SMTP');
     });
 
-    it('can create an SMTP transporter with deprecated secureConnection', function () {
+    it('can create an SMTP transporter with deprecated secureConnection (true)', function () {
         const transporter = nodemailer('SMTP', {secureConnection: true});
         transporter.transporter.name.should.equal('SMTP');
         transporter.transporter.options.secure.should.equal(true);
+    });
+
+    it('can create an SMTP transporter with deprecated secureConnection (false)', function () {
+        const transporter = nodemailer('SMTP', {secureConnection: false});
+        transporter.transporter.name.should.equal('SMTP');
+        transporter.transporter.options.secure.should.equal(false);
     });
 
     it('can create an SMTP transporter with Sendmail service', function () {
