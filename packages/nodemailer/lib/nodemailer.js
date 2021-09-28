@@ -29,8 +29,8 @@ module.exports = function (transport, options = {}) {
          *
          * Therefore, we have to alias it here to keep things working
          */
-        if (options.secureConnection === true) {
-            transportOptions.secure = true;
+        if (Object.prototype.hasOwnProperty.call(options, 'secureConnection')) {
+            transportOptions.secure = options.secureConnection;
         }
 
         if (options.service && options.service.toLowerCase() === 'sendmail') {
