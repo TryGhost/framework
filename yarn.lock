@@ -949,13 +949,6 @@
     "@tryghost/ignition-errors" "^0.1.0"
     lodash "^4.17.21"
 
-"@tryghost/tpl@^0.1.1", "@tryghost/tpl@^0.1.2":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@tryghost/tpl/-/tpl-0.1.3.tgz#719e1161f7af1f9cfed055aeb8e1ba8058103d3f"
-  integrity sha512-RLuhgPIGhEO/eSYJ7VjjcLy18a4QMOqBb+e6ThKQloWgIZKjSuo2Z15zcqCu3pnFWyGEOyMBGTL/CFnSEhN74Q==
-  dependencies:
-    lodash.template "^4.5.0"
-
 "@types/istanbul-lib-coverage@^2.0.1":
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/@types/istanbul-lib-coverage/-/istanbul-lib-coverage-2.0.3.tgz#4ba8ddb720221f432e443bd5f9117fd22cfd4762"
