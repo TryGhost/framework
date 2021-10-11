@@ -4,6 +4,7 @@ const sandbox = sinon.createSandbox();
 
 const {Client} = require('@elastic/elasticsearch');
 const ElasticSearch = require('../index');
+const ElasticSearchBunyan = require('../lib/elasticsearch-bunyan');
 
 const testClientConfig = {
     node: 'http://test-elastic-client',
@@ -81,5 +82,35 @@ describe('ElasticSearch', function () {
         await es.index({
             message: 'Test data'
         }, indexConfig.index);
+    });
+});
+
+describe('ElasticSearch Bunyan', function () {
+    afterEach(function () {
+        sandbox.restore();
+    });
+
+    it('Sets the index config', async function () {
+        const es = new ElasticSearchBunyan(testClientConfig, indexConfig);
+        sandbox.stub(ElasticSearch.prototype, 'index').callsFake((data) => {
+            should.equal(data.index, indexConfig.index);
+        });
+
+        await es.write({
+            message: 'Test data'
+        }, indexConfig);
+    });
+
+    it('Can index using the Bunyan API', async function () {
+        const testMessage = {
+            message: 'Test data'
+        };
+
+        const es = new ElasticSearchBunyan(testClientConfig, indexConfig);
+        sandbox.stub(ElasticSearch.prototype, 'index').callsFake((data) => {
+            should.deepEqual(data.body, testMessage);
+        });
+
+        await es.write(testMessage, indexConfig);
     });
 });
