@@ -33,7 +33,7 @@ class GhostMetrics {
             let transportFn = `setup${transport[0].toUpperCase()}${transport.substr(1)}Shipper`;
 
             if (!this[transportFn]) {
-                throw new Error(`${transport} is an invalid transport`);
+                throw new Error(`${transport} is an invalid transport`); // eslint-disable-line
             }
 
             this[transportFn]();
