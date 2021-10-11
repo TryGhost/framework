@@ -1,7 +1,7 @@
 {
-  "name": "@tryghost/elasticsearch-wrapper",
+  "name": "@tryghost/elasticsearch",
   "version": "0.0.0",
-  "repository": "https://github.com/TryGhost/framework/tree/main/packages/elasticsearch-wrapper",
+  "repository": "https://github.com/TryGhost/framework/tree/main/packages/elasticsearch",
   "author": "Ghost Foundation",
   "license": "MIT",
   "main": "index.js",

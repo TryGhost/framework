@@ -7,7 +7,7 @@ const includes = require('lodash/includes');
 const bunyan = require('bunyan');
 const fs = require('fs-extra');
 const jsonStringifySafe = require('json-stringify-safe');
-const GhostPrettyStream = require('./PrettyStream');
+const GhostPrettyStream = require('@tryghost/pretty-stream');
 
 /**
  * @description Ghost's logger class.
@@ -167,7 +167,7 @@ class GhostLogger {
      * @description Setup ElasticSearch.
      */
     setElasticsearchStream() {
-        const ElasticSearch = require('@tryghost/elasticsearch-bunyan');
+        const ElasticSearch = require('@tryghost/elasticsearch').BunyanStream;
 
         const elasticStream = new ElasticSearch({
             node: this.elasticsearch.host,

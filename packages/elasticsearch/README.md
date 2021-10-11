@@ -1,12 +1,12 @@
-# Elasticsearch Wrapper
+# Elasticsearch
 
 ## Install
 
-`npm install @tryghost/elasticsearch-wrapper --save`
+`npm install @tryghost/elasticsearch --save`
 
 or
 
-`yarn add @tryghost/elasticsearch-wrapper`
+`yarn add @tryghost/elasticsearch`
 
 
 ## Usage

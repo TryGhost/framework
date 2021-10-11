@@ -27,7 +27,8 @@
   },
   "dependencies": {
     "@tryghost/bunyan-rotating-filestream": "^0.0.7",
-    "@tryghost/elasticsearch-bunyan": "^0.1.1",
+    "@tryghost/elasticsearch": "^0.0.0",
+    "@tryghost/pretty-stream": "^0.0.0",
     "@tryghost/root-utils": "^0.3.4",
     "bunyan": "^1.8.15",
     "bunyan-loggly": "^1.4.2",
