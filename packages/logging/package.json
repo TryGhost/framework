@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/logging",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/logging",
   "author": "Ghost Foundation",
   "license": "MIT",
@@ -27,8 +27,8 @@
   },
   "dependencies": {
     "@tryghost/bunyan-rotating-filestream": "^0.0.7",
-    "@tryghost/elasticsearch": "^0.1.0",
-    "@tryghost/pretty-stream": "^0.1.0",
+    "@tryghost/elasticsearch": "^0.1.1",
+    "@tryghost/pretty-stream": "^0.1.1",
     "@tryghost/root-utils": "^0.3.5",
     "bunyan": "^1.8.15",
     "bunyan-loggly": "^1.4.2",
