@@ -11,6 +11,7 @@ or
 
 ## Usage
 
+Used by `@tryghost/logging` and `@tryghost/metrics`.
 
 ## Develop
 

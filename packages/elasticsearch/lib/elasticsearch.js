@@ -1,7 +1,7 @@
 const {Client} = require('@elastic/elasticsearch');
 const debug = require('@tryghost/debug')('logging:elasticsearch');
 
-// Single client - multiple children made from it for a single connection pool
+// Singleton client - multiple children made from it for a single connection pool
 let client;
 
 class ElasticSearch {
