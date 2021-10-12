@@ -13,7 +13,9 @@ describe('Metrics config', function () {
     it('Reads file called loggingrc.js', function () {
         const transports = ['stdout'];
         const loggingRc = `module.exports = {
-            metricTransports: [${transports.map(t => `'${t}'`).join(', ')}]
+            metrics: {
+                transports: [${transports.map(t => `'${t}'`).join(', ')}]
+            }
         };`;
 
         fs.writeFileSync('loggingrc.js', loggingRc);
@@ -41,7 +43,9 @@ describe('Logging', function () {
         });
 
         const ghostMetrics = new GhostMetrics({
-            metricTransports: ['stdout']
+            metrics: {
+                transports: ['stdout']
+            }
         });
         ghostMetrics.metric(name, value);
     });
@@ -51,7 +55,12 @@ describe('Logging', function () {
         const value = 101;
 
         const ghostMetrics = new GhostMetrics({
-            metricTransports: ['elasticsearch'],
+            metrics: {
+                transports: ['elasticsearch'],
+                metadata: {
+                    id: '123123'
+                }
+            },
             elasticsearch: {
                 host: 'https://test-elasticsearch',
                 username: 'user',
@@ -61,7 +70,8 @@ describe('Logging', function () {
         });
 
         sandbox.stub(ElasticSearch.prototype, 'index').callsFake(function (data, index) {
-            should.equal(data.domain, ghostMetrics.domain);
+            should.exist(data.metadata);
+            should.equal(data.metadata.id, ghostMetrics.metadata.id);
             should.equal(data.value, value);
 
             // ElasticSearch shipper prefixes metric names to avoid polluting index namespace
@@ -75,14 +85,18 @@ describe('Logging', function () {
     it('throws for invalid transport', function () {
         should.throws(() => {
             new GhostMetrics({
-                metricTransports: ['not-a-transport']
+                metrics: {
+                    transports: ['not-a-transport']
+                }
             });
         });
     });
 
     it('defaults to short mode', function () {
         const ghostMetrics = new GhostMetrics({
-            metricTransports: ['stdout']
+            metrics: {
+                transports: ['stdout']
+            }
         });
 
         ghostMetrics.mode.should.eql('short');

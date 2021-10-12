@@ -8,19 +8,26 @@ class GhostMetrics {
     /**
      * Properties in the options bag:
      * 
-     * domain:           Metadata for metrics in shared databases.
-     * mode:             Is used to print short or long log - used for stdout shipper.
-     * metricTransports: An array of transports for metric shipping (e.g. ['stdout', 'elasticsearch'])
-     * elasticsearch:    Elasticsearch transport configuration
+     * domain:             Metadata for metrics in shared databases.
+     * mode:               Is used to print short or long log - used for stdout shipper.
+     * metrics.transports: An array of transports for metric shipping (e.g. ['stdout', 'elasticsearch'])
+     * metrics.metadata:   A property bag of metadata values to be shipped alongside the metric value
+     * elasticsearch:      Elasticsearch transport configuration
      * @param {object} options Bag of options
      */
     constructor(options) {
         options = options || {};
 
         this.domain = options.domain || 'localhost';
-        this.transports = options.metricTransports || [];
         this.elasticsearch = options.elasticsearch || {};
         this.mode = process.env.MODE || options.mode || 'short';
+        if ('metrics' in options && typeof options.metrics === 'object') {
+            this.transports = options.metrics.transports || [];
+            this.metadata = options.metrics.metadata || {};
+        } else {
+            this.transports = [];
+            this.metadata = {};
+        }
 
         // CASE: special env variable to enable long mode and level info
         if (process.env.LOIN) {
@@ -80,7 +87,9 @@ class GhostMetrics {
             }
 
             value['@timestamp'] = Date.now();
-            value.domain = this.domain;
+            if (this.metadata) {
+                value.metadata = this.metadata;
+            }
 
             elasticSearch.index(value, `metrics-${name}`);
         };
