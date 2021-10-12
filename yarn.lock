@@ -1179,24 +1179,6 @@ c8@7.10.0:
     yargs "^16.2.0"
     yargs-parser "^20.2.7"
 
-c8@7.9.0:
-  version "7.9.0"
-  resolved "https://registry.yarnpkg.com/c8/-/c8-7.9.0.tgz#e63b9a22c8b4adbf6a8c8cb6194ee086b3e13c24"
-  integrity sha512-aQ7dC8gASnKdBwHUuYuzsdKCEDrKnWr7ZuZUnf4CNAL81oyKloKrs7H7zYvcrmCtIrMToudBSUhq2q+LLBMvgg==
-  dependencies:
-    "@bcoe/v8-coverage" "^0.2.3"
-    "@istanbuljs/schema" "^0.1.2"
-    find-up "^5.0.0"
-    foreground-child "^2.0.0"
-    istanbul-lib-coverage "^3.0.0"
-    istanbul-lib-report "^3.0.0"
-    istanbul-reports "^3.0.2"
-    rimraf "^3.0.0"
-    test-exclude "^6.0.0"
-    v8-to-istanbul "^8.0.0"
-    yargs "^16.2.0"
-    yargs-parser "^20.2.7"
-
 cacheable-request@^6.0.0:
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/cacheable-request/-/cacheable-request-6.1.0.tgz#20ffb8bd162ba4be11e9567d823db651052ca912"
@@ -2340,12 +2322,7 @@ isstream@~0.1.2:
   resolved "https://registry.yarnpkg.com/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
   integrity sha1-R+Y/evVa+m+S4VAOaQ64uFKcCZo=
 
-istanbul-lib-coverage@^3.0.0:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/istanbul-lib-coverage/-/istanbul-lib-coverage-3.0.1.tgz#e8900b3ed6069759229cf30f7067388d148aeb5e"
-  integrity sha512-GvCYYTxaCPqwMjobtVcVKvSHtAGe48MNhGjpK8LtVF8K0ISX7hCKl85LgtuaSneWVyQmaGcW3iXVV3GaZSLpmQ==
-
-istanbul-lib-coverage@^3.0.1:
+istanbul-lib-coverage@^3.0.0, istanbul-lib-coverage@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/istanbul-lib-coverage/-/istanbul-lib-coverage-3.0.1.tgz#e8900b3ed6069759229cf30f7067388d148aeb5e"
   integrity sha512-GvCYYTxaCPqwMjobtVcVKvSHtAGe48MNhGjpK8LtVF8K0ISX7hCKl85LgtuaSneWVyQmaGcW3iXVV3GaZSLpmQ==
@@ -2685,36 +2662,6 @@ mocha@9.1.2:
     yargs-parser "20.2.4"
     yargs-unparser "2.0.0"
 
-mocha@9.1.2:
-  version "9.1.2"
-  resolved "https://registry.yarnpkg.com/mocha/-/mocha-9.1.2.tgz#93f53175b0f0dc4014bd2d612218fccfcf3534d3"
-  integrity sha512-ta3LtJ+63RIBP03VBjMGtSqbe6cWXRejF9SyM9Zyli1CKZJZ+vfCTj3oW24V7wAphMJdpOFLoMI3hjJ1LWbs0w==
-  dependencies:
-    "@ungap/promise-all-settled" "1.1.2"
-    ansi-colors "4.1.1"
-    browser-stdout "1.3.1"
-    chokidar "3.5.2"
-    debug "4.3.2"
-    diff "5.0.0"
-    escape-string-regexp "4.0.0"
-    find-up "5.0.0"
-    glob "7.1.7"
-    growl "1.10.5"
-    he "1.2.0"
-    js-yaml "4.1.0"
-    log-symbols "4.1.0"
-    minimatch "3.0.4"
-    ms "2.1.3"
-    nanoid "3.1.25"
-    serialize-javascript "6.0.0"
-    strip-json-comments "3.1.1"
-    supports-color "8.1.1"
-    which "2.0.2"
-    workerpool "6.1.5"
-    yargs "16.2.0"
-    yargs-parser "20.2.4"
-    yargs-unparser "2.0.0"
-
 moment-timezone@0.5.23:
   version "0.5.23"
   resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.23.tgz#7cbb00db2c14c71b19303cb47b0fb0a6d8651463"
@@ -2772,11 +2719,6 @@ nanocolors@^0.2.12:
   version "0.2.12"
   resolved "https://registry.yarnpkg.com/nanocolors/-/nanocolors-0.2.12.tgz#4d05932e70116078673ea4cc6699a1c56cc77777"
   integrity sha512-SFNdALvzW+rVlzqexid6epYdt8H9Zol7xDoQarioEFcFN0JHo4CYNztAxmtfgGTVRCmFlEOqqhBpoFGKqSAMug==
-
-nanoid@3.1.25:
-  version "3.1.25"
-  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.1.25.tgz#09ca32747c0e543f0e1814b7d3793477f9c8e152"
-  integrity sha512-rdwtIXaXCLFAQbnfqDRnI6jaRHp9fTcYBjtFKE8eezcZ7LuLjhUaQGNeMXf1HmRoCH32CLz6XwX0TtxEOS/A3Q==
 
 nanoid@3.1.25:
   version "3.1.25"
