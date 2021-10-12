@@ -60,6 +60,8 @@ class GhostMetrics {
 
     /**
      * @description Setup ElasticSearch metric shipper
+     * ElasticSearch metrics are shipped to an index individually for each metric.
+     * The name of the index is the name of the metric prefixed with "metrics-", the metric name itself should be sluggified
      */
     setupElasticsearchShipper() {
         const ElasticSearch = require('@tryghost/elasticsearch');
@@ -77,9 +79,10 @@ class GhostMetrics {
                 value = {value};
             }
 
+            value['@timestamp'] = Date.now();
             value.domain = this.domain;
 
-            elasticSearch.index(value, name);
+            elasticSearch.index(value, `metrics-${name}`);
         };
     }
 

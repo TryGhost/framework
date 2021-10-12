@@ -61,12 +61,11 @@ describe('Logging', function () {
         });
 
         sandbox.stub(ElasticSearch.prototype, 'index').callsFake(function (data, index) {
-            should.deepEqual(data, {
-                domain: ghostMetrics.domain,
-                value: value
-            });
+            should.equal(data.domain, ghostMetrics.domain);
+            should.equal(data.value, value);
 
-            should.equal(index, name);
+            // ElasticSearch shipper prefixes metric names to avoid polluting index namespace
+            should.equal(index, 'metrics-' + name);
             done();
         });
 
