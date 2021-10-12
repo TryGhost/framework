@@ -52,7 +52,8 @@ class GhostMetrics {
 
         this.shippers.stdout = (name, value) => {
             prettyStdOut.write({
-                msg: `Metric ${name}: ${jsonStringifySafe(value)}`
+                msg: `Metric ${name}: ${jsonStringifySafe(value)}`,
+                level: 30 // Magic number, log level for info
             });
         };
     }
