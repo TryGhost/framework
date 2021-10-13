@@ -26,6 +26,7 @@
     "sinon": "11.1.2"
   },
   "dependencies": {
-    "@tryghost/pretty-stream": "^0.1.1"
+    "@tryghost/pretty-stream": "^0.1.1",
+    "@tryghost/root-utils": "^0.3.6"
   }
 }
