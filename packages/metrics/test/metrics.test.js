@@ -108,4 +108,28 @@ describe('Logging', function () {
 
         ghostMetrics.mode.should.eql('long');
     });
+
+    it('resolves even when transport throws', async function () {
+        const name = 'test-metric';
+        const value = 101;
+
+        const ghostMetrics = new GhostMetrics({
+            metrics: {
+                transports: ['elasticsearch'],
+                metadata: {
+                    id: '123123'
+                }
+            },
+            elasticsearch: {
+                host: 'https://test-elasticsearch',
+                username: 'user',
+                password: 'pass',
+                level: 'info'
+            }
+        });
+
+        sandbox.stub(ElasticSearch.prototype, 'index').rejects();
+
+        await ghostMetrics.metric(name, value).should.be.fulfilled();
+    });
 });

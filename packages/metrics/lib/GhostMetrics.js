@@ -62,6 +62,8 @@ class GhostMetrics {
                 msg: `Metric ${name}: ${jsonStringifySafe(value)}`,
                 level: 30 // Magic number, log level for info
             });
+
+            return Promise.resolve();
         };
     }
 
@@ -91,7 +93,7 @@ class GhostMetrics {
                 value.metadata = this.metadata;
             }
 
-            elasticSearch.index(value, `metrics-${name}`);
+            return elasticSearch.index(value, `metrics-${name}`);
         };
     }
 
@@ -101,9 +103,12 @@ class GhostMetrics {
      * @param {any} value Value of metric, will be co-erced to an object before being shipped
      */
     metric(name, value) {
+        const promises = [];
         for (const metricShipper of Object.values(this.shippers)) {
-            metricShipper(name, value);
+            promises.push(metricShipper(name, value));
         }
+
+        return Promise.allSettled(promises).then(() => null);
     }
 }
 
