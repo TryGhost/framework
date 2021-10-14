@@ -80,7 +80,8 @@ class GhostMetrics {
             auth: {
                 username: this.elasticsearch.username,
                 password: this.elasticsearch.password
-            }
+            },
+            requestTimeout: 5000
         });
 
         this.shippers.elasticsearch = (name, value) => {
