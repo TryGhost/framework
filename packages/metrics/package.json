@@ -29,5 +29,8 @@
     "@tryghost/elasticsearch": "^0.1.2",
     "@tryghost/pretty-stream": "^0.1.1",
     "@tryghost/root-utils": "^0.3.6"
+  },
+  "optionalDependencies": {
+    "promise.allsettled": "^1.0.5"
   }
 }
