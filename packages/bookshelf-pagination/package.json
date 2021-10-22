@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-pagination",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/bookshelf-pagination",
   "author": "Ghost Foundation",
   "license": "MIT",
@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@tryghost/errors": "^0.2.12",
-    "@tryghost/tpl": "^0.1.7",
+    "@tryghost/tpl": "^0.1.8",
     "lodash": "^4.17.21"
   }
 }
