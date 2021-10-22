@@ -88,7 +88,8 @@ class GhostMetrics {
                 username: this.elasticsearch.username,
                 password: this.elasticsearch.password
             },
-            requestTimeout: 5000
+            requestTimeout: 5000,
+            proxy: 'proxy' in this.elasticsearch ? this.elasticsearch.proxy : null
         });
 
         this.shippers.elasticsearch = (name, value) => {
