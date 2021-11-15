@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-ses": "^3.31.0",
+    "@aws-sdk/credential-provider-node": "^3.31.0",
     "@tryghost/errors": "^0.2.13",
     "nodemailer": "^6.6.3",
     "nodemailer-direct-transport": "^3.3.2",

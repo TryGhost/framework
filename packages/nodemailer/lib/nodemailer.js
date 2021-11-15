@@ -43,6 +43,7 @@ module.exports = function (transport, options = {}) {
         break;
     case 'ses':
         const aws = require('@aws-sdk/client-ses');
+        const {defaultProvider} = require('@aws-sdk/credential-provider-node');
 
         const pattern = /(.*)email(.*)\.(.*).amazonaws.com/i;
         const result = pattern.exec(options.ServiceUrl);
@@ -53,7 +54,8 @@ module.exports = function (transport, options = {}) {
 
         const ses = new aws.SES({
             apiVersion: '2010-12-01',
-            region
+            region,
+            defaultProvider
         });
 
         transportOptions = {
