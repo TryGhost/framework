@@ -5,6 +5,7 @@ const sandbox = sinon.createSandbox();
 const logging = require('@tryghost/logging');
 const EventEmitter = require('events');
 const http = require('http');
+const process = require('process');
 
 // Switch these lines once there are useful utils
 // const testUtils = require('./utils');
@@ -105,6 +106,9 @@ describe('Server Utils', function () {
     it('Emits nice error for EACCES', function (done) {
         const testPort = 180;
 
+        sandbox.stub(process, 'exit').callsFake(function () {
+        });
+
         sandbox.stub(logging, 'error').callsFake(function (message) { 
             message.should.startWith(`Port ${testPort} requires elevated privileges`);
             done();
@@ -135,6 +139,9 @@ describe('Server Utils', function () {
     
     it('Emits nice error for EADDRINUSE', function (done) {
         const testPort = 180;
+
+        sandbox.stub(process, 'exit').callsFake(function () {
+        });
 
         sandbox.stub(logging, 'error').callsFake(function (message) { 
             message.should.startWith(`Port ${testPort} is already in use`);
