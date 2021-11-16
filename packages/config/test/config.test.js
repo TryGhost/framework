@@ -4,7 +4,6 @@ require('./utils');
 
 const initConfig = require('../lib/config');
 const rootUtils = require('@tryghost/root-utils');
-const process = require('process');
 const sandbox = sinon.createSandbox();
 const {join} = require('path');
 
