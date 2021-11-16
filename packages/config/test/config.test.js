@@ -2,7 +2,7 @@
 // const testUtils = require('./utils');
 require('./utils');
 
-const initConfig = require('../lib/config');
+const getConfig = require('../lib/GhostConfig');
 const rootUtils = require('@tryghost/root-utils');
 const sandbox = sinon.createSandbox();
 const {join} = require('path');
@@ -18,16 +18,16 @@ describe('Config', function () {
         return join(realRoot, '/test/fixtures', path || '');
     }
 
-    it('Ignition does NOT have config', function () {
-        const config = initConfig(true);
+    it('Empty config when no configuration file found', function () {
+        const config = getConfig();
 
         should(config.get('test')).be.undefined();
         should(config.get('should-be-used')).be.undefined();
     });
 
-    it('loads config file', function () {
+    it('Reads configuration file when exists', function () {
         sandbox.stub(rootUtils, 'getProcessRoot').returns(fixturePath());
-        var config = initConfig(true);
+        var config = getConfig();
 
         config.stores.file.file.should.endWith('config/test/fixtures/config.testing.json');
         config.get('hello').should.equal('world');

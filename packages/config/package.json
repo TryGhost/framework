@@ -25,6 +25,7 @@
     "sinon": "12.0.1"
   },
   "dependencies": {
+    "@tryghost/root-utils": "^0.3.7",
     "nconf": "^0.11.3"
   }
 }
