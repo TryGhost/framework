@@ -1,5 +1,4 @@
 const jsonStringifySafe = require('json-stringify-safe');
-const GhostPrettyStream = require('@tryghost/pretty-stream');
 
 try {
     const allSettled = require('promise.allsettled');
@@ -58,6 +57,7 @@ class GhostMetrics {
      * @description Setup stdout stream.
      */
     setupStdoutShipper() {
+        const GhostPrettyStream = require('@tryghost/pretty-stream');
         const prettyStdOut = new GhostPrettyStream({
             mode: this.mode
         });

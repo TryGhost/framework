@@ -7,7 +7,6 @@ const includes = require('lodash/includes');
 const bunyan = require('bunyan');
 const fs = require('fs-extra');
 const jsonStringifySafe = require('json-stringify-safe');
-const GhostPrettyStream = require('@tryghost/pretty-stream');
 
 /**
  * @description Ghost's logger class.
@@ -92,6 +91,7 @@ class GhostLogger {
      * @description Setup stdout stream.
      */
     setStdoutStream() {
+        const GhostPrettyStream = require('@tryghost/pretty-stream');
         const prettyStdOut = new GhostPrettyStream({
             mode: this.mode
         });
@@ -116,6 +116,7 @@ class GhostLogger {
      * @description Setup stderr stream.
      */
     setStderrStream() {
+        const GhostPrettyStream = require('@tryghost/pretty-stream');
         const prettyStdErr = new GhostPrettyStream({
             mode: this.mode
         });
