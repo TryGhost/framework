@@ -3,7 +3,7 @@ const getConfig = require('./GhostConfig');
 let config;
 function initConfig() {
     if (!config) {
-        getConfig();
+        config = getConfig();
     }
 
     return config;
