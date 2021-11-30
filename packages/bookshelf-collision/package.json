@@ -25,7 +25,7 @@
     "sinon": "11.1.2"
   },
   "dependencies": {
-    "@tryghost/errors": "^0.2.12",
+    "@tryghost/errors": "^1.0.0",
     "lodash": "^4.17.21",
     "moment-timezone": "^0.5.33"
   }

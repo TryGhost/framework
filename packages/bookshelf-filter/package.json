@@ -27,7 +27,7 @@
   "dependencies": {
     "@nexes/nql": "0.6.0",
     "@tryghost/debug": "^0.1.9",
-    "@tryghost/errors": "^0.2.12",
+    "@tryghost/errors": "^1.0.0",
     "@tryghost/tpl": "^0.1.8"
   }
 }
