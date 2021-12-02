@@ -138,6 +138,33 @@ class GhostLogger {
     }
 
     /**
+     * Setup stream for posting the message to a parent instance
+     */
+    setParentStream() {
+        const {parentPort} = require('worker_threads');
+        const bunyanStream = {
+            // Parent stream only supports sending a string
+            write: (bunyanObject) => {
+                const {msg} = bunyanObject;
+                parentPort.postMessage(msg);
+            }
+        };
+
+        this.streams.parent = {
+            name: 'parent',
+            log: bunyan.createLogger({
+                name: this.name,
+                streams: [{
+                    type: 'raw',
+                    stream: bunyanStream,
+                    level: this.level
+                }],
+                serializers: this.serializers
+            })
+        };
+    }
+
+    /**
      * @description Setup loggly.
      */
     setLogglyStream() {

@@ -9,6 +9,7 @@ const Bunyan2Loggly = require('bunyan-loggly');
 const GelfStream = require('gelf-stream').GelfStream;
 const ElasticSearch = require('@tryghost/elasticsearch').BunyanStream;
 const sandbox = sinon.createSandbox();
+const {Worker} = require('worker_threads');
 
 describe('Logging config', function () {
     it('Reads file called loggingrc.js', function () {
@@ -402,6 +403,14 @@ describe('Logging', function () {
         ghostLogger.error('some error');
         stderr.calledOnce.should.be.true();
         stdout.called.should.be.false('stdout should not be written to');
+    });
+
+    it('logs to parent port when in a worker thread', function (done) {
+        const worker = new Worker('./test/fixtures/worker.js');
+        worker.on('message', (data) => {
+            data.should.eql('Hello!');
+            done();
+        });
     });
 
     describe('serialization', function () {
