@@ -30,7 +30,7 @@
     "@tryghost/errors": "^1.0.0",
     "@tryghost/validator": "^0.1.9",
     "@tryghost/version": "^0.1.7",
-    "got": "9.6.0",
+    "got": "11.8.3",
     "lodash": "^4.17.21"
   }
 }
