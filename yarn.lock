@@ -955,7 +955,7 @@
   dependencies:
     long-timeout "^0.1.1"
 
-"@tryghost/errors@^1.0.0":
+"@tryghost/errors@1.0.0", "@tryghost/errors@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@tryghost/errors/-/errors-1.0.0.tgz#de7ad1a895cbdb48692e877727d8ed830f251285"
   integrity sha512-w6PEPKGzYDfaNUbjueQ7bp5tyXLTiwa4aEF9tM7xOAhlDFgeHG1xxP5vOfJgEPS20B0ZEHkTGNdh4KJwLEN9yw==
