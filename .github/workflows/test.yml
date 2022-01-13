@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - 'renovate/*'
 jobs:
   test:
     uses: tryghost/actions/.github/workflows/test.yml@main
