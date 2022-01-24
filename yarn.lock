@@ -801,12 +801,13 @@
   dependencies:
     long-timeout "^0.1.1"
 
-"@tryghost/errors@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@tryghost/errors/-/errors-1.0.0.tgz#de7ad1a895cbdb48692e877727d8ed830f251285"
-  integrity sha512-w6PEPKGzYDfaNUbjueQ7bp5tyXLTiwa4aEF9tM7xOAhlDFgeHG1xxP5vOfJgEPS20B0ZEHkTGNdh4KJwLEN9yw==
+"@tryghost/errors@1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@tryghost/errors/-/errors-1.2.1.tgz#1f2e618ec3a0617a6b9c5ac540a202fb46e32559"
+  integrity sha512-Ui8iU/ky2HC9+WqOFKDSJyZv0WonrklPugKgWR4QKJ4wIeMXd+uJMqpHLXcN8uMiPVw5Lj9yl8mHq5rjw5dgIQ==
   dependencies:
     lodash "^4.17.21"
+    uuid "^8.3.2"
 
 "@tryghost/errors@^1.0.0":
   version "1.2.0"
