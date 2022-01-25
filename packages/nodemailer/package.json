@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/nodemailer",
-  "version": "0.3.9",
+  "version": "0.3.10",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/nodemailer",
   "author": "Ghost Foundation",
   "license": "MIT",
