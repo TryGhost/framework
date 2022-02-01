@@ -1,1 +1,1 @@
-module.exports = require('./lib/express-test');
+module.exports = require('./lib/agent');
