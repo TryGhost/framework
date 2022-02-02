@@ -1,5 +1,4 @@
 const {default: reqresnext} = require('reqresnext');
-
 class Request {
     constructor(app, reqOptions) {
         this.app = app;
@@ -20,20 +19,34 @@ class Request {
         return this._fullfilledPromise.then(resolve, reject);
     }
 
-    _doRequest(callback) {
+    _getReqRes() {
         const {app, reqOptions} = this;
-        const {req, res} = reqresnext(Object.assign({}, reqOptions, {app}), {app});
+        return reqresnext(Object.assign({}, reqOptions, {app}), {app});
+    }
 
-        res.on('finish', () => {
-            const statusCode = res.statusCode;
-            const headers = Object.assign({}, res.getHeaders());
-            const text = res.body.toString('utf8');
-            let body = {};
+    _buildResponse(res) {
+        const statusCode = res.statusCode;
+        const headers = Object.assign({}, res.getHeaders());
+        const text = res.body ? res.body.toString('utf8') : undefined;
+        let body = {};
 
-            callback(null, {statusCode, headers, text, body, response: res});
-        });
+        return {statusCode, headers, text, body, response: res};
+    }
 
-        this.app(req, res);
+    _doRequest(callback) {
+        try {
+            const {req, res} = this._getReqRes();
+
+            res.on('finish', () => {
+                const response = this._buildResponse(res);
+
+                callback(null, response);
+            });
+
+            this.app(req, res);
+        } catch (error) {
+            callback(error);
+        }
     }
 }
 
