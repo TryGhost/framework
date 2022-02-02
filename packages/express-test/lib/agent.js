@@ -15,6 +15,15 @@ class Agent {
     }
 
     _mergeOptions(method, url, options = {}) {
+        // It doesn't make sense to call this method without these properties
+        if (!method) {
+            throw new Error('_mergeOptions cannot be called without a method'); /* eslint-disable-line no-restricted-syntax */
+        }
+
+        if (!url) {
+            throw new Error('_mergeOptions cannot be called without a url'); /* eslint-disable-line no-restricted-syntax */
+        }
+
         return {
             method,
             url: this._makeUrl(url),
@@ -27,6 +36,9 @@ class Agent {
 
 ['get', 'post', 'put', 'del'].forEach((method) => {
     Agent.prototype[method] = function (url, options) {
+        if (!url) {
+            throw new Error('Cannot make a request without supplying a url'); /* eslint-disable-line no-restricted-syntax */
+        }
         return new Test(this.app, this._mergeOptions(method.toUpperCase(), url, options));
     };
 });
