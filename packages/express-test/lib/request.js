@@ -1,4 +1,5 @@
 const {default: reqresnext} = require('reqresnext');
+const {isJSON} = require('./utils');
 class Request {
     constructor(app, reqOptions) {
         this.app = app;
@@ -29,6 +30,10 @@ class Request {
         const headers = Object.assign({}, res.getHeaders());
         const text = res.body ? res.body.toString('utf8') : undefined;
         let body = {};
+
+        if (isJSON(res.getHeader('Content-Type'))) {
+            body = text && JSON.parse(text);
+        }
 
         return {statusCode, headers, text, body, response: res};
     }

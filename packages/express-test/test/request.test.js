@@ -23,7 +23,7 @@ describe('Request', function () {
             assert.deepEqual(res.req, req);
         });
 
-        it('_buildResponse handles buffer as body', function () {
+        it('_buildResponse handles string buffer as body', function () {
             const fn = () => {};
             const opts = {};
             const request = new Request(fn, opts);
@@ -32,11 +32,35 @@ describe('Request', function () {
                 {
                     statusCode: 999,
                     body: Buffer.from('Hello World'),
-                    getHeaders: () => {}
+                    getHeaders: () => { },
+                    getHeader: () => {
+                        return 'text/html';
+                    }
+
                 }
             );
             assert.equal(response.statusCode, 999);
             assert.equal(response.text, 'Hello World');
+        });
+
+        it('_buildResponse handles JSON buffer as body', function () {
+            const fn = () => {};
+            const opts = {};
+            const request = new Request(fn, opts);
+
+            const response = request._buildResponse(
+                {
+                    statusCode: 111,
+                    body: Buffer.from('{"hello":"world"}'),
+                    getHeaders: () => { },
+                    getHeader: () => {
+                        return 'application/json';
+                    }
+
+                }
+            );
+            assert.equal(response.statusCode, 111);
+            assert.equal(response.text, '{"hello":"world"}');
         });
 
         it('_doRequest', async function (done) {
@@ -98,14 +122,16 @@ describe('Request', function () {
 
             const opts = {};
             const request = new Request(fn, opts);
+            let response;
 
             try {
-                const response = await request;
-                assert.equal(response.statusCode, 200); // this is the default
-                assert.equal(response.text, 'Hello World!');
+                response = await request;
             } catch (error) {
                 assert.fail(`This should not have thrown an error. Original error: ${error.stack}.`);
             }
+
+            assert.equal(response.statusCode, 200); // this is the default
+            assert.equal(response.text, 'Hello World!');
         });
 
         it('converts body to text correctly for json', async function () {
@@ -118,14 +144,16 @@ describe('Request', function () {
 
             const opts = {};
             const request = new Request(fn, opts);
-
+            let response;
             try {
-                const response = await request;
-                assert.equal(response.statusCode, 200); // this is the default
-                assert.equal(response.text, '{"hello":"world"}');
+                response = await request;
             } catch (error) {
                 assert.fail(`This should not have thrown an error. Original error: ${error.stack}.`);
             }
+
+            assert.equal(response.statusCode, 200); // this is the default
+            assert.equal(response.text, '{"hello":"world"}');
+            assert.deepEqual(response.body, {hello: 'world'});
         });
     });
 });
