@@ -1,6 +1,6 @@
 const Request = require('./request');
 
-class Test extends Request {
+class ExpectRequest extends Request {
     constructor(...args) {
         super(...args);
     }
@@ -9,4 +9,4 @@ class Test extends Request {
     // such as .expectStatus
 }
 
-module.exports = Test;
+module.exports = ExpectRequest;

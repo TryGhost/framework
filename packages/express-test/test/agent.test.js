@@ -151,7 +151,7 @@ describe('Agent', function () {
 
             const test = agent.get('/');
 
-            assert.equal(test instanceof require('../lib/test'), true);
+            assert.equal(test instanceof require('../lib/expect-request'), true);
             assert.equal(test instanceof require('../lib/request'), true);
             assert.equal(test.app, fn);
             assert.equal(test.reqOptions.method, 'GET');
