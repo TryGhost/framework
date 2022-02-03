@@ -2,7 +2,7 @@ const {CookieJar} = require('cookiejar');
 const ExpectRequest = require('./expect-request');
 
 class Agent {
-    constructor(app, defaults) {
+    constructor(app, defaults = {}) {
         this.app = app;
         this.defaults = defaults;
 

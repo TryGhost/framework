@@ -18,6 +18,19 @@ describe('Agent', function () {
             assert.equal(typeof agent.del, 'function');
         });
 
+        it('constructor works without being passed defaults', function () {
+            const fn = () => { };
+            const agent = new Agent(fn);
+
+            assert.equal(agent.app, fn);
+            assert.deepEqual(agent.defaults, {});
+
+            assert.equal(typeof agent.get, 'function');
+            assert.equal(typeof agent.post, 'function');
+            assert.equal(typeof agent.put, 'function');
+            assert.equal(typeof agent.del, 'function');
+        });
+
         it('_makeUrl without defaults', function () {
             const fn = () => { };
             const opts = {};
