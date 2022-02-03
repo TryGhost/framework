@@ -30,17 +30,12 @@ class Request {
     }
 
     then(resolve, reject) {
-        const self = this;
-        this._fullfilledPromise = new Promise((_resolve, _reject) => {
-            self._doRequest((error, result) => {
-                if (error) {
-                    _reject(error);
-                }
-                _resolve(result);
-            });
+        this._doRequest((error, result) => {
+            if (error) {
+                reject(error);
+            }
+            resolve(result);
         });
-
-        return this._fullfilledPromise.then(resolve, reject);
     }
 
     _getReqRes() {
