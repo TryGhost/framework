@@ -10,6 +10,10 @@ class RequestOptions {
         this.headers = headers || {};
         this.body = body;
     }
+
+    toString() {
+        return `${this.method} request on ${this.url}`;
+    }
 }
 
 class Request {
@@ -30,11 +34,26 @@ class Request {
     }
 
     then(resolve, reject) {
+        this.finalize((error, response) => {
+            if (error) {
+                return reject(error);
+            }
+
+            return resolve(response);
+        });
+    }
+
+    /*
+     * This method exists to make it easy to extend this class with ExpectRequest
+     * We use callbacks so we don't need to introduce async/await here which may make things
+     * Difficult and/or confusing with the thennable
+     */
+    finalize(callback) {
         this._doRequest((error, result) => {
             if (error) {
-                reject(error);
+                callback(error);
             }
-            resolve(result);
+            callback(null, result);
         });
     }
 

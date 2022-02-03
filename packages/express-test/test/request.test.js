@@ -1,11 +1,5 @@
-const {assert, sinon} = require('./utils');
+const {assert, sinon, stubCookies} = require('./utils');
 const {Request, RequestOptions} = require('../lib/request');
-
-const stubCookies = (request) => {
-    const saveCookiesStub = request._saveCookies = sinon.stub();
-    const restoreCookiesStub = request._restoreCookies = sinon.stub();
-    return {saveCookiesStub, restoreCookiesStub};
-};
 
 describe('Request', function () {
     afterEach(function () {
