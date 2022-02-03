@@ -1,21 +1,34 @@
-const {assert} = require('./utils');
+const {assert, sinon} = require('./utils');
 const Request = require('../lib/request');
 
-describe('Request', function () {
-    describe('Class functions', function () {
-        it('constructor sets app and reqOptions', function () {
-            const fn = () => {};
-            const opts = {};
-            const request = new Request(fn, opts);
+const stubCookies = (request) => {
+    const saveCookiesStub = request._saveCookies = sinon.stub();
+    const restoreCookiesStub = request._restoreCookies = sinon.stub();
+    return {saveCookiesStub, restoreCookiesStub};
+};
 
-            assert.equal(fn, request.app);
-            assert.equal(opts, request.reqOptions);
+describe('Request', function () {
+    afterEach(function () {
+        sinon.restore();
+    });
+
+    describe('Class functions', function () {
+        it('constructor sets app, jar and reqOptions', function () {
+            const fn = () => { };
+            const jar = {};
+            const opts = {};
+            const request = new Request(fn, jar, opts);
+
+            assert.equal(request.app, fn);
+            assert.equal(request.cookieJar, jar);
+            assert.equal(request.reqOptions, opts);
         });
 
         it('_getReqRes generates req and res correctly', function () {
-            const fn = () => {};
+            const fn = () => { };
+            const jar = {};
             const opts = {};
-            const request = new Request(fn, opts);
+            const request = new Request(fn, jar, opts);
 
             const {req, res} = request._getReqRes();
             assert.deepEqual(req.app, fn);
@@ -24,9 +37,10 @@ describe('Request', function () {
         });
 
         it('_buildResponse handles string buffer as body', function () {
-            const fn = () => {};
+            const fn = () => { };
+            const jar = {};
             const opts = {};
-            const request = new Request(fn, opts);
+            const request = new Request(fn, jar, opts);
 
             const response = request._buildResponse(
                 {
@@ -44,9 +58,10 @@ describe('Request', function () {
         });
 
         it('_buildResponse handles JSON buffer as body', function () {
-            const fn = () => {};
+            const fn = () => { };
+            const jar = {};
             const opts = {};
-            const request = new Request(fn, opts);
+            const request = new Request(fn, jar, opts);
 
             const response = request._buildResponse(
                 {
@@ -63,17 +78,110 @@ describe('Request', function () {
             assert.equal(response.text, '{"hello":"world"}');
         });
 
+        it('_getCookies', function () {
+            const fn = () => { };
+            const getCookies = {
+                toValueString: sinon.stub()
+            };
+            const jar = {
+                getCookies: sinon.stub().returns(getCookies)
+            };
+            const opts = {};
+            const request = new Request(fn, jar, opts);
+
+            const req = {url: '/'};
+
+            request._getCookies(req);
+
+            sinon.assert.calledOnce(jar.getCookies);
+            sinon.assert.calledOnceWithMatch(jar.getCookies, sinon.match({path: '/'}));
+            sinon.assert.calledOnce(getCookies.toValueString);
+        });
+
+        it('_restoreCookies does nothing with no cookies', function () {
+            const fn = () => { };
+            const jar = {};
+            const opts = {};
+            const request = new Request(fn, jar, opts);
+
+            request._getCookies = sinon.stub();
+
+            const req = {headers: {}};
+            request._restoreCookies(req);
+
+            assert.equal(req.headers.cookie, undefined);
+        });
+
+        it('_restoreCookies restores cookes when present', function () {
+            const fn = () => { };
+            const jar = {};
+            const opts = {};
+            const request = new Request(fn, jar, opts);
+
+            request._getCookies = sinon.stub().returns('abc');
+
+            const req = {headers: {}};
+            request._restoreCookies(req);
+
+            assert.equal(req.headers.cookie, 'abc');
+        });
+
+        it('_saveCookies does nothing with no cookies', function () {
+            const fn = () => { };
+            const jar = {
+                setCookies: sinon.stub()
+            };
+            const opts = {};
+            const request = new Request(fn, jar, opts);
+
+            const res = {
+                getHeader: sinon.stub()
+            };
+
+            request._saveCookies(res);
+
+            sinon.assert.calledOnce(res.getHeader);
+            sinon.assert.notCalled(jar.setCookies);
+        });
+
+        it('_saveCookies sets cookies on the cookiejar', function () {
+            const fn = () => { };
+            const jar = {
+                setCookies: sinon.stub()
+            };
+            const opts = {};
+            const request = new Request(fn, jar, opts);
+
+            const res = {
+                getHeader: sinon.stub().returns('xyz')
+            };
+
+            request._saveCookies(res);
+
+            sinon.assert.calledOnce(res.getHeader);
+            sinon.assert.calledOnce(jar.setCookies);
+            sinon.assert.calledOnceWithMatch(jar.setCookies, 'xyz');
+        });
+
         it('_doRequest', async function (done) {
             const fn = (req, res) => {
                 // This is how reqresnext works
                 res.emit('finish');
             };
+            const jar = {};
             const opts = {};
-            const request = new Request(fn, opts);
+            const request = new Request(fn, jar, opts);
+
+            // Stub cookies, we'll test this behaviour later
+            const {saveCookiesStub, restoreCookiesStub} = stubCookies(request);
 
             request._doRequest((error, response) => {
                 assert.equal(error, null);
                 assert.equal(response.statusCode, 200);
+
+                sinon.assert.calledOnce(saveCookiesStub);
+                sinon.assert.calledOnce(restoreCookiesStub);
+
                 done();
             });
         });
@@ -83,8 +191,12 @@ describe('Request', function () {
                 // This is how reqresnext works
                 res.emit('finish');
             };
+            const jar = {};
             const opts = {};
-            const request = new Request(fn, opts);
+            const request = new Request(fn, jar, opts);
+
+            // Stub getCookies, we'll test this behaviour later
+            stubCookies(request);
 
             try {
                 const response = await request;
@@ -98,8 +210,12 @@ describe('Request', function () {
             const fn = () => {
                 throw new Error('something went wrong');
             };
+            const jar = {};
             const opts = {};
-            const request = new Request(fn, opts);
+            const request = new Request(fn, jar, opts);
+
+            // Stub getCookies, we'll test this behaviour later
+            stubCookies(request);
 
             try {
                 await request;
@@ -119,9 +235,12 @@ describe('Request', function () {
             };
             // Used by express internally to get etag function in .send()
             fn.get = () => { };
-
+            const jar = {};
             const opts = {};
-            const request = new Request(fn, opts);
+            const request = new Request(fn, jar, opts);
+
+            stubCookies(request);
+
             let response;
 
             try {
@@ -141,9 +260,12 @@ describe('Request', function () {
             };
             // Used by express internally to get etag function in .send()
             fn.get = () => { };
-
+            const jar = {};
             const opts = {};
-            const request = new Request(fn, opts);
+            const request = new Request(fn, jar, opts);
+
+            stubCookies(request);
+
             let response;
             try {
                 response = await request;

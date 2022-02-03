@@ -1,9 +1,12 @@
 const {default: reqresnext} = require('reqresnext');
+const {CookieAccessInfo} = require('cookiejar');
+const {parse} = require('url');
 const {isJSON} = require('./utils');
 class Request {
-    constructor(app, reqOptions) {
+    constructor(app, cookieJar, reqOptions) {
         this.app = app;
         this.reqOptions = reqOptions;
+        this.cookieJar = cookieJar;
     }
 
     then(resolve, reject) {
@@ -42,8 +45,12 @@ class Request {
         try {
             const {req, res} = this._getReqRes();
 
+            this._restoreCookies(req);
+
             res.on('finish', () => {
                 const response = this._buildResponse(res);
+
+                this._saveCookies(res);
 
                 callback(null, response);
             });
@@ -51,6 +58,31 @@ class Request {
             this.app(req, res);
         } catch (error) {
             callback(error);
+        }
+    }
+
+    _getCookies(req) {
+        const url = parse(req.url);
+
+        const access = new CookieAccessInfo(
+            url.hostname,
+            url.pathname,
+            url.protocol === 'https:'
+        );
+
+        return this.cookieJar.getCookies(access).toValueString();
+    }
+
+    _restoreCookies(req) {
+        req.headers.cookie = this._getCookies(req);
+        return req;
+    }
+
+    _saveCookies(res) {
+        const cookies = res.getHeader('set-cookie');
+
+        if (cookies) {
+            this.cookieJar.setCookies(cookies);
         }
     }
 }

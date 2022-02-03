@@ -9,8 +9,8 @@ describe('Agent', function () {
             const opts = {};
             const agent = new Agent(fn, opts);
 
-            assert.equal(fn, agent.app);
-            assert.equal(opts, agent.defaults);
+            assert.equal(agent.app, fn);
+            assert.equal(agent.defaults, opts);
 
             assert.equal(typeof agent.get, 'function');
             assert.equal(typeof agent.post, 'function');

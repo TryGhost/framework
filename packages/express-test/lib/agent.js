@@ -1,9 +1,12 @@
+const {CookieJar} = require('cookiejar');
 const ExpectRequest = require('./expect-request');
 
 class Agent {
     constructor(app, defaults) {
         this.app = app;
         this.defaults = defaults;
+
+        this.jar = new CookieJar();
     }
 
     _makeUrl(url) {
@@ -39,7 +42,7 @@ class Agent {
         if (!url) {
             throw new Error('Cannot make a request without supplying a url'); /* eslint-disable-line no-restricted-syntax */
         }
-        return new ExpectRequest(this.app, this._mergeOptions(method.toUpperCase(), url, options));
+        return new ExpectRequest(this.app, this.jar, this._mergeOptions(method.toUpperCase(), url, options));
     };
 });
 

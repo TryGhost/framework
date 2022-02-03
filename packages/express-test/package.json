@@ -24,6 +24,7 @@
     "sinon": "13.0.0"
   },
   "dependencies": {
+    "cookiejar": "^2.1.3",
     "reqresnext": "^1.6.6"
   }
 }
