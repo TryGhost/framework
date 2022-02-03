@@ -122,7 +122,7 @@ describe('Example App', function () {
                 assert.equal(headers['x-checked'], 'true');
             });
 
-            it('check headers and body using chaining', async function () {
+            it('check headers and body using set chaining', async function () {
                 const {statusCode, headers, body} = await agent
                     .post('/check/')
                     .body({foo: 'bar'})
@@ -131,6 +131,17 @@ describe('Example App', function () {
                 assert.equal(statusCode, 200);
                 assert.deepEqual(body, {foo: 'bar'});
                 assert.equal(headers['x-checked'], 'true');
+            });
+
+            it('check headers and body using set and expect chaining', async function () {
+                const {body} = await agent
+                    .post('/check/')
+                    .body({foo: 'bar'})
+                    .header('x-check', true)
+                    .expectStatus(200)
+                    .expectHeader('x-checked', 'true');
+
+                assert.deepEqual(body, {foo: 'bar'});
             });
         });
     });

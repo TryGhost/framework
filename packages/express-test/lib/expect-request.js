@@ -6,6 +6,28 @@ class ExpectRequest extends Request {
         super(...args);
     }
 
+    expectStatus(expected) {
+        const assertion = {
+            fn: '_assertStatus',
+            expected
+        };
+
+        this._addAssertion(assertion);
+
+        return this;
+    }
+
+    expectHeader(expectedField, expectedValue) {
+        const assertion = {
+            fn: '_assertHeader',
+            expectedField: expectedField.toLowerCase(),
+            expectedValue
+        };
+
+        this._addAssertion(assertion);
+
+        return this;
+    }
     finalize(callback) {
         super.finalize((error, response) => {
             if (this.assertions) {
@@ -33,6 +55,31 @@ class ExpectRequest extends Request {
 
         this.assertions = this.assertions || [];
         this.assertions.push(assertion);
+    }
+
+    _assertStatus(result, assertion) {
+        const {error} = assertion;
+
+        error.message = `Expected statusCode ${assertion.expected}, got statusCode ${result.statusCode} ${error.contextString}`;
+        error.actual = result.statusCode;
+
+        assert.equal(result.statusCode, assertion.expected, error);
+    }
+
+    _assertHeader(result, assertion) {
+        const {expectedField, expectedValue, error} = assertion;
+        const actual = result.headers[expectedField];
+        const expectedHeaderString = `${expectedField}: ${expectedValue}`;
+        const actualHeaderString = `${expectedField}: ${actual}`;
+
+        error.expected = expectedHeaderString;
+        error.actual = actualHeaderString;
+
+        error.message = `Expected header "${expectedHeaderString}" to exist but got ${JSON.stringify(result.headers)} ${error.contextString}`;
+        assert.notStrictEqual(actual, undefined, error);
+
+        error.message = `Expected header "${expectedHeaderString}", got ${actualHeaderString} ${error.contextString}`;
+        assert.equal(expectedHeaderString, actualHeaderString, error);
     }
 }
 

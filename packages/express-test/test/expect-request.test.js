@@ -145,5 +145,128 @@ describe('ExpectRequest', function () {
             sinon.assert.calledTwice(request._fakeAssertion);
             sinon.assert.calledWith(request._fakeAssertion, response);
         });
+
+        it('_assertStatus ok when status is ok', function () {
+            const fn = () => { };
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new ExpectRequest(fn, jar, opts);
+
+            const error = new assert.AssertionError({});
+            error.contextString = 'foo';
+
+            const response = {statusCode: 200};
+            const assertion = {expected: 200, error};
+
+            const assertFn = () => {
+                request._assertStatus(response, assertion);
+            };
+
+            assert.doesNotThrow(assertFn);
+        });
+
+        it('_assertStatus not ok when status is not ok', function () {
+            const fn = () => { };
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new ExpectRequest(fn, jar, opts);
+
+            const error = new assert.AssertionError({});
+            error.contextString = 'foo';
+
+            const response = {statusCode: 404};
+            const assertion = {expected: 200, error};
+
+            const assertFn = () => {
+                request._assertStatus(response, assertion);
+            };
+
+            assert.throws(assertFn);
+        });
+
+        it('_assertHeader ok when header is ok', function () {
+            const fn = () => { };
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new ExpectRequest(fn, jar, opts);
+
+            const error = new assert.AssertionError({});
+            error.contextString = 'foo';
+
+            const response = {headers: {foo: 'bar'}};
+            const assertion = {expectedField: 'foo', expectedValue: 'bar', error};
+
+            const assertFn = () => {
+                request._assertHeader(response, assertion);
+            };
+
+            assert.doesNotThrow(assertFn);
+        });
+
+        it('_assertHeader not ok when header is not ok', function () {
+            const fn = () => { };
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new ExpectRequest(fn, jar, opts);
+
+            const error = new assert.AssertionError({});
+            error.contextString = 'foo';
+
+            const response = {headers: {foo: 'baz'}};
+            const assertion = {expectedField: 'foo', expectedValue: 'bar', error};
+
+            const assertFn = () => {
+                request._assertHeader(response, assertion);
+            };
+
+            assert.throws(assertFn);
+        });
+
+        it('_assertHeader not ok when status is not set', function () {
+            const fn = () => { };
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new ExpectRequest(fn, jar, opts);
+
+            const error = new assert.AssertionError({});
+            error.contextString = 'foo';
+
+            const response = {headers: {}};
+            const assertion = {expectedField: 'foo', expectedValue: 'bar', error};
+
+            const assertFn = () => {
+                request._assertHeader(response, assertion);
+            };
+
+            assert.throws(assertFn);
+        });
+
+        it('expectStatus calls _addAssertion [public interface]', function () {
+            const fn = () => { };
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new ExpectRequest(fn, jar, opts);
+
+            const addSpy = sinon.stub(request, '_addAssertion');
+
+            request.expectStatus(200);
+
+            sinon.assert.calledOnce(addSpy);
+            sinon.assert.calledOnceWithExactly(addSpy, {fn: '_assertStatus', expected: 200});
+        });
+
+        it('expectHeader calls _addAssertion [public interface]', function () {
+            const fn = () => { };
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new ExpectRequest(fn, jar, opts);
+
+            const addSpy = sinon.stub(request, '_addAssertion');
+
+            request.expectHeader('foo', 'bar');
+
+            sinon.assert.calledOnce(addSpy);
+            sinon.assert.calledOnceWithExactly(addSpy, {fn: '_assertHeader', expectedField: 'foo', expectedValue: 'bar'});
+        });
     });
 });
