@@ -201,6 +201,30 @@ describe('Request', function () {
             });
         });
 
+        it('body() sets body correctly', function () {
+            const fn = () => {};
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new Request(fn, jar, opts);
+
+            const body = {foo: 'bar'};
+
+            request.body(body);
+
+            assert.equal(request.reqOptions.body, body);
+        });
+
+        it('header() sets body correctly', function () {
+            const fn = () => {};
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new Request(fn, jar, opts);
+
+            request.header('foo', 'bar');
+
+            assert.equal(request.reqOptions.headers.foo, 'bar');
+        });
+
         it('class is thenable [public api]', async function () {
             const fn = (req, res) => {
                 // This is how reqresnext works

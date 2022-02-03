@@ -19,6 +19,16 @@ class Request {
         this.cookieJar = cookieJar;
     }
 
+    body(body) {
+        this.reqOptions.body = body;
+        return this;
+    }
+
+    header(name, value) {
+        this.reqOptions.headers[name] = value;
+        return this;
+    }
+
     then(resolve, reject) {
         const self = this;
         this._fullfilledPromise = new Promise((_resolve, _reject) => {

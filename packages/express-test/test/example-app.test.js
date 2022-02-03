@@ -42,65 +42,96 @@ describe('Example App', function () {
         agent = await getAgent();
     });
 
-    it('Basic test of GET /', async function () {
-        try {
-            const {statusCode, text} = await agent.get('/');
-            assert.equal(statusCode, 200);
-            assert.equal(text, 'Hello World!');
-        } catch (error) {
-            assert.fail(`Should not have thrown an error', but got ${error.stack}`);
-        }
-    });
-
-    describe('API Agent with authentication in two steps', function () {
-        before(async function () {
-            agent = await getAPIAgent();
+    describe('Object Destructuring', function () {
+        it('Basic test of GET /', async function () {
+            try {
+                const {statusCode, text} = await agent.get('/');
+                assert.equal(statusCode, 200);
+                assert.equal(text, 'Hello World!');
+            } catch (error) {
+                assert.fail(`Should not have thrown an error', but got ${error.stack}`);
+            }
         });
 
-        it('cannot perform request without session', async function () {
-            const {statusCode, headers, body, text} = await agent.get('/foo/');
-
-            assert.equal(statusCode, 403);
-            assert.deepEqual(Object.keys(headers), ['x-powered-by', 'content-type', 'content-length', 'etag']);
-            assert.deepEqual(body, {});
-            assert.equal(text, 'Forbidden');
-        });
-
-        it('create session & make authenticated request', async function () {
-            const sessionRes = await agent.post('/session/', {
-                body: {
-                    username: 'hello',
-                    password: 'world'
-                }
+        describe('API Agent with authentication in two steps', function () {
+            before(async function () {
+                agent = await getAPIAgent();
             });
 
-            assert.equal(sessionRes.statusCode, 200);
-            assert.deepEqual(Object.keys(sessionRes.headers), ['x-powered-by', 'content-type', 'content-length', 'etag', 'set-cookie']);
-            assert.deepEqual(sessionRes.body, {});
-            assert.equal(sessionRes.text, 'OK');
+            it('cannot perform request without session', async function () {
+                const {statusCode, headers, body, text} = await agent.get('/foo/');
 
-            const {statusCode, headers, body, text} = await agent.get('/foo/');
+                assert.equal(statusCode, 403);
+                assert.deepEqual(Object.keys(headers), ['x-powered-by', 'content-type', 'content-length', 'etag']);
+                assert.deepEqual(body, {});
+                assert.equal(text, 'Forbidden');
+            });
 
-            assert.equal(statusCode, 200);
-            assert.deepEqual(Object.keys(headers), ['x-powered-by', 'content-type', 'content-length', 'etag']);
-            assert.deepEqual(body, {foo: [{bar: 'baz'}]});
-            assert.equal(text, '{"foo":[{"bar":"baz"}]}');
+            it('create session & make authenticated request', async function () {
+                const sessionRes = await agent.post('/session/', {
+                    body: {
+                        username: 'hello',
+                        password: 'world'
+                    }
+                });
+
+                assert.equal(sessionRes.statusCode, 200);
+                assert.deepEqual(Object.keys(sessionRes.headers), ['x-powered-by', 'content-type', 'content-length', 'etag', 'set-cookie']);
+                assert.deepEqual(sessionRes.body, {});
+                assert.equal(sessionRes.text, 'OK');
+
+                const {statusCode, headers, body, text} = await agent.get('/foo/');
+
+                assert.equal(statusCode, 200);
+                assert.deepEqual(Object.keys(headers), ['x-powered-by', 'content-type', 'content-length', 'etag']);
+                assert.deepEqual(body, {foo: [{bar: 'baz'}]});
+                assert.equal(text, '{"foo":[{"bar":"baz"}]}');
+            });
         });
-    });
 
-    describe('API Agent with login function', function () {
-        before(async function () {
-            agent = await getExtendedAPIAgent();
-            await agent.login();
+        describe('API Agent with login function', function () {
+            before(async function () {
+                agent = await getExtendedAPIAgent();
+                await agent.login();
+            });
+
+            it('make an authenticated request', async function () {
+                const {statusCode, headers, body, text} = await agent.get('/foo/');
+
+                assert.equal(statusCode, 200);
+                assert.deepEqual(Object.keys(headers), ['x-powered-by', 'content-type', 'content-length', 'etag']);
+                assert.deepEqual(body, {foo: [{bar: 'baz'}]});
+                assert.equal(text, '{"foo":[{"bar":"baz"}]}');
+            });
         });
 
-        it('make an authenticated request', async function () {
-            const {statusCode, headers, body, text} = await agent.get('/foo/');
+        describe('headers and body', function () {
+            before(async function () {
+                agent = await getAgent();
+            });
 
-            assert.equal(statusCode, 200);
-            assert.deepEqual(Object.keys(headers), ['x-powered-by', 'content-type', 'content-length', 'etag']);
-            assert.deepEqual(body, {foo: [{bar: 'baz'}]});
-            assert.equal(text, '{"foo":[{"bar":"baz"}]}');
+            it('check headers and body using reqOptions', async function () {
+                const {statusCode, headers, body} = await agent
+                    .post('/check/', {
+                        body: {foo: 'bar'},
+                        headers: {'x-check': true}
+                    });
+
+                assert.equal(statusCode, 200);
+                assert.deepEqual(body, {foo: 'bar'});
+                assert.equal(headers['x-checked'], 'true');
+            });
+
+            it('check headers and body using chaining', async function () {
+                const {statusCode, headers, body} = await agent
+                    .post('/check/')
+                    .body({foo: 'bar'})
+                    .header('x-check', true);
+
+                assert.equal(statusCode, 200);
+                assert.deepEqual(body, {foo: 'bar'});
+                assert.equal(headers['x-checked'], 'true');
+            });
         });
     });
 });
