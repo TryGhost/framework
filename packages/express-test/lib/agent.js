@@ -1,5 +1,6 @@
 const {CookieJar} = require('cookiejar');
 const ExpectRequest = require('./expect-request');
+const {RequestOptions} = require('./request');
 
 class Agent {
     constructor(app, defaults = {}) {
@@ -27,13 +28,12 @@ class Agent {
             throw new Error('_mergeOptions cannot be called without a url'); /* eslint-disable-line no-restricted-syntax */
         }
 
-        return {
+        return new RequestOptions({
             method,
             url: this._makeUrl(url),
             headers: Object.assign({}, this.defaults.headers, options.headers),
             body: Object.assign({}, this.defaults.body, options.body)
-
-        };
+        });
     }
 }
 

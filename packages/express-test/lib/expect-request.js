@@ -1,4 +1,4 @@
-const Request = require('./request');
+const {Request, RequestOptions} = require('./request');
 
 class ExpectRequest extends Request {
     constructor(...args) {
@@ -10,3 +10,5 @@ class ExpectRequest extends Request {
 }
 
 module.exports = ExpectRequest;
+module.exports.ExpectRequest = ExpectRequest;
+module.exports.RequestOptions = RequestOptions;

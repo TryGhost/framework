@@ -1,5 +1,5 @@
 const {assert, sinon} = require('./utils');
-const Request = require('../lib/request');
+const {Request, RequestOptions} = require('../lib/request');
 
 const stubCookies = (request) => {
     const saveCookiesStub = request._saveCookies = sinon.stub();
@@ -13,10 +13,25 @@ describe('Request', function () {
     });
 
     describe('Class functions', function () {
-        it('constructor sets app, jar and reqOptions', function () {
+        it('constructor sets app, jar and reqOptions when reqOptions is empty', function () {
             const fn = () => { };
             const jar = {};
             const opts = {};
+            const request = new Request(fn, jar, opts);
+
+            assert.equal(request.app, fn);
+            assert.equal(request.cookieJar, jar);
+            assert.notEqual(request.reqOptions, opts);
+            assert.equal(request.reqOptions instanceof RequestOptions, true);
+            assert.equal(request.reqOptions.method, 'GET');
+            assert.equal(request.reqOptions.url, '/');
+            assert.deepEqual(request.reqOptions.headers, {});
+        });
+
+        it('constructor sets app, jar and reqOptions', function () {
+            const fn = () => { };
+            const jar = {};
+            const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
             assert.equal(request.app, fn);
@@ -27,7 +42,7 @@ describe('Request', function () {
         it('_getReqRes generates req and res correctly', function () {
             const fn = () => { };
             const jar = {};
-            const opts = {};
+            const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
             const {req, res} = request._getReqRes();
@@ -39,7 +54,7 @@ describe('Request', function () {
         it('_buildResponse handles string buffer as body', function () {
             const fn = () => { };
             const jar = {};
-            const opts = {};
+            const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
             const response = request._buildResponse(
@@ -60,7 +75,7 @@ describe('Request', function () {
         it('_buildResponse handles JSON buffer as body', function () {
             const fn = () => { };
             const jar = {};
-            const opts = {};
+            const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
             const response = request._buildResponse(
@@ -86,7 +101,7 @@ describe('Request', function () {
             const jar = {
                 getCookies: sinon.stub().returns(getCookies)
             };
-            const opts = {};
+            const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
             const req = {url: '/'};
@@ -101,7 +116,7 @@ describe('Request', function () {
         it('_restoreCookies does nothing with no cookies', function () {
             const fn = () => { };
             const jar = {};
-            const opts = {};
+            const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
             request._getCookies = sinon.stub();
@@ -115,7 +130,7 @@ describe('Request', function () {
         it('_restoreCookies restores cookes when present', function () {
             const fn = () => { };
             const jar = {};
-            const opts = {};
+            const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
             request._getCookies = sinon.stub().returns('abc');
@@ -131,7 +146,7 @@ describe('Request', function () {
             const jar = {
                 setCookies: sinon.stub()
             };
-            const opts = {};
+            const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
             const res = {
@@ -149,7 +164,7 @@ describe('Request', function () {
             const jar = {
                 setCookies: sinon.stub()
             };
-            const opts = {};
+            const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
             const res = {
@@ -169,7 +184,7 @@ describe('Request', function () {
                 res.emit('finish');
             };
             const jar = {};
-            const opts = {};
+            const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
             // Stub cookies, we'll test this behaviour later
@@ -186,13 +201,13 @@ describe('Request', function () {
             });
         });
 
-        it('class is thenable', async function () {
+        it('class is thenable [public api]', async function () {
             const fn = (req, res) => {
                 // This is how reqresnext works
                 res.emit('finish');
             };
             const jar = {};
-            const opts = {};
+            const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
             // Stub getCookies, we'll test this behaviour later
@@ -211,7 +226,7 @@ describe('Request', function () {
                 throw new Error('something went wrong');
             };
             const jar = {};
-            const opts = {};
+            const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
             // Stub getCookies, we'll test this behaviour later
@@ -236,7 +251,7 @@ describe('Request', function () {
             // Used by express internally to get etag function in .send()
             fn.get = () => { };
             const jar = {};
-            const opts = {};
+            const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
             stubCookies(request);
@@ -261,7 +276,7 @@ describe('Request', function () {
             // Used by express internally to get etag function in .send()
             fn.get = () => { };
             const jar = {};
-            const opts = {};
+            const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
             stubCookies(request);

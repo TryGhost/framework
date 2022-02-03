@@ -2,10 +2,20 @@ const {default: reqresnext} = require('reqresnext');
 const {CookieAccessInfo} = require('cookiejar');
 const {parse} = require('url');
 const {isJSON} = require('./utils');
+
+class RequestOptions {
+    constructor({method, url, headers, body} = {}) {
+        this.method = method || 'GET';
+        this.url = url || '/';
+        this.headers = headers || {};
+        this.body = body;
+    }
+}
+
 class Request {
     constructor(app, cookieJar, reqOptions) {
         this.app = app;
-        this.reqOptions = reqOptions;
+        this.reqOptions = reqOptions instanceof RequestOptions ? reqOptions : new RequestOptions(reqOptions);
         this.cookieJar = cookieJar;
     }
 
@@ -88,3 +98,5 @@ class Request {
 }
 
 module.exports = Request;
+module.exports.Request = Request;
+module.exports.RequestOptions = RequestOptions;
