@@ -1,6 +1,14 @@
 const express = require('express');
 const session = require('express-session');
 
+const path = require('path');
+const fs = require('fs').promises;
+
+const readJSONFile = async function (name) {
+    const data = await fs.readFile(path.join(__dirname, `${name}.json`), {encoding: 'utf8'});
+    return JSON.parse(data);
+};
+
 const app = express();
 
 const isLoggedIn = function (req, res, next) {
@@ -42,9 +50,12 @@ app.post('/check/', (req, res) => {
  */
 
 app.post('/api/session/', async (req, res) => {
-    if (req.body.username && req.body.password && req.body.username === 'hello' && req.body.password === 'world') {
+    const user = await readJSONFile('user');
+
+    if (req.body.username && req.body.password && req.body.username === user.username && req.body.password === user.password) {
         req.session.loggedIn = true;
         req.session.username = req.body.username;
+
         return res.sendStatus(200);
     }
 
@@ -52,12 +63,9 @@ app.post('/api/session/', async (req, res) => {
 });
 
 app.get('/api/foo/', isLoggedIn, async (req, res) => {
-    const json = {
-        foo: [{
-            bar: 'baz'
-        }]
-    };
-    return res.json(json);
+    const data = await readJSONFile('data');
+
+    return res.json(data);
 });
 
 module.exports = app;

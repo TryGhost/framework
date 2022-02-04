@@ -34,13 +34,17 @@ class Request {
     }
 
     then(resolve, reject) {
-        this.finalize((error, response) => {
-            if (error) {
-                return reject(error);
-            }
-
-            return resolve(response);
+        const self = this;
+        this._fullfilledPromise = new Promise((_resolve, _reject) => {
+            self.finalize((error, result) => {
+                if (error) {
+                    return _reject(error);
+                }
+                return _resolve(result);
+            });
         });
+
+        return this._fullfilledPromise.then(resolve, reject);
     }
 
     /*
