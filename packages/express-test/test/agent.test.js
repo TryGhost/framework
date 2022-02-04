@@ -15,7 +15,10 @@ describe('Agent', function () {
             assert.equal(typeof agent.get, 'function');
             assert.equal(typeof agent.post, 'function');
             assert.equal(typeof agent.put, 'function');
-            assert.equal(typeof agent.del, 'function');
+            assert.equal(typeof agent.patch, 'function');
+            assert.equal(typeof agent.delete, 'function');
+            assert.equal(typeof agent.options, 'function');
+            assert.equal(typeof agent.head, 'function');
         });
 
         it('constructor works without being passed defaults', function () {
@@ -28,7 +31,10 @@ describe('Agent', function () {
             assert.equal(typeof agent.get, 'function');
             assert.equal(typeof agent.post, 'function');
             assert.equal(typeof agent.put, 'function');
-            assert.equal(typeof agent.del, 'function');
+            assert.equal(typeof agent.patch, 'function');
+            assert.equal(typeof agent.delete, 'function');
+            assert.equal(typeof agent.options, 'function');
+            assert.equal(typeof agent.head, 'function');
         });
 
         it('_makeUrl without defaults', function () {

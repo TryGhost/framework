@@ -37,7 +37,7 @@ class Agent {
     }
 }
 
-['get', 'post', 'put', 'del'].forEach((method) => {
+['get', 'post', 'put', 'patch', 'delete', 'options', 'head'].forEach((method) => {
     Agent.prototype[method] = function (url, options) {
         if (!url) {
             throw new Error('Cannot make a request without supplying a url'); /* eslint-disable-line no-restricted-syntax */
