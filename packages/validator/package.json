@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/validator",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/validator",
   "author": "Ghost Foundation",
   "license": "MIT",
@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@tryghost/errors": "^1.0.0",
-    "@tryghost/tpl": "^0.1.10",
+    "@tryghost/tpl": "^0.1.11",
     "lodash": "^4.17.21",
     "moment-timezone": "0.5.23",
     "validator": "7.2.0"
