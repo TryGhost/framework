@@ -161,6 +161,20 @@ describe('Example App', function () {
                         .expectHeader('x-checked', 'false');
                 }, {message: 'Expected header "x-checked: false", got x-checked: true POST request on /check/'});
             });
+
+            it('check body using expect chaining errors correctly', async function () {
+                await assert.rejects(async () => {
+                    return await agent
+                        .post('/check/')
+                        .body({foo: 'bar'})
+                        .expect(({body}) => {
+                            assert.deepEqual(body, {foo: 'ba'});
+                        });
+                }, (error) => {
+                    assert.equal(error.message.startsWith('Expected values to be loosely deep-equal:'), true);
+                    return true;
+                });
+            });
         });
     });
 });

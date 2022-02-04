@@ -6,6 +6,25 @@ class ExpectRequest extends Request {
         super(...args);
     }
 
+    expect(callback) {
+        const wrapperFn = (response, assertion) => {
+            try {
+                callback(response);
+            } catch (error) {
+                error.stack = assertion.error.stack.replace(assertion.error.message, error.message);
+                throw error;
+            }
+        };
+
+        const assertion = {
+            fn: wrapperFn
+        };
+
+        this._addAssertion(assertion);
+
+        return this;
+    }
+
     expectStatus(expected) {
         const assertion = {
             fn: this._assertStatus,
