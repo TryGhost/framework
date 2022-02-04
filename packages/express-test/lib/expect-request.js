@@ -30,10 +30,18 @@ class ExpectRequest extends Request {
     }
     finalize(callback) {
         super.finalize((error, response) => {
-            if (this.assertions) {
-                this._assertAll(response);
+            if (error) {
+                return callback(error);
             }
-            callback(error, response);
+
+            try {
+                if (this.assertions) {
+                    this._assertAll(response);
+                }
+                return callback(null, response);
+            } catch (_error) {
+                return callback(_error);
+            }
         });
     }
 

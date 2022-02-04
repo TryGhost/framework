@@ -51,15 +51,21 @@ class Request {
     finalize(callback) {
         this._doRequest((error, response) => {
             if (error) {
-                callback(error);
+                return callback(error);
             }
-            callback(null, response);
+            return callback(null, response);
         });
     }
 
     _getReqRes() {
         const {app, reqOptions} = this;
-        return reqresnext(Object.assign({}, reqOptions, {app}), {app});
+
+        const {req, res} = reqresnext(Object.assign({}, reqOptions, {app}), {app});
+
+        // This is needed to make error handling work
+        // @TODO: submit this upstream in reqresnext
+        req.socket.destroy = () => { };
+        return {req, res};
     }
 
     _buildResponse(res) {

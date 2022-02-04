@@ -105,12 +105,12 @@ describe('Example App', function () {
             });
         });
 
-        describe('headers and body', function () {
+        describe('headers, status and body', function () {
             before(async function () {
                 agent = await getAgent();
             });
 
-            it('check headers and body using reqOptions', async function () {
+            it('check headers, status and body using reqOptions', async function () {
                 const {statusCode, headers, body} = await agent
                     .post('/check/', {
                         body: {foo: 'bar'},
@@ -122,7 +122,7 @@ describe('Example App', function () {
                 assert.equal(headers['x-checked'], 'true');
             });
 
-            it('check headers and body using set chaining', async function () {
+            it('check headers, status and body using set chaining', async function () {
                 const {statusCode, headers, body} = await agent
                     .post('/check/')
                     .body({foo: 'bar'})
@@ -133,7 +133,7 @@ describe('Example App', function () {
                 assert.equal(headers['x-checked'], 'true');
             });
 
-            it('check headers and body using set and expect chaining', async function () {
+            it('check headers, status and body using set and expect chaining', async function () {
                 const {body} = await agent
                     .post('/check/')
                     .body({foo: 'bar'})
@@ -142,6 +142,24 @@ describe('Example App', function () {
                     .expectHeader('x-checked', 'true');
 
                 assert.deepEqual(body, {foo: 'bar'});
+            });
+
+            it('check status using expect chaining errors correctly', async function () {
+                await assert.rejects(async () => {
+                    return await agent
+                        .post('/check/')
+                        .expectStatus(404);
+                }), {message: 'Expected header "x-checked: false", got x-checked: true POST request on /check/'};
+            });
+
+            it('check header using expect chaining errors correctly', async function () {
+                await assert.rejects(async () => {
+                    return await agent
+                        .post('/check/')
+                        .header('x-check', true)
+                        .expectStatus(200)
+                        .expectHeader('x-checked', 'false');
+                }, {message: 'Expected header "x-checked: false", got x-checked: true POST request on /check/'});
             });
         });
     });

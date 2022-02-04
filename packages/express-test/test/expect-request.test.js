@@ -88,7 +88,6 @@ describe('ExpectRequest', function () {
                 const superStub = sinon.stub(Request.prototype, 'finalize').callsArg(0);
                 const assertSpy = sinon.stub(request, '_assertAll');
 
-                // I couldn't figure out how to stub the super.finalize call here
                 request.finalize((error) => {
                     if (error) {
                         done(error);
@@ -97,6 +96,66 @@ describe('ExpectRequest', function () {
                     sinon.assert.calledOnce(superStub);
                     assert.equal(error, null);
                     sinon.assert.calledOnce(assertSpy);
+                    done();
+                });
+            } catch (error) {
+                done(error);
+            }
+        });
+
+        it('finalize errors correctly when super.finalize is erroring', async function (done) {
+            const fn = (req, res) => {
+                // This is how reqresnext works
+                res.emit('finish');
+            };
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new ExpectRequest(fn, jar, opts);
+
+            request.assertions = [];
+
+            stubCookies(request);
+
+            const theError = new Error();
+
+            try {
+                const superStub = sinon.stub(Request.prototype, 'finalize').callsArgWith(0, theError);
+                const assertSpy = sinon.stub(request, '_assertAll');
+
+                request.finalize((error) => {
+                    sinon.assert.calledOnce(superStub);
+                    assert.equal(error, theError);
+                    sinon.assert.notCalled(assertSpy);
+                    done();
+                });
+            } catch (error) {
+                done(error);
+            }
+        });
+
+        it('finalize errors correctly when assertions are erroring', async function (done) {
+            const fn = (req, res) => {
+                // This is how reqresnext works
+                res.emit('finish');
+            };
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new ExpectRequest(fn, jar, opts);
+
+            request.assertions = [];
+
+            stubCookies(request);
+
+            const theError = new Error();
+
+            try {
+                const superStub = sinon.stub(Request.prototype, 'finalize').callsArg(0);
+                const assertSpy = sinon.stub(request, '_assertAll').throws(theError);
+
+                request.finalize((error) => {
+                    sinon.assert.calledOnce(superStub);
+                    sinon.assert.calledOnce(assertSpy);
+                    assert.equal(error, theError);
                     done();
                 });
             } catch (error) {
