@@ -8,7 +8,7 @@ class ExpectRequest extends Request {
 
     expectStatus(expected) {
         const assertion = {
-            fn: '_assertStatus',
+            fn: this._assertStatus,
             expected
         };
 
@@ -19,7 +19,7 @@ class ExpectRequest extends Request {
 
     expectHeader(expectedField, expectedValue) {
         const assertion = {
-            fn: '_assertHeader',
+            fn: this._assertHeader,
             expectedField: expectedField.toLowerCase(),
             expectedValue
         };
@@ -39,7 +39,7 @@ class ExpectRequest extends Request {
 
     _assertAll(result) {
         for (const assertion of this.assertions) {
-            this[assertion.fn](result, assertion);
+            assertion.fn(result, assertion);
         }
     }
 

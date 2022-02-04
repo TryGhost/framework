@@ -127,14 +127,14 @@ describe('ExpectRequest', function () {
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
 
-            request._fakeAssertion = sinon.stub();
+            const fakeAssertion = sinon.stub();
 
             request.assertions = [
                 {
-                    fn: '_fakeAssertion'
+                    fn: fakeAssertion
                 },
                 {
-                    fn: '_fakeAssertion'
+                    fn: fakeAssertion
                 }
             ];
 
@@ -142,8 +142,8 @@ describe('ExpectRequest', function () {
 
             request._assertAll(response);
 
-            sinon.assert.calledTwice(request._fakeAssertion);
-            sinon.assert.calledWith(request._fakeAssertion, response);
+            sinon.assert.calledTwice(fakeAssertion);
+            sinon.assert.calledWith(fakeAssertion, response);
         });
 
         it('_assertStatus ok when status is ok', function () {
@@ -252,7 +252,7 @@ describe('ExpectRequest', function () {
             request.expectStatus(200);
 
             sinon.assert.calledOnce(addSpy);
-            sinon.assert.calledOnceWithExactly(addSpy, {fn: '_assertStatus', expected: 200});
+            sinon.assert.calledOnceWithExactly(addSpy, {fn: request._assertStatus, expected: 200});
         });
 
         it('expectHeader calls _addAssertion [public interface]', function () {
@@ -266,7 +266,7 @@ describe('ExpectRequest', function () {
             request.expectHeader('foo', 'bar');
 
             sinon.assert.calledOnce(addSpy);
-            sinon.assert.calledOnceWithExactly(addSpy, {fn: '_assertHeader', expectedField: 'foo', expectedValue: 'bar'});
+            sinon.assert.calledOnceWithExactly(addSpy, {fn: request._assertHeader, expectedField: 'foo', expectedValue: 'bar'});
         });
     });
 });
