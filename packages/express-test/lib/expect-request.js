@@ -37,15 +37,15 @@ class ExpectRequest extends Request {
         });
     }
 
-    _assertAll(result) {
+    _assertAll(response) {
         for (const assertion of this.assertions) {
-            assertion.fn(result, assertion);
+            assertion.fn(response, assertion);
         }
     }
 
     _addAssertion(assertion) {
         let error = new assert.AssertionError({
-            message: 'Unexpected result',
+            message: 'Unexpected assertion error',
             expected: assertion.expected,
             stackStartFn: this._addAssertion
         });
@@ -57,25 +57,25 @@ class ExpectRequest extends Request {
         this.assertions.push(assertion);
     }
 
-    _assertStatus(result, assertion) {
+    _assertStatus(response, assertion) {
         const {error} = assertion;
 
-        error.message = `Expected statusCode ${assertion.expected}, got statusCode ${result.statusCode} ${error.contextString}`;
-        error.actual = result.statusCode;
+        error.message = `Expected statusCode ${assertion.expected}, got statusCode ${response.statusCode} ${error.contextString}`;
+        error.actual = response.statusCode;
 
-        assert.equal(result.statusCode, assertion.expected, error);
+        assert.equal(response.statusCode, assertion.expected, error);
     }
 
-    _assertHeader(result, assertion) {
+    _assertHeader(response, assertion) {
         const {expectedField, expectedValue, error} = assertion;
-        const actual = result.headers[expectedField];
+        const actual = response.headers[expectedField];
         const expectedHeaderString = `${expectedField}: ${expectedValue}`;
         const actualHeaderString = `${expectedField}: ${actual}`;
 
         error.expected = expectedHeaderString;
         error.actual = actualHeaderString;
 
-        error.message = `Expected header "${expectedHeaderString}" to exist but got ${JSON.stringify(result.headers)} ${error.contextString}`;
+        error.message = `Expected header "${expectedHeaderString}" to exist but got ${JSON.stringify(response.headers)} ${error.contextString}`;
         assert.notStrictEqual(actual, undefined, error);
 
         error.message = `Expected header "${expectedHeaderString}", got ${actualHeaderString} ${error.contextString}`;

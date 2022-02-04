@@ -117,7 +117,7 @@ describe('ExpectRequest', function () {
 
             const added = request.assertions[0];
             assert.notEqual(request.assertions, undefined);
-            assert.equal(added.error.message, 'Unexpected result');
+            assert.equal(added.error.message, 'Unexpected assertion error');
             assert.equal(added.error.contextString, 'GET request on /');
         });
 

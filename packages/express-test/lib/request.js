@@ -49,11 +49,11 @@ class Request {
      * Difficult and/or confusing with the thennable
      */
     finalize(callback) {
-        this._doRequest((error, result) => {
+        this._doRequest((error, response) => {
             if (error) {
                 callback(error);
             }
-            callback(null, result);
+            callback(null, response);
         });
     }
 
