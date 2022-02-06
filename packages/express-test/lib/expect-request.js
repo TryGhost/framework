@@ -7,6 +7,12 @@ class ExpectRequest extends Request {
     }
 
     expect(callback) {
+        if (typeof callback !== 'function') {
+            throw new Error(/* eslint-disable-line no-restricted-syntax */
+                'express-test expect() requires a callback function, did you mean expectStatus or expectHeader?'
+            );
+        }
+
         const wrapperFn = (response, assertion) => {
             try {
                 callback(response);
