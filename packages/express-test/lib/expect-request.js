@@ -53,6 +53,7 @@ class ExpectRequest extends Request {
 
         return this;
     }
+
     finalize(callback) {
         super.finalize((error, response) => {
             if (error) {
@@ -102,17 +103,25 @@ class ExpectRequest extends Request {
     _assertHeader(response, assertion) {
         const {expectedField, expectedValue, error} = assertion;
         const actual = response.headers[expectedField];
+
         const expectedHeaderString = `${expectedField}: ${expectedValue}`;
         const actualHeaderString = `${expectedField}: ${actual}`;
 
         error.expected = expectedHeaderString;
         error.actual = actualHeaderString;
 
-        error.message = `Expected header "${expectedHeaderString}" to exist but got ${JSON.stringify(response.headers)} ${error.contextString}`;
+        error.message = `Expected header "${expectedHeaderString}" to exist, got headers: ${JSON.stringify(response.headers)} ${error.contextString}`;
         assert.notStrictEqual(actual, undefined, error);
 
-        error.message = `Expected header "${expectedHeaderString}", got ${actualHeaderString} ${error.contextString}`;
-        assert.equal(expectedHeaderString, actualHeaderString, error);
+        if (expectedValue instanceof RegExp) {
+            error.expected = expectedValue;
+            error.actual = actual;
+            error.message = `Expected header "${expectedField}" to have value matching "${expectedValue}", got "${actual}" ${error.contextString}`;
+            assert.equal(expectedValue.test(actual), true, error);
+        } else {
+            error.message = `Expected header "${expectedHeaderString}", got "${actualHeaderString}" ${error.contextString}`;
+            assert.equal(expectedHeaderString, actualHeaderString, error);
+        }
     }
 }
 

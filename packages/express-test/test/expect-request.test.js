@@ -278,7 +278,7 @@ describe('ExpectRequest', function () {
                 request._assertHeader(response, assertion);
             };
 
-            assert.throws(assertFn);
+            assert.throws(assertFn, {message: 'Expected header "foo: bar", got "foo: baz" foo'});
         });
 
         it('_assertHeader not ok when status is not set', function () {
@@ -297,7 +297,45 @@ describe('ExpectRequest', function () {
                 request._assertHeader(response, assertion);
             };
 
-            assert.throws(assertFn);
+            assert.throws(assertFn, {message: 'Expected header "foo: bar" to exist, got headers: {} foo'});
+        });
+
+        it('_assertHeader ok with matching regex for value', function () {
+            const fn = () => { };
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new ExpectRequest(fn, jar, opts);
+
+            const error = new assert.AssertionError({});
+            error.contextString = 'foo';
+
+            const response = {headers: {foo: 'baz'}};
+            const assertion = {expectedField: 'foo', expectedValue: /^ba/, error};
+
+            const assertFn = () => {
+                request._assertHeader(response, assertion);
+            };
+
+            assert.doesNotThrow(assertFn);
+        });
+
+        it('_assertHeader mot ok with non-matching regex for value', function () {
+            const fn = () => { };
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new ExpectRequest(fn, jar, opts);
+
+            const error = new assert.AssertionError({});
+            error.contextString = 'foo';
+
+            const response = {headers: {foo: 'baz'}};
+            const assertion = {expectedField: 'foo', expectedValue: /^bar/, error};
+
+            const assertFn = () => {
+                request._assertHeader(response, assertion);
+            };
+
+            assert.throws(assertFn, {message: 'Expected header "foo" to have value matching "/^bar/", got "baz" foo'});
         });
 
         it('expectStatus calls _addAssertion [public interface]', function () {

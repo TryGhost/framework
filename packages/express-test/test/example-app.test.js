@@ -149,7 +149,7 @@ describe('Example App', function () {
                     return await agent
                         .post('/check/')
                         .expectStatus(404);
-                }), {message: 'Expected header "x-checked: false", got x-checked: true POST request on /check/'};
+                }), {message: 'Expected header "x-checked: false", got "x-checked: true" POST request on /check/'};
             });
 
             it('check header using expect chaining errors correctly', async function () {
@@ -159,7 +159,7 @@ describe('Example App', function () {
                         .header('x-check', true)
                         .expectStatus(200)
                         .expectHeader('x-checked', 'false');
-                }, {message: 'Expected header "x-checked: false", got x-checked: true POST request on /check/'});
+                }, {message: 'Expected header "x-checked: false", got "x-checked: true" POST request on /check/'});
             });
 
             it('check body using expect chaining errors correctly', async function () {
