@@ -1,5 +1,6 @@
 const assert = require('assert');
 const {Request, RequestOptions} = require('./request');
+const {snapshotManager} = require('@tryghost/jest-snapshot');
 
 class ExpectRequest extends Request {
     constructor(...args) {
@@ -47,6 +48,30 @@ class ExpectRequest extends Request {
             fn: this._assertHeader,
             expectedField: expectedField.toLowerCase(),
             expectedValue
+        };
+
+        this._addAssertion(assertion);
+
+        return this;
+    }
+
+    matchBodySnapshot(properties) {
+        let assertion = {
+            fn: this._assertSnapshot,
+            properties: properties,
+            field: 'body'
+        };
+
+        this._addAssertion(assertion);
+
+        return this;
+    }
+
+    matchHeaderSnapshot(properties) {
+        let assertion = {
+            fn: this._assertSnapshot,
+            properties: properties,
+            field: 'headers'
         };
 
         this._addAssertion(assertion);
@@ -122,6 +147,21 @@ class ExpectRequest extends Request {
             error.message = `Expected header "${expectedHeaderString}", got "${actualHeaderString}" ${error.contextString}`;
             assert.equal(expectedHeaderString, actualHeaderString, error);
         }
+    }
+
+    _assertSnapshot(result, assertion) {
+        const {properties, field, error} = assertion;
+
+        const match = snapshotManager.match(result[field], properties);
+
+        if (match.pass !== true) {
+            const snapshotName = match.message().match(/Snapshot name: `(.*)`/)[1];
+            error.expected = match.expected;
+            error.actual = match.actual;
+            error.message = `Expected ${field} to match in Snapshot: "${snapshotName}" ${error.contextString}`;
+        }
+
+        assert.equal(match.pass, true, error);
     }
 }
 

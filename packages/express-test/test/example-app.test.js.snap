@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Example App Object Destructuring headers, status and body check headers, status and body using set, expect chaining & snapshot matching 1 1`] = `
+Object {
+  "foo": "bar",
+}
+`;
+
+exports[`Example App Object Destructuring headers, status and body check headers, status and body using set, expect chaining & snapshot matching 2 1`] = `
+Object {
+  "content-length": "13",
+  "content-type": "application/json; charset=utf-8",
+  "etag": "W/\\"d-pedE0BZFQNM7HX6mFsKPL6l+dUo\\"",
+  "x-checked": "true",
+  "x-powered-by": "Express",
+}
+`;

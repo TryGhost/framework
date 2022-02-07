@@ -144,6 +144,17 @@ describe('Example App', function () {
                 assert.deepEqual(body, {foo: 'bar'});
             });
 
+            it('check headers, status and body using set, expect chaining & snapshot matching', async function () {
+                await agent
+                    .post('/check/')
+                    .body({foo: 'bar'})
+                    .header('x-check', true)
+                    .expectStatus(200)
+                    .expectHeader('x-checked', 'true')
+                    .matchBodySnapshot()
+                    .matchHeaderSnapshot();
+            });
+
             it('check status using expect chaining errors correctly', async function () {
                 await assert.rejects(async () => {
                     return await agent

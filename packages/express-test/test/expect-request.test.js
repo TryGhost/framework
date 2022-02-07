@@ -1,6 +1,7 @@
 const {assert, sinon, stubCookies} = require('./utils');
 
 const {ExpectRequest, RequestOptions} = require('../lib/expect-request');
+const {snapshotManager} = require('@tryghost/jest-snapshot');
 const Request = require('../lib/request');
 
 describe('ExpectRequest', function () {
@@ -338,6 +339,48 @@ describe('ExpectRequest', function () {
             assert.throws(assertFn, {message: 'Expected header "foo" to have value matching "/^bar/", got "baz" foo'});
         });
 
+        it('_assertSnapshot ok when match is a pass', function () {
+            const fn = () => { };
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new ExpectRequest(fn, jar, opts);
+
+            const error = new assert.AssertionError({});
+            error.contextString = 'foo';
+
+            const response = {body: {foo: 'bar'}};
+            const assertion = {properties: {}, field: 'body', error};
+
+            sinon.stub(snapshotManager, 'match').returns({pass: true});
+
+            const assertFn = () => {
+                request._assertSnapshot(response, assertion);
+            };
+
+            assert.doesNotThrow(assertFn);
+        });
+
+        it('_assertSnapshot not ok when match is not a pass', function () {
+            const fn = () => { };
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new ExpectRequest(fn, jar, opts);
+
+            const error = new assert.AssertionError({});
+            error.contextString = 'foo';
+
+            const response = {body: {foo: 'bar'}};
+            const assertion = {properties: {}, field: 'body', error};
+
+            sinon.stub(snapshotManager, 'match').returns({pass: false});
+
+            const assertFn = () => {
+                request._assertSnapshot(response, assertion);
+            };
+
+            assert.throws(assertFn);
+        });
+
         it('expectStatus calls _addAssertion [public interface]', function () {
             const fn = () => { };
             const jar = {};
@@ -364,6 +407,34 @@ describe('ExpectRequest', function () {
 
             sinon.assert.calledOnce(addSpy);
             sinon.assert.calledOnceWithExactly(addSpy, {fn: request._assertHeader, expectedField: 'foo', expectedValue: 'bar'});
+        });
+
+        it('matchBodySnapshot calls _addAssertion [public interface]', function () {
+            const fn = () => { };
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new ExpectRequest(fn, jar, opts);
+
+            const addSpy = sinon.stub(request, '_addAssertion');
+
+            request.matchBodySnapshot({});
+
+            sinon.assert.calledOnce(addSpy);
+            sinon.assert.calledOnceWithExactly(addSpy, {fn: request._assertSnapshot, properties: {}, field: 'body'});
+        });
+
+        it('matchHeaderSnapshot calls _addAssertion [public interface]', function () {
+            const fn = () => { };
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new ExpectRequest(fn, jar, opts);
+
+            const addSpy = sinon.stub(request, '_addAssertion');
+
+            request.matchHeaderSnapshot({});
+
+            sinon.assert.calledOnce(addSpy);
+            sinon.assert.calledOnceWithExactly(addSpy, {fn: request._assertSnapshot, properties: {}, field: 'headers'});
         });
     });
 });
