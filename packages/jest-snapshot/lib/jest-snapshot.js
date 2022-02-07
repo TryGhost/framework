@@ -30,7 +30,6 @@ const {any, anything, stringMatching} = expect;
 module.exports = {
     mochaHooks,
     snapshotMatcher,
-    matchSnapshot: snapshotMatcher.matchSnapshot,
     matchSnapshotAssertion,
     any,
     anything,

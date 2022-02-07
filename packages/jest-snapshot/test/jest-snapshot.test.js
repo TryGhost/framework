@@ -9,7 +9,7 @@ describe('Jest Snapshot', function () {
     });
 
     it('exposes a set of functions', function () {
-        assert.deepEqual(Object.keys(snapshotTools), ['mochaHooks', 'snapshotMatcher', 'matchSnapshot', 'matchSnapshotAssertion', 'any', 'anything', 'stringMatching']);
+        assert.deepEqual(Object.keys(snapshotTools), ['mochaHooks', 'snapshotMatcher', 'matchSnapshotAssertion', 'any', 'anything', 'stringMatching']);
     });
 
     it('matchSnapshotAssertion', function () {
