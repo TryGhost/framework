@@ -1,20 +1,20 @@
 const {assert, sinon} = require('./utils');
 
-const SnapshotMatcher = require('../lib/snapshot-matcher');
+const SnapshotManager = require('../lib/snapshot-manager');
 
-describe('Snapshot Matcher', function () {
+describe('Snapshot Manager', function () {
     afterEach(function () {
         sinon.restore();
     });
 
     it('constructor', function () {
-        const snapshotMatcher = new SnapshotMatcher();
+        const snapshotMatcher = new SnapshotManager();
         assert.deepEqual(snapshotMatcher.registry, {});
         assert.deepEqual(snapshotMatcher.currentTest, {});
     });
 
     it('resetRegistry', function () {
-        const snapshotMatcher = new SnapshotMatcher();
+        const snapshotMatcher = new SnapshotManager();
         assert.deepEqual(snapshotMatcher.registry, {});
 
         snapshotMatcher.registry = {foo: 'bar'};
@@ -25,7 +25,7 @@ describe('Snapshot Matcher', function () {
     });
 
     it('setCurrentTest', function () {
-        const snapshotMatcher = new SnapshotMatcher();
+        const snapshotMatcher = new SnapshotManager();
         assert.deepEqual(snapshotMatcher.currentTest, {});
 
         snapshotMatcher.setCurrentTest({foo: 'bar'});
@@ -33,7 +33,7 @@ describe('Snapshot Matcher', function () {
     });
 
     it('_getNameForSnapshot', function () {
-        const snapshotMatcher = new SnapshotMatcher();
+        const snapshotMatcher = new SnapshotManager();
 
         assert.equal(
             snapshotMatcher._getNameForSnapshot('foo.js.snap', 'testing bar'),
@@ -52,7 +52,7 @@ describe('Snapshot Matcher', function () {
     });
 
     it('_getConfig', function () {
-        const snapshotMatcher = new SnapshotMatcher();
+        const snapshotMatcher = new SnapshotManager();
 
         let nameSpy = sinon.spy(snapshotMatcher, '_getNameForSnapshot');
 
@@ -84,8 +84,8 @@ describe('Snapshot Matcher', function () {
         process.env.SNAPSHOT_UPDATE = 0;
     });
 
-    it('matchSnapshot works as expected', function () {
-        const snapshotMatcher = new SnapshotMatcher();
+    it('match works as expected', function () {
+        const snapshotMatcher = new SnapshotManager();
 
         const configStub = sinon.stub(snapshotMatcher, '_getConfig').returns({
             testFile: 'foo.js.snap',
@@ -95,7 +95,7 @@ describe('Snapshot Matcher', function () {
             willUpdate: 'none'
         });
 
-        const result = snapshotMatcher.matchSnapshot({});
+        const result = snapshotMatcher.match({});
         sinon.assert.calledOnce(configStub);
         assert.equal(result.pass, false);
         assert.equal(typeof result.message, 'function');

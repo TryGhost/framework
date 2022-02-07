@@ -2,7 +2,7 @@ const {SnapshotState, toMatchSnapshot} = require('jest-snapshot');
 const expect = require('expect');
 const utils = require('expect/build/utils');
 
-class SnapshotMatcher {
+class SnapshotManageer {
     constructor() {
         this.registry = {};
         this.currentTest = {};
@@ -44,7 +44,7 @@ class SnapshotMatcher {
         });
     }
 
-    matchSnapshot(received, properties = {}) {
+    match(received, properties = {}) {
         const {testFile, snapshotName, willUpdate} = this._getConfig();
 
         const snapshotState = this.getSnapshotState(testFile, willUpdate);
@@ -76,4 +76,4 @@ class SnapshotMatcher {
     }
 }
 
-module.exports = SnapshotMatcher;
+module.exports = SnapshotManageer;

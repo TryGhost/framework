@@ -9,11 +9,11 @@ describe('Jest Snapshot', function () {
     });
 
     it('exposes a set of functions', function () {
-        assert.deepEqual(Object.keys(snapshotTools), ['mochaHooks', 'snapshotMatcher', 'matchSnapshotAssertion', 'any', 'anything', 'stringMatching']);
+        assert.deepEqual(Object.keys(snapshotTools), ['mochaHooks', 'snapshotManager', 'matchSnapshotAssertion', 'any', 'anything', 'stringMatching']);
     });
 
     it('matchSnapshotAssertion', function () {
-        const matchSnapshotSpy = sinon.stub(snapshotTools.snapshotMatcher, 'matchSnapshot').returns(
+        const matchSnapshotSpy = sinon.stub(snapshotTools.snapshotManager, 'match').returns(
             {
                 message: () => { },
                 pass: {
@@ -31,13 +31,13 @@ describe('Jest Snapshot', function () {
     });
 
     it('mochaHooks: beforeAll', function () {
-        const registrySpy = sinon.stub(snapshotTools.snapshotMatcher, 'resetRegistry');
+        const registrySpy = sinon.stub(snapshotTools.snapshotManager, 'resetRegistry');
         snapshotTools.mochaHooks.beforeAll();
         sinon.assert.calledOnce(registrySpy);
     });
 
     it('mochaHooks: beforeEach', function () {
-        const setTestSpy = sinon.stub(snapshotTools.snapshotMatcher, 'setCurrentTest').returns();
+        const setTestSpy = sinon.stub(snapshotTools.snapshotManager, 'setCurrentTest').returns();
         snapshotTools.mochaHooks.beforeEach.call({currentTest: {file: 'test', fullTitle: () => { }}});
         sinon.assert.calledOnce(setTestSpy);
     });
