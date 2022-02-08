@@ -13,7 +13,7 @@ try {
 class GhostMetrics {
     /**
      * Properties in the options bag:
-     * 
+     *
      * domain:             Metadata for metrics in shared databases.
      * mode:               Is used to print short or long log - used for stdout shipper.
      * metrics.transports: An array of transports for metric shipping (e.g. ['stdout', 'elasticsearch'])
@@ -97,7 +97,10 @@ class GhostMetrics {
                 value = {value};
             }
 
-            value['@timestamp'] = Date.now();
+            if (!('@timestamp' in value)) {
+                value['@timestamp'] = Date.now();
+            }
+
             if (this.metadata) {
                 value.metadata = this.metadata;
             }
