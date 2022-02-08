@@ -161,7 +161,8 @@ class ExpectRequest extends Request {
             assert.notEqual(result[field], undefined, error);
         }
 
-        const match = snapshotManager.match(result[field], properties);
+        const hint = `[${field}]`;
+        const match = snapshotManager.match(result[field], properties, hint);
 
         Object.keys(properties).forEach((prop) => {
             const errorMessage = `"response.${field}" is missing the expected property "${prop}"`;

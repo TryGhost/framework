@@ -351,13 +351,17 @@ describe('ExpectRequest', function () {
             const response = {body: {foo: 'bar'}};
             const assertion = {properties: {}, field: 'body', error};
 
-            sinon.stub(snapshotManager, 'match').returns({pass: true});
+            const matchStub = sinon.stub(snapshotManager, 'match').returns({pass: true});
 
             const assertFn = () => {
                 request._assertSnapshot(response, assertion);
             };
 
             assert.doesNotThrow(assertFn);
+
+            // Assert side effects, check that hinting works as expected
+            sinon.assert.calledOnce(matchStub);
+            sinon.assert.calledOnceWithExactly(matchStub, response.body, {}, '[body]');
         });
 
         it('_assertSnapshot not ok when match is not a pass', function () {

@@ -199,6 +199,7 @@ describe('Example App', function () {
                         });
                 }, (error) => {
                     assert.match(error.message, /check body using snapshot matching errors correctly for missing property/);
+                    assert.match(error.message, /\[body\]/);
                     assert.match(error.message, /Expected properties {2}- 1/);
                     assert.match(error.message, /Received value {2,}\+ 1/);
                     return true;
@@ -216,6 +217,7 @@ describe('Example App', function () {
                         .matchBodySnapshot();
                 }, (error) => {
                     assert.match(error.message, /check body using snapshot matching errors correctly for random data/);
+                    assert.match(error.message, /\[body\]/);
                     assert.match(error.message, /Snapshot {2}- 1/);
                     assert.match(error.message, /Received {2}\+ 1/);
                     return true;
