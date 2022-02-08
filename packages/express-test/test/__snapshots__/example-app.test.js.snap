@@ -3,7 +3,7 @@
 exports[`Example App Object Destructuring headers, status and body check body using snapshot matching errors correctly for random data 1: [body] 1`] = `
 Object {
   "foo": "bar",
-  "id": "0.c9916wdc0uk",
+  "id": "0.peo1xr2fyg",
 }
 `;
 

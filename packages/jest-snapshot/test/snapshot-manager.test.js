@@ -52,34 +52,36 @@ describe('Snapshot Manager', function () {
     });
 
     it('_getConfig', function () {
+        const {test} = this;
         const snapshotMatcher = new SnapshotManager();
 
         let nameSpy = sinon.spy(snapshotMatcher, '_getNameForSnapshot');
 
         // If there's no currentTest...
+        const assertFn = () => {
+            snapshotMatcher._getConfig();
+        };
+
+        assert.throws(assertFn, {message: 'Unable to run snapshot tests, current test was not configured'});
+
+        // Set current test from the mocha context for this test!
+        snapshotMatcher.setCurrentTest({
+            filename: test.file + '.snap',
+            nameTemplate: test.fullTitle()
+        });
+
         let config = snapshotMatcher._getConfig();
-        assert.equal(config.testFile, undefined);
-        assert.equal(config.snapshotName, 'undefined 1');
+        assert.match(config.testFile, /\/framework\/packages\/jest-snapshot\/test\/__snapshots__\/snapshot-manager\.test\.js\.snap/);
+        assert.equal(config.snapshotName, 'Snapshot Manager _getConfig 1');
         assert.equal(config.willUpdate, 'new');
         sinon.assert.calledOnce(nameSpy);
 
-        snapshotMatcher.setCurrentTest({
-            filename: 'foo.js.snap',
-            nameTemplate: 'testing bar'
-        });
-
-        config = snapshotMatcher._getConfig();
-        assert.equal(config.testFile, 'foo.js.snap');
-        assert.equal(config.snapshotName, 'testing bar 1');
-        assert.equal(config.willUpdate, 'new');
-        sinon.assert.calledTwice(nameSpy);
-
         process.env.SNAPSHOT_UPDATE = 1;
         config = snapshotMatcher._getConfig();
-        assert.equal(config.testFile, 'foo.js.snap');
-        assert.equal(config.snapshotName, 'testing bar 2');
+        assert.match(config.testFile, /\/framework\/packages\/jest-snapshot\/test\/__snapshots__\/snapshot-manager\.test\.js\.snap/);
+        assert.equal(config.snapshotName, 'Snapshot Manager _getConfig 2');
         assert.equal(config.willUpdate, 'all');
-        sinon.assert.calledThrice(nameSpy);
+        sinon.assert.calledTwice(nameSpy);
 
         process.env.SNAPSHOT_UPDATE = 0;
     });

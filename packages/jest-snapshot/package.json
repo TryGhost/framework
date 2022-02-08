@@ -25,6 +25,7 @@
     "sinon": "13.0.1"
   },
   "dependencies": {
+    "@tryghost/errors": "^1.2.1",
     "expect": "^27.5.0",
     "jest-snapshot": "^27.5.0"
   }
