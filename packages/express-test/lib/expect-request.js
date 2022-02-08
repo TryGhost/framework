@@ -1,6 +1,7 @@
 const assert = require('assert');
 const {Request, RequestOptions} = require('./request');
 const {snapshotManager} = require('@tryghost/jest-snapshot');
+const {makeMessageFromMatchMessage} = require('./utils');
 
 class ExpectRequest extends Request {
     constructor(...args) {
@@ -55,7 +56,7 @@ class ExpectRequest extends Request {
         return this;
     }
 
-    matchBodySnapshot(properties) {
+    matchBodySnapshot(properties = {}) {
         let assertion = {
             fn: this._assertSnapshot,
             properties: properties,
@@ -67,7 +68,7 @@ class ExpectRequest extends Request {
         return this;
     }
 
-    matchHeaderSnapshot(properties) {
+    matchHeaderSnapshot(properties = {}) {
         let assertion = {
             fn: this._assertSnapshot,
             properties: properties,
@@ -103,6 +104,7 @@ class ExpectRequest extends Request {
     }
 
     _addAssertion(assertion) {
+        // We create the error here so that we get a useful stack trace
         let error = new assert.AssertionError({
             message: 'Unexpected assertion error',
             expected: assertion.expected,
@@ -152,13 +154,31 @@ class ExpectRequest extends Request {
     _assertSnapshot(result, assertion) {
         const {properties, field, error} = assertion;
 
+        if (!result[field]) {
+            error.message = `Unable to match snapshot on undefined field ${field} ${error.contextString}`;
+            error.expected = field;
+            error.actual = 'undefined';
+            assert.notEqual(result[field], undefined, error);
+        }
+
         const match = snapshotManager.match(result[field], properties);
 
+        Object.keys(properties).forEach((prop) => {
+            const errorMessage = `"response.${field}" is missing the expected property "${prop}"`;
+            error.message = makeMessageFromMatchMessage(match.message(), errorMessage);
+            error.expected = prop;
+            error.actual = 'undefined';
+            error.showDiff = false; // Disable mocha's diff output as it's already present in match.message()
+
+            assert.notEqual(result[field][prop], undefined, error);
+        });
+
         if (match.pass !== true) {
-            const snapshotName = match.message().match(/Snapshot name: `(.*)`/)[1];
+            const errorMessage = `"response.${field}" does not match snapshot.`;
+            error.message = makeMessageFromMatchMessage(match.message(), errorMessage);
             error.expected = match.expected;
             error.actual = match.actual;
-            error.message = `Expected ${field} to match in Snapshot: "${snapshotName}" ${error.contextString}`;
+            error.showDiff = false; // Disable mocha's diff output as it's already present in match.message()
         }
 
         assert.equal(match.pass, true, error);

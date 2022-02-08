@@ -2,7 +2,7 @@ const {assert} = require('./utils');
 
 const Agent = require('../'); // we require the root file
 const app = require('../example/app');
-const {before} = require('mocha');
+const {any} = require('@tryghost/jest-snapshot');
 
 let agent;
 
@@ -182,9 +182,56 @@ describe('Example App', function () {
                             assert.deepEqual(body, {foo: 'ba'});
                         });
                 }, (error) => {
-                    assert.equal(error.message.startsWith('Expected values to be loosely deep-equal:'), true);
+                    assert.match(error.message, /^Expected values to be loosely deep-equal/);
                     return true;
                 });
+            });
+
+            it('check body using snapshot matching errors correctly for missing property', async function () {
+                await assert.rejects(async () => {
+                    return await agent
+                        .post('/check/')
+                        .body({
+                            foo: 'bar'
+                        })
+                        .matchBodySnapshot({
+                            id: any(String)
+                        });
+                }, (error) => {
+                    assert.match(error.message, /check body using snapshot matching errors correctly for missing property/);
+                    assert.match(error.message, /Expected properties {2}- 1/);
+                    assert.match(error.message, /Received value {2,}\+ 1/);
+                    return true;
+                });
+            });
+
+            it('check body using snapshot matching errors correctly for random data', async function () {
+                await assert.rejects(async () => {
+                    return await agent
+                        .post('/check/')
+                        .body({
+                            foo: 'bar',
+                            id: Math.random().toString(36)
+                        })
+                        .matchBodySnapshot();
+                }, (error) => {
+                    assert.match(error.message, /check body using snapshot matching errors correctly for random data/);
+                    assert.match(error.message, /Snapshot {2}- 1/);
+                    assert.match(error.message, /Received {2}\+ 1/);
+                    return true;
+                });
+            });
+
+            it('check body using snapshot matching properties works for random data', async function () {
+                await agent
+                    .post('/check/')
+                    .body({
+                        foo: 'bar',
+                        id: Math.random().toString(36)
+                    })
+                    .matchBodySnapshot({
+                        id: any(String)
+                    });
             });
         });
     });
