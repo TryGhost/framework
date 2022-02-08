@@ -8,7 +8,6 @@ class SnapshotManageer {
     constructor() {
         this.registry = {};
         this.currentTest = {};
-        this.defaultTestPath = 'test';
         this.defaultSnapshotPath = '__snapshots__';
     }
 
@@ -21,6 +20,14 @@ class SnapshotManageer {
         this.registry[snapshotFilename][snapshotNameTemplate] = nextCounter;
 
         return `${snapshotNameTemplate} ${nextCounter}`;
+    }
+
+    _resolveSnapshotFilePath(testFile) {
+        const parsedPath = path.parse(testFile);
+
+        parsedPath.dir = path.join(parsedPath.dir, this.defaultSnapshotPath);
+
+        return path.format(parsedPath);
     }
 
     _getConfig() {
@@ -38,10 +45,7 @@ class SnapshotManageer {
         const willUpdate = process.env.SNAPSHOT_UPDATE ? 'all' : 'new';
 
         // Set full path
-        const testPath = path.resolve(this.defaultTestPath);
-        const snapshotPath = path.join(testPath, this.defaultSnapshotPath);
-
-        testFile = testFile.replace(testPath, snapshotPath);
+        testFile = this._resolveSnapshotFilePath(testFile);
 
         return {testFile, snapshotName, willUpdate};
     }
