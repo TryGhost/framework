@@ -50,7 +50,7 @@ class SnapshotManageer {
         const snapshotState = this.getSnapshotState(testFile, willUpdate);
         // Equals is not exposed from the internals of expect
         // This truly bananananas workaround comes from here: https://github.com/facebook/jest/issues/11867
-        let equals = () => {};
+        let equals = null;
         expect.extend({
             __capture_equals__() {
                 equals = this.equals;
