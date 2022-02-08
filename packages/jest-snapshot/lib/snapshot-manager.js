@@ -44,7 +44,7 @@ class SnapshotManageer {
         });
     }
 
-    match(received, properties = {}) {
+    match(received, properties = {}, hint) {
         const {testFile, snapshotName, willUpdate} = this._getConfig();
 
         const snapshotState = this.getSnapshotState(testFile, willUpdate);
@@ -67,7 +67,7 @@ class SnapshotManageer {
         });
 
         // Execute the matcher
-        const result = matcher(received, properties);
+        const result = matcher(received, properties, hint);
 
         // Store the state of snapshot, depending on updateSnapshot value
         snapshotState.save();

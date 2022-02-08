@@ -100,4 +100,21 @@ describe('Snapshot Manager', function () {
         assert.equal(result.pass, false);
         assert.equal(typeof result.message, 'function');
     });
+
+    it('match can accept a name hint', function () {
+        const snapshotMatcher = new SnapshotManager();
+
+        const configStub = sinon.stub(snapshotMatcher, '_getConfig').returns({
+            testFile: 'foo.js.snap',
+            snapshotName: 'testing bar 1',
+
+            // Ensure this doesn't result in files being written
+            willUpdate: 'none'
+        });
+
+        const result = snapshotMatcher.match({}, {}, '[headers]');
+        sinon.assert.calledOnce(configStub);
+        assert.equal(result.pass, false);
+        assert.match(result.message(), /testing bar 1:.*?\[headers\]/);
+    });
 });
