@@ -9,3 +9,13 @@ module.exports.makeMessageFromMatchMessage = function makeMessageFromMatchMessag
     messageLines.splice(0, 1, errorMessage);
     return messageLines.join('\n');
 };
+
+module.exports.convertKeysToLowerCase = function (map) {
+    const newMap = {};
+
+    for (const key in map) {
+        newMap[key.toLowerCase()] = map[key];
+    }
+
+    return newMap;
+};
