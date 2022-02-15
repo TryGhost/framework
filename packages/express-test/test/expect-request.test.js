@@ -244,6 +244,32 @@ describe('ExpectRequest', function () {
             assert.throws(assertFn);
         });
 
+        it('_assertStatus not ok when status i not ok and shows response error when present', function () {
+            const fn = () => { };
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new ExpectRequest(fn, jar, opts);
+
+            const error = new assert.AssertionError({});
+            error.contextString = 'foo';
+
+            const response = {
+                statusCode: 404,
+                body: {
+                    errors: [{
+                        message: 'Not found'
+                    }]
+                }
+            };
+            const assertion = {expected: 200, error};
+
+            const assertFn = () => {
+                request._assertStatus(response, assertion);
+            };
+
+            assert.throws(assertFn, {message: 'Expected statusCode 200, got statusCode 404 foo\nNot found'});
+        });
+
         it('_assertHeader ok when header is ok', function () {
             const fn = () => { };
             const jar = {};
