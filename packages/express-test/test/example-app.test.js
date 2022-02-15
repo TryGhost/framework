@@ -133,6 +133,29 @@ describe('Example App', function () {
                 assert.equal(headers['x-checked'], 'true');
             });
 
+            it('check headers, status and body with mixed-case header', async function () {
+                const {statusCode, headers, body} = await agent
+                    .post('/check/', {
+                        body: {foo: 'bar'},
+                        headers: {'X-Check': true}
+                    });
+
+                assert.equal(statusCode, 200);
+                assert.deepEqual(body, {foo: 'bar'});
+                assert.equal(headers['x-checked'], 'true');
+            });
+
+            it('check headers, status and body with mixed-case header and chaining', async function () {
+                const {statusCode, headers, body} = await agent
+                    .post('/check/')
+                    .body({foo: 'bar'})
+                    .header('X-Check', true);
+
+                assert.equal(statusCode, 200);
+                assert.deepEqual(body, {foo: 'bar'});
+                assert.equal(headers['x-checked'], 'true');
+            });
+
             it('check headers, status and body using set and expect chaining', async function () {
                 const {body} = await agent
                     .post('/check/')
