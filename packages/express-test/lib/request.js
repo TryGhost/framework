@@ -67,7 +67,7 @@ class Request {
         const {req, res} = reqresnext(Object.assign({}, reqOptions, {app}), {app});
 
         // This is needed to make error handling work
-        // @TODO: submit this upstream in reqresnext
+        // @TODO: remove once https://github.com/antongolub/reqresnext/issues/31 is solved
         req.socket.destroy = () => { };
         return {req, res};
     }
