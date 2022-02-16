@@ -81,7 +81,7 @@ describe('ExpectRequest', function () {
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
 
-            request.assertions = [];
+            request.assertions = [{}];
 
             stubCookies(request);
 
@@ -143,7 +143,7 @@ describe('ExpectRequest', function () {
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
 
-            request.assertions = [];
+            request.assertions = [{}];
 
             stubCookies(request);
 
@@ -172,11 +172,11 @@ describe('ExpectRequest', function () {
 
             const assertion = {};
 
-            assert.equal(request.assertions, undefined);
+            assert.equal(request.assertions.length, 0);
             request._addAssertion(assertion);
 
             const added = request.assertions[0];
-            assert.notEqual(request.assertions, undefined);
+            assert.notEqual(request.assertions.length, 0);
             assert.equal(added.error.message, 'Unexpected assertion error');
             assert.equal(added.error.contextString, 'GET request on /');
         });

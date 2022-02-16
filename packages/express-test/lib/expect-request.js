@@ -19,6 +19,11 @@ const {makeMessageFromMatchMessage} = require('./utils');
 class ExpectRequest extends Request {
     constructor(...args) {
         super(...args);
+
+        /**
+         * @property {ExpressTestAssertion[]} assertions
+         */
+        this.assertions = [];
     }
 
     expect(callback) {
@@ -103,7 +108,7 @@ class ExpectRequest extends Request {
             }
 
             try {
-                if (this.assertions) {
+                if (this.assertions && this.assertions.length) {
                     this._assertAll(response);
                 }
                 return callback(null, response);
@@ -134,7 +139,6 @@ class ExpectRequest extends Request {
         error.contextString = this.reqOptions.toString();
         assertion.error = error;
 
-        this.assertions = this.assertions || [];
         this.assertions.push(assertion);
     }
 
