@@ -1,14 +1,13 @@
 const {default: reqresnext} = require('reqresnext');
 const {CookieAccessInfo} = require('cookiejar');
 const {parse} = require('url');
-const {isJSON, convertKeysToLowerCase} = require('./utils');
+const {isJSON} = require('./utils');
 
 class RequestOptions {
     constructor({method, url, headers, body} = {}) {
         this.method = method || 'GET';
         this.url = url || '/';
-        // TODO: remove convertKeysToLowerCase utility once https://github.com/antongolub/reqresnext/issues/33 is fixed
-        this.headers = convertKeysToLowerCase(headers) || {};
+        this.headers = headers || {};
         this.body = body;
     }
 
@@ -30,8 +29,7 @@ class Request {
     }
 
     header(name, value) {
-        // TODO: remove toLowerCase once https://github.com/antongolub/reqresnext/issues/33 is fixed
-        this.reqOptions.headers[name.toLowerCase()] = value;
+        this.reqOptions.headers[name] = value;
         return this;
     }
 
