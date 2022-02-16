@@ -206,6 +206,46 @@ describe('ExpectRequest', function () {
             sinon.assert.calledWith(fakeAssertion, response);
         });
 
+        it('_assertAll calls assertion functions in order of "no type", "header" type, and "status" type', function () {
+            const fn = () => { };
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new ExpectRequest(fn, jar, opts);
+
+            const statusSpy = sinon.spy();
+            const noTypeSpy = sinon.spy();
+            const headerSpy = sinon.spy();
+
+            request.assertions = [
+                {
+                    type: 'status',
+                    fn: statusSpy
+                },
+                {
+                    fn: noTypeSpy
+                },
+                {
+                    type: 'header',
+                    fn: headerSpy
+                }
+            ];
+
+            const response = {foo: 'bar'};
+
+            request._assertAll(response);
+
+            sinon.assert.calledOnce(statusSpy);
+            sinon.assert.calledWith(statusSpy, response);
+
+            sinon.assert.calledOnce(noTypeSpy);
+            sinon.assert.calledWith(noTypeSpy, response);
+
+            sinon.assert.calledOnce(headerSpy);
+            sinon.assert.calledWith(headerSpy, response);
+
+            sinon.assert.callOrder(noTypeSpy, headerSpy, statusSpy);
+        });
+
         it('_assertStatus ok when status is ok', function () {
             const fn = () => { };
             const jar = {};

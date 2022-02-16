@@ -118,8 +118,41 @@ class ExpectRequest extends Request {
         });
     }
 
+    /**
+     * @description Runs through the assertions queue and executes them
+     * in following order:
+     * 1. Assertions with no type, e.g: body snapshot match, generic assertions
+     * 2. Assertions of "header" type
+     * 3. Assertions of "status" type
+     *
+     * The order is here to assert the most informative assertions first and the
+     * least informative ones last. For example status code assertions, usually
+     * are setup first but give the least amount of information needed to
+     * investigate the reason of failure. Same problem with header assertions.
+     * By changing the default order of assertions it's expected to improve
+     * the developer experience creating/debugging tests.
+     *
+     * @param {Object} response - HTTP response object
+     */
     _assertAll(response) {
+        const statusCodeAssertions = [];
+        const headerAssertions = [];
+
         for (const assertion of this.assertions) {
+            if (!['status', 'header'].includes(assertion.type)) {
+                assertion.fn(response, assertion);
+            } else if (assertion.type === 'status') {
+                statusCodeAssertions.push(assertion);
+            } else if (assertion.type === 'header') {
+                headerAssertions.push(assertion);
+            }
+        }
+
+        for (const assertion of headerAssertions) {
+            assertion.fn(response, assertion);
+        }
+
+        for (const assertion of statusCodeAssertions) {
             assertion.fn(response, assertion);
         }
     }
