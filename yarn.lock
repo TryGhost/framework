@@ -3992,10 +3992,10 @@ regexpp@^3.0.0, regexpp@^3.1.0, regexpp@^3.2.0:
   resolved "https://registry.yarnpkg.com/regexpp/-/regexpp-3.2.0.tgz#0425a2768d8f23bad70ca4b90461fa2f1213e1b2"
   integrity sha512-pq2bWo9mVD43nbts2wGv17XLiNLya+GklZ8kaDLV2Z08gDCsGpnKn9BFMepvWuHCbyVvY7J5o5+BVvoQbmlJLg==
 
-reqresnext@^1.6.6:
-  version "1.6.6"
-  resolved "https://registry.yarnpkg.com/reqresnext/-/reqresnext-1.6.6.tgz#ac35485e5910823b33ccd5153c298ce9558eb65f"
-  integrity sha512-gP3U2ZbjmICAAEPA923eeRgsFh1M1WLioa9Sqsphyu4wA2vcmoKzRC8olM7XfABxnt4guCMdujhm0aXJdDKlPg==
+reqresnext@^1.7.0:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/reqresnext/-/reqresnext-1.7.0.tgz#1cec2e39d808b9e8cd8a4a90f16e4bc9f9806c90"
+  integrity sha512-TS/B8FKRf7j1oowoAYB1Hv+Ga92Y6vY6NvxVF0fqw11KFdwe+DI6jSWB7XHa1Hf21lRqT6vmwy+6KOkLBF6GkQ==
   dependencies:
     express "^4.17.2"
     lodash "^4.17.21"
