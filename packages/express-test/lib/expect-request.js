@@ -3,6 +3,18 @@ const {Request, RequestOptions} = require('./request');
 const {snapshotManager} = require('@tryghost/jest-snapshot');
 const {makeMessageFromMatchMessage} = require('./utils');
 
+/**
+ * @typedef {object} ExpressTestAssertion
+ * @prop {function} fn - Wrapped assertion with response context
+ * @prop {string} [message] - The message to display if the assertion fails
+ * @prop {string} [method] - The method to call on the assertion object
+ * @prop {import('assert').AssertionError} [error] - The error to throw if the assertion fails
+ * @prop {any} [expected]
+ * @prop {any} [expectedValue]
+ * @prop {string} [expectedField]
+ * @prop {object} [properties]
+ */
+
 class ExpectRequest extends Request {
     constructor(...args) {
         super(...args);
@@ -103,6 +115,10 @@ class ExpectRequest extends Request {
         }
     }
 
+    /**
+     * Adds assertion to the queue of assertions to be performed
+     * @param {ExpressTestAssertion} assertion
+     */
     _addAssertion(assertion) {
         // We create the error here so that we get a useful stack trace
         let error = new assert.AssertionError({
