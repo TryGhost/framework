@@ -422,7 +422,11 @@ describe('ExpectRequest', function () {
             request.expectStatus(200);
 
             sinon.assert.calledOnce(addSpy);
-            sinon.assert.calledOnceWithExactly(addSpy, {fn: request._assertStatus, expected: 200});
+            sinon.assert.calledOnceWithExactly(addSpy, {
+                fn: request._assertStatus,
+                expected: 200,
+                type: 'status'
+            });
         });
 
         it('expectHeader calls _addAssertion [public interface]', function () {
@@ -436,7 +440,12 @@ describe('ExpectRequest', function () {
             request.expectHeader('foo', 'bar');
 
             sinon.assert.calledOnce(addSpy);
-            sinon.assert.calledOnceWithExactly(addSpy, {fn: request._assertHeader, expectedField: 'foo', expectedValue: 'bar'});
+            sinon.assert.calledOnceWithExactly(addSpy, {
+                fn: request._assertHeader,
+                expectedField: 'foo',
+                expectedValue: 'bar',
+                type: 'header'
+            });
         });
 
         it('matchBodySnapshot calls _addAssertion [public interface]', function () {
@@ -464,7 +473,12 @@ describe('ExpectRequest', function () {
             request.matchHeaderSnapshot({});
 
             sinon.assert.calledOnce(addSpy);
-            sinon.assert.calledOnceWithExactly(addSpy, {fn: request._assertSnapshot, properties: {}, field: 'headers'});
+            sinon.assert.calledOnceWithExactly(addSpy, {
+                fn: request._assertSnapshot,
+                properties: {},
+                field: 'headers',
+                type: 'header'
+            });
         });
     });
 });

@@ -8,6 +8,7 @@ const {makeMessageFromMatchMessage} = require('./utils');
  * @prop {function} fn - Wrapped assertion with response context
  * @prop {string} [message] - The message to display if the assertion fails
  * @prop {string} [method] - The method to call on the assertion object
+ * @prop {'header' | 'status'} [type] - The type of assertion
  * @prop {import('assert').AssertionError} [error] - The error to throw if the assertion fails
  * @prop {any} [expected]
  * @prop {any} [expectedValue]
@@ -48,7 +49,8 @@ class ExpectRequest extends Request {
     expectStatus(expected) {
         const assertion = {
             fn: this._assertStatus,
-            expected
+            expected,
+            type: 'status'
         };
 
         this._addAssertion(assertion);
@@ -60,7 +62,8 @@ class ExpectRequest extends Request {
         const assertion = {
             fn: this._assertHeader,
             expectedField: expectedField.toLowerCase(),
-            expectedValue
+            expectedValue,
+            type: 'header'
         };
 
         this._addAssertion(assertion);
@@ -84,7 +87,8 @@ class ExpectRequest extends Request {
         let assertion = {
             fn: this._assertSnapshot,
             properties: properties,
-            field: 'headers'
+            field: 'headers',
+            type: 'header'
         };
 
         this._addAssertion(assertion);
