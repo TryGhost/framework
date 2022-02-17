@@ -40,6 +40,16 @@ return await agent
 This is an initial version for review. More docs coming if it works :)
 
 
+### Assertion execution order
+The order of *chained* assertion execution is NOT the order they were declared in. The framework follows the priority order of the assertion types:
+1. `expect`
+2. `expectHeader`
+3. `expectStatus`
+
+Meaning, any `expect` declarations would be asserted first following by `expectHeader` and `expectStatus` declarations.
+
+The custom order is here to prioritize assertions with the most context first. The feature was added based on frustrations with frameworks like [superagent](https://github.com/visionmedia/superagent), which didn't provide enough information when the status code assertions failed.
+
 ## Develop
 
 This is a mono repository, managed with [lerna](https://lernajs.io/).
