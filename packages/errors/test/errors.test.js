@@ -364,16 +364,6 @@ describe('Errors', function () {
             error.hideStack.should.be.false();
         });
 
-        // Unused don't make a test
-        it.skip('DatabaseVersionError', function () {
-            const error = new errors.DatabaseVersionError();
-            error.statusCode.should.eql(500);
-            error.level.should.eql('normal'),
-            error.errorType.should.eql('DatabaseVersionError');
-            error.message.should.eql('');
-            error.hideStack.should.be.true();
-        });
-
         it('EmailError', function () {
             const error = new errors.EmailError();
             error.statusCode.should.eql(500);

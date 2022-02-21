@@ -220,15 +220,6 @@ const ghostErrors = {
             }, options));
         }
     },
-    DatabaseVersionError: class DatabaseVersionError extends GhostError {
-        constructor(options) {
-            super(merge({
-                hideStack: true,
-                statusCode: 500,
-                errorType: 'DatabaseVersionError'
-            }, options));
-        }
-    },
     EmailError: class EmailError extends GhostError {
         constructor(options) {
             super(merge({
