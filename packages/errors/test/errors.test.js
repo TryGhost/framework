@@ -110,9 +110,9 @@ describe('Errors', function () {
                 context: 'i can\'t help',
                 property: 'email'
             });
-    
+
             var serialized = errors.utils.serialize(err);
-    
+
             serialized.should.be.a.JSONErrorResponse({
                 status: 400,
                 code: 'BadRequestError',
@@ -126,10 +126,10 @@ describe('Errors', function () {
                     errorType: 'BadRequestError'
                 }
             });
-    
+
             var deserialized = errors.utils.deserialize(serialized);
             (deserialized instanceof Error).should.eql(true);
-    
+
             deserialized.id.should.eql(serialized.errors[0].id);
             deserialized.message.should.eql(serialized.errors[0].detail);
             deserialized.name.should.eql(serialized.errors[0].title);
@@ -138,10 +138,10 @@ describe('Errors', function () {
             deserialized.help.should.eql(serialized.errors[0].meta.help);
             deserialized.context.should.eql(serialized.errors[0].meta.context);
             deserialized.property.should.eql('email');
-    
+
             err = new errors.BadRequestError();
             serialized = errors.utils.serialize(err);
-    
+
             serialized.should.be.a.JSONErrorResponse({
                 status: 400,
                 code: 'BadRequestError',
@@ -152,40 +152,40 @@ describe('Errors', function () {
                     errorType: 'BadRequestError'
                 }
             });
-    
+
             should.not.exist(serialized.errors[0].error);
             should.not.exist(serialized.errors[0].error_description);
         });
-    
+
         it('oauth serialize', function () {
             var err = new errors.NoPermissionError({
                 message: 'Permissions you need to have.'
             });
-    
+
             var serialized = errors.utils.serialize(err, {format: 'oauth'});
-    
+
             serialized.error.should.eql('access_denied');
             serialized.error_description.should.eql('Permissions you need to have.');
             serialized.status.should.eql(403);
             serialized.title.should.eql('NoPermissionError');
             serialized.meta.level.should.eql('normal');
-    
+
             should.not.exist(serialized.message);
             should.not.exist(serialized.detail);
             should.not.exist(serialized.code);
-    
+
             var deserialized = errors.utils.deserialize(serialized, {});
-    
+
             (deserialized instanceof errors.NoPermissionError).should.eql(true);
             (deserialized instanceof Error).should.eql(true);
-    
+
             deserialized.id.should.eql(serialized.id);
             deserialized.message.should.eql(serialized.error_description);
             deserialized.name.should.eql(serialized.title);
             deserialized.statusCode.should.eql(serialized.status);
             deserialized.level.should.eql(serialized.meta.level);
         });
-    
+
         it('[success] deserialize jsonapi, but target error name is unknown', function () {
             var deserialized = errors.utils.deserialize({
                 errors: [{
@@ -193,29 +193,279 @@ describe('Errors', function () {
                     message: 'message'
                 }]
             });
-    
+
             (deserialized instanceof errors.InternalServerError).should.eql(true);
             (deserialized instanceof Error).should.eql(true);
-    
+
             deserialized.errorType.should.eql('UnknownError');
             deserialized.message.should.eql('message');
         });
-    
+
         it('[failure] deserialize jsonapi, but obj is empty', function () {
             var deserialized = errors.utils.deserialize({});
             (deserialized instanceof errors.InternalServerError).should.eql(true);
             (deserialized instanceof Error).should.eql(true);
         });
-    
+
         it('[failure] deserialize oauth, but obj is empty', function () {
             var deserialized = errors.utils.deserialize({});
             (deserialized instanceof errors.InternalServerError).should.eql(true);
             (deserialized instanceof Error).should.eql(true);
         });
-    
+
         it('[failure] serialize oauth, but obj is empty', function () {
             var serialized = errors.utils.serialize({}, {format: 'oauth'});
             serialized.error.should.eql('server_error');
+        });
+    });
+
+    describe('ErrorTypes', function () {
+        it('InternalServerError', function () {
+            const error = new errors.InternalServerError();
+            error.statusCode.should.eql(500);
+            error.level.should.eql('critical'),
+            error.errorType.should.eql('InternalServerError');
+            error.message.should.eql('The server has encountered an error.');
+            error.hideStack.should.be.false();
+        });
+
+        it('IncorrectUsageError', function () {
+            const error = new errors.IncorrectUsageError();
+            error.statusCode.should.eql(400);
+            error.level.should.eql('critical'),
+            error.errorType.should.eql('IncorrectUsageError');
+            error.message.should.eql('We detected a misuse. Please read the stack trace.');
+            error.hideStack.should.be.false();
+        });
+
+        it('NotFoundError', function () {
+            const error = new errors.NotFoundError();
+            error.statusCode.should.eql(404);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('NotFoundError');
+            error.message.should.eql('Resource could not be found.');
+            error.hideStack.should.be.true();
+        });
+
+        it('BadRequestError', function () {
+            const error = new errors.BadRequestError();
+            error.statusCode.should.eql(400);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('BadRequestError');
+            error.message.should.eql('The request could not be understood.');
+            error.hideStack.should.be.false();
+        });
+
+        it('UnauthorizedError', function () {
+            const error = new errors.UnauthorizedError();
+            error.statusCode.should.eql(401);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('UnauthorizedError');
+            error.message.should.eql('You are not authorised to make this request.');
+            error.hideStack.should.be.false();
+        });
+
+        it('NoPermissionError', function () {
+            const error = new errors.NoPermissionError();
+            error.statusCode.should.eql(403);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('NoPermissionError');
+            error.message.should.eql('You do not have permission to perform this request.');
+            error.hideStack.should.be.false();
+        });
+
+        it('ValidationError', function () {
+            const error = new errors.ValidationError();
+            error.statusCode.should.eql(422);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('ValidationError');
+            error.message.should.eql('The request failed validation.');
+            error.hideStack.should.be.false();
+        });
+
+        it('UnsupportedMediaTypeError', function () {
+            const error = new errors.UnsupportedMediaTypeError();
+            error.statusCode.should.eql(415);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('UnsupportedMediaTypeError');
+            error.message.should.eql('The media in the request is not supported by the server.');
+            error.hideStack.should.be.false();
+        });
+
+        it('TooManyRequestsError', function () {
+            const error = new errors.TooManyRequestsError();
+            error.statusCode.should.eql(429);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('TooManyRequestsError');
+            error.message.should.eql('Server has received too many similar requests in a short space of time.');
+            error.hideStack.should.be.false();
+        });
+
+        it('MaintenanceError', function () {
+            const error = new errors.MaintenanceError();
+            error.statusCode.should.eql(503);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('MaintenanceError');
+            error.message.should.eql('The server is temporarily down for maintenance.');
+            error.hideStack.should.be.false();
+        });
+
+        it('MethodNotAllowedError', function () {
+            const error = new errors.MethodNotAllowedError();
+            error.statusCode.should.eql(405);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('MethodNotAllowedError');
+            error.message.should.eql('Method not allowed for resource.');
+            error.hideStack.should.be.false();
+        });
+
+        it('RequestEntityTooLargeError', function () {
+            const error = new errors.RequestEntityTooLargeError();
+            error.statusCode.should.eql(413);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('RequestEntityTooLargeError');
+            error.message.should.eql('Request was too big for the server to handle.');
+            error.hideStack.should.be.false();
+        });
+
+        it('TokenRevocationError', function () {
+            const error = new errors.TokenRevocationError();
+            error.statusCode.should.eql(503);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('TokenRevocationError');
+            error.message.should.eql('Token is no longer available.');
+            error.hideStack.should.be.false();
+        });
+
+        it('VersionMismatchError', function () {
+            const error = new errors.VersionMismatchError();
+            error.statusCode.should.eql(400);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('VersionMismatchError');
+            error.message.should.eql('Requested version does not match server version.');
+            error.hideStack.should.be.false();
+        });
+
+        it('DataExportError', function () {
+            const error = new errors.DataExportError();
+            error.statusCode.should.eql(500);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('DataExportError');
+            error.message.should.eql('The server encountered an error whilst exporting data.');
+            error.hideStack.should.be.false();
+        });
+
+        it('DataImportError', function () {
+            const error = new errors.DataImportError();
+            error.statusCode.should.eql(500);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('DataImportError');
+            error.message.should.eql('The server encountered an error whilst importing data.');
+            error.hideStack.should.be.false();
+        });
+
+        // Unused don't make a test
+        it.skip('DatabaseVersionError', function () {
+            const error = new errors.DatabaseVersionError();
+            error.statusCode.should.eql(500);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('DatabaseVersionError');
+            error.message.should.eql('');
+            error.hideStack.should.be.true();
+        });
+
+        it('EmailError', function () {
+            const error = new errors.EmailError();
+            error.statusCode.should.eql(500);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('EmailError');
+            error.message.should.eql('The server encountered an error whilst sending email.');
+            error.hideStack.should.be.false();
+        });
+
+        it('ThemeValidationError', function () {
+            const error = new errors.ThemeValidationError();
+            error.statusCode.should.eql(422);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('ThemeValidationError');
+            error.message.should.eql('The theme has a validation error.');
+            error.hideStack.should.be.false();
+            // Extra property
+            error.errorDetails.should.be.an.Object();
+        });
+
+        it('DisabledFeatureError', function () {
+            const error = new errors.DisabledFeatureError();
+            error.statusCode.should.eql(409);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('DisabledFeatureError');
+            error.message.should.eql('Unable to complete the request, this feature is disabled.');
+            error.hideStack.should.be.false();
+        });
+
+        it('UpdateCollisionError', function () {
+            const error = new errors.UpdateCollisionError();
+            error.statusCode.should.eql(409);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('UpdateCollisionError');
+            error.message.should.eql('Unable to complete the request, there was a conflict.');
+            error.hideStack.should.be.false();
+        });
+
+        it('HostLimitError', function () {
+            const error = new errors.HostLimitError();
+            error.statusCode.should.eql(403);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('HostLimitError');
+            error.message.should.eql('Unable to complete the request, this resource is limited.');
+            error.hideStack.should.be.true();
+        });
+
+        // Not sure this error makes sense either
+        it('HelperWarning', function () {
+            const error = new errors.HelperWarning();
+            error.statusCode.should.eql(400);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('HelperWarning');
+            error.message.should.eql('A theme helper has done something unexpected.');
+            error.hideStack.should.be.true();
+        });
+
+        it('PasswordResetRequiredError', function () {
+            const error = new errors.PasswordResetRequiredError();
+            error.statusCode.should.eql(401);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('PasswordResetRequiredError');
+            error.message.should.eql('For security, you need to create a new password. An email has been sent to you with instructions!');
+            error.hideStack.should.be.false();
+        });
+
+        it('UnhandledJobError', function () {
+            const error = new errors.UnhandledJobError();
+            error.statusCode.should.eql(500);
+            error.level.should.eql('critical'),
+            error.errorType.should.eql('UnhandledJobError');
+            error.message.should.eql('Processed job threw an unhandled error');
+            error.hideStack.should.be.false();
+        });
+
+        // This error makes no sense
+        it.skip('NoContentError', function () {
+            const error = new errors.NoContentError();
+            error.statusCode.should.eql(204);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('NoContentError');
+            error.message.should.eql('');
+            error.hideStack.should.be.true();
+        });
+
+        it('ConflictError', function () {
+            const error = new errors.ConflictError();
+            error.statusCode.should.eql(409);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('ConflictError');
+            error.message.should.eql('The server has encountered an conflict.');
+            error.hideStack.should.be.false();
         });
     });
 });

@@ -34,7 +34,7 @@ class GhostError extends Error {
         this.redirect = options.redirect || null;
 
         this.message = options.message || this.message;
-        this.hideStack = options.hideStack;
+        this.hideStack = options.hideStack || false;
 
         // NOTE: Error to inherit from, override!
         //       Nested objects are getting copied over in one piece (can be changed, but not needed right now)
@@ -52,7 +52,7 @@ class GhostError extends Error {
                 }
 
                 // CASE: `code` should put options as priority over err
-                if (property === 'code') {  
+                if (property === 'code') {
                     // @ts-ignore
                     this[property] = this[property] || options.err[property];
                     return;
@@ -206,7 +206,8 @@ const ghostErrors = {
         constructor(options) {
             super(merge({
                 statusCode: 500,
-                errorType: 'DataExportError'
+                errorType: 'DataExportError',
+                message: 'The server encountered an error whilst exporting data.'
             }, options));
         }
     },
@@ -214,7 +215,8 @@ const ghostErrors = {
         constructor(options) {
             super(merge({
                 statusCode: 500,
-                errorType: 'DataImportError'
+                errorType: 'DataImportError',
+                message: 'The server encountered an error whilst importing data.'
             }, options));
         }
     },
@@ -231,7 +233,8 @@ const ghostErrors = {
         constructor(options) {
             super(merge({
                 statusCode: 500,
-                errorType: 'EmailError'
+                errorType: 'EmailError',
+                message: 'The server encountered an error whilst sending email.'
             }, options));
         }
     },
@@ -240,6 +243,7 @@ const ghostErrors = {
             super(merge({
                 statusCode: 422,
                 errorType: 'ThemeValidationError',
+                message: 'The theme has a validation error.',
                 errorDetails: {}
             }, options));
         }
@@ -248,7 +252,8 @@ const ghostErrors = {
         constructor(options) {
             super(merge({
                 statusCode: 409,
-                errorType: 'DisabledFeatureError'
+                errorType: 'DisabledFeatureError',
+                message: 'Unable to complete the request, this feature is disabled.'
             }, options));
         }
     },
@@ -256,7 +261,8 @@ const ghostErrors = {
         constructor(options) {
             super(merge({
                 statusCode: 409,
-                errorType: 'UpdateCollisionError'
+                errorType: 'UpdateCollisionError',
+                message: 'Unable to complete the request, there was a conflict.'
             }, options));
         }
     },
@@ -265,7 +271,8 @@ const ghostErrors = {
             super(merge({
                 errorType: 'HostLimitError',
                 hideStack: true,
-                statusCode: 403
+                statusCode: 403,
+                message: 'Unable to complete the request, this resource is limited.'
             }, options));
         }
     },
@@ -273,7 +280,9 @@ const ghostErrors = {
         constructor(options) {
             super(merge({
                 errorType: 'HelperWarning',
-                hideStack: true
+                hideStack: true,
+                statusCode: 400,
+                message: 'A theme helper has done something unexpected.'
             }, options));
         }
     },
@@ -308,7 +317,8 @@ const ghostErrors = {
         constructor(options) {
             super(merge({
                 errorType: 'ConflictError',
-                statusCode: 409
+                statusCode: 409,
+                message: 'The server has encountered an conflict.'
             }, options));
         }
     }
