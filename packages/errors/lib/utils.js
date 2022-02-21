@@ -27,15 +27,15 @@ _private.serialize = function serialize(err) {
 };
 
 _private.deserialize = function deserialize(obj) {
-        return {
-            id: obj.id,
-            message: obj.detail || obj.error_description || obj.message,
-            statusCode: obj.status,
-            code: obj.code || obj.error,
-            level: obj.meta && obj.meta.level,
-            help: obj.meta && obj.meta.help,
-            context: obj.meta && obj.meta.context
-        };
+    return {
+        id: obj.id,
+        message: obj.detail || obj.error_description || obj.message,
+        statusCode: obj.status,
+        code: obj.code || obj.error,
+        level: obj.meta && obj.meta.level,
+        help: obj.meta && obj.meta.help,
+        context: obj.meta && obj.meta.context
+    };
 };
 
 /**

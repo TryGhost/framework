@@ -4,9 +4,7 @@ const isString = require('lodash/isString');
 const utils = require('./utils');
 
 class GhostError extends Error {
-    constructor(options) {
-        options = options || {};
-
+    constructor(options = {}) {
         super();
 
         /**
@@ -58,10 +56,7 @@ class GhostError extends Error {
                     return;
                 }
 
-                if (property === 'stack') {
-                    if (this.hideStack) {
-                        return;
-                    }
+                if (property === 'stack' && !this.hideStack) {
                     this[property] = utils.wrapStack(this, options.err);
                     return;
                 }

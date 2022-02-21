@@ -64,7 +64,7 @@ describe('Errors', function () {
 
         it('error is string', function () {
             var ghostError = new errors.InternalServerError({
-                err: new Error('string')
+                err: 'string'
             });
             ghostError.stack.should.match(/Error: string/);
         });
@@ -523,7 +523,8 @@ Line 2 - Help`);
             error.hideStack.should.be.false();
         });
 
-        // This error makes no sense
+        // This error doesn't make sense because it has an OK status code..
+        // I think this should have been an EmptyImageError with a 400
         it.skip('NoContentError', function () {
             const error = new errors.NoContentError();
             error.statusCode.should.eql(204);
