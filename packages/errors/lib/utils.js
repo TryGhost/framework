@@ -194,13 +194,12 @@ exports.prepareStackForUser = function prepareStackForUser(error) {
     }
 
     // Add in our custom cotext and help methods
-
-    if (this.help) {
-        stackbits.splice(1, 0, `${this.help}`);
+    if (error.help) {
+        stackbits.splice(1, 0, `${error.help}`);
     }
 
-    if (this.context) {
-        stackbits.splice(1, 0, `${this.context}`);
+    if (error.context) {
+        stackbits.splice(1, 0, `${error.context}`);
     }
 
     error.stack = stackbits.join('\n');

@@ -228,6 +228,81 @@ describe('Errors', function () {
         });
     });
 
+    describe('prepareStackForUser', function () {
+        it('Correctly adds Stack Trace header line', function () {
+            const testStack = `Error: Line 0 - Message
+Stack Line 1
+Stack Line 2`;
+
+            const {stack} = errors.utils.prepareStackForUser({stack: testStack});
+
+            stack.should.eql(`Error: Line 0 - Message
+Stack Trace:
+Stack Line 1
+Stack Line 2`);
+        });
+
+        it('Injects context', function () {
+            const testStack = `Error: Line 0 - Message
+Stack Line 1
+Stack Line 2`;
+
+            const {stack} = errors.utils.prepareStackForUser({stack: testStack, context: 'Line 1 - Context'});
+
+            stack.should.eql(`Error: Line 0 - Message
+Line 1 - Context
+Stack Trace:
+Stack Line 1
+Stack Line 2`);
+        });
+
+        it('Injects help', function () {
+            const testStack = `Error: Line 0 - Message
+Stack Line 1
+Stack Line 2`;
+
+            const {stack} = errors.utils.prepareStackForUser({stack: testStack, help: 'Line 2 - Help'});
+
+            stack.should.eql(`Error: Line 0 - Message
+Line 2 - Help
+Stack Trace:
+Stack Line 1
+Stack Line 2`);
+        });
+
+        it('Injects help & context', function () {
+            const testStack = `Error: Line 0 - Message
+Stack Line 1
+Stack Line 2`;
+
+            const {stack} = errors.utils.prepareStackForUser({stack: testStack, context: 'Line 1 - Context', help: 'Line 2 - Help'});
+
+            stack.should.eql(`Error: Line 0 - Message
+Line 1 - Context
+Line 2 - Help
+Stack Trace:
+Stack Line 1
+Stack Line 2`);
+        });
+
+        it('removes the code stack in production mode, leaving just error message, context & help', function () {
+            const originalMode = process.env.NODE_ENV;
+
+            process.env.NODE_ENV = 'production';
+            const testStack = `Error: Line 0 - Message
+Stack Line 1
+Stack Line 2`;
+
+            const {stack} = errors.utils.prepareStackForUser({stack: testStack, context: 'Line 1 - Context', help: 'Line 2 - Help'});
+
+            stack.should.eql(`Error: Line 0 - Message
+Line 1 - Context
+Line 2 - Help`);
+
+            process.env.NODE_ENV = originalMode;
+        });
+    });
+
     describe('ErrorTypes', function () {
         it('InternalServerError', function () {
             const error = new errors.InternalServerError();
