@@ -27,7 +27,6 @@ _private.serialize = function serialize(err) {
 };
 
 _private.deserialize = function deserialize(obj) {
-    try {
         return {
             id: obj.id,
             message: obj.detail || obj.error_description || obj.message,
@@ -37,11 +36,6 @@ _private.deserialize = function deserialize(obj) {
             help: obj.meta && obj.meta.help,
             context: obj.meta && obj.meta.context
         };
-    } catch (err) {
-        return {
-            message: 'Something went wrong.'
-        };
-    }
 };
 
 /**

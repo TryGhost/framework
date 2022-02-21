@@ -104,7 +104,7 @@ describe('Errors', function () {
     });
 
     describe('Serialization', function () {
-        it('serialize/deserialize error', function () {
+        it('Can serialize/deserialize error', function () {
             var err = new errors.BadRequestError({
                 help: 'do you need help?',
                 context: 'i can\'t help',
@@ -155,6 +155,15 @@ describe('Errors', function () {
 
             should.not.exist(serialized.errors[0].error);
             should.not.exist(serialized.errors[0].error_description);
+        });
+
+        it('cannot serialize nothing', function () {
+            errors.utils.serialize().message.should.eql('Something went wrong.');
+        });
+
+        it('deserializing nothing results in a plain InternalServerError (the default)', function () {
+            errors.utils.deserialize({}).message.should.eql('The server has encountered an error.');
+            errors.utils.deserialize({errors: null}).message.should.eql('The server has encountered an error.');
         });
 
         it('oauth serialize', function () {
