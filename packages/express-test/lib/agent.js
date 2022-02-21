@@ -3,6 +3,14 @@ const ExpectRequest = require('./expect-request');
 const {RequestOptions} = require('./request');
 
 class Agent {
+    /**
+     *
+     * @param {Object} app instance of Express app
+     * @param {Object} [defaults]
+     * @param {string} [defaults.baseUrl]
+     * @param {Object} [defaults.headers]
+     * @param {Object} [defaults.queryParams] - custom query params to append to each request
+     */
     constructor(app, defaults = {}) {
         this.app = app;
         this.defaults = defaults;
@@ -13,6 +21,20 @@ class Agent {
     _makeUrl(url) {
         if (this.defaults.baseUrl) {
             url = `/${this.defaults.baseUrl}/${url}`.replace(/(^|[^:])\/\/+/g, '$1/');
+        }
+
+        if (this.defaults.queryParams) {
+            const searchParams = new URLSearchParams();
+
+            for (const key in this.defaults.queryParams) {
+                searchParams.append(key, this.defaults.queryParams[key]);
+            }
+
+            if (url.includes('?')) {
+                url = `${url}&${searchParams.toString()}`;
+            } else {
+                url = `${url}?${searchParams.toString()}`;
+            }
         }
 
         return url;

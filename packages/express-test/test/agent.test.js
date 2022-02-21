@@ -65,6 +65,30 @@ describe('Agent', function () {
             assert.equal(agent._makeUrl('/'), '/base/');
         });
 
+        it('_makeUrl with query params', function () {
+            const fn = () => { };
+            const opts = {
+                queryParams: {
+                    key: 'very_secret'
+                }
+            };
+            const agent = new Agent(fn, opts);
+
+            assert.equal(agent._makeUrl('/'), '/?key=very_secret');
+        });
+
+        it('_makeUrl with query params and existing query params', function () {
+            const fn = () => { };
+            const opts = {
+                queryParams: {
+                    key: 'very_secret'
+                }
+            };
+            const agent = new Agent(fn, opts);
+
+            assert.equal(agent._makeUrl('/?hello=world'), '/?hello=world&key=very_secret');
+        });
+
         it('_mergeOptions validation', function () {
             const fn = () => { };
             const opts = {
