@@ -8,6 +8,10 @@ const _ = require('lodash');
 module.exports = function (Bookshelf) {
     const modelProto = Bookshelf.Model.prototype;
     const countQueryBuilder = {
+        /**
+         * Ideally, these configs should exist on the model and be much more dynamic
+         * In reality, there's no point fixing this
+         */
         tags: {
             posts: function addPostCountToTags(model, options) {
                 model.query('columns', 'tags.*', function (qb) {
@@ -43,6 +47,42 @@ module.exports = function (Bookshelf) {
                         .from('posts')
                         .join('posts_authors', 'posts.id', 'posts_authors.post_id')
                         .whereRaw('posts_authors.author_id = users.id')
+                        .as('count__posts');
+
+                    if (options.context && options.context.public) {
+                        // @TODO use the filter behavior for posts
+                        qb.andWhere('posts.type', '=', 'post');
+                        qb.andWhere('posts.status', '=', 'published');
+                    }
+                });
+            }
+        },
+        /* Speculative */
+        channels: {
+            posts: function addPostCountToChannels(model, options) {
+                model.query('columns', 'channels.*', function (qb) {
+                    qb.count('posts.id')
+                        .from('posts')
+                        .leftOuterJoin('posts_channels', 'posts.id', 'posts_channels.post_id')
+                        .whereRaw('posts_channels.channel_id = channels.id')
+                        .as('count__posts');
+
+                    if (options.context && options.context.public) {
+                        // @TODO use the filter behavior for posts
+                        qb.andWhere('posts.type', '=', 'post');
+                        qb.andWhere('posts.status', '=', 'published');
+                    }
+                });
+            }
+        },
+        /* Speculative */
+        newsletters: {
+            posts: function addPostCountToNewsletters(model, options) {
+                model.query('columns', 'newsletters.*', function (qb) {
+                    qb.count('posts.id')
+                        .from('posts')
+                        .leftOuterJoin('posts_newsletters', 'posts.id', 'posts_newsletters.post_id')
+                        .whereRaw('posts_newsletters.newsletter_id = newsletters.id')
                         .as('count__posts');
 
                     if (options.context && options.context.public) {
