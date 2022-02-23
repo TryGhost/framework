@@ -8,7 +8,7 @@ const {makeMessageFromMatchMessage} = require('./utils');
  * @prop {function} fn - Wrapped assertion with response context
  * @prop {string} [message] - The message to display if the assertion fails
  * @prop {string} [method] - The method to call on the assertion object
- * @prop {'header' | 'status'} [type] - The type of assertion
+ * @prop {'body' | 'header' | 'status'} type - The type of assertion, with following priority: body > header > status
  * @prop {import('assert').AssertionError} [error] - The error to throw if the assertion fails
  * @prop {any} [expected]
  * @prop {any} [expectedValue]
@@ -43,7 +43,8 @@ class ExpectRequest extends Request {
         };
 
         const assertion = {
-            fn: wrapperFn
+            fn: wrapperFn,
+            type: 'body'
         };
 
         this._addAssertion(assertion);
@@ -80,7 +81,8 @@ class ExpectRequest extends Request {
         let assertion = {
             fn: this._assertSnapshot,
             properties: properties,
-            field: 'body'
+            field: 'body',
+            type: 'body'
         };
 
         this._addAssertion(assertion);
@@ -139,11 +141,13 @@ class ExpectRequest extends Request {
         const headerAssertions = [];
 
         for (const assertion of this.assertions) {
-            if (!['status', 'header'].includes(assertion.type)) {
+            if (assertion.type === 'body') {
                 assertion.fn(response, assertion);
             } else if (assertion.type === 'status') {
                 statusCodeAssertions.push(assertion);
             } else if (assertion.type === 'header') {
+                headerAssertions.push(assertion);
+            } else {
                 headerAssertions.push(assertion);
             }
         }

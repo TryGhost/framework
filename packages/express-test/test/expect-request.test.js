@@ -499,7 +499,7 @@ describe('ExpectRequest', function () {
             request.matchBodySnapshot({});
 
             sinon.assert.calledOnce(addSpy);
-            sinon.assert.calledOnceWithExactly(addSpy, {fn: request._assertSnapshot, properties: {}, field: 'body'});
+            sinon.assert.calledOnceWithExactly(addSpy, {fn: request._assertSnapshot, properties: {}, field: 'body', type: 'body'});
         });
 
         it('matchHeaderSnapshot calls _addAssertion [public interface]', function () {
