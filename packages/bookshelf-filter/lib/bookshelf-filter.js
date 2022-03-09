@@ -24,7 +24,7 @@ const filter = function filter(Bookshelf) {
          * instance.
          */
         applyDefaultAndCustomFilters: function applyDefaultAndCustomFilters(options) {
-            const nql = require('@nexes/nql');
+            const nql = require('@tryghost/nql');
 
             const expansions = [];
 
