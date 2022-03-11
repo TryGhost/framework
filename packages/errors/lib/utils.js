@@ -1,6 +1,7 @@
 const omit = require('lodash/omit');
 const merge = require('lodash/merge');
 const extend = require('lodash/extend');
+const cloneError = require('utils-copy-error');
 const _private = {};
 
 _private.serialize = function serialize(err) {
@@ -180,6 +181,7 @@ exports.deserialize = function deserialize(errorFormat) {
 /**
  * @description Replace the stack with a user-facing one
  * @params {Error} err
+ * @returns {Error} Clone of the original error with a user-facing stack
  */
 exports.prepareStackForUser = function prepareStackForUser(error) {
     let stackbits = error.stack.split(/\n/);
@@ -202,8 +204,9 @@ exports.prepareStackForUser = function prepareStackForUser(error) {
         stackbits.splice(1, 0, `${error.context}`);
     }
 
-    error.stack = stackbits.join('\n');
-    return error;
+    const errorClone = cloneError(error);
+    errorClone.stack = stackbits.join('\n');
+    return errorClone;
 };
 
 /**

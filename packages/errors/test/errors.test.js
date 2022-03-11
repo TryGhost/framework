@@ -234,7 +234,10 @@ describe('Errors', function () {
 Stack Line 1
 Stack Line 2`;
 
-            const {stack} = errors.utils.prepareStackForUser({stack: testStack});
+            const error = new Error('Test');
+            error.stack = testStack;
+
+            const {stack} = errors.utils.prepareStackForUser(error);
 
             stack.should.eql(`Error: Line 0 - Message
 Stack Trace:
@@ -247,7 +250,11 @@ Stack Line 2`);
 Stack Line 1
 Stack Line 2`;
 
-            const {stack} = errors.utils.prepareStackForUser({stack: testStack, context: 'Line 1 - Context'});
+            const error = new Error('Test');
+            error.stack = testStack;
+            error.context = 'Line 1 - Context';
+
+            const {stack} = errors.utils.prepareStackForUser(error);
 
             stack.should.eql(`Error: Line 0 - Message
 Line 1 - Context
@@ -261,7 +268,11 @@ Stack Line 2`);
 Stack Line 1
 Stack Line 2`;
 
-            const {stack} = errors.utils.prepareStackForUser({stack: testStack, help: 'Line 2 - Help'});
+            const error = new Error('Test');
+            error.stack = testStack;
+            error.help = 'Line 2 - Help';
+
+            const {stack} = errors.utils.prepareStackForUser(error);
 
             stack.should.eql(`Error: Line 0 - Message
 Line 2 - Help
@@ -275,7 +286,12 @@ Stack Line 2`);
 Stack Line 1
 Stack Line 2`;
 
-            const {stack} = errors.utils.prepareStackForUser({stack: testStack, context: 'Line 1 - Context', help: 'Line 2 - Help'});
+            const error = new Error('Test');
+            error.stack = testStack;
+            error.context = 'Line 1 - Context';
+            error.help = 'Line 2 - Help';
+
+            const {stack} = errors.utils.prepareStackForUser(error);
 
             stack.should.eql(`Error: Line 0 - Message
 Line 1 - Context
@@ -293,7 +309,12 @@ Stack Line 2`);
 Stack Line 1
 Stack Line 2`;
 
-            const {stack} = errors.utils.prepareStackForUser({stack: testStack, context: 'Line 1 - Context', help: 'Line 2 - Help'});
+            const error = new Error('Test');
+            error.stack = testStack;
+            error.context = 'Line 1 - Context';
+            error.help = 'Line 2 - Help';
+
+            const {stack} = errors.utils.prepareStackForUser(error);
 
             stack.should.eql(`Error: Line 0 - Message
 Line 1 - Context
