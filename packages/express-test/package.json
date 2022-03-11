@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/express-test",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/express-test",
   "author": "Ghost Foundation",
   "license": "MIT",
@@ -26,7 +26,7 @@
     "sinon": "13.0.1"
   },
   "dependencies": {
-    "@tryghost/jest-snapshot": "^0.3.4",
+    "@tryghost/jest-snapshot": "^0.3.5",
     "cookiejar": "^2.1.3",
     "reqresnext": "^1.7.0"
   }
