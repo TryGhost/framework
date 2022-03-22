@@ -42,7 +42,13 @@ class SnapshotManageer {
         let testFile = this.currentTest.filename;
         const testTitle = this.currentTest.nameTemplate;
         const snapshotName = this._getNameForSnapshot(testFile, testTitle);
-        const willUpdate = process.env.SNAPSHOT_UPDATE ? 'all' : 'new';
+        const updateSnapshots = (
+            process.env.SNAPSHOT_UPDATE
+            || process.env.UPDATE_SNAPSHOT
+            || process.env.SNAPSHOTS_UPDATE
+            || process.env.UPDATE_SNAPSHOTS
+        );
+        const willUpdate = updateSnapshots ? 'all' : 'new';
 
         // Set full path
         testFile = this._resolveSnapshotFilePath(testFile);
