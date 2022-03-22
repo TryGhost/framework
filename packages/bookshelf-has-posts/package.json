@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-has-posts",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/bookshelf-has-posts",
   "author": "Ghost Foundation",
   "license": "MIT",
@@ -24,7 +24,7 @@
     "sinon": "13.0.1"
   },
   "dependencies": {
-    "@tryghost/debug": "^0.1.13",
+    "@tryghost/debug": "^0.1.14",
     "lodash": "^4.17.21"
   }
 }
