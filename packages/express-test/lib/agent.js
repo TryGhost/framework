@@ -1,6 +1,7 @@
 const {CookieJar} = require('cookiejar');
 const ExpectRequest = require('./expect-request');
 const {RequestOptions} = require('./request');
+const { normalizeURL } = require('./utils');
 
 class Agent {
     /**
@@ -19,8 +20,10 @@ class Agent {
     }
 
     _makeUrl(url) {
+        let processedURL = url;
+
         if (this.defaults.baseUrl) {
-            url = `/${this.defaults.baseUrl}/${url}`.replace(/(^|[^:])\/\/+/g, '$1/');
+            processedURL = `/${this.defaults.baseUrl}/${processedURL}`.replace(/(^|[^:])\/\/+/g, '$1/');
         }
 
         if (this.defaults.queryParams) {
@@ -30,14 +33,14 @@ class Agent {
                 searchParams.append(key, this.defaults.queryParams[key]);
             }
 
-            if (url.includes('?')) {
-                url = `${url}&${searchParams.toString()}`;
+            if (processedURL.includes('?')) {
+                processedURL = `${processedURL}&${searchParams.toString()}`;
             } else {
-                url = `${url}?${searchParams.toString()}`;
+                processedURL = `${processedURL}?${searchParams.toString()}`;
             }
         }
 
-        return url;
+        return processedURL;
     }
 
     _mergeOptions(method, url, options = {}) {
