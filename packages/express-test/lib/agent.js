@@ -1,7 +1,7 @@
 const {CookieJar} = require('cookiejar');
 const ExpectRequest = require('./expect-request');
 const {RequestOptions} = require('./request');
-const { normalizeURL } = require('./utils');
+const {normalizeURL} = require('./utils');
 
 class Agent {
     /**
@@ -25,6 +25,8 @@ class Agent {
         if (this.defaults.baseUrl) {
             processedURL = `/${this.defaults.baseUrl}/${processedURL}`.replace(/(^|[^:])\/\/+/g, '$1/');
         }
+
+        processedURL = normalizeURL(processedURL);
 
         if (this.defaults.queryParams) {
             const searchParams = new URLSearchParams();
