@@ -28,6 +28,7 @@
   "dependencies": {
     "@tryghost/bunyan-rotating-filestream": "^0.0.7",
     "@tryghost/elasticsearch": "^1.0.5",
+    "@tryghost/http-stream": "^0.1.1",
     "@tryghost/pretty-stream": "^0.1.7",
     "@tryghost/root-utils": "^0.3.12",
     "bunyan": "^1.8.15",

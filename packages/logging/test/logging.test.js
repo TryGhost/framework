@@ -8,6 +8,7 @@ const should = require('should');
 const Bunyan2Loggly = require('bunyan-loggly');
 const GelfStream = require('gelf-stream').GelfStream;
 const ElasticSearch = require('@tryghost/elasticsearch').BunyanStream;
+const HttpStream = require('@tryghost/http-stream');
 const sandbox = sinon.createSandbox();
 const {Worker} = require('worker_threads');
 
@@ -381,6 +382,53 @@ describe('Logging', function () {
 
         ghostLogger.error('testing');
         ElasticSearch.prototype.write.called.should.eql(true);
+    });
+
+    it('http writes a log message', function (done) {
+        sandbox.stub(HttpStream.prototype, 'write').callsFake(function (data) {
+            should.exist(data.err);
+            done();
+        });
+
+        var ghostLogger = new GhostLogger({
+            transports: ['http'],
+            http: {
+                host: 'http://localhost'
+            }
+        });
+
+        ghostLogger.error(new errors.NotFoundError());
+        HttpStream.prototype.write.called.should.eql(true);
+    });
+
+    it('http does not write an info log in error mode', function () {
+        sandbox.spy(HttpStream.prototype, 'write');
+
+        var ghostLogger = new GhostLogger({
+            transports: ['http'],
+            http: {
+                host: 'http://localhost',
+                level: 'error'
+            }
+        });
+
+        ghostLogger.info('testing');
+        HttpStream.prototype.write.called.should.eql(false);
+    });
+
+    it('http can write errors in info mode', function () {
+        sandbox.spy(HttpStream.prototype, 'write');
+
+        var ghostLogger = new GhostLogger({
+            transports: ['http'],
+            http: {
+                host: 'http://localhost',
+                level: 'info'
+            }
+        });
+
+        ghostLogger.error('testing');
+        HttpStream.prototype.write.called.should.eql(true);
     });
 
     it('automatically adds stdout to transports if stderr transport is configured and stdout isn\'t', function () {

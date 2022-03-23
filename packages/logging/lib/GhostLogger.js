@@ -29,6 +29,7 @@ class GhostLogger {
      * loggly:          Loggly transport configuration.
      * elasticsearch:   Elasticsearch transport configuration
      * gelf:            Gelf transport configuration.
+     * http:            HTTP transport configuration
      * @param {object} options Bag of options
      */
     constructor(options) {
@@ -45,6 +46,7 @@ class GhostLogger {
         this.loggly = options.loggly || {};
         this.elasticsearch = options.elasticsearch || {};
         this.gelf = options.gelf || {};
+        this.http = options.http || {};
 
         // CASE: stdout has to be on the first position in the transport,  because if the GhostLogger itself logs, you won't see the stdout print
         if (this.transports.indexOf('stdout') !== -1 && this.transports.indexOf('stdout') !== 0) {
@@ -216,6 +218,30 @@ class GhostLogger {
                     type: 'raw',
                     stream: elasticStream,
                     level: this.elasticsearch.level
+                }],
+                serializers: this.serializers
+            })
+        };
+    }
+
+    setHttpStream() {
+        const Http = require('@tryghost/http-stream');
+
+        const httpStream = new Http({
+            url: this.http.url,
+            headers: this.http.headers || {},
+            username: this.http.username || '',
+            password: this.http.password || ''
+        });
+
+        this.streams.http = {
+            name: 'http',
+            log: bunyan.createLogger({
+                name: this.name,
+                streams: [{
+                    type: 'raw',
+                    stream: httpStream,
+                    level: this.http.level
                 }],
                 serializers: this.serializers
             })
