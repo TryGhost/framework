@@ -27,6 +27,6 @@
   "dependencies": {
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
-    "prettyjson": "1.2.5"
+    "prettyjson": "^1.2.5"
   }
 }
