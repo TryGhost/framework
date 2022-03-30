@@ -42,11 +42,21 @@ describe('Example App', function () {
         agent = await getAgent();
     });
 
-    it('Basic test of GET /', async function () {
+    it('GET / works', async function () {
         try {
             const {statusCode, text} = await agent.get('/');
             assert.equal(statusCode, 200);
             assert.equal(text, 'Hello World!');
+        } catch (error) {
+            assert.fail(`Should not have thrown an error', but got ${error.stack}`);
+        }
+    });
+
+    it('GET /idontexist 404s', async function () {
+        try {
+            const {statusCode, text} = await agent.get('/idontexist');
+            assert.equal(statusCode, 404);
+            assert.match(text, /Cannot GET \/idontexist/);
         } catch (error) {
             assert.fail(`Should not have thrown an error', but got ${error.stack}`);
         }
@@ -64,6 +74,19 @@ describe('Example App', function () {
             assert.deepEqual(Object.keys(headers), ['x-powered-by', 'content-type', 'content-length', 'etag']);
             assert.deepEqual(body, {});
             assert.equal(text, 'Forbidden');
+        });
+
+        it('cannot create a session without valid credentials', async function () {
+            const sessionRes = await agent.post('/session/', {
+                body: {
+                    username: 'hello'
+                }
+            });
+
+            assert.equal(sessionRes.statusCode, 401);
+            assert.deepEqual(Object.keys(sessionRes.headers), ['x-powered-by', 'content-type', 'content-length', 'etag']);
+            assert.deepEqual(sessionRes.body, {});
+            assert.equal(sessionRes.text, 'Unauthorized');
         });
 
         it('create session & make authenticated request', async function () {

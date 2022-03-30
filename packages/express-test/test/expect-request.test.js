@@ -451,6 +451,61 @@ describe('ExpectRequest', function () {
             assert.throws(assertFn);
         });
 
+        it('_assertSnapshot not ok when field not set', function () {
+            const fn = () => { };
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new ExpectRequest(fn, jar, opts);
+
+            const error = new assert.AssertionError({});
+            error.contextString = 'foo';
+
+            const response = {body: {foo: 'bar'}};
+            const assertion = {properties: {}, error};
+
+            sinon.stub(snapshotManager, 'match').returns({pass: false});
+
+            const assertFn = () => {
+                request._assertSnapshot(response, assertion);
+            };
+
+            assert.throws(assertFn, {message: 'Unable to match snapshot on undefined field undefined foo'});
+        });
+
+        it('expect calls _addAssertion [public interface]', function () {
+            const fn = () => { };
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new ExpectRequest(fn, jar, opts);
+
+            const addSpy = sinon.stub(request, '_addAssertion');
+
+            request.expect(fn);
+
+            sinon.assert.calledOnce(addSpy);
+            sinon.assert.calledOnceWithMatch(addSpy, {
+                fn: sinon.match.func, // this is the wrapped callback
+                type: 'body'
+            });
+        });
+
+        it('expect not ok when given something other than a function [public interface]', function () {
+            const fn = () => { };
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new ExpectRequest(fn, jar, opts);
+
+            const addSpy = sinon.stub(request, '_addAssertion');
+
+            const assertFn = () => {
+                request.expect('foo');
+            };
+
+            assert.throws(assertFn, {message: 'express-test expect() requires a callback function, did you mean expectStatus or expectHeader?'});
+
+            sinon.assert.notCalled(addSpy);
+        });
+
         it('expectStatus calls _addAssertion [public interface]', function () {
             const fn = () => { };
             const jar = {};
