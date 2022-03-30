@@ -1,26 +1,26 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Example App Object Destructuring headers, status and body check body using snapshot matching errors correctly for random data 1: [body] 1`] = `
+exports[`Example App Set & Expect check body using snapshot matching errors correctly for random data 1: [body] 1`] = `
 Object {
   "foo": "bar",
   "id": "0.peo1xr2fyg",
 }
 `;
 
-exports[`Example App Object Destructuring headers, status and body check body using snapshot matching properties works for random data 1: [body] 1`] = `
+exports[`Example App Set & Expect check body using snapshot matching properties works for random data 1: [body] 1`] = `
 Object {
   "foo": "bar",
   "id": Any<String>,
 }
 `;
 
-exports[`Example App Object Destructuring headers, status and body check headers, status and body using set, expect chaining & snapshot matching 1: [body] 1`] = `
+exports[`Example App Set & Expect check headers, status and body using set, expect chaining & snapshot matching 1: [body] 1`] = `
 Object {
   "foo": "bar",
 }
 `;
 
-exports[`Example App Object Destructuring headers, status and body check headers, status and body using set, expect chaining & snapshot matching 2: [headers] 1`] = `
+exports[`Example App Set & Expect check headers, status and body using set, expect chaining & snapshot matching 2: [headers] 1`] = `
 Object {
   "content-length": "13",
   "content-type": "application/json; charset=utf-8",
