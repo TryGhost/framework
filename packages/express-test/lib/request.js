@@ -36,11 +36,11 @@ class Request {
     then(resolve, reject) {
         const self = this;
         this._fullfilledPromise = new Promise((_resolve, _reject) => {
-            self.finalize((error, result) => {
+            self.finalize((error, response) => {
                 if (error) {
                     return _reject(error);
                 }
-                return _resolve(result);
+                return _resolve(response);
             });
         });
 

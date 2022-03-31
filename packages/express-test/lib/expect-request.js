@@ -217,18 +217,18 @@ class ExpectRequest extends Request {
         }
     }
 
-    _assertSnapshot(result, assertion) {
+    _assertSnapshot(response, assertion) {
         const {properties, field, error} = assertion;
 
-        if (!result[field]) {
+        if (!response[field]) {
             error.message = `Unable to match snapshot on undefined field ${field} ${error.contextString}`;
             error.expected = field;
             error.actual = 'undefined';
-            assert.notEqual(result[field], undefined, error);
+            assert.notEqual(response[field], undefined, error);
         }
 
         const hint = `[${field}]`;
-        const match = snapshotManager.match(result[field], properties, hint);
+        const match = snapshotManager.match(response[field], properties, hint);
 
         Object.keys(properties).forEach((prop) => {
             const errorMessage = `"response.${field}" is missing the expected property "${prop}"`;
@@ -237,7 +237,7 @@ class ExpectRequest extends Request {
             error.actual = 'undefined';
             error.showDiff = false; // Disable mocha's diff output as it's already present in match.message()
 
-            assert.notEqual(result[field][prop], undefined, error);
+            assert.notEqual(response[field][prop], undefined, error);
         });
 
         if (match.pass !== true) {
