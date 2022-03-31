@@ -77,6 +77,18 @@ class ExpectRequest extends Request {
         return this;
     }
 
+    expectEmptyBody() {
+        const assertion = {
+            fn: this._assertEmptyBody,
+            expected: {},
+            type: 'body'
+        };
+
+        this._addAssertion(assertion);
+
+        return this;
+    }
+
     matchBodySnapshot(properties = {}) {
         let assertion = {
             fn: this._assertSnapshot,
@@ -215,6 +227,16 @@ class ExpectRequest extends Request {
             error.message = `Expected header "${expectedHeaderString}", got "${actualHeaderString}" ${error.contextString}`;
             assert.equal(expectedHeaderString, actualHeaderString, error);
         }
+    }
+
+    _assertEmptyBody(response, assertion) {
+        const {error, expected} = assertion;
+        const actual = response.body;
+
+        error.actual = actual;
+        error.message = `Expected body to be empty, got "${actual}" ${error.contextString}`;
+
+        assert.deepEqual(actual, expected, error);
     }
 
     _assertSnapshot(response, assertion) {

@@ -220,6 +220,15 @@ describe('Example App', function () {
             }), {message: 'Expected header "x-checked: false", got "x-checked: true" POST request on /check/'};
         });
 
+        it('check headers, status and empty body using set and expect chaining', async function () {
+            await agent
+                .post('/check/')
+                .header('x-check', true)
+                .expectStatus(200)
+                .expectHeader('x-checked', 'true')
+                .expectEmptyBody();
+        });
+
         it('check header using expect chaining errors correctly', async function () {
             await assert.rejects(async () => {
                 return await agent
@@ -240,6 +249,18 @@ describe('Example App', function () {
                     });
             }, (error) => {
                 assert.match(error.message, /^Expected values to be loosely deep-equal/);
+                return true;
+            });
+        });
+
+        it('check empty body using expect chaining errors correctly', async function () {
+            await assert.rejects(async () => {
+                return await agent
+                    .post('/check/')
+                    .body({foo: 'bar'})
+                    .expectEmptyBody();
+            }, (error) => {
+                assert.match(error.message, /^Expected body to be empty, got/);
                 return true;
             });
         });
