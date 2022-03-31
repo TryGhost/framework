@@ -64,12 +64,7 @@ class Request {
     _getReqRes() {
         const {app, reqOptions} = this;
 
-        const {req, res} = reqresnext(Object.assign({}, reqOptions, {app}), {app});
-
-        // This is needed to make error handling work
-        // @TODO: remove once https://github.com/antongolub/reqresnext/issues/31 is solved
-        req.socket.destroy = () => { };
-        return {req, res};
+        return reqresnext(Object.assign({}, reqOptions, {app}), {app});
     }
 
     _buildResponse(res) {
