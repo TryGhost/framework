@@ -1,6 +1,6 @@
 {
   "all": true,
   "100": true,
-  "reporter": ["text-summary", "html", "cobertura"],
+  "reporter": ["text", "html", "cobertura"],
   "check-coverage": true
 }
