@@ -109,6 +109,17 @@ describe('Example App', function () {
             agent = await getAgent();
         });
 
+        it('set headers but not body using reqOptions', async function () {
+            const {statusCode, headers, body} = await agent
+                .post('/check/', {
+                    headers: {'x-check': true}
+                });
+
+            assert.equal(statusCode, 200);
+            assert.deepEqual(body, {});
+            assert.equal(headers['x-checked'], 'true');
+        });
+
         it('set headers, status and body using reqOptions', async function () {
             const {statusCode, headers, body} = await agent
                 .post('/check/', {

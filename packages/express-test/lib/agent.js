@@ -59,6 +59,7 @@ class Agent {
             method,
             url: this._makeUrl(url),
             headers: Object.assign({}, this.defaults.headers, options.headers),
+            // Set this to an empty object for ease, as express.json will do this anyway
             body: Object.assign({}, this.defaults.body, options.body)
         });
     }

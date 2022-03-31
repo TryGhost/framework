@@ -38,7 +38,8 @@ app.post('/check/', (req, res) => {
         res.set('x-checked', true);
     }
 
-    if (req.body) {
+    // express.json() makes this always be an empty object
+    if (!req.body || req.body !== {}) {
         return res.json(req.body);
     }
 
