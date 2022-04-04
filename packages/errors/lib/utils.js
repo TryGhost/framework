@@ -188,7 +188,7 @@ exports.prepareStackForUser = function prepareStackForUser(error) {
 
     // We build this up backwards, so we always insert at position 1
 
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === 'production' || error.hideStack) {
         stackbits.splice(1, stackbits.length - 1);
     } else {
         // Clearly mark the strack trace
