@@ -170,7 +170,7 @@ const ghostErrors = {
             }, options));
         }
     },
-    RequestNotAcceptableError: class MethodNotAcceptableError extends GhostError {
+    RequestNotAcceptableError: class RequestNotAcceptableError extends GhostError {
         constructor(options) {
             super(merge({
                 statusCode: 406,
