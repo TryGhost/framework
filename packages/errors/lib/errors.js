@@ -170,6 +170,15 @@ const ghostErrors = {
             }, options));
         }
     },
+    RequestNotAcceptableError: class MethodNotAcceptableError extends GhostError {
+        constructor(options) {
+            super(merge({
+                statusCode: 406,
+                errorType: 'RequestNotAcceptableError',
+                message: 'Request not acceptable for provided Accept-Version header.'
+            }, options));
+        }
+    },
     RequestEntityTooLargeError: class RequestEntityTooLargeError extends GhostError {
         constructor(options) {
             super(merge({

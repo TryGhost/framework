@@ -424,6 +424,15 @@ Line 2 - Help`);
             error.hideStack.should.be.false();
         });
 
+        it('RequestNotAcceptableError', function () {
+            const error = new errors.RequestNotAcceptableError();
+            error.statusCode.should.eql(406);
+            error.level.should.eql('normal'),
+            error.errorType.should.eql('RequestNotAcceptableError');
+            error.message.should.eql('Request not acceptable for provided Accept-Version header.');
+            error.hideStack.should.be.false();
+        });
+
         it('RequestEntityTooLargeError', function () {
             const error = new errors.RequestEntityTooLargeError();
             error.statusCode.should.eql(413);
