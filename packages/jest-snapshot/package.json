@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/jest-snapshot",
-  "version": "0.3.10",
+  "version": "0.3.11",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/jest-snapshot",
   "author": "Ghost Foundation",
   "license": "MIT",
@@ -25,7 +25,7 @@
     "sinon": "13.0.1"
   },
   "dependencies": {
-    "@tryghost/errors": "^1.2.9",
+    "@tryghost/errors": "^1.2.10",
     "expect": "^27.5.0",
     "jest-snapshot": "^27.5.0"
   }
