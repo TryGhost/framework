@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/version",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/version",
   "author": "Ghost Foundation",
   "license": "MIT",
@@ -26,7 +26,7 @@
     "sinon": "13.0.2"
   },
   "dependencies": {
-    "@tryghost/root-utils": "^0.3.12",
+    "@tryghost/root-utils": "^0.3.13",
     "semver": "^7.3.5"
   }
 }
