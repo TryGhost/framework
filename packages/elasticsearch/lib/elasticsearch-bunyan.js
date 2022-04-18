@@ -7,10 +7,7 @@ class ElasticSearchBunyan {
     }
 
     async write(data) {
-        await this.client.index({
-            body: data,
-            ...this.index
-        });
+        await this.client.index(data, this.index);
     }
 }
 

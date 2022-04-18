@@ -92,13 +92,11 @@ describe('ElasticSearch Bunyan', function () {
 
     it('Sets the index config', async function () {
         const es = new ElasticSearchBunyan(testClientConfig, indexConfig);
-        sandbox.stub(ElasticSearch.prototype, 'index').callsFake((data) => {
-            should.equal(data.index, indexConfig.index);
+        sandbox.stub(ElasticSearch.prototype, 'index').callsFake((_data, index) => {
+            should.equal(index.index, indexConfig.index);
         });
 
-        await es.write({
-            message: 'Test data'
-        }, indexConfig);
+        await es.write({message: 'Test data'});
     });
 
     it('Can index using the Bunyan API', async function () {
@@ -108,9 +106,9 @@ describe('ElasticSearch Bunyan', function () {
 
         const es = new ElasticSearchBunyan(testClientConfig, indexConfig);
         sandbox.stub(ElasticSearch.prototype, 'index').callsFake((data) => {
-            should.deepEqual(data.body, testMessage);
+            should.deepEqual(data, testMessage);
         });
 
-        await es.write(testMessage, indexConfig);
+        await es.write(testMessage);
     });
 });
