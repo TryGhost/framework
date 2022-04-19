@@ -198,6 +198,10 @@ class ExpectRequest extends Request {
 
         if (response.body && response.body.errors && response.body.errors[0].message) {
             error.message += `\n${response.body.errors[0].message}`;
+
+            if (response.body.errors[0].context) {
+                error.message += `\n${response.body.errors[0].context}`;
+            }
         }
 
         error.actual = response.statusCode;
