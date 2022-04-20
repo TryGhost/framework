@@ -310,6 +310,33 @@ describe('ExpectRequest', function () {
             assert.throws(assertFn, {message: 'Expected statusCode 200, got statusCode 404 foo\nNot found'});
         });
 
+        it('_assertStatus not ok when status i not ok and shows response context when present', function () {
+            const fn = () => { };
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new ExpectRequest(fn, jar, opts);
+
+            const error = new assert.AssertionError({});
+            error.contextString = 'foo';
+
+            const response = {
+                statusCode: 500,
+                body: {
+                    errors: [{
+                        message: 'Internal server error, cannot save member.',
+                        context: 'offer is not defined on the model.'
+                    }]
+                }
+            };
+            const assertion = {expected: 200, error};
+
+            const assertFn = () => {
+                request._assertStatus(response, assertion);
+            };
+
+            assert.throws(assertFn, {message: 'Expected statusCode 200, got statusCode 500 foo\nInternal server error, cannot save member.\noffer is not defined on the model.'});
+        });
+
         it('_assertHeader ok when header is ok', function () {
             const fn = () => { };
             const jar = {};
