@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/express-test",
-  "version": "0.8.4",
+  "version": "0.9.0",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/express-test",
   "author": "Ghost Foundation",
   "license": "MIT",
