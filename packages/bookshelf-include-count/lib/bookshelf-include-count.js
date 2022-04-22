@@ -75,21 +75,21 @@ module.exports = function (Bookshelf) {
                 });
             }
         },
-        /* Speculative */
         newsletters: {
-            posts: function addPostCountToNewsletters(model, options) {
+            posts: function addPostCountToNewsletters(model) {
                 model.query('columns', 'newsletters.*', function (qb) {
                     qb.count('posts.id')
                         .from('posts')
-                        .leftOuterJoin('posts_newsletters', 'posts.id', 'posts_newsletters.post_id')
-                        .whereRaw('posts_newsletters.newsletter_id = newsletters.id')
+                        .whereRaw('posts.newsletter_id = newsletters.id')
                         .as('count__posts');
-
-                    if (options.context && options.context.public) {
-                        // @TODO use the filter behavior for posts
-                        qb.andWhere('posts.type', '=', 'post');
-                        qb.andWhere('posts.status', '=', 'published');
-                    }
+                });
+            },
+            members: function addMemberCountToNewsletters(model) {
+                model.query('columns', 'newsletters.*', function (qb) {
+                    qb.count('members_newsletters.id')
+                        .from('members_newsletters')
+                        .whereRaw('members_newsletters.newsletter_id = newsletters.id')
+                        .as('count__members');
                 });
             }
         }
