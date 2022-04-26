@@ -43,19 +43,19 @@ module.exports = function (transport, options = {}) {
         break;
     case 'ses':
         const aws = require('@aws-sdk/client-ses');
-        const {defaultProvider} = require('@aws-sdk/credential-provider-node');
 
         const pattern = /(.*)email(.*)\.(.*).amazonaws.com/i;
         const result = pattern.exec(options.ServiceUrl);
         const region = options.region || (result && result[3]) || 'us-east-1';
 
-        process.env.AWS_ACCESS_KEY_ID = options.accessKeyId || options.AWSAccessKeyID;
-        process.env.AWS_SECRET_ACCESS_KEY = options.secretAccessKey || options.AWSSecretKey;
+        const accessKeyId = options.accessKeyId || options.AWSAccessKeyID;
+        const secretAccessKey = options.secretAccessKey || options.AWSSecretKey;
+        const credentials = (accessKeyId && secretAccessKey) ? {accessKeyId, secretAccessKey} : undefined;
 
         const ses = new aws.SES({
             apiVersion: '2010-12-01',
             region,
-            defaultProvider
+            credentials
         });
 
         transportOptions = {

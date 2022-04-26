@@ -236,7 +236,7 @@
     "@aws-sdk/util-credentials" "3.53.0"
     tslib "^2.3.0"
 
-"@aws-sdk/credential-provider-node@3.53.0", "@aws-sdk/credential-provider-node@^3.31.0":
+"@aws-sdk/credential-provider-node@3.53.0":
   version "3.53.0"
   resolved "https://registry.yarnpkg.com/@aws-sdk/credential-provider-node/-/credential-provider-node-3.53.0.tgz#65343d6f7aee4ae4b0386cbc325790ea40b00de9"
   integrity sha512-sy0NeuJHOBhe7XwxCX2y+YZAB4CqcHveyXJfT6mv7eY6bYQskkMTCPp2D586hSH3c6cfIsmvLSxNhNJApj1Atw==
