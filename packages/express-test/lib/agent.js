@@ -3,14 +3,19 @@ const ExpectRequest = require('./expect-request');
 const {RequestOptions} = require('./request');
 const {normalizeURL} = require('./utils');
 
+/**
+ * @typedef AgentOptions
+ * @param {string} [baseUrl] - the base URL path for the API query
+ * @param {Object} [queryParams] - custom query params to append to each request
+ * @param {Object} [headers] - any default headers to append to each request
+ * @param {Object} [body] - a default body to append to each request
+ * */
+
 class Agent {
     /**
      *
      * @param {Object} app instance of Express app
-     * @param {Object} [defaults]
-     * @param {string} [defaults.baseUrl]
-     * @param {Object} [defaults.headers]
-     * @param {Object} [defaults.queryParams] - custom query params to append to each request
+     * @param {AgentOptions} [defaults]
      */
     constructor(app, defaults = {}) {
         this.app = app;
@@ -19,20 +24,31 @@ class Agent {
         this.jar = new CookieJar();
     }
 
-    _makeUrl(url) {
+    /**
+     *
+     * @param {String} url
+     * @param {object} [urlOptions]
+     * @param {string} [urlOptions.baseUrl] - the base URL path for the API query
+     * @param {Object} [urlOptions.queryParams] - custom query params to append to each request
+     * @returns
+     */
+    _makeUrl(url, urlOptions = {}) {
         let processedURL = url;
+        const baseUrl = urlOptions.baseUrl || this.defaults.baseUrl || null;
 
-        if (this.defaults.baseUrl) {
-            processedURL = `/${this.defaults.baseUrl}/${processedURL}`.replace(/(^|[^:])\/\/+/g, '$1/');
+        if (baseUrl) {
+            processedURL = `/${baseUrl}/${processedURL}`.replace(/(^|[^:])\/\/+/g, '$1/');
         }
 
         processedURL = normalizeURL(processedURL);
 
-        if (this.defaults.queryParams) {
+        const queryParams = Object.assign({}, this.defaults.queryParams, urlOptions.queryParams);
+
+        if (Object.keys(queryParams).length > 0) {
             const searchParams = new URLSearchParams();
 
-            for (const key in this.defaults.queryParams) {
-                searchParams.append(key, this.defaults.queryParams[key]);
+            for (const key in queryParams) {
+                searchParams.append(key, queryParams[key]);
             }
 
             if (processedURL.includes('?')) {
@@ -45,6 +61,13 @@ class Agent {
         return processedURL;
     }
 
+    /**
+     *
+     * @param {string}} method - HTTP method
+     * @param {string} url - url to request
+     * @param {AgentOptions} options
+     * @returns
+     */
     _mergeOptions(method, url, options = {}) {
         // It doesn't make sense to call this method without these properties
         if (!method) {
@@ -55,9 +78,12 @@ class Agent {
             throw new Error('_mergeOptions cannot be called without a url'); /* eslint-disable-line no-restricted-syntax */
         }
 
+        // urlOptions
+        const {baseUrl, queryParams} = options;
+
         return new RequestOptions({
             method,
-            url: this._makeUrl(url),
+            url: this._makeUrl(url, Object.assign({}, {baseUrl, queryParams})),
             headers: Object.assign({}, this.defaults.headers, options.headers),
             // Set this to an empty object for ease, as express.json will do this anyway
             body: Object.assign({}, this.defaults.body, options.body)

@@ -45,7 +45,7 @@ describe('Agent', function () {
             assert.equal(agent._makeUrl('/'), '/');
         });
 
-        it('_makeUrl with defaults + slashes', function () {
+        it('_makeUrl with baseUrl + slashes', function () {
             const fn = () => { };
             const opts = {
                 baseUrl: '/base/'
@@ -55,7 +55,7 @@ describe('Agent', function () {
             assert.equal(agent._makeUrl('/'), '/base/');
         });
 
-        it('_makeUrl with defaults + no slashes', function () {
+        it('_makeUrl with baseUrl + no slashes', function () {
             const fn = () => { };
             const opts = {
                 baseUrl: 'base'
@@ -63,6 +63,16 @@ describe('Agent', function () {
             const agent = new Agent(fn, opts);
 
             assert.equal(agent._makeUrl('/'), '/base/');
+        });
+
+        it('_makeUrl with baseUrl + override baseUrl', function () {
+            const fn = () => { };
+            const opts = {
+                baseUrl: '/base/'
+            };
+            const agent = new Agent(fn, opts);
+
+            assert.equal(agent._makeUrl('/', {baseUrl: 'override'}), '/override/');
         });
 
         it('_makeUrl with query params', function () {
@@ -75,6 +85,26 @@ describe('Agent', function () {
             const agent = new Agent(fn, opts);
 
             assert.equal(agent._makeUrl('/'), '/?key=very_secret');
+        });
+
+        it('_makeUrl with queryParams + override queryParams', function () {
+            const fn = () => { };
+            const opts = {
+                queryParams: {
+                    key: 'very_secret',
+                    foo: 'bar'
+                }
+            };
+
+            const overrides = {
+                queryParams: {
+                    key: 'not_so_secret',
+                    bar: 'baz'
+                }
+            };
+            const agent = new Agent(fn, opts);
+
+            assert.equal(agent._makeUrl('/', overrides), '/?key=not_so_secret&foo=bar&bar=baz');
         });
 
         it('_makeUrl with query params and existing query params', function () {
