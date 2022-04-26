@@ -1,4 +1,4 @@
-const expect = require('expect');
+const {jestExpect} = require('@jest/expect');
 const SnapshotManager = require('./snapshot-manager');
 const snapshotManager = new SnapshotManager();
 
@@ -25,7 +25,7 @@ const mochaHooks = {
     }
 };
 
-const {any, anything, stringMatching} = expect;
+const {any, anything, stringMatching} = jestExpect;
 
 module.exports = {
     mochaHooks,

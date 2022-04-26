@@ -10,6 +10,13 @@ describe('Jest Snapshot', function () {
 
     it('exposes a set of functions', function () {
         assert.deepEqual(Object.keys(snapshotTools), ['mochaHooks', 'snapshotManager', 'matchSnapshotAssertion', 'any', 'anything', 'stringMatching']);
+
+        const {any, anything, stringMatching} = snapshotTools;
+
+        // Check the methods we export from other packages still exist and are
+        assert.equal(typeof any, 'function');
+        assert.equal(typeof anything, 'function');
+        assert.equal(typeof stringMatching, 'function');
     });
 
     it('matchSnapshotAssertion', function () {
