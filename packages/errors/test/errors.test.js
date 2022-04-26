@@ -430,7 +430,7 @@ Line 2 - Help`);
             error.level.should.eql('normal'),
             error.errorType.should.eql('RequestNotAcceptableError');
             error.message.should.eql('Request not acceptable for provided Accept-Version header.');
-            error.hideStack.should.be.false();
+            error.hideStack.should.be.true();
         });
 
         it('RequestEntityTooLargeError', function () {
