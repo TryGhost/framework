@@ -1,7 +1,6 @@
 const {SnapshotState, toMatchSnapshot} = require('jest-snapshot');
 const errors = require('@tryghost/errors');
-const expect = require('expect');
-const utils = require('expect/build/utils');
+const utils = require('@jest/expect-utils');
 const path = require('path');
 
 class SnapshotManageer {
@@ -76,22 +75,11 @@ class SnapshotManageer {
         const {testFile, snapshotName, willUpdate} = this._getConfig();
 
         const snapshotState = this.getSnapshotState(testFile, willUpdate);
-        // Equals is not exposed from the internals of expect
-        // This truly bananananas workaround comes from here: https://github.com/facebook/jest/issues/11867
-        let equals = null;
-        expect.extend({
-            __capture_equals__() {
-                equals = this.equals;
-                return {pass: true};
-            }
-        });
-        expect().__capture_equals__();
-
         const matcher = toMatchSnapshot.bind({
             snapshotState,
             currentTestName: snapshotName,
             utils,
-            equals
+            equals: utils.equals
         });
 
         // Execute the matcher
