@@ -12,15 +12,17 @@ class ElasticSearchBunyan {
     }
 
     getStream() {
+        const index = this.index;
+        const pipeline = this.pipeline;
         const stream = new PassThrough();
         this.client.client.helpers.bulk({
-            datasource: stream.pipe(split(JSON.parse)),
+            datasource: stream.pipe(split()),
             onDocument() {
                 return {
-                    index: this.index
+                    index: {_index: index}
                 };
             },
-            pipeline: this.pipeline
+            pipeline
         });
 
         return stream;
