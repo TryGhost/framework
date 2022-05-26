@@ -331,57 +331,17 @@ describe('Logging', function () {
         Bunyan2Loggly.prototype.write.called.should.eql(true);
     });
 
-    it('elasticsearch writes a log message', function (done) {
-        sandbox.stub(ElasticSearch.prototype, 'write').callsFake(function (data) {
-            should.exist(data.err);
-            done();
-        });
-
-        var ghostLogger = new GhostLogger({
-            transports: ['elasticsearch'],
-            elasticsearch: {
-                host: 'https://test-elasticsearch',
+    it('elasticsearch should make a stream', function () {
+        const es = new ElasticSearch({
+            node: 'http://test-elastic-client',
+            auth: {
                 username: 'user',
                 password: 'pass'
             }
-        });
+        }, 'index', 'pipeline');
 
-        ghostLogger.error(new errors.NotFoundError());
-        ElasticSearch.prototype.write.called.should.eql(true);
-    });
-
-    it('elasticsearch does not write a log message', function () {
-        sandbox.spy(ElasticSearch.prototype, 'write');
-
-        var ghostLogger = new GhostLogger({
-            transports: ['elasticsearch'],
-            elasticsearch: {
-                host: 'https://test-elasticsearch',
-                username: 'user',
-                password: 'pass',
-                level: 'error'
-            }
-        });
-
-        ghostLogger.info('testing');
-        ElasticSearch.prototype.write.called.should.eql(false);
-    });
-
-    it('elasticsearch can write errors in info mode', function () {
-        sandbox.spy(ElasticSearch.prototype, 'write');
-
-        var ghostLogger = new GhostLogger({
-            transports: ['elasticsearch'],
-            elasticsearch: {
-                host: 'https://test-elasticsearch',
-                username: 'user',
-                password: 'pass',
-                level: 'info'
-            }
-        });
-
-        ghostLogger.error('testing');
-        ElasticSearch.prototype.write.called.should.eql(true);
+        const stream = es.getStream();
+        stream.write.should.instanceOf(Function);
     });
 
     it('http writes a log message', function (done) {

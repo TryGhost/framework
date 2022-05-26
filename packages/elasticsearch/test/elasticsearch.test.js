@@ -59,7 +59,7 @@ describe('ElasticSearch', function () {
         await es.index({
             message: 'test!s'
         }, indexConfig);
-        
+
         indexStub.callCount.should.equal(1);
     });
 
@@ -68,7 +68,7 @@ describe('ElasticSearch', function () {
         const indexStub = sandbox.stub(Client.prototype, 'index');
 
         await es.index('not an object', indexConfig);
-        
+
         indexStub.callCount.should.equal(0);
     });
 
@@ -90,25 +90,14 @@ describe('ElasticSearch Bunyan', function () {
         sandbox.restore();
     });
 
-    it('Sets the index config', async function () {
-        const es = new ElasticSearchBunyan(testClientConfig, indexConfig);
-        sandbox.stub(ElasticSearch.prototype, 'index').callsFake((_data, index) => {
-            should.equal(index.index, indexConfig.index);
-        });
-
-        await es.write({message: 'Test data'});
-    });
-
     it('Can index using the Bunyan API', async function () {
-        const testMessage = {
-            message: 'Test data'
-        };
-
-        const es = new ElasticSearchBunyan(testClientConfig, indexConfig);
-        sandbox.stub(ElasticSearch.prototype, 'index').callsFake((data) => {
-            should.deepEqual(data, testMessage);
+        const es = new ElasticSearchBunyan(testClientConfig, indexConfig.index, indexConfig.pipeline);
+        sandbox.stub(es.client.client.helpers, 'bulk').callsFake((data) => {
+            should.equal(data.pipeline, indexConfig.pipeline);
         });
 
-        await es.write(testMessage);
+        const stream = es.getStream();
+
+        stream.write(JSON.stringify({message: 'Test data'}));
     });
 });
