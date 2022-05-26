@@ -1,13 +1,29 @@
 const ElasticSearch = require('./elasticsearch');
+const {PassThrough} = require('stream');
+const split = require('split2');
+
+// Create a writable stream which pipes data written into it, into the bulk helper
 
 class ElasticSearchBunyan {
-    constructor(clientConfig, indexConfig) {
+    constructor(clientConfig, index, pipeline) {
         this.client = new ElasticSearch(clientConfig);
-        this.index = indexConfig;
+        this.index = index;
+        this.pipeline = pipeline;
     }
 
-    async write(data) {
-        await this.client.index(data, this.index);
+    getStream() {
+        const stream = new PassThrough();
+        this.client.client.helpers.bulk({
+            datasource: stream.pipe(split(JSON.parse)),
+            onDocument() {
+                return {
+                    index: this.index
+                };
+            },
+            pipeline: this.pipeline
+        });
+
+        return stream;
     }
 }
 

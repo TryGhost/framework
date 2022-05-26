@@ -16,7 +16,7 @@ const jsonStringifySafe = require('json-stringify-safe');
 class GhostLogger {
     /**
      * Properties in the options bag:
-     * 
+     *
      * name:            Name of the logger. The name will appear in the raw log files with {"name": String...}
      * domain:          Is used for creating the file name.
      * env:             Is used for creating the file name.
@@ -199,24 +199,21 @@ class GhostLogger {
     setElasticsearchStream() {
         const ElasticSearch = require('@tryghost/elasticsearch').BunyanStream;
 
-        const elasticStream = new ElasticSearch({
+        const elasticSearchInstance = new ElasticSearch({
             node: this.elasticsearch.host,
             auth: {
                 username: this.elasticsearch.username,
                 password: this.elasticsearch.password
             }
-        }, {
-            index: this.elasticsearch.index,
-            pipeline: this.elasticsearch.pipeline
-        });
+        }, this.elasticsearch.index, this.elasticsearch.pipeline);
 
         this.streams.elasticsearch = {
             name: 'elasticsearch',
             log: bunyan.createLogger({
                 name: this.name,
                 streams: [{
-                    type: 'raw',
-                    stream: elasticStream,
+                    type: 'stream',
+                    stream: elasticSearchInstance.getStream(),
                     level: this.elasticsearch.level
                 }],
                 serializers: this.serializers
@@ -300,7 +297,7 @@ class GhostLogger {
                     threshold: this.rotation.threshold,
                     totalFiles: this.rotation.count,
                     gzip: this.rotation.gzip,
-                    rotateExisting: (typeof this.rotation.rotateExisting === 'undefined') ? this.rotation.rotateExisting : true 
+                    rotateExisting: (typeof this.rotation.rotateExisting === 'undefined') ? this.rotation.rotateExisting : true
                 };
 
                 this.streams['rotation-errors'] = {
@@ -344,7 +341,7 @@ class GhostLogger {
                         serializers: this.serializers
                     })
                 };
-    
+
                 this.streams['rotation-all'] = {
                     name: 'rotation-all',
                     log: bunyan.createLogger({
