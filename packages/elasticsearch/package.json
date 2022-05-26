@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@elastic/elasticsearch": "8.2.0",
-    "@tryghost/debug": "^0.1.16"
+    "@tryghost/debug": "^0.1.16",
+    "split2": "4.1.0"
   }
 }
