@@ -19,7 +19,7 @@ class ElasticSearchBunyan {
             datasource: stream.pipe(split()),
             onDocument() {
                 return {
-                    index: {_index: index}
+                    create: {_index: index}
                 };
             },
             pipeline
