@@ -4,6 +4,7 @@ module.exports = require('./lib/agent');
 //       version missmatching on the client side
 module.exports.snapshot = {
     mochaHooks: require('@tryghost/jest-snapshot').mochaHooks,
+    snapshotManager: require('@tryghost/jest-snapshot').snapshotManager,
     any: require('@tryghost/jest-snapshot').any,
     stringMatching: require('@tryghost/jest-snapshot').stringMatching
 };
