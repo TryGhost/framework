@@ -3,7 +3,7 @@ const errors = require('@tryghost/errors');
 const utils = require('@jest/expect-utils');
 const path = require('path');
 
-class SnapshotManageer {
+class SnapshotManager {
     constructor() {
         this.registry = {};
         this.currentTest = {};
@@ -92,4 +92,4 @@ class SnapshotManageer {
     }
 }
 
-module.exports = SnapshotManageer;
+module.exports = SnapshotManager;
