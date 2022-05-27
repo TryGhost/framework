@@ -1,7 +1,6 @@
 const assert = require('assert');
 const {Request, RequestOptions} = require('./request');
 const {snapshotManager} = require('@tryghost/jest-snapshot');
-const {makeMessageFromMatchMessage} = require('./utils');
 
 /**
  * @typedef {object} ExpressTestAssertion
@@ -17,13 +16,16 @@ const {makeMessageFromMatchMessage} = require('./utils');
  */
 
 class ExpectRequest extends Request {
-    constructor(...args) {
-        super(...args);
+    constructor(app, cookieJar, reqOptions) {
+        super(app, cookieJar, reqOptions);
 
         /**
          * @property {ExpressTestAssertion[]} assertions
          */
         this.assertions = [];
+
+        this.snapshotManager = snapshotManager;
+        this._assertSnapshot = this._assertSnapshot.bind(this);
     }
 
     expect(callback) {
@@ -244,37 +246,7 @@ class ExpectRequest extends Request {
     }
 
     _assertSnapshot(response, assertion) {
-        const {properties, field, error} = assertion;
-
-        if (!response[field]) {
-            error.message = `Unable to match snapshot on undefined field ${field} ${error.contextString}`;
-            error.expected = field;
-            error.actual = 'undefined';
-            assert.notEqual(response[field], undefined, error);
-        }
-
-        const hint = `[${field}]`;
-        const match = snapshotManager.match(response[field], properties, hint);
-
-        Object.keys(properties).forEach((prop) => {
-            const errorMessage = `"response.${field}" is missing the expected property "${prop}"`;
-            error.message = makeMessageFromMatchMessage(match.message(), errorMessage);
-            error.expected = prop;
-            error.actual = 'undefined';
-            error.showDiff = false; // Disable mocha's diff output as it's already present in match.message()
-
-            assert.notEqual(response[field][prop], undefined, error);
-        });
-
-        if (match.pass !== true) {
-            const errorMessage = `"response.${field}" does not match snapshot.`;
-            error.message = makeMessageFromMatchMessage(match.message(), errorMessage);
-            error.expected = match.expected;
-            error.actual = match.actual;
-            error.showDiff = false; // Disable mocha's diff output as it's already present in match.message()
-        }
-
-        assert.equal(match.pass, true, error);
+        this.snapshotManager.assertSnapshot(response, assertion);
     }
 }
 

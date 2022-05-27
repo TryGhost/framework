@@ -1,7 +1,9 @@
 const {SnapshotState, toMatchSnapshot} = require('jest-snapshot');
 const errors = require('@tryghost/errors');
 const utils = require('@jest/expect-utils');
+const assert = require('assert');
 const path = require('path');
+const {makeMessageFromMatchMessage} = require('./utils');
 
 class SnapshotManager {
     constructor() {
@@ -69,6 +71,40 @@ class SnapshotManager {
         return new SnapshotState(testFile, {
             updateSnapshot: willUpdate
         });
+    }
+
+    assertSnapshot(response, assertion) {
+        const {properties, field, error} = assertion;
+
+        if (!response[field]) {
+            error.message = `Unable to match snapshot on undefined field ${field} ${error.contextString}`;
+            error.expected = field;
+            error.actual = 'undefined';
+            assert.notEqual(response[field], undefined, error);
+        }
+
+        const hint = `[${field}]`;
+        const match = this.match(response[field], properties, hint);
+
+        Object.keys(properties).forEach((prop) => {
+            const errorMessage = `"response.${field}" is missing the expected property "${prop}"`;
+            error.message = makeMessageFromMatchMessage(match.message(), errorMessage);
+            error.expected = prop;
+            error.actual = 'undefined';
+            error.showDiff = false; // Disable mocha's diff output as it's already present in match.message()
+
+            assert.notEqual(response[field][prop], undefined, error);
+        });
+
+        if (match.pass !== true) {
+            const errorMessage = `"response.${field}" does not match snapshot.`;
+            error.message = makeMessageFromMatchMessage(match.message(), errorMessage);
+            error.expected = match.expected;
+            error.actual = match.actual;
+            error.showDiff = false; // Disable mocha's diff output as it's already present in match.message()
+        }
+
+        assert.equal(match.pass, true, error);
     }
 
     match(received, properties = {}, hint) {

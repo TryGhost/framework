@@ -106,6 +106,87 @@ describe('Snapshot Manager', function () {
         process.env.SNAPSHOT_UPDATE = 0;
     });
 
+    describe('assert snapshot', function () {
+        it('ok when match is a pass', function () {
+            const snapshotManager = new SnapshotManager();
+            const matchStub = sinon.stub(snapshotManager, 'match').returns({pass: true});
+
+            const error = new assert.AssertionError({});
+            error.contextString = 'foo';
+
+            const response = {body: {foo: 'bar'}};
+            const assertion = {properties: {}, field: 'body', error};
+
+            const assertFn = () => {
+                snapshotManager.assertSnapshot(response, assertion);
+            };
+
+            assert.doesNotThrow(assertFn);
+
+            // Assert side effects, check that hinting works as expected
+            sinon.assert.calledOnce(matchStub);
+            sinon.assert.calledOnceWithExactly(matchStub, response.body, {}, '[body]');
+        });
+
+        it('ok when match is a with extra properties', function () {
+            const snapshotManager = new SnapshotManager();
+            const matchStub = sinon.stub(snapshotManager, 'match').returns({
+                message: () => 'hello',
+                pass: true
+            });
+
+            const error = new assert.AssertionError({});
+            error.contextString = 'foo';
+
+            const response = {body: {foo: 'bar'}};
+            const assertion = {properties: {foo: 'bar'}, field: 'body', error};
+
+            const assertFn = () => {
+                snapshotManager.assertSnapshot(response, assertion);
+            };
+
+            assert.doesNotThrow(assertFn);
+
+            // Assert side effects, check that hinting works as expected
+            sinon.assert.calledOnce(matchStub);
+            sinon.assert.calledOnceWithExactly(matchStub, response.body, {foo: 'bar'}, '[body]');
+        });
+
+        it('not ok when match is not a pass', function () {
+            const snapshotManager = new SnapshotManager();
+            sinon.stub(snapshotManager, 'match').returns({pass: false});
+
+            const error = new assert.AssertionError({});
+            error.contextString = 'foo';
+
+            const response = {body: {foo: 'bar'}};
+            const assertion = {properties: {}, field: 'body', error};
+
+            const assertFn = () => {
+                snapshotManager.assertSnapshot(response, assertion);
+            };
+
+            assert.throws(assertFn);
+        });
+
+        it('not ok when field not set', function () {
+            const snapshotManager = new SnapshotManager();
+            sinon.stub(snapshotManager, 'match').returns({pass: false});
+
+            const error = new assert.AssertionError({});
+            error.contextString = 'foo';
+
+            const response = {body: {foo: 'bar'}};
+            const assertion = {properties: {}, error};
+
+            const assertFn = () => {
+                snapshotManager.assertSnapshot(response, assertion);
+            };
+
+            assert.throws(assertFn, {message: 'Unable to match snapshot on undefined field undefined foo'});
+        });
+    });
+
     it('match works as expected', function () {
         const snapshotMatcher = new SnapshotManager();
 
