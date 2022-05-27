@@ -64,7 +64,7 @@ class SnapshotManager {
     }
 
     getSnapshotState(testFile, willUpdate) {
-        // Intilize the SnapshotState, it’s responsible for actually matching
+        // Initialize the SnapshotState, it’s responsible for actually matching
         // actual snapshot with expected one and storing results
         return new SnapshotState(testFile, {
             updateSnapshot: willUpdate
