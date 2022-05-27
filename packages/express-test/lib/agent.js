@@ -17,11 +17,12 @@ class Agent {
      * @param {Object} app instance of Express app
      * @param {AgentOptions} [defaults]
      */
-    constructor(app, defaults = {}) {
+    constructor(app, defaults = {}, snapshotManager) {
         this.app = app;
         this.defaults = defaults;
 
         this.jar = new CookieJar();
+        this.snapshotManager = snapshotManager;
     }
 
     /**
@@ -96,7 +97,7 @@ class Agent {
         if (!url) {
             throw new Error('Cannot make a request without supplying a url'); /* eslint-disable-line no-restricted-syntax */
         }
-        return new ExpectRequest(this.app, this.jar, this._mergeOptions(method.toUpperCase(), url, options));
+        return new ExpectRequest(this.app, this.jar, this._mergeOptions(method.toUpperCase(), url, options), this.snapshotManager);
     };
 });
 

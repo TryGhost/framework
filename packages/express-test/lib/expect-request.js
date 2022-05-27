@@ -16,7 +16,7 @@ const {snapshotManager} = require('@tryghost/jest-snapshot');
  */
 
 class ExpectRequest extends Request {
-    constructor(app, cookieJar, reqOptions) {
+    constructor(app, cookieJar, reqOptions, _snapshotManager) {
         super(app, cookieJar, reqOptions);
 
         /**
@@ -24,7 +24,7 @@ class ExpectRequest extends Request {
          */
         this.assertions = [];
 
-        this.snapshotManager = snapshotManager;
+        this.snapshotManager = _snapshotManager ?? snapshotManager;
         this._assertSnapshot = this._assertSnapshot.bind(this);
     }
 
