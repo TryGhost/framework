@@ -95,6 +95,11 @@ describe('Webhook Mock Receiver', function () {
                     avocado: 'toast'
                 }
             });
+
+            assert.deepEqual(snapshotManager.assertSnapshot.args[0][1].field, 'body');
+            assert.deepEqual(snapshotManager.assertSnapshot.args[0][1].type, 'body');
+            assert.deepEqual(snapshotManager.assertSnapshot.args[0][1].properties, {});
+            assert.deepEqual(snapshotManager.assertSnapshot.args[0][1].error.constructor.name, 'AssertionError');
         });
 
         it('waits for the request completeion before checking the request payload', async function () {

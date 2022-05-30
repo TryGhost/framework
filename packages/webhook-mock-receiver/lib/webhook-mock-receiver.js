@@ -1,3 +1,4 @@
+const {AssertionError} = require('assert');
 const util = require('util');
 const {URL} = require('url');
 const nock = require('nock');
@@ -45,10 +46,12 @@ class WebhookMockReceiver {
             await setTimeoutPromise(10);
         }
 
+        const error = new AssertionError({});
         let assertion = {
             properties: properties,
             field: 'body',
-            type: 'body'
+            type: 'body',
+            error
         };
 
         this.snapshotManager.assertSnapshot(this.bodyResponse, assertion);
