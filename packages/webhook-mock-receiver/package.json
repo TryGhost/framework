@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/webhook-mock-receiver",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/webhook-mock-receiver",
   "author": "Ghost Foundation",
   "license": "MIT",
@@ -25,6 +25,5 @@
     "got": "9.6.0",
     "mocha": "10.0.0",
     "sinon": "14.0.0"
-  },
-  "dependencies": {}
+  }
 }
