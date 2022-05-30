@@ -1,6 +1,11 @@
 # Webhook Mock Receiver
 
-Webhook request testing
+Webhook request testing.
+
+It's a bare minimum implementation to be able to check webhook request payload. Few things that need to be done in the future:
+- cleaner module API
+- header snapshot recording/testing
+- better request resolution waiting mechanism (see @TODO list)
 
 ## Install
 
