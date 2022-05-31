@@ -572,5 +572,14 @@ Line 2 - Help`);
             error.message.should.eql('The server has encountered an conflict.');
             error.hideStack.should.be.false();
         });
+
+        it('MigrationError', function () {
+            const error = new errors.MigrationError();
+            error.statusCode.should.eql(500);
+            error.level.should.eql('critical'),
+            error.errorType.should.eql('MigrationError');
+            error.message.should.eql('An error has occurred applying a database migration.');
+            error.hideStack.should.be.false();
+        });
     });
 });
