@@ -317,6 +317,15 @@ const ghostErrors = {
                 message: 'The server has encountered an conflict.'
             }, options));
         }
+    },
+    MigrationError: class MigrationError extends GhostError {
+        constructor(options) {
+            super(merge({
+                errorType: 'MigrationError',
+                message: 'An error has occurred applying a database migration.',
+                level: 'critical'
+            }, options));
+        }
     }
 };
 
