@@ -30,6 +30,7 @@ class GhostLogger {
      * elasticsearch:   Elasticsearch transport configuration
      * gelf:            Gelf transport configuration.
      * http:            HTTP transport configuration
+     * useLocalTime:    Use local time instead of UTC.
      * @param {object} options Bag of options
      */
     constructor(options) {
@@ -47,6 +48,7 @@ class GhostLogger {
         this.elasticsearch = options.elasticsearch || {};
         this.gelf = options.gelf || {};
         this.http = options.http || {};
+        this.useLocalTime = options.useLocalTime || false;
 
         // CASE: stdout has to be on the first position in the transport,  because if the GhostLogger itself logs, you won't see the stdout print
         if (this.transports.indexOf('stdout') !== -1 && this.transports.indexOf('stdout') !== 0) {
@@ -496,6 +498,12 @@ class GhostLogger {
                 modifiedMessages.push(value);
             }
         });
+
+        if (this.useLocalTime) {
+            let currentDate = new Date();
+            currentDate.setMinutes(currentDate.getMinutes() - currentDate.getTimezoneOffset());
+            modifiedObject.time = currentDate.toISOString();
+        }
 
         if (!isEmpty(modifiedObject)) {
             if (modifiedObject.err) {
