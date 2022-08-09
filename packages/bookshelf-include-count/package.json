@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@tryghost/debug": "^0.1.17",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "bluebird": "3.7.2"
   }
 }

@@ -1,6 +1,7 @@
 const _debug = require('@tryghost/debug')._base;
 const debug = _debug('ghost-query');
 const _ = require('lodash');
+const Promise = require('bluebird');
 
 /**
  * @param {import('bookshelf')} Bookshelf
@@ -57,6 +58,39 @@ module.exports = function (Bookshelf) {
                 });
             }
         },
+        comments: {
+            replies: function addReplyCountToComments(model) {
+                model.query('columns', 'comments.*', function (qb) {
+                    qb.count('replies.id')
+                        .from('comments AS replies')
+                        .whereRaw('replies.parent_id = comments.id')
+                        .as('count__replies');
+                });
+            },
+            likes: function addLikesCountToComments(model) {
+                model.query('columns', 'comments.*', function (qb) {
+                    qb.count('comment_likes.id')
+                        .from('comment_likes')
+                        .whereRaw('comment_likes.comment_id = comments.id')
+                        .as('count__likes');
+                });
+            },
+            liked: function addLikedCountToComments(model, options) {
+                model.query('columns', 'comments.*', function (qb) {
+                    if (options.context && options.context.member && options.context.member.id) {
+                        qb.count('comment_likes.id')
+                            .from('comment_likes')
+                            .whereRaw('comment_likes.comment_id = comments.id')
+                            .where('comment_likes.member_id', options.context.member.id)
+                            .as('count__liked');
+                        return;
+                    }
+
+                    // Return zero
+                    qb.select(Bookshelf.knex.raw('0')).as('count__liked');
+                });
+            }
+        },
         /* Speculative */
         channels: {
             posts: function addPostCountToChannels(model, options) {
@@ -95,54 +129,89 @@ module.exports = function (Bookshelf) {
         }
     };
 
-    const Model = Bookshelf.Model.extend({
-        addCounts: function (options) {
-            if (!options) {
+    const addCounts = function (options) {
+        if (!options) {
+            return;
+        }
+
+        const tableName = _.result(this, 'tableName');
+
+        // withRelated can be an object or an array of strings. We need to support handling both representations.
+        // ['user', 'replies']
+        // OR
+        // [
+        //    {'user': function() {} }
+        // ]
+
+        function hasKey(key) {
+            if (!options.withRelated) {
                 return;
             }
-
-            const tableName = _.result(this, 'tableName');
-
-            if (options.withRelated && options.withRelated.indexOf('count.posts') > -1) {
-                // remove post_count from withRelated
-                options.withRelated = _.pull([].concat(options.withRelated), 'count.posts');
-
-                // Call the query builder
-                countQueryBuilder[tableName].posts(this, options);
+            if (options.withRelated.indexOf(key) > -1) {
+                return true;
             }
-            if (options.withRelated && options.withRelated.indexOf('count.members') > -1) {
-                // remove post_count from withRelated
-                options.withRelated = _.pull([].concat(options.withRelated), 'count.members');
-
-                // Call the query builder
-                countQueryBuilder[tableName].members(this, options);
+            for (const item of options.withRelated) {
+                if (typeof item !== 'string') {
+                    if (item[key] !== undefined) {
+                        return true;
+                    }
+                }
             }
-        },
-        fetch: function () {
-            this.addCounts.apply(this, arguments);
+            return false;
+        }
+        function removeKey(key) {
+            // VERY IMPORTANT HERE:
+            // We need to keep the reference to the withRelated array and not create a new array
+            // This is required to make eager relations work correctly (otherwise the updated withRelated won't get passed further)
+            const newItems = options.withRelated.filter((item) => {
+                if (typeof item === 'string') {
+                    return item !== key;
+                }
+                return item[key] === undefined;
+            });
+            options.withRelated.splice(0, options.withRelated.length, ...newItems);
+        }
 
-            // Useful when debugging no. database queries, GQL, etc
-            // To output this, use DEBUG=ghost:*,ghost-query
-            if (_debug.enabled('ghost-query')) {
-                debug('QUERY', this.query().toQuery());
-            }
+        // Normalize withRelated
+        if (hasKey('count.posts')) {
+            // remove post_count from withRelated
+            removeKey('count.posts');
 
-            // Call parent fetch
-            return modelProto.fetch.apply(this, arguments);
-        },
-        fetchAll: function () {
-            this.addCounts.apply(this, arguments);
+            // Call the query builder
+            countQueryBuilder[tableName].posts(this, options);
+        }
+        if (hasKey('count.members')) {
+            // remove post_count from withRelated
+            removeKey('count.members');
 
-            // Useful when debugging no. database queries, GQL, etc
-            // To output this, use DEBUG=ghost:*,ghost-query
-            if (_debug.enabled('ghost-query')) {
-                debug('QUERY', this.query().toQuery());
-            }
+            // Call the query builder
+            countQueryBuilder[tableName].members(this, options);
+        }
+        if (hasKey('count.replies')) {
+            // remove post_count from withRelated
+            removeKey('count.replies');
 
-            // Call parent fetchAll
-            return modelProto.fetchAll.apply(this, arguments);
-        },
+            // Call the query builder
+            countQueryBuilder[tableName].replies(this, options);
+        }
+        if (hasKey('count.likes')) {
+            // remove post_count from withRelated
+            removeKey('count.likes');
 
+            // Call the query builder
+            countQueryBuilder[tableName].likes(this, options);
+        }
+        if (hasKey('count.liked')) {
+            // remove post_count from withRelated
+            removeKey('count.liked');
+
+            // Call the query builder
+            countQueryBuilder[tableName].liked(this, options);
+        }
+    };
+
+    const Model = Bookshelf.Model.extend({
+        addCounts,
         serialize: function serialize(options) {
             const attrs = modelProto.serialize.call(this, options);
             const countRegex = /^(count)(__)(.*)$/;
@@ -157,8 +226,71 @@ module.exports = function (Bookshelf) {
             });
 
             return attrs;
-        }
+        },
+
+        /**
+         * Instead of adding the counts in .fetch and .fetchAll,
+         * we need to do it in sync because Bookshelf doesn't call fetch for eagerRelations
+         * E.g. when trying to load counts on replies.count.likes, we wouldn't get an opportunity to load the counts on the replies relation.
+         */
+        sync: function (options) {
+            if (!options.method || (options.method !== 'insert' && options.method !== 'update')) {
+                this.addCounts.apply(this, arguments);
+            }
+
+            if (_debug.enabled('ghost-query')) {
+                debug('QUERY', this.query().toQuery());
+            }
+
+            // Call parent fetchAll
+            return modelProto.sync.apply(this, arguments);
+        },
+
+        // When save a modal, make sure we keep the already fetched counts alive because they will get
+        // removed before saving in the saving event (as they are not 'permitted')
+        // We need to use bluebird to override save (or things will break)
+        save: Promise.method(function save() {
+            // the count__ variables are not 'permitted' and will get removed after a save
+            // so this will make sure they are kept alive after a save (unless they are also still available after the save)
+
+            const savedAttributes = {};
+            const countRegex = /^(count)(__)(.*)$/;
+
+            for (const key of Object.keys(this.attributes)) {
+                const match = key.match(countRegex);
+                if (match) {
+                    savedAttributes[key] = this.attributes[key];
+                }
+            }
+            
+            return modelProto.save.apply(this, arguments).then((t) => {
+                // Set savedAttributes, but keep count__ variables if they stayed inside this.attributes
+                if (savedAttributes) {
+                    Object.assign(this.attributes, savedAttributes, this.attributes);
+                }
+                return t;
+            });
+        })
     });
 
     Bookshelf.Model = Model;
+
+    const collectionProto = Bookshelf.Collection.prototype;
+
+    const Collection = Bookshelf.Collection.extend({
+        addCounts,
+        sync: function () {
+            // For now, only apply this for eager loaded collections
+            this.addCounts.apply(this, arguments);
+
+            if (_debug.enabled('ghost-query')) {
+                debug('QUERY', this.query().toQuery());
+            }
+
+            // Call parent fetchAll
+            return collectionProto.sync.apply(this, arguments);
+        }
+    });
+
+    Bookshelf.Collection = Collection;
 };
