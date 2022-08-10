@@ -2,7 +2,7 @@ require('should');
 const HttpStream = require('../index');
 
 const testConfig = {
-    url: 'http://localhost:3000'
+    url: 'http://localhost:3001'
 };
 
 describe('HttpStream', function () {
@@ -15,7 +15,7 @@ describe('HttpStream', function () {
             app.post('*', (req, res) => {
                 res.json(req.body);
             });
-            server = app.listen(3000);
+            server = app.listen(3001);
         });
         afterEach(function () {
             server.close();
