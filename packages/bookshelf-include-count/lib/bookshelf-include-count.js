@@ -1,7 +1,6 @@
 const _debug = require('@tryghost/debug')._base;
 const debug = _debug('ghost-query');
 const _ = require('lodash');
-const Promise = require('bluebird');
 
 /**
  * @param {import('bookshelf')} Bookshelf
@@ -246,10 +245,8 @@ module.exports = function (Bookshelf) {
             return modelProto.sync.apply(this, arguments);
         },
 
-        // When save a modal, make sure we keep the already fetched counts alive because they will get
-        // removed before saving in the saving event (as they are not 'permitted')
-        // We need to use bluebird to override save (or things will break)
-        save: Promise.method(function save() {
+        // Warning: Make sure this method always returns a Bluebird Promise (modelProto.save.apply does, so returning that is fine)
+        save: function save() {
             // the count__ variables are not 'permitted' and will get removed after a save
             // so this will make sure they are kept alive after a save (unless they are also still available after the save)
 
@@ -270,7 +267,7 @@ module.exports = function (Bookshelf) {
                 }
                 return t;
             });
-        })
+        }
     });
 
     Bookshelf.Model = Model;
