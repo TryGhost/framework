@@ -28,6 +28,6 @@
     "@jest/expect": "^28.0.1",
     "@jest/expect-utils": "^28.0.1",
     "@tryghost/errors": "^1.2.15",
-    "jest-snapshot": "^28.0.0"
+    "jest-snapshot": "^29.0.0"
   }
 }
