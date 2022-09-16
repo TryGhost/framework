@@ -328,7 +328,7 @@ Line 2 - Help`);
         it('InternalServerError', function () {
             const error = new errors.InternalServerError();
             error.statusCode.should.eql(500);
-            error.level.should.eql('critical'),
+            error.level.should.eql('critical');
             error.errorType.should.eql('InternalServerError');
             error.message.should.eql('The server has encountered an error.');
             error.hideStack.should.be.false();
@@ -337,7 +337,7 @@ Line 2 - Help`);
         it('IncorrectUsageError', function () {
             const error = new errors.IncorrectUsageError();
             error.statusCode.should.eql(400);
-            error.level.should.eql('critical'),
+            error.level.should.eql('critical');
             error.errorType.should.eql('IncorrectUsageError');
             error.message.should.eql('We detected a misuse. Please read the stack trace.');
             error.hideStack.should.be.false();
@@ -346,7 +346,7 @@ Line 2 - Help`);
         it('NotFoundError', function () {
             const error = new errors.NotFoundError();
             error.statusCode.should.eql(404);
-            error.level.should.eql('normal'),
+            error.level.should.eql('normal');
             error.errorType.should.eql('NotFoundError');
             error.message.should.eql('Resource could not be found.');
             error.hideStack.should.be.true();
@@ -355,7 +355,7 @@ Line 2 - Help`);
         it('BadRequestError', function () {
             const error = new errors.BadRequestError();
             error.statusCode.should.eql(400);
-            error.level.should.eql('normal'),
+            error.level.should.eql('normal');
             error.errorType.should.eql('BadRequestError');
             error.message.should.eql('The request could not be understood.');
             error.hideStack.should.be.false();
@@ -364,7 +364,7 @@ Line 2 - Help`);
         it('UnauthorizedError', function () {
             const error = new errors.UnauthorizedError();
             error.statusCode.should.eql(401);
-            error.level.should.eql('normal'),
+            error.level.should.eql('normal');
             error.errorType.should.eql('UnauthorizedError');
             error.message.should.eql('You are not authorised to make this request.');
             error.hideStack.should.be.false();
@@ -373,7 +373,7 @@ Line 2 - Help`);
         it('NoPermissionError', function () {
             const error = new errors.NoPermissionError();
             error.statusCode.should.eql(403);
-            error.level.should.eql('normal'),
+            error.level.should.eql('normal');
             error.errorType.should.eql('NoPermissionError');
             error.message.should.eql('You do not have permission to perform this request.');
             error.hideStack.should.be.false();
@@ -382,7 +382,7 @@ Line 2 - Help`);
         it('ValidationError', function () {
             const error = new errors.ValidationError();
             error.statusCode.should.eql(422);
-            error.level.should.eql('normal'),
+            error.level.should.eql('normal');
             error.errorType.should.eql('ValidationError');
             error.message.should.eql('The request failed validation.');
             error.hideStack.should.be.false();
@@ -391,7 +391,7 @@ Line 2 - Help`);
         it('UnsupportedMediaTypeError', function () {
             const error = new errors.UnsupportedMediaTypeError();
             error.statusCode.should.eql(415);
-            error.level.should.eql('normal'),
+            error.level.should.eql('normal');
             error.errorType.should.eql('UnsupportedMediaTypeError');
             error.message.should.eql('The media in the request is not supported by the server.');
             error.hideStack.should.be.false();
@@ -400,7 +400,7 @@ Line 2 - Help`);
         it('TooManyRequestsError', function () {
             const error = new errors.TooManyRequestsError();
             error.statusCode.should.eql(429);
-            error.level.should.eql('normal'),
+            error.level.should.eql('normal');
             error.errorType.should.eql('TooManyRequestsError');
             error.message.should.eql('Server has received too many similar requests in a short space of time.');
             error.hideStack.should.be.false();
@@ -409,7 +409,7 @@ Line 2 - Help`);
         it('MaintenanceError', function () {
             const error = new errors.MaintenanceError();
             error.statusCode.should.eql(503);
-            error.level.should.eql('normal'),
+            error.level.should.eql('normal');
             error.errorType.should.eql('MaintenanceError');
             error.message.should.eql('The server is temporarily down for maintenance.');
             error.hideStack.should.be.false();
@@ -418,7 +418,7 @@ Line 2 - Help`);
         it('MethodNotAllowedError', function () {
             const error = new errors.MethodNotAllowedError();
             error.statusCode.should.eql(405);
-            error.level.should.eql('normal'),
+            error.level.should.eql('normal');
             error.errorType.should.eql('MethodNotAllowedError');
             error.message.should.eql('Method not allowed for resource.');
             error.hideStack.should.be.false();
@@ -427,7 +427,7 @@ Line 2 - Help`);
         it('RequestNotAcceptableError', function () {
             const error = new errors.RequestNotAcceptableError();
             error.statusCode.should.eql(406);
-            error.level.should.eql('normal'),
+            error.level.should.eql('normal');
             error.errorType.should.eql('RequestNotAcceptableError');
             error.message.should.eql('Request not acceptable for provided Accept-Version header.');
             error.hideStack.should.be.true();
@@ -436,7 +436,7 @@ Line 2 - Help`);
         it('RequestEntityTooLargeError', function () {
             const error = new errors.RequestEntityTooLargeError();
             error.statusCode.should.eql(413);
-            error.level.should.eql('normal'),
+            error.level.should.eql('normal');
             error.errorType.should.eql('RequestEntityTooLargeError');
             error.message.should.eql('Request was too big for the server to handle.');
             error.hideStack.should.be.false();
@@ -445,7 +445,7 @@ Line 2 - Help`);
         it('TokenRevocationError', function () {
             const error = new errors.TokenRevocationError();
             error.statusCode.should.eql(503);
-            error.level.should.eql('normal'),
+            error.level.should.eql('normal');
             error.errorType.should.eql('TokenRevocationError');
             error.message.should.eql('Token is no longer available.');
             error.hideStack.should.be.false();
@@ -454,7 +454,7 @@ Line 2 - Help`);
         it('VersionMismatchError', function () {
             const error = new errors.VersionMismatchError();
             error.statusCode.should.eql(400);
-            error.level.should.eql('normal'),
+            error.level.should.eql('normal');
             error.errorType.should.eql('VersionMismatchError');
             error.message.should.eql('Requested version does not match server version.');
             error.hideStack.should.be.false();
@@ -463,7 +463,7 @@ Line 2 - Help`);
         it('DataExportError', function () {
             const error = new errors.DataExportError();
             error.statusCode.should.eql(500);
-            error.level.should.eql('normal'),
+            error.level.should.eql('normal');
             error.errorType.should.eql('DataExportError');
             error.message.should.eql('The server encountered an error whilst exporting data.');
             error.hideStack.should.be.false();
@@ -472,7 +472,7 @@ Line 2 - Help`);
         it('DataImportError', function () {
             const error = new errors.DataImportError();
             error.statusCode.should.eql(500);
-            error.level.should.eql('normal'),
+            error.level.should.eql('normal');
             error.errorType.should.eql('DataImportError');
             error.message.should.eql('The server encountered an error whilst importing data.');
             error.hideStack.should.be.false();
@@ -481,7 +481,7 @@ Line 2 - Help`);
         it('EmailError', function () {
             const error = new errors.EmailError();
             error.statusCode.should.eql(500);
-            error.level.should.eql('normal'),
+            error.level.should.eql('normal');
             error.errorType.should.eql('EmailError');
             error.message.should.eql('The server encountered an error whilst sending email.');
             error.hideStack.should.be.false();
@@ -490,7 +490,7 @@ Line 2 - Help`);
         it('ThemeValidationError', function () {
             const error = new errors.ThemeValidationError();
             error.statusCode.should.eql(422);
-            error.level.should.eql('normal'),
+            error.level.should.eql('normal');
             error.errorType.should.eql('ThemeValidationError');
             error.message.should.eql('The theme has a validation error.');
             error.hideStack.should.be.false();
@@ -501,7 +501,7 @@ Line 2 - Help`);
         it('DisabledFeatureError', function () {
             const error = new errors.DisabledFeatureError();
             error.statusCode.should.eql(409);
-            error.level.should.eql('normal'),
+            error.level.should.eql('normal');
             error.errorType.should.eql('DisabledFeatureError');
             error.message.should.eql('Unable to complete the request, this feature is disabled.');
             error.hideStack.should.be.false();
@@ -510,7 +510,7 @@ Line 2 - Help`);
         it('UpdateCollisionError', function () {
             const error = new errors.UpdateCollisionError();
             error.statusCode.should.eql(409);
-            error.level.should.eql('normal'),
+            error.level.should.eql('normal');
             error.errorType.should.eql('UpdateCollisionError');
             error.message.should.eql('Unable to complete the request, there was a conflict.');
             error.hideStack.should.be.false();
@@ -519,7 +519,7 @@ Line 2 - Help`);
         it('HostLimitError', function () {
             const error = new errors.HostLimitError();
             error.statusCode.should.eql(403);
-            error.level.should.eql('normal'),
+            error.level.should.eql('normal');
             error.errorType.should.eql('HostLimitError');
             error.message.should.eql('Unable to complete the request, this resource is limited.');
             error.hideStack.should.be.true();
@@ -529,7 +529,7 @@ Line 2 - Help`);
         it('HelperWarning', function () {
             const error = new errors.HelperWarning();
             error.statusCode.should.eql(400);
-            error.level.should.eql('normal'),
+            error.level.should.eql('normal');
             error.errorType.should.eql('HelperWarning');
             error.message.should.eql('A theme helper has done something unexpected.');
             error.hideStack.should.be.true();
@@ -538,7 +538,7 @@ Line 2 - Help`);
         it('PasswordResetRequiredError', function () {
             const error = new errors.PasswordResetRequiredError();
             error.statusCode.should.eql(401);
-            error.level.should.eql('normal'),
+            error.level.should.eql('normal');
             error.errorType.should.eql('PasswordResetRequiredError');
             error.message.should.eql('For security, you need to create a new password. An email has been sent to you with instructions!');
             error.hideStack.should.be.false();
@@ -547,7 +547,7 @@ Line 2 - Help`);
         it('UnhandledJobError', function () {
             const error = new errors.UnhandledJobError();
             error.statusCode.should.eql(500);
-            error.level.should.eql('critical'),
+            error.level.should.eql('critical');
             error.errorType.should.eql('UnhandledJobError');
             error.message.should.eql('Processed job threw an unhandled error');
             error.hideStack.should.be.false();
@@ -558,7 +558,7 @@ Line 2 - Help`);
         it.skip('NoContentError', function () {
             const error = new errors.NoContentError();
             error.statusCode.should.eql(204);
-            error.level.should.eql('normal'),
+            error.level.should.eql('normal');
             error.errorType.should.eql('NoContentError');
             error.message.should.eql('');
             error.hideStack.should.be.true();
@@ -567,7 +567,7 @@ Line 2 - Help`);
         it('ConflictError', function () {
             const error = new errors.ConflictError();
             error.statusCode.should.eql(409);
-            error.level.should.eql('normal'),
+            error.level.should.eql('normal');
             error.errorType.should.eql('ConflictError');
             error.message.should.eql('The server has encountered an conflict.');
             error.hideStack.should.be.false();
@@ -576,7 +576,7 @@ Line 2 - Help`);
         it('MigrationError', function () {
             const error = new errors.MigrationError();
             error.statusCode.should.eql(500);
-            error.level.should.eql('critical'),
+            error.level.should.eql('critical');
             error.errorType.should.eql('MigrationError');
             error.message.should.eql('An error has occurred applying a database migration.');
             error.hideStack.should.be.false();
