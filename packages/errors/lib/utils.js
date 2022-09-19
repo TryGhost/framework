@@ -1,7 +1,7 @@
 const omit = require('lodash/omit');
 const merge = require('lodash/merge');
 const extend = require('lodash/extend');
-const cloneError = require('utils-copy-error');
+const deepCopy = require('@stdlib/utils/copy');
 const _private = {};
 
 _private.serialize = function serialize(err) {
@@ -204,7 +204,11 @@ exports.prepareStackForUser = function prepareStackForUser(error) {
         stackbits.splice(1, 0, `${error.context}`);
     }
 
-    const errorClone = cloneError(error);
+    // @NOTE: would be a good idea to swap out the cloning implementation with native
+    //        `structuredClone` one once we use Node v17 or higher. Before making an 
+    //        upgrade make sure structuredClone does a full copy of all properties 
+    //        present on a custom error (see issue: https://github.com/ungap/structured-clone/issues/12)
+    const errorClone = deepCopy(error);
     errorClone.stack = stackbits.join('\n');
     return errorClone;
 };
