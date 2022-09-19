@@ -27,6 +27,6 @@
   "dependencies": {
     "@stdlib/utils": "^0.0.12",
     "lodash": "^4.17.21",
-    "uuid": "^8.3.2"
+    "uuid": "^9.0.0"
   }
 }
