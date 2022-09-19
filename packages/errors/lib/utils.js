@@ -195,7 +195,7 @@ exports.prepareStackForUser = function prepareStackForUser(error) {
         stackbits.splice(1, 0, `Stack Trace:`);
     }
 
-    // Add in our custom cotext and help methods
+    // Add in our custom context and help methods
     if (error.help) {
         stackbits.splice(1, 0, `${error.help}`);
     }
