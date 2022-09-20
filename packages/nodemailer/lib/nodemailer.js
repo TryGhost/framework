@@ -37,6 +37,10 @@ module.exports = function (transport, options = {}) {
             transportOptions.sendmail = true;
         }
         break;
+    case 'mailgun':
+        const mailgunTransport = require('nodemailer-mailgun-transport');
+        transportOptions = mailgunTransport(options);
+        break;
     case 'sendmail':
         transportOptions = options;
         transportOptions.sendmail = true;

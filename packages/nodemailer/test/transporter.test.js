@@ -47,6 +47,16 @@ describe('Transporter', function () {
         transporter.transporter.name.should.equal('Stub');
     });
 
+    it('can create a Mailgun transporter', function () {
+        const transporter = nodemailer('mailgun', {
+            auth: {
+                api_key: 'hello',
+                domain: 'example.com'
+            }
+        });
+        transporter.transporter.name.should.equal('Mailgun');
+    });
+
     it('should throw an error when creating an unknown transporter', function () {
         try {
             const transporter = nodemailer('unknown', {});

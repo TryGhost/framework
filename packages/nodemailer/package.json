@@ -29,6 +29,7 @@
     "@tryghost/errors": "^1.2.16",
     "nodemailer": "^6.6.3",
     "nodemailer-direct-transport": "^3.3.2",
+    "nodemailer-mailgun-transport": "^2.1.5",
     "nodemailer-stub-transport": "^1.1.0"
   }
 }
