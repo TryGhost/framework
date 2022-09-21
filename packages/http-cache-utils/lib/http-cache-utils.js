@@ -33,5 +33,5 @@ module.exports.cacheControlValues = {
     // never cache a single bit in any type of cache
     private: 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0',
     // never cache except if it's a shared cache (lack of 'private' allows to do so)
-    noCacheDynamic: 'no-cache, maxAge=0, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0'
+    noCacheDynamic: 'no-cache, max-age=0, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0'
 };
