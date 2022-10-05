@@ -117,7 +117,7 @@ describe('Webhook Mock Receiver', function () {
             assert.deepEqual(snapshotManager.assertSnapshot.args[0][1].error.constructor.name, 'AssertionError');
         });
 
-        it('waits for the request completeion before checking the request payload', async function () {
+        it('waits for the request completion before checking the request payload', async function () {
             webhookMockReceiver.mock(webhookURL);
 
             // shoot a request with a delay simulating request completion delay
