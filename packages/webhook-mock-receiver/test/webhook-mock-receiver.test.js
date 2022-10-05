@@ -102,7 +102,7 @@ describe('Webhook Mock Receiver', function () {
                 json: true
             });
 
-            await webhookMockReceiver.matchBodySnapshot();
+            webhookMockReceiver.matchBodySnapshot();
 
             assert.equal(snapshotManager.assertSnapshot.calledOnce, true);
             assert.deepEqual(snapshotManager.assertSnapshot.args[0][0], {

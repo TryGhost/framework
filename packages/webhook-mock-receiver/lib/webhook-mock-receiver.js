@@ -44,8 +44,7 @@ class WebhookMockReceiver {
         this.bodyResponse = undefined;
     }
 
-    async matchBodySnapshot(properties = {}) {
-
+    matchBodySnapshot(properties = {}) {
         const error = new AssertionError({});
         let assertion = {
             properties: properties,
@@ -55,6 +54,8 @@ class WebhookMockReceiver {
         };
 
         this.snapshotManager.assertSnapshot(this.bodyResponse, assertion);
+
+        return this;
     }
 }
 
