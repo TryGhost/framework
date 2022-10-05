@@ -1,13 +1,12 @@
 const {AssertionError} = require('assert');
-const util = require('util');
 const {URL} = require('url');
 const nock = require('nock');
-const setTimeoutPromise = util.promisify(setTimeout);
+const pWaitFor = require('p-wait-for');
 
 class WebhookMockReceiver {
     constructor({snapshotManager}) {
         this.bodyResponse;
-        this.receiver;
+        this._receiver;
         this.snapshotManager = snapshotManager;
         this.recordBodyResponse = this.recordBodyResponse.bind(this);
     }
@@ -17,6 +16,11 @@ class WebhookMockReceiver {
 
         // let the nock continue with the response
         return true;
+    }
+
+    async receivedRequest() {
+        // @NOTE: figure out a better waiting mechanism here, don't allow it to hang forever
+        await pWaitFor(() => this._receiver.isDone());
     }
 
     /**
@@ -41,10 +45,6 @@ class WebhookMockReceiver {
     }
 
     async matchBodySnapshot(properties = {}) {
-        // @TODO: figure out a better waiting mechanism here, don't allow it to hang forever
-        while (!this.receiver.isDone()) {
-            await setTimeoutPromise(10);
-        }
 
         const error = new AssertionError({});
         let assertion = {
