@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-custom-query",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/bookshelf-custom-query",
   "author": "Ghost Foundation",
   "license": "MIT",
