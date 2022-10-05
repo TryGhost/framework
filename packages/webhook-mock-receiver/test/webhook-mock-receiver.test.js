@@ -25,12 +25,20 @@ describe('Webhook Mock Receiver', function () {
 
     describe('recordBodyResponse', function () {
         it('saves the payload', function () {
-            const result = webhookMockReceiver.recordBodyResponse({foo: 'bar'});
+            webhookMockReceiver.recordRequest({foo: 'bar'}, {
+                headers: {
+                    lorem: 'ipsum'
+                }
+            });
 
-            assert.equal(result, true);
-            assert.deepEqual(webhookMockReceiver.bodyResponse, {
+            assert.deepEqual(webhookMockReceiver.body, {
                 body: {
                     foo: 'bar'
+                }
+            });
+            assert.deepEqual(webhookMockReceiver.headers, {
+                headers: {
+                    lorem: 'ipsum'
                 }
             });
         });
@@ -47,7 +55,7 @@ describe('Webhook Mock Receiver', function () {
                 json: true
             });
             
-            assert.deepEqual(webhookMockReceiver.bodyResponse, {
+            assert.deepEqual(webhookMockReceiver.body, {
                 body: {
                     avocado: 'toast'
                 }
@@ -59,14 +67,19 @@ describe('Webhook Mock Receiver', function () {
         it('resets the default state of the mock receiver', async function () {
             webhookMockReceiver.mock(webhookURL);
             await got.post(webhookURL, {
-                avocado: 'toast'
+                avocado: 'toast',
+                headers: {
+                    hey: 'ho'
+                }
             });
 
-            assert.notEqual(webhookMockReceiver.bodyResponse, undefined);
+            assert.notEqual(webhookMockReceiver.body, undefined);
+            assert.notEqual(webhookMockReceiver.headers, undefined);
 
             webhookMockReceiver.reset();
 
-            assert.equal(webhookMockReceiver.bodyResponse, undefined);
+            assert.equal(webhookMockReceiver.body, undefined);
+            assert.equal(webhookMockReceiver.headers, undefined);
         });
     });
 
@@ -140,6 +153,44 @@ describe('Webhook Mock Receiver', function () {
                     avocado: 'toast'
                 }
             });
+        });
+    });
+
+    describe('matchHeaderSnapshot', function () {
+        it('checks the request payload', async function () {
+            webhookMockReceiver.mock(webhookURL);
+            await got.post(webhookURL, {
+                headers: {
+                    foo: 'bar'
+                }
+            });
+
+            await webhookMockReceiver.matchHeaderSnapshot();
+
+            assert.equal(snapshotManager.assertSnapshot.calledOnce, true);
+            assert.deepEqual(snapshotManager.assertSnapshot.args[0][0], {
+                headers: {
+                    'accept-encoding': 'gzip, deflate',
+                    foo: 'bar',
+                    'user-agent': 'got/9.6.0 (https://github.com/sindresorhus/got)'
+                }
+            });
+
+            assert.deepEqual(snapshotManager.assertSnapshot.args[0][1].field, 'headers');
+            assert.deepEqual(snapshotManager.assertSnapshot.args[0][1].type, 'header');
+            assert.deepEqual(snapshotManager.assertSnapshot.args[0][1].properties, {});
+            assert.deepEqual(snapshotManager.assertSnapshot.args[0][1].error.constructor.name, 'AssertionError');
+        });
+    });
+
+    describe('chainable interface', function () {
+        it('chains body and header snapshot matching assertions', async function () {
+            webhookMockReceiver.mock(webhookURL);
+            await got.post(webhookURL);
+
+            webhookMockReceiver
+                .matchHeaderSnapshot()
+                .matchBodySnapshot();
         });
     });
 });

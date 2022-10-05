@@ -5,17 +5,16 @@ const pWaitFor = require('p-wait-for');
 
 class WebhookMockReceiver {
     constructor({snapshotManager}) {
-        this.bodyResponse;
+        this.body;
+        this.headers;
         this._receiver;
         this.snapshotManager = snapshotManager;
-        this.recordBodyResponse = this.recordBodyResponse.bind(this);
+        this.recordRequest = this.recordRequest.bind(this);
     }
 
-    recordBodyResponse(body) {
-        this.bodyResponse = {body};
-
-        // let the nock continue with the response
-        return true;
+    recordRequest(body, options) {
+        this.body = {body};
+        this.headers = {headers: options.headers};
     }
 
     async receivedRequest() {
@@ -30,9 +29,14 @@ class WebhookMockReceiver {
      */
     mock(url) {
         const parsedURL = new URL(url);
+        const recordRequest = this.recordRequest;
 
-        this.receiver = nock(parsedURL.origin)
-            .post(parsedURL.pathname, this.recordBodyResponse)
+        this._receiver = nock(parsedURL.origin)
+            .post(parsedURL.pathname, function (body) {
+                recordRequest(body, this);
+                // let the nock continue with the response
+                return true;
+            })
             .reply(200, {status: 'OK'});
 
         return this;
@@ -40,8 +44,9 @@ class WebhookMockReceiver {
 
     reset() {
         nock.cleanAll();
-        this.receiver = undefined;
-        this.bodyResponse = undefined;
+        this._receiver = undefined;
+        this.body = undefined;
+        this.headers = undefined;
     }
 
     matchBodySnapshot(properties = {}) {
@@ -53,8 +58,22 @@ class WebhookMockReceiver {
             error
         };
 
-        this.snapshotManager.assertSnapshot(this.bodyResponse, assertion);
+        this.snapshotManager.assertSnapshot(this.body, assertion);
 
+        return this;
+    }
+
+    matchHeaderSnapshot(properties = {}) {
+        const error = new AssertionError({});
+        let assertion = {
+            properties: properties,
+            field: 'headers',
+            type: 'header',
+            error
+        };
+
+        this.snapshotManager.assertSnapshot(this.headers, assertion);
+        
         return this;
     }
 }
