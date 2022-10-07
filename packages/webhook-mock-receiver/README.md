@@ -1,11 +1,6 @@
 # Webhook Mock Receiver
 
-Webhook request testing.
-
-It's a bare minimum implementation to be able to check webhook request payload. Few things that need to be done in the future:
-- cleaner module API
-- header snapshot recording/testing
-- better request resolution waiting mechanism (see @TODO list)
+Up to date documentation about the usage of the module available in [End-to-end Testing Codex](https://ghost.notion.site/End-to-end-Testing-6a2ef073b1754b18aff42e24a632a007#827471b6314640758460b9c1e22b34c4).
 
 ## Install
 
