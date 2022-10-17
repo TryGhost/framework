@@ -3,21 +3,23 @@
  * https://github.com/tgriesser/knex/issues/1641
  */
 module.exports = function (bookshelf) {
-    const orig1 = bookshelf.transaction;
+    const originalTransaction = bookshelf.transaction;
 
     bookshelf.transaction = function (cb) {
-        return orig1.bind(bookshelf)(function (t) {
-            const orig2 = t.commit;
-            const orig3 = t.rollback;
+        return originalTransaction.bind(bookshelf)(function (t) {
+            const originalCommit = t.commit;
+            const originalRollback = t.rollback;
 
-            t.commit = function () {
+            t.commit = async function () {
+                const originalReturn = await originalCommit.apply(t, arguments);
                 t.emit('committed', true);
-                return orig2.apply(t, arguments);
+                return originalReturn;
             };
 
-            t.rollback = function () {
+            t.rollback = async function () {
+                const originalReturn = await originalRollback.apply(t, arguments);
                 t.emit('committed', false);
-                return orig3.apply(t, arguments);
+                return originalReturn;
             };
 
             return cb(t);
