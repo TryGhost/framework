@@ -1,6 +1,6 @@
 module.exports = class DatabaseInfo {
     /**
-     * @param {import('knex')} knex
+     * @param {import('knex').Knex} knex
      */
     constructor(knex) {
         this._knex = knex;
@@ -85,7 +85,7 @@ module.exports = class DatabaseInfo {
     /**
      * Returns if the driver used is for SQLite
      *
-     * @param {import('knex')} knex
+     * @param {import('knex').Knex} knex
      */
     static isSQLite(knex) {
         const driver = knex.client.config.client;
@@ -104,7 +104,7 @@ module.exports = class DatabaseInfo {
     /**
      * Returns if the driver used is for MySQL
      *
-     * @param {import('knex')} knex
+     * @param {import('knex').Knex} knex
      */
     static isMySQL(knex) {
         const driver = knex.client.config.client;
