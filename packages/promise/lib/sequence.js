@@ -1,5 +1,3 @@
-const Promise = require('bluebird');
-
 /**
  * expects an array of functions returning a promise
  */

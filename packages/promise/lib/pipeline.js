@@ -4,7 +4,6 @@
  * Based on pipeline.js from when.js:
  * https://github.com/cujojs/when/blob/3.7.4/pipeline.js
  */
-const Promise = require('bluebird');
 
 function pipeline(tasks /* initial arguments */) {
     const args = Array.prototype.slice.call(arguments, 1);

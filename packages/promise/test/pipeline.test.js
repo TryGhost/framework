@@ -1,6 +1,5 @@
 require('./utils');
 const sinon = require('sinon');
-const Promise = require('bluebird');
 
 // Stuff we are testing
 const {pipeline} = require('../');

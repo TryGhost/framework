@@ -1,6 +1,5 @@
 require('./utils');
 const sinon = require('sinon');
-const Promise = require('bluebird');
 const {sequence} = require('../');
 
 describe('Unit: lib/promise/sequence', function () {
