@@ -21,7 +21,7 @@ function pipeline(tasks /* initial arguments */) {
     // Resolve any promises for the arguments passed in first
     return Promise.all(args).then(function (args) {
         // Iterate through the tasks passing args from one into the next
-        return Promise.reduce(tasks, function (arg, task) {
+        return tasks.reduce(function (arg, task) {
             return runTask(task, arg);
         }, args);
     });
