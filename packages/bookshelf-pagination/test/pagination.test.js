@@ -180,7 +180,8 @@ describe('pagination', function () {
             mockQuery = {
                 clone: sinon.stub(),
                 select: sinon.stub(),
-                toQuery: sinon.stub()
+                toQuery: sinon.stub(),
+                clear: sinon.stub()
             };
             mockQuery.clone.returns(mockQuery);
             mockQuery.select.returns(Promise.resolve([{aggregate: 1}]));
