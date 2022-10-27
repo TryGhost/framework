@@ -189,6 +189,7 @@ const pagination = function pagination(bookshelf) {
                     countQuery.transacting(options.transacting);
                 }
 
+                countQuery.clear('select');
                 countPromise = countQuery.select(
                     bookshelf.knex.raw('count(distinct ' + tableName + '.' + idAttribute + ') as aggregate')
                 );
