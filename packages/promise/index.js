@@ -5,5 +5,9 @@ module.exports = {
 
     get sequence() {
         return require('./lib/sequence');
+    },
+
+    get pool() {
+        return require('./lib/pool');
     }
 };
