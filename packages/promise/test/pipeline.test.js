@@ -1,6 +1,5 @@
 require('./utils');
 const sinon = require('sinon');
-const Promise = require('bluebird');
 
 // Stuff we are testing
 const {pipeline} = require('../');
@@ -48,9 +47,8 @@ describe('Pipeline', function () {
     it('should allow initial args to be promises', function () {
         const expected = [1, 2, 3];
         const tasks = [sinon.spy()];
-        const Resolver = Promise.resolve;
 
-        return pipeline(tasks, new Resolver(1), new Resolver(2), new Resolver(3)).then(function () {
+        return pipeline(tasks, Promise.resolve(1), Promise.resolve(2), Promise.resolve(3)).then(function () {
             tasks[0].calledOnce.should.be.true();
             tasks[0].firstCall.args.should.eql(expected);
         });
@@ -60,9 +58,9 @@ describe('Pipeline', function () {
         const expected = [1, 2, 3];
 
         const tasks = [
-            sinon.stub().returns(new Promise.resolve(4)),
-            sinon.stub().returns(new Promise.resolve(5)),
-            sinon.stub().returns(new Promise.resolve(6))
+            sinon.stub().returns(Promise.resolve(4)),
+            sinon.stub().returns(Promise.resolve(5)),
+            sinon.stub().returns(Promise.resolve(6))
         ];
 
         return pipeline(tasks, 1, 2, 3).then(function (result) {
@@ -80,14 +78,12 @@ describe('Pipeline', function () {
         const expected = [1, 2, 3];
 
         const tasks = [
-            sinon.stub().returns(new Promise.resolve(4)),
-            sinon.stub().returns(new Promise.resolve(5)),
-            sinon.stub().returns(new Promise.resolve(6))
+            sinon.stub().returns(Promise.resolve(4)),
+            sinon.stub().returns(Promise.resolve(5)),
+            sinon.stub().returns(Promise.resolve(6))
         ];
 
-        const Resolver = Promise.resolve;
-
-        return pipeline(tasks, new Resolver(1), new Resolver(2), new Resolver(3)).then(function (result) {
+        return pipeline(tasks, Promise.resolve(1), Promise.resolve(2), Promise.resolve(3)).then(function (result) {
             result.should.eql(6);
             tasks[0].calledOnce.should.be.true();
             tasks[0].firstCall.args.should.eql(expected);

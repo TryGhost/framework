@@ -1,26 +1,21 @@
-const Promise = require('bluebird');
+/**
+ * @callback Task
+ * @param {...any} args
+ * @returns {Promise}
+ */
 
 /**
- * expects an array of functions returning a promise
+ * Executes a series of asyncronous tasks in sequence
+ * @param {Task[]} tasks Set of tasks to complete in sequence
+ * @param {...any} args Arguments for the task
+ * @returns {any[]} Set of results for each task, in same order as input
  */
-function sequence(tasks /* Any Arguments */) {
-    const args = Array.prototype.slice.call(arguments, 1);
-
-    return Promise.reduce(tasks, function (results, task) {
-        const response = task.apply(this, args);
-
-        if (response && response.then) {
-            return response.then(function (result) {
-                results.push(result);
-                return results;
-            });
-        } else {
-            return Promise.resolve().then(() => {
-                results.push(response);
-                return results;
-            });
-        }
-    }, []);
+async function sequence(tasks, ...args) {
+    const results = [];
+    for (const task of tasks) {
+        results.push(await task.apply(this, args));
+    }
+    return results;
 }
 
 module.exports = sequence;
