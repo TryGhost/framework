@@ -8,6 +8,7 @@
  * Execute a series of async functions, passing the results of each to the next
  * @param {Task[]} tasks Set of tasks to complete in sequence
  * @param {...any} args Arguments for the first task, can be promises which will be resolved
+ * @returns {Promise}
  */
 async function pipeline(tasks, ...args) {
     let results = await Promise.all(args);

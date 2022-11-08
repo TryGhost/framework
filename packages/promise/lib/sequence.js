@@ -8,7 +8,7 @@
  * Executes a series of asyncronous tasks in sequence
  * @param {Task[]} tasks Set of tasks to complete in sequence
  * @param {...any} args Arguments for the task
- * @returns {any[]} Set of results for each task, in same order as input
+ * @returns {Promise<any[]>} Set of results for each task, in same order as input
  */
 async function sequence(tasks, ...args) {
     const results = [];
