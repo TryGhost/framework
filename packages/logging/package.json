@@ -33,7 +33,7 @@
     "@tryghost/root-utils": "^0.3.17",
     "bunyan": "^1.8.15",
     "bunyan-loggly": "^1.4.2",
-    "fs-extra": "^10.0.0",
+    "fs-extra": "^11.0.0",
     "gelf-stream": "^1.1.1",
     "json-stringify-safe": "^5.0.1",
     "lodash": "^4.17.21"
