@@ -35,9 +35,7 @@ module.exports = async (zipToExtract, destination, options) => {
 
     // Filter all __MACOSX folders and .DS_Store files
     for (const entry of zip.getEntries()) {
-        if (entry.name === '__MACOSX' && entry.isDirectory) {
-            zip.deleteFile(entry);
-        } else if (entry.name === '.DS_Store' && !entry.isDirectory) {
+        if (entry.name === '.DS_Store' && !entry.isDirectory) {
             zip.deleteFile(entry);
         }
     }
