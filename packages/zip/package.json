@@ -26,6 +26,7 @@
     "sinon": "14.0.1"
   },
   "dependencies": {
+    "adm-zip": "^0.5.9",
     "archiver": "^5.0.0",
     "bluebird": "^3.7.2",
     "extract-zip": "^2.0.1",
