@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/pretty-stream",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/pretty-stream",
   "author": "Ghost Foundation",
   "license": "MIT",
