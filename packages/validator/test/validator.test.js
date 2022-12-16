@@ -42,6 +42,10 @@ describe('Validator', function () {
         it('custom isEmail validator detects incorrect emails', function () {
             validator.isEmail('member@example.com').should.be.true();
             validator.isEmail('member@example.com', {latest: true}).should.be.true();
+
+            validator.isEmail('member@example').should.be.false();
+            validator.isEmail('member@example', {latest: true}).should.be.false();
+
             // old email validator doesn't detect this as invalid
             validator.isEmail('member@example.com�').should.be.true();
             // new email validator detects this as invalid
