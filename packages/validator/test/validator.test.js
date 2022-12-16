@@ -38,5 +38,18 @@ describe('Validator', function () {
             validator.isEmptyOrURL('http://example.com/foo?somequery=bar').should.be.true();
             validator.isEmptyOrURL('example.com/test/').should.be.true();
         });
+
+        it('custom isEmail validator detects incorrect emails', function () {
+            validator.isEmail('member@example.com').should.be.true();
+            validator.isEmail('member@example.com', {legacy: false}).should.be.true();
+
+            validator.isEmail('member@example').should.be.false();
+            validator.isEmail('member@example', {legacy: false}).should.be.false();
+
+            // old email validator doesn't detect this as invalid
+            validator.isEmail('member@example.com�').should.be.true();
+            // new email validator detects this as invalid
+            validator.isEmail('member@example.com�', {legacy: false}).should.be.false();
+        });
     });
 });
