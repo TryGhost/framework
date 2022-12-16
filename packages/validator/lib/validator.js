@@ -4,6 +4,8 @@ const baseValidator = require('validator');
 const moment = require('moment-timezone');
 const assert = require('assert');
 
+const isEmailCustom = require('./isEmail');
+
 const allowedValidators = [
     'isLength',
     'isEmpty',
@@ -43,6 +45,16 @@ validators.isEmptyOrURL = function isEmptyOrURL(str) {
 validators.isSlug = function isSlug(str) {
     assertString(str);
     return validators.matches(str, /^[a-z0-9\-_]+$/);
+};
+
+validators.isEmail = function isEmail(str, options = {}) {
+    assertString(str);
+    // Use the latest email validator if the option is set
+    if (options?.latest) {
+        return isEmailCustom(str);
+    }
+    // Otherwise use the validator from the validator package
+    return baseValidator.isEmail(str);
 };
 
 module.exports = validators;
