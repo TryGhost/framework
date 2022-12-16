@@ -47,13 +47,13 @@ validators.isSlug = function isSlug(str) {
     return validators.matches(str, /^[a-z0-9\-_]+$/);
 };
 
-validators.isEmail = function isEmail(str, options = {}) {
+validators.isEmail = function isEmail(str, options = {legacy: true}) {
     assertString(str);
-    // Use the latest email validator if the option is set
-    if (options?.latest) {
+    // Use the latest email validator if legacy is set to false
+    if (!options?.legacy) {
         return isEmailCustom(str);
     }
-    // Otherwise use the validator from the validator package
+    // Otherwise use the legacy email validator from the validator package
     return baseValidator.isEmail(str);
 };
 
