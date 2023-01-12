@@ -86,15 +86,17 @@ class SnapshotManager {
         const hint = `[${field}]`;
         const match = this.match(response[field], properties, hint);
 
-        Object.keys(properties).forEach((prop) => {
-            const errorMessage = `"response.${field}" is missing the expected property "${prop}"`;
-            error.message = makeMessageFromMatchMessage(match.message(), errorMessage);
-            error.expected = prop;
-            error.actual = 'undefined';
-            error.showDiff = false; // Disable mocha's diff output as it's already present in match.message()
+        if (properties) {
+            Object.keys(properties).forEach((prop) => {
+                const errorMessage = `"response.${field}" is missing the expected property "${prop}"`;
+                error.message = makeMessageFromMatchMessage(match.message(), errorMessage);
+                error.expected = prop;
+                error.actual = 'undefined';
+                error.showDiff = false; // Disable mocha's diff output as it's already present in match.message()
 
-            assert.notEqual(response[field][prop], undefined, error);
-        });
+                assert.notEqual(response[field][prop], undefined, error);
+            });
+        }
 
         if (match.pass !== true) {
             const errorMessage = `"response.${field}" does not match snapshot.`;
@@ -119,7 +121,12 @@ class SnapshotManager {
         });
 
         // Execute the matcher
-        const result = matcher(received, properties, hint);
+        let result;
+        if (properties) {
+            result = matcher(received, properties, hint);
+        } else {
+            result = matcher(received, hint);
+        }
 
         // Store the state of snapshot, depending on updateSnapshot value
         snapshotState.save();
