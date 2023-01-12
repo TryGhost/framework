@@ -85,6 +85,17 @@ describe('Logging', function () {
         ghostLogger.error({err: new errors.NotFoundError(), test: 2}, 'Got an error from 3rd party service X!');
     });
 
+    it('ensure stdout write metadata properties', function (done) {
+        sandbox.stub(PrettyStream.prototype, 'write').callsFake(function (data) {
+            data.version.should.eql(2);
+            data.msg.should.eql('Message to be logged!');
+            done();
+        });
+
+        var ghostLogger = new GhostLogger({metadata: {version: 2}});
+        ghostLogger.info('Message to be logged!');
+    });
+
     it('ensure stdout write properties with util.format', function (done) {
         sandbox.stub(PrettyStream.prototype, 'write').callsFake(function (data) {
             should.exist(data);
@@ -342,6 +353,31 @@ describe('Logging', function () {
 
         const stream = es.getStream();
         stream.write.should.instanceOf(Function);
+    });
+
+    it('elasticsearch should receive a single object', async function () {
+        sandbox.stub(ElasticSearch.prototype, 'getStream').returns({
+            write: function (jsonData) {
+                arguments.length.should.eql(1);
+                const data = JSON.parse(jsonData);
+                data.msg.should.eql('hello 1');
+                data.prop.should.eql('prop val');
+            }
+        });
+
+        var ghostLogger = new GhostLogger({
+            transports: ['elasticsearch'],
+            elasticsearch: {
+                index: 'ghost-index',
+                username: 'example',
+                password: 'password',
+                host: 'elastic-search-host'
+            }
+        });
+
+        await ghostLogger.info({
+            prop: 'prop val'
+        }, 'hello', 1);
     });
 
     it('http writes a log message', function (done) {

@@ -31,6 +31,7 @@ class GhostLogger {
      * gelf:            Gelf transport configuration.
      * http:            HTTP transport configuration
      * useLocalTime:    Use local time instead of UTC.
+     * metadata:        Optional set of metadata to attach to each log line
      * @param {object} options Bag of options
      */
     constructor(options) {
@@ -49,6 +50,7 @@ class GhostLogger {
         this.gelf = options.gelf || {};
         this.http = options.http || {};
         this.useLocalTime = options.useLocalTime || false;
+        this.metadata = options.metadata || {};
 
         // CASE: stdout has to be on the first position in the transport,  because if the GhostLogger itself logs, you won't see the stdout print
         if (this.transports.indexOf('stdout') !== -1 && this.transports.indexOf('stdout') !== 0) {
@@ -486,6 +488,12 @@ class GhostLogger {
         let modifiedMessages = [];
         let modifiedObject = {};
         let modifiedArguments = [];
+
+        if (this.metadata) {
+            for (const key in this.metadata) {
+                modifiedObject[key] = this.metadata[key];
+            }
+        }
 
         each(args, function (value) {
             if (value instanceof Error) {
