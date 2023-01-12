@@ -11,7 +11,9 @@ describe('Email mock receiver', function () {
         snapshotManager = {
             assertSnapshot: sinon.spy()
         };
+    });
 
+    beforeEach(function () {
         emailMockReceiver = new EmailMockReceiver({snapshotManager});
     });
 
@@ -46,6 +48,23 @@ describe('Email mock receiver', function () {
             assert.equal(snapshotManager.assertSnapshot.calledOnce, true);
             assert.deepEqual(snapshotManager.assertSnapshot.args[0][0], {
                 html: '<div>test 1</div>'
+            });
+        });
+    });
+
+    describe('matchMetadataSnapshot', function (){
+        it('Can match primitive metadata snapshot ignoring html property', function () {
+            emailMockReceiver.send({
+                subject: 'test',
+                to: 'test@example.com',
+                html: '<div>do not include me</div>'
+            });
+            emailMockReceiver.matchMetadataSnapshot();
+
+            assert.equal(snapshotManager.assertSnapshot.calledOnce, true);
+            assert.deepEqual(snapshotManager.assertSnapshot.args[0][0].metadata, {
+                subject: 'test',
+                to: 'test@example.com'
             });
         });
     });

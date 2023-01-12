@@ -21,20 +21,13 @@ class EmailMockReceiver {
      * @param {string} [message.from] - sender email address
      * @param {string} [message.text] - text version of this message
      */
-    async send({subject, html, to, replyTo, from, text}) {
+    async send(message) {
         if (this.#snapshot) {
             return this.#sendResponse;
         }
 
         // store snapshot
-        this.#snapshot = {
-            subject,
-            html,
-            to,
-            from,
-            replyTo,
-            text
-        };
+        this.#snapshot = message;
 
         return this.#sendResponse;
     }
@@ -49,6 +42,24 @@ class EmailMockReceiver {
 
         this.#snapshotManager.assertSnapshot({
             html: this.#snapshot.html
+        }, assertion);
+
+        return this;
+    }
+
+    matchMetadataSnapshot(properties = {}) {
+        const error = new AssertionError({});
+        let assertion = {
+            properties: properties,
+            field: 'metadata',
+            error
+        };
+
+        const metadata = Object.assign({}, this.#snapshot);
+        delete metadata.html;
+
+        this.#snapshotManager.assertSnapshot({
+            metadata
         }, assertion);
 
         return this;
