@@ -23,7 +23,8 @@
     "express": "4.18.2",
     "express-session": "1.17.3",
     "mocha": "10.2.0",
-    "sinon": "15.0.1"
+    "sinon": "15.0.1",
+    "form-data": "^4.0.0"
   },
   "dependencies": {
     "@tryghost/jest-snapshot": "^0.4.8",
