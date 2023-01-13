@@ -83,7 +83,7 @@ class SnapshotManager {
             assert.notEqual(response[field], undefined, error);
         }
 
-        const hint = `[${field}]`;
+        const hint = assertion.hint || `[${field}]`;
         const match = this.match(response[field], properties, hint);
 
         if (properties) {

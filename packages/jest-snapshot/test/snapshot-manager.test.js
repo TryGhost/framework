@@ -139,7 +139,7 @@ describe('Snapshot Manager', function () {
             error.contextString = 'foo';
 
             const response = {body: {foo: 'bar'}};
-            const assertion = {properties: {foo: 'bar'}, field: 'body', error};
+            const assertion = {properties: {foo: 'bar'}, field: 'body', hint: '[custom hint]', error};
 
             const assertFn = () => {
                 snapshotManager.assertSnapshot(response, assertion);
@@ -147,9 +147,9 @@ describe('Snapshot Manager', function () {
 
             assert.doesNotThrow(assertFn);
 
-            // Assert side effects, check that hinting works as expected
+            // Assert side effects, check that custom hinting works as expected
             sinon.assert.calledOnce(matchStub);
-            sinon.assert.calledOnceWithExactly(matchStub, response.body, {foo: 'bar'}, '[body]');
+            sinon.assert.calledOnceWithExactly(matchStub, response.body, {foo: 'bar'}, '[custom hint]');
         });
 
         it('not ok when match is not a pass', function () {
