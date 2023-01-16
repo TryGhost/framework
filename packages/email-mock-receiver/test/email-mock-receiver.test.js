@@ -68,4 +68,25 @@ describe('Email mock receiver', function () {
             });
         });
     });
+
+    describe('sentEmailCount', function () {
+        it('Can assert email count', function () {
+            emailMockReceiver.send({html: '<div>test</div>'});
+            emailMockReceiver.sentEmailCount(1);
+        });
+
+        it('Can assert email count with multiple send requests are executed', function () {
+            emailMockReceiver.send({html: '<div>test 1</div>'});
+            emailMockReceiver.send({html: '<div>test 2</div>'});
+            emailMockReceiver.sentEmailCount(2);
+        });
+
+        it('Can reset email count', function () {
+            emailMockReceiver.send({html: '<div>test 1</div>'});
+            emailMockReceiver.sentEmailCount(1);
+
+            emailMockReceiver.reset();
+            emailMockReceiver.sentEmailCount(0);
+        });
+    });
 });
