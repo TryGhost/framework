@@ -1,5 +1,68 @@
 const {assert, sinon, stubCookies} = require('./utils');
 const {Request, RequestOptions} = require('../lib/request');
+const FormData = require('form-data');
+const Stream = require('stream');
+
+const streamToBuffer = async function (stream) {
+    return new Promise((resolve, reject) => {
+        const data = [];
+        const onData = (chunk) => {
+            data.push(chunk);
+        };
+
+        stream.pause(); // just to test the pause method
+
+        stream.on('data', onData);
+
+        stream.on('end', () => {
+            stream.removeListener('data', onData); // to test the removeListener method
+            resolve(Buffer.concat(data));
+        });
+
+        stream.on('error', (err) => {
+            reject(err);
+        });
+
+        stream.read(); // just to test the read method
+    });
+};
+
+/**
+ * We need this to test the pipe method
+ */
+const createAwaitableStream = function () {
+    const ws = new Stream();
+    ws.writable = true;
+    ws.data = [];
+    ws.promise = new Promise((resolve) => {
+        if (!ws.writable) {
+            resolve(Buffer.concat(ws.data));
+            return;
+        }
+        ws.resolve = resolve;
+    });
+
+    ws.write = function (buf) {
+        ws.data.push(buf);
+    };
+
+    ws.end = function (buf) {
+        if (arguments.length) {
+            ws.write(buf);
+        }
+        ws.writable = false;
+
+        if (ws.resolve) {
+            ws.resolve(Buffer.concat(ws.data));
+        }
+    };
+
+    ws.then = function (resolve, reject) {
+        return ws.promise.then(resolve, reject);
+    };
+
+    return ws;
+};
 
 describe('Request', function () {
     afterEach(function () {
@@ -206,6 +269,63 @@ describe('Request', function () {
             request.body(body);
 
             assert.equal(request.reqOptions.body, body);
+        });
+
+        it('body() sets body correctly with FormData', async function () {
+            const fn = () => {};
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new Request(fn, jar, opts);
+
+            const formData = new FormData();
+            formData.append('foo', 'bar');
+
+            request.body(formData);
+
+            assert.equal(request.reqOptions.body, undefined);
+            const {req} = request._getReqRes();
+            const requestBody = (await streamToBuffer(req)).toString('utf8');
+            assert.match(requestBody, /Content-Disposition: form-data; name="foo"\r\n\r\nbar/);
+            assert.equal(req.headers['content-length'], requestBody.length);
+            assert.equal(req.headers['content-type'], 'multipart/form-data; boundary=' + formData.getBoundary());
+        });
+
+        it('body() sets body correctly with string', async function () {
+            const fn = () => {};
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new Request(fn, jar, opts);
+
+            const stringData = 'hello-world';
+            request.body(stringData);
+
+            assert.equal(request.reqOptions.body, undefined);
+            const {req} = request._getReqRes();
+            const requestBody = (await streamToBuffer(req)).toString('utf8');
+            assert.equal(requestBody, stringData);
+            assert.equal(req.headers['content-length'], stringData.length);
+        });
+
+        it('body() stream can pipe to writeable stream', async function () {
+            const fn = () => {};
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new Request(fn, jar, opts);
+
+            const stringData = 'hello-world';
+            request.body(stringData);
+
+            assert.equal(request.reqOptions.body, undefined);
+            const {req} = request._getReqRes();
+
+            const writeableStream = createAwaitableStream();
+            req.pipe(writeableStream);
+
+            const requestBody = (await writeableStream).toString('utf8');
+            assert.equal(requestBody, stringData);
+            assert.equal(req.headers['content-length'], stringData.length);
+
+            req.unpipe(writeableStream);
         });
 
         it('header() sets body correctly', function () {

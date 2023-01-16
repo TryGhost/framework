@@ -82,6 +82,9 @@ class Request {
             readable: readableStream.readable,
             pause: () => {
                 readableStream.pause();
+            },
+            read: () => {
+                readableStream.read();
             }
         };
         return this;
