@@ -5,6 +5,7 @@ module.exports = require('./lib/agent');
 module.exports.snapshot = {
     mochaHooks: require('@tryghost/jest-snapshot').mochaHooks,
     snapshotManager: require('@tryghost/jest-snapshot').snapshotManager,
+    matchSnapshotAssertion: require('@tryghost/jest-snapshot').matchSnapshotAssertion,
     any: require('@tryghost/jest-snapshot').any,
     stringMatching: require('@tryghost/jest-snapshot').stringMatching
 };
