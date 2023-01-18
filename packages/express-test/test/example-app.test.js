@@ -3,7 +3,7 @@ const {assert} = require('./utils');
 const Agent = require('../'); // we require the root file
 const app = require('../example/app');
 const {any} = require('@tryghost/jest-snapshot');
-const {promises: fs} = require('fs');
+const {promises: fs, createReadStream} = require('node:fs');
 const FormData = require('form-data');
 let agent;
 
@@ -361,9 +361,8 @@ describe('Example App', function () {
         });
 
         it('can stream body', async function () {
-            const fd = await fs.open(__dirname + '/fixtures/long-json-body.json', 'r');
-            const stat = await fd.stat();
-            const stream = fd.createReadStream();
+            const stat = await fs.stat(__dirname + '/fixtures/long-json-body.json');
+            const stream = createReadStream(__dirname + '/fixtures/long-json-body.json');
 
             const {body} = await agent
                 .post('/api/ping/')
