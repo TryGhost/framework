@@ -79,12 +79,14 @@ class Request {
             removeListener: (event, listener) => {
                 readableStream.removeListener(event, listener);
             },
-            readable: readableStream.readable,
+            get readable() {
+                return readableStream.readable;
+            },
             pause: () => {
                 readableStream.pause();
             },
             read: () => {
-                readableStream.read();
+                readableStream.read(...arguments);
             }
         };
         return this;
@@ -129,7 +131,12 @@ class Request {
         const {req, res} = reqresnext({...reqOptions, app}, {app});
 
         if (this.reqOptions.methodOverrides) {
-            Object.assign(req, this.reqOptions.methodOverrides);
+            // Copies all properties from original to copy, including getters and setters
+            const props = Object.keys(this.reqOptions.methodOverrides);
+            for (const prop of props) {
+                const descriptor = Object.getOwnPropertyDescriptor(this.reqOptions.methodOverrides, prop);
+                Object.defineProperty(req, prop, descriptor);
+            }
         }
 
         return {req, res};

@@ -3,7 +3,8 @@ const {assert} = require('./utils');
 const Agent = require('../'); // we require the root file
 const app = require('../example/app');
 const {any} = require('@tryghost/jest-snapshot');
-
+const {promises: fs} = require('fs');
+const FormData = require('form-data');
 let agent;
 
 /**
@@ -312,6 +313,67 @@ describe('Example App', function () {
                 .matchBodySnapshot({
                     id: any(String)
                 });
+        });
+
+        it('can send the body as a string', async function () {
+            const data = {foo: 'bar', nested: {foo: 'bar'}};
+            await agent
+                .post('/api/ping/')
+                .body(JSON.stringify(data))
+                .header('content-type', 'application/json')
+                .expectStatus(200)
+                .expect(({body}) => {
+                    assert.deepEqual(body, data);
+                });
+        });
+
+        it('can upload a file', async function () {
+            const fileContents = await fs.readFile(__dirname + '/fixtures/ghost-favicon.png');
+            const filename = 'test.png';
+            const contentType = 'image/png';
+
+            const form = new FormData();
+            form.append('image', fileContents, {
+                filename,
+                contentType
+            });
+
+            const {body} = await agent
+                .post('/api/upload/')
+                .body(form)
+                .expectStatus(200);
+
+            assert.equal(body.originalname, filename);
+            assert.equal(body.mimetype, contentType);
+            assert.equal(body.size, fileContents.length);
+            assert.equal(body.fieldname, 'image');
+
+            // Do a real comparison in the uploaded file to check if it was uploaded and saved correctly
+            const uploadedFileContents = await fs.readFile(body.path);
+            assert.deepEqual(uploadedFileContents, fileContents);
+
+            // Delete the file
+            try {
+                await fs.unlink(body.path);
+            } catch (e) {
+                // ignore if this fails
+            }
+        });
+
+        it('can stream body', async function () {
+            const fd = await fs.open(__dirname + '/fixtures/long-json-body.json', 'r');
+            const stat = await fd.stat();
+            const stream = fd.createReadStream();
+
+            const {body} = await agent
+                .post('/api/ping/')
+                .header('content-type', 'application/json')
+                .header('content-length', stat.size) // the Express json middleware requires content-length to work
+                .stream(stream)
+                .expectStatus(200);
+
+            const fileContents = await fs.readFile(__dirname + '/fixtures/long-json-body.json', 'utf8');
+            assert.equal(JSON.stringify(body) + '\n', fileContents);
         });
     });
 });
