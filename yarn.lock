@@ -4493,10 +4493,10 @@ keyv@^3.0.0:
   dependencies:
     json-buffer "3.0.0"
 
-knex@2.3.0:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/knex/-/knex-2.3.0.tgz#87fa2a9553d7cafb125d7a0645256fbe29ef5967"
-  integrity sha512-WMizPaq9wRMkfnwKXKXgBZeZFOSHGdtoSz5SaLAVNs3WRDfawt9O89T4XyH52PETxjV8/kRk0Yf+8WBEP/zbYw==
+knex@2.4.1:
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/knex/-/knex-2.4.1.tgz#eff21a905e102a306a9c43ea11d984b0f54c4583"
+  integrity sha512-5wylehvnTOE8EdypPFakccA1zgo6Lp+TNultncvBUCUD0PasY+PLVa9qPrTFCioxPSPVha1u9ye2niAVVbLM0Q==
   dependencies:
     colorette "2.0.19"
     commander "^9.1.0"
