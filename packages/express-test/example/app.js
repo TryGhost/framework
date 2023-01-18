@@ -3,6 +3,9 @@ const session = require('express-session');
 
 const path = require('path');
 const fs = require('fs').promises;
+const os = require('os');
+const multer = require('multer');
+const upload = multer({dest: os.tmpdir()});
 
 const readJSONFile = async function (name) {
     const data = await fs.readFile(path.join(__dirname, `${name}.json`), {encoding: 'utf8'});
@@ -63,6 +66,14 @@ app.get('/api/foo/', isLoggedIn, async (req, res) => {
     const data = await readJSONFile('data');
 
     return res.json(data);
+});
+
+app.post('/api/ping/', async (req, res) => {
+    return res.json(req.body);
+});
+
+app.post('/api/upload/', upload.single('image'), async (req, res) => {
+    return res.json(req.file);
 });
 
 module.exports = app;

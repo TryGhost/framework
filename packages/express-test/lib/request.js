@@ -2,6 +2,7 @@ const {default: reqresnext} = require('reqresnext');
 const {CookieAccessInfo} = require('cookiejar');
 const {parse} = require('url');
 const {isJSON} = require('./utils');
+const {Readable} = require('stream');
 
 class RequestOptions {
     constructor({method, url, headers, body} = {}) {
@@ -23,8 +24,71 @@ class Request {
         this.cookieJar = cookieJar;
     }
 
+    /**
+     * @param {object|string|FormData|Buffer} body Set the request body object or FormData (for multipart/form-data)
+     * @returns
+     */
     body(body) {
+        if (body.getBuffer && typeof body.getBuffer === 'function') {
+            // body is FormData (we cannot reliably check instanceof, not working in all situations)
+            const requestBuffer = body.getBuffer();
+            const headers = body.getHeaders({
+                ...this.reqOptions.headers
+            });
+            this.reqOptions.headers = headers;
+            return this.body(requestBuffer);
+        }
+        if (typeof body === 'string') {
+            const buffer = Buffer.from(body, 'utf8');
+            return this.body(buffer);
+        }
+        if (body instanceof Buffer) {
+            this.reqOptions.headers['content-length'] = body.length;
+            return this.stream(Readable.from(body));
+        }
+
+        // Manually parsed object (e.g. JSON object)
         this.reqOptions.body = body;
+        return this;
+    }
+
+    /**
+     * Instead of setting a body object, you can also stream the request body. Use this if you want the body
+     * to be parsed by the middlewares instead of skipping that step and already setting the decoded body object.
+     * @param {stream.Readable} readableStream
+     * @returns
+     */
+    stream(readableStream) {
+        this.reqOptions.body = undefined;
+
+        // reqresnext doesn't support streaming, which we need for file uploads. So we need to add some new methods.
+        // ExpressRequest inherits from http.IncomingMessage which inherits from stream.Readable
+        // It is that stream that is eventually read by middlewares and converted as JSON, as text, as form data etc.
+        // Currently the Express middlewares (and multer for file uploads) use the pipe method and/or the event listeners, so we don't need to override other methods
+        // If we need other methods, we only need to map them to the readable stream.
+        this.reqOptions.methodOverrides = {
+            pipe: (destination) => {
+                readableStream.pipe(destination);
+            },
+            unpipe: (destination) => {
+                readableStream.unpipe(destination);
+            },
+            on: (event, listener) => {
+                readableStream.on(event, listener);
+            },
+            removeListener: (event, listener) => {
+                readableStream.removeListener(event, listener);
+            },
+            get readable() {
+                return readableStream.readable;
+            },
+            pause: () => {
+                readableStream.pause();
+            },
+            read: () => {
+                readableStream.read(...arguments);
+            }
+        };
         return this;
     }
 
@@ -64,7 +128,18 @@ class Request {
     _getReqRes() {
         const {app, reqOptions} = this;
 
-        return reqresnext(Object.assign({}, reqOptions, {app}), {app});
+        const {req, res} = reqresnext({...reqOptions, app}, {app});
+
+        if (this.reqOptions.methodOverrides) {
+            // Copies all properties from original to copy, including getters and setters
+            const props = Object.keys(this.reqOptions.methodOverrides);
+            for (const prop of props) {
+                const descriptor = Object.getOwnPropertyDescriptor(this.reqOptions.methodOverrides, prop);
+                Object.defineProperty(req, prop, descriptor);
+            }
+        }
+
+        return {req, res};
     }
 
     _buildResponse(res) {
