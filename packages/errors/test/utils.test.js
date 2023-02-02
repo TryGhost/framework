@@ -28,5 +28,20 @@ describe('Error Utils', function () {
             originalError.message = 'changed';
             assert.notEqual(processedError.message, originalError.message);
         });
+
+        it('Preserves the stack trace', function () {
+            const errorCreatingFunction = () => {
+                return new Error({
+                    message: 'Original error'
+                });
+            };
+            const originalError = errorCreatingFunction();
+            const ghostError = new errors.EmailError({
+                message: 'Ghost error',
+                err: originalError
+            });
+
+            assert.equal(ghostError.stack.includes('errorCreatingFunction'), true);
+        });
     });
 });
