@@ -1,5 +1,4 @@
 const fs = require('fs-extra');
-const Promise = require('bluebird');
 
 const defaultOptions = {
     type: 'zip',
