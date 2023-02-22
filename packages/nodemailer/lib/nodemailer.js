@@ -39,6 +39,12 @@ module.exports = function (transport, options = {}) {
         break;
     case 'mailgun':
         const mailgunTransport = require('nodemailer-mailgun-transport');
+
+        // Default to 60s timeout if not set in `options`
+        if (!Object.prototype.hasOwnProperty.call(options, 'timeout')) {
+            options.timeout = 60000;
+        }
+
         transportOptions = mailgunTransport(options);
         break;
     case 'sendmail':

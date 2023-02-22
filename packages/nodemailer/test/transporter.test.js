@@ -55,6 +55,21 @@ describe('Transporter', function () {
             }
         });
         transporter.transporter.name.should.equal('Mailgun');
+
+        // Ensure the default timeout is set
+        transporter.transporter.options.timeout.should.equal(60000);
+    });
+
+    it('can create a Mailgun transporter with custom timeout', function () {
+        const transporter = nodemailer('mailgun', {
+            auth: {
+                api_key: 'hello',
+                domain: 'example.com'
+            },
+            timeout: 10000
+        });
+        transporter.transporter.name.should.equal('Mailgun');
+        transporter.transporter.options.timeout.should.equal(10000);
     });
 
     it('should throw an error when creating an unknown transporter', function () {
