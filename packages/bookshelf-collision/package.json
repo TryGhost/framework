@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-collision",
-  "version": "0.1.30",
+  "version": "0.1.31",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/bookshelf-collision",
   "author": "Ghost Foundation",
   "license": "MIT",
@@ -24,7 +24,7 @@
     "sinon": "15.0.1"
   },
   "dependencies": {
-    "@tryghost/errors": "^1.2.20",
+    "@tryghost/errors": "^1.2.21",
     "lodash": "^4.17.21",
     "moment-timezone": "^0.5.33"
   }
