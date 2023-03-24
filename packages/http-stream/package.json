@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/http-stream",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/http-stream",
   "author": "Ghost Foundation",
   "license": "MIT",
@@ -28,7 +28,7 @@
     "sinon": "15.0.2"
   },
   "dependencies": {
-    "@tryghost/errors": "^1.2.21",
-    "@tryghost/request": "^0.1.36"
+    "@tryghost/errors": "^1.2.22",
+    "@tryghost/request": "^0.1.37"
   }
 }

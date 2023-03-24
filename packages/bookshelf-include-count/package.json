@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-include-count",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/bookshelf-include-count",
   "author": "Ghost Foundation",
   "license": "MIT",
@@ -24,7 +24,7 @@
     "sinon": "15.0.2"
   },
   "dependencies": {
-    "@tryghost/debug": "^0.1.22",
+    "@tryghost/debug": "^0.1.23",
     "lodash": "^4.17.21"
   }
 }

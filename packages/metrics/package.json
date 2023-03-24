@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/metrics",
-  "version": "1.0.22",
+  "version": "1.0.23",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/metrics",
   "author": "Ghost Foundation",
   "license": "MIT",
@@ -26,9 +26,9 @@
     "sinon": "15.0.2"
   },
   "dependencies": {
-    "@tryghost/elasticsearch": "^3.0.10",
-    "@tryghost/pretty-stream": "^0.1.16",
-    "@tryghost/root-utils": "^0.3.20",
+    "@tryghost/elasticsearch": "^3.0.11",
+    "@tryghost/pretty-stream": "^0.1.17",
+    "@tryghost/root-utils": "^0.3.21",
     "json-stringify-safe": "^5.0.1"
   },
   "optionalDependencies": {
