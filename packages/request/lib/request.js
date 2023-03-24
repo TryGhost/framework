@@ -19,6 +19,10 @@ module.exports = function request(url, options) {
         }));
     }
 
+    if (process.env.NODE_ENV?.startsWith('test') && !Object.prototype.hasOwnProperty.call(options, 'retry')) {
+        options.retry = 0;
+    }
+
     const mergedOptions = _.merge({}, defaultOptions, options);
 
     return got(url, mergedOptions);
