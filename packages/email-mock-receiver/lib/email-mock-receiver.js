@@ -33,7 +33,7 @@ class EmailMockReceiver {
         assert.equal(this.#snapshots.length, count, 'Email count does not match');
     }
 
-    matchHTMLSnapshot(snapshotIndex = 0) {
+    matchHTMLSnapshot(snapshotIndex = 0, replacements = []) {
         const error = new AssertionError({});
 
         let assertion = {
@@ -43,8 +43,15 @@ class EmailMockReceiver {
             error
         };
 
+        let html = this.#snapshots[snapshotIndex].html;
+        if (replacements.length) {
+            for (const [, {pattern, replacement}] of Object.entries(replacements)) {
+                html = html.replaceAll(pattern, replacement);
+            }
+        }
+
         this.#snapshotManager.assertSnapshot({
-            html: this.#snapshots[snapshotIndex].html
+            html: html
         }, assertion);
 
         return this;

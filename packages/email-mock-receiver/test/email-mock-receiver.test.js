@@ -50,6 +50,42 @@ describe('Email mock receiver', function () {
                 html: '<div>test 1</div>'
             });
         });
+
+        it('Can match HTML snapshot with dynamic URL query parameters', function () {
+            emailMockReceiver = new EmailMockReceiver({snapshotManager});
+
+            emailMockReceiver.send({
+                html: '<div>test https://127.0.0.1:2369/welcome/?token=JRexE3uutntD6F6WXSVaDZke91fTjpvO&action=signup</div>'
+            });
+
+            emailMockReceiver.matchHTMLSnapshot(0, [{
+                pattern: /token=(\w+)/gmi,
+                replacement: 'token=TEST_TOKEN'
+            }]);
+
+            assert.equal(snapshotManager.assertSnapshot.calledOnce, true);
+            assert.deepEqual(snapshotManager.assertSnapshot.args[0][0], {
+                html: '<div>test https://127.0.0.1:2369/welcome/?token=TEST_TOKEN&action=signup</div>'
+            });
+        });
+
+        it('Can match HTML snapshot with dynamic version in content', function () {
+            emailMockReceiver = new EmailMockReceiver({snapshotManager});
+
+            emailMockReceiver.send({
+                html: '<div>this email contains a dynamic version string v5.45</div>'
+            });
+
+            emailMockReceiver.matchHTMLSnapshot([{
+                pattern: /v\d+.\d+/gmi,
+                replacement: 'v5.0'
+            }]);
+
+            assert.equal(snapshotManager.assertSnapshot.calledOnce, true);
+            assert.deepEqual(snapshotManager.assertSnapshot.args[0][0], {
+                html: '<div>this email contains a dynamic version string v5.0</div>'
+            });
+        });
     });
 
     describe('matchMetadataSnapshot', function (){
