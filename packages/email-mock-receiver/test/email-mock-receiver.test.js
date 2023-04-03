@@ -86,6 +86,24 @@ describe('Email mock receiver', function () {
                 html: '<div>this email contains a dynamic version string v5.0</div>'
             });
         });
+
+        it('Cant match HTML snapshot with multiple occurrences of dynamic content', function () {
+            emailMockReceiver = new EmailMockReceiver({snapshotManager});
+
+            emailMockReceiver.send({
+                html: '<div>this email contains a dynamic version string once v5.45 and twice v4.28</div>'
+            });
+
+            emailMockReceiver.matchHTMLSnapshot([{
+                pattern: /v\d+.\d+/gmi,
+                replacement: 'v5.0'
+            }]);
+
+            assert.equal(snapshotManager.assertSnapshot.calledOnce, true);
+            assert.deepEqual(snapshotManager.assertSnapshot.args[0][0], {
+                html: '<div>this email contains a dynamic version string once v5.0 and twice v5.0</div>'
+            });
+        });
     });
 
     describe('matchMetadataSnapshot', function (){

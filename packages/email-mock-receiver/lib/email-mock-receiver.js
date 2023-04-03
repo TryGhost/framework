@@ -52,7 +52,7 @@ class EmailMockReceiver {
         let html = this.#snapshots[snapshotIndex].html;
         if (replacements.length) {
             for (const [, {pattern, replacement}] of Object.entries(replacements)) {
-                html = html.replaceAll(pattern, replacement);
+                html = html.replace(pattern, replacement);
             }
         }
 
