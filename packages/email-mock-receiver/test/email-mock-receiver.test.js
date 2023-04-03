@@ -58,7 +58,7 @@ describe('Email mock receiver', function () {
                 html: '<div>test https://127.0.0.1:2369/welcome/?token=JRexE3uutntD6F6WXSVaDZke91fTjpvO&action=signup</div>'
             });
 
-            emailMockReceiver.matchHTMLSnapshot(0, [{
+            emailMockReceiver.matchHTMLSnapshot([{
                 pattern: /token=(\w+)/gmi,
                 replacement: 'token=TEST_TOKEN'
             }]);

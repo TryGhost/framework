@@ -33,7 +33,13 @@ class EmailMockReceiver {
         assert.equal(this.#snapshots.length, count, 'Email count does not match');
     }
 
-    matchHTMLSnapshot(snapshotIndex = 0, replacements = []) {
+    /**
+     *
+     * @param {Replacement[]} replacements replacement patterns
+     * @param {Number} snapshotIndex index of snapshot to match
+     * @returns {EmailMockReceiver} current instance
+     */
+    matchHTMLSnapshot(replacements = [], snapshotIndex = 0) {
         const error = new AssertionError({});
 
         let assertion = {
@@ -82,3 +88,9 @@ class EmailMockReceiver {
 }
 
 module.exports = EmailMockReceiver;
+
+/**
+ * @typedef {Object} Replacement
+ * @prop {String|RegExp} [pattern] - pattern to match the dynamic content
+ * @prop {String} [replacement] - replacement for the matched pattern
+ */
