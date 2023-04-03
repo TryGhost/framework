@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/server",
-  "version": "0.1.32",
+  "version": "0.1.33",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/server",
   "author": "Ghost Foundation",
   "license": "MIT",
@@ -25,7 +25,7 @@
     "sinon": "15.0.3"
   },
   "dependencies": {
-    "@tryghost/debug": "^0.1.23",
-    "@tryghost/logging": "^2.4.2"
+    "@tryghost/debug": "^0.1.24",
+    "@tryghost/logging": "^2.4.3"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/config",
-  "version": "0.2.15",
+  "version": "0.2.16",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/config",
   "author": "Ghost Foundation",
   "license": "MIT",
@@ -25,7 +25,7 @@
     "sinon": "15.0.3"
   },
   "dependencies": {
-    "@tryghost/root-utils": "^0.3.21",
+    "@tryghost/root-utils": "^0.3.22",
     "nconf": "^0.12.0"
   }
 }

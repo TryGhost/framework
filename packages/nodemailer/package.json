@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/nodemailer",
-  "version": "0.3.33",
+  "version": "0.3.34",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/nodemailer",
   "author": "Ghost Foundation",
   "license": "MIT",
@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-ses": "^3.31.0",
-    "@tryghost/errors": "^1.2.22",
+    "@tryghost/errors": "^1.2.23",
     "nodemailer": "^6.6.3",
     "nodemailer-direct-transport": "^3.3.2",
     "nodemailer-mailgun-transport": "^2.1.5",
