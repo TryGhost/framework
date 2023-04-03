@@ -63,7 +63,13 @@ class EmailMockReceiver {
         return this;
     }
 
-    matchMetadataSnapshot(snapshotIndex = 0, properties = {}) {
+    /**
+     *
+     * @param {Object} [properties] - properties to match
+     * @param {Number} [snapshotIndex] - index of snapshot to match
+     * @returns {EmailMockReceiver} current instance
+     */
+    matchMetadataSnapshot(properties = {}, snapshotIndex = 0) {
         const error = new AssertionError({});
         let assertion = {
             properties: properties,

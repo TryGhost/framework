@@ -103,6 +103,26 @@ describe('Email mock receiver', function () {
                 to: 'test@example.com'
             });
         });
+
+        it('Can match explicit second metadata snapshot when multiple send requests are executed', function () {
+            emailMockReceiver.send({
+                subject: 'test 1',
+                to: 'test@example.com'
+            });
+
+            emailMockReceiver.send({
+                subject: 'test 2',
+                to: 'test@example.com'
+            });
+
+            emailMockReceiver.matchMetadataSnapshot({}, 1);
+
+            assert.equal(snapshotManager.assertSnapshot.calledOnce, true);
+            assert.deepEqual(snapshotManager.assertSnapshot.args[0][0].metadata, {
+                subject: 'test 2',
+                to: 'test@example.com'
+            });
+        });
     });
 
     describe('sentEmailCount', function () {
