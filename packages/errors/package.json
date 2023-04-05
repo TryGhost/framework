@@ -25,7 +25,7 @@
     "sinon": "15.0.3"
   },
   "dependencies": {
-    "@stdlib/utils": "^0.0.12",
+    "@stdlib/utils-copy": "^0.0.7",
     "lodash": "^4.17.21",
     "uuid": "^9.0.0"
   }

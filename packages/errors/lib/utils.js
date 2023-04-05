@@ -1,7 +1,7 @@
 const omit = require('lodash/omit');
 const merge = require('lodash/merge');
 const extend = require('lodash/extend');
-const deepCopy = require('@stdlib/utils/copy');
+const deepCopy = require('@stdlib/utils-copy');
 const _private = {};
 
 _private.serialize = function serialize(err) {
