@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-filter",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/bookshelf-filter",
   "author": "Ghost Foundation",
   "license": "MIT",
@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@tryghost/debug": "^0.1.24",
-    "@tryghost/errors": "^1.2.23",
+    "@tryghost/errors": "^1.2.24",
     "@tryghost/nql": "^0.11.0",
     "@tryghost/tpl": "^0.1.24"
   }
