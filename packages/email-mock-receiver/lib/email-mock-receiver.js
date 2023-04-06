@@ -39,28 +39,48 @@ class EmailMockReceiver {
      * @param {Number} snapshotIndex index of snapshot to match
      * @returns {EmailMockReceiver} current instance
      */
-    matchHTMLSnapshot(replacements = [], snapshotIndex = 0) {
+    #matchTextSnapshot(replacements, snapshotIndex, field) {
         const error = new AssertionError({});
 
         let assertion = {
             properties: null,
-            field: 'html',
-            hint: `[html ${snapshotIndex + 1}]`,
+            field: field,
+            hint: `[${field} ${snapshotIndex + 1}]`,
             error
         };
 
-        let html = this.#snapshots[snapshotIndex].html;
+        let text = this.#snapshots[snapshotIndex][field];
         if (replacements.length) {
             for (const [, {pattern, replacement}] of Object.entries(replacements)) {
-                html = html.replace(pattern, replacement);
+                text = text.replace(pattern, replacement);
             }
         }
 
-        this.#snapshotManager.assertSnapshot({
-            html: html
-        }, assertion);
+        const assertedObject = {};
+        assertedObject[field] = text;
+        this.#snapshotManager.assertSnapshot(assertedObject, assertion);
 
         return this;
+    }
+
+    /**
+     *
+     * @param {Replacement[]} [replacements] replacement patterns
+     * @param {Number} [snapshotIndex] index of snapshot to match
+     * @returns {EmailMockReceiver} current instance
+     */
+    matchHTMLSnapshot(replacements = [], snapshotIndex = 0) {
+        return this.#matchTextSnapshot(replacements, snapshotIndex, 'html');
+    }
+
+    /**
+     *
+     * @param {Replacement[]} [replacements replacement patterns
+     * @param {Number} [snapshotIndex] index of snapshot to match
+     * @returns {EmailMockReceiver} current instance
+     */
+    matchPlaintextSnapshot(replacements = [], snapshotIndex = 0) {
+        return this.#matchTextSnapshot(replacements, snapshotIndex, 'text');
     }
 
     /**
@@ -80,6 +100,7 @@ class EmailMockReceiver {
 
         const metadata = Object.assign({}, this.#snapshots[snapshotIndex]);
         delete metadata.html;
+        delete metadata.text;
 
         this.#snapshotManager.assertSnapshot({
             metadata

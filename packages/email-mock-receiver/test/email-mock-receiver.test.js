@@ -38,8 +38,6 @@ describe('Email mock receiver', function () {
         });
 
         it('Can match first HTML snapshot with multiple send requests are executed', function () {
-            emailMockReceiver = new EmailMockReceiver({snapshotManager});
-
             emailMockReceiver.send({html: '<div>test 1</div>'});
             emailMockReceiver.send({html: '<div>test 2</div>'});
 
@@ -52,8 +50,6 @@ describe('Email mock receiver', function () {
         });
 
         it('Can match HTML snapshot with dynamic URL query parameters', function () {
-            emailMockReceiver = new EmailMockReceiver({snapshotManager});
-
             emailMockReceiver.send({
                 html: '<div>test https://127.0.0.1:2369/welcome/?token=JRexE3uutntD6F6WXSVaDZke91fTjpvO&action=signup</div>'
             });
@@ -70,8 +66,6 @@ describe('Email mock receiver', function () {
         });
 
         it('Can match HTML snapshot with dynamic version in content', function () {
-            emailMockReceiver = new EmailMockReceiver({snapshotManager});
-
             emailMockReceiver.send({
                 html: '<div>this email contains a dynamic version string v5.45</div>'
             });
@@ -88,8 +82,6 @@ describe('Email mock receiver', function () {
         });
 
         it('Cant match HTML snapshot with multiple occurrences of dynamic content', function () {
-            emailMockReceiver = new EmailMockReceiver({snapshotManager});
-
             emailMockReceiver.send({
                 html: '<div>this email contains a dynamic version string once v5.45 and twice v4.28</div>'
             });
@@ -106,6 +98,84 @@ describe('Email mock receiver', function () {
         });
     });
 
+    describe('matchPlaintextSnapshot', function () {
+        it('Can match primitive text snapshot', function () {
+            emailMockReceiver.send({text: 'test text lorem ipsum'});
+
+            emailMockReceiver.matchPlaintextSnapshot();
+
+            assert.equal(snapshotManager.assertSnapshot.calledOnce, true);
+            assert.deepEqual(snapshotManager.assertSnapshot.args[0][0], {
+                text: 'test text lorem ipsum'
+            });
+        });
+
+        it('Can match text snapshot with multiple send requests are executed', function () {
+            emailMockReceiver.send({text: 'test 1'});
+            emailMockReceiver.send({text: 'test 2'});
+
+            emailMockReceiver.matchPlaintextSnapshot();
+
+            assert.equal(snapshotManager.assertSnapshot.calledOnce, true);
+            assert.deepEqual(snapshotManager.assertSnapshot.args[0][0], {
+                text: 'test 1'
+            });
+
+            emailMockReceiver.matchPlaintextSnapshot([], 1);
+            assert.equal(snapshotManager.assertSnapshot.calledTwice, true);
+            assert.deepEqual(snapshotManager.assertSnapshot.args[1][0], {
+                text: 'test 2'
+            });
+        });
+
+        it('Can match text snapshot with dynamic URL query parameters', function () {
+            emailMockReceiver.send({
+                text: 'test https://127.0.0.1:2369/welcome/?token=JRexE3uutntD6F6WXSVaDZke91fTjpvO&action=signup'
+            });
+
+            emailMockReceiver.matchPlaintextSnapshot([{
+                pattern: /token=(\w+)/gmi,
+                replacement: 'token=TEST_TOKEN'
+            }]);
+
+            assert.equal(snapshotManager.assertSnapshot.calledOnce, true);
+            assert.deepEqual(snapshotManager.assertSnapshot.args[0][0], {
+                text: 'test https://127.0.0.1:2369/welcome/?token=TEST_TOKEN&action=signup'
+            });
+        });
+
+        it('Can match text snapshot with dynamic version in content', function () {
+            emailMockReceiver.send({
+                text: 'this email contains a dynamic version string v5.45'
+            });
+
+            emailMockReceiver.matchPlaintextSnapshot([{
+                pattern: /v\d+.\d+/gmi,
+                replacement: 'v5.0'
+            }]);
+
+            assert.equal(snapshotManager.assertSnapshot.calledOnce, true);
+            assert.deepEqual(snapshotManager.assertSnapshot.args[0][0], {
+                text: 'this email contains a dynamic version string v5.0'
+            });
+        });
+
+        it('Cant match text snapshot with multiple occurrences of dynamic content', function () {
+            emailMockReceiver.send({
+                text: 'this email contains a dynamic version string once v5.45 and twice v4.28'
+            });
+
+            emailMockReceiver.matchPlaintextSnapshot([{
+                pattern: /v\d+.\d+/gmi,
+                replacement: 'v5.0'
+            }]);
+            assert.equal(snapshotManager.assertSnapshot.calledOnce, true);
+            assert.deepEqual(snapshotManager.assertSnapshot.args[0][0], {
+                text: 'this email contains a dynamic version string once v5.0 and twice v5.0'
+            });
+        });
+    });
+
     describe('matchMetadataSnapshot', function (){
         it('Can match primitive metadata snapshot ignoring html property', function () {
             emailMockReceiver.send({
@@ -113,6 +183,7 @@ describe('Email mock receiver', function () {
                 to: 'test@example.com',
                 html: '<div>do not include me</div>'
             });
+
             emailMockReceiver.matchMetadataSnapshot();
 
             assert.equal(snapshotManager.assertSnapshot.calledOnce, true);
