@@ -26,6 +26,37 @@ describe('Email mock receiver', function () {
         assert.ok(new EmailMockReceiver({snapshotManager: {}}));
     });
 
+    it('Can chain match snapshot methods', function () {
+        emailMockReceiver.send({
+            html: '<div>test</div>',
+            text: 'test text lorem ipsum',
+            metadata: {
+                to: 'test@example.com'
+            }
+        });
+
+        emailMockReceiver
+            .matchHTMLSnapshot()
+            .matchPlaintextSnapshot()
+            .matchMetadataSnapshot()
+            .sentEmailCount(1);
+
+        assert.equal(snapshotManager.assertSnapshot.calledThrice, true);
+        assert.deepEqual(snapshotManager.assertSnapshot.args[0][0], {
+            html: '<div>test</div>'
+        });
+        assert.deepEqual(snapshotManager.assertSnapshot.args[1][0], {
+            text: 'test text lorem ipsum'
+        });
+        assert.deepEqual(snapshotManager.assertSnapshot.args[2][0], {
+            metadata: {
+                metadata: {
+                    to: 'test@example.com'
+                }
+            }
+        });
+    });
+
     describe('matchHTMLSnapshot', function () {
         it('Can match primitive HTML snapshot', function () {
             emailMockReceiver.send({html: '<div>test</div>'});
@@ -232,6 +263,14 @@ describe('Email mock receiver', function () {
 
             emailMockReceiver.reset();
             emailMockReceiver.sentEmailCount(0);
+        });
+
+        it('Throws error when email count is not equal to expected', function () {
+            emailMockReceiver.send({html: '<div>test 1</div>'});
+
+            assert.throws(function () {
+                emailMockReceiver.sentEmailCount(2);
+            });
         });
     });
 });

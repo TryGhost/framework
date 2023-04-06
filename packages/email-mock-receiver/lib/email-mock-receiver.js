@@ -31,6 +31,8 @@ class EmailMockReceiver {
 
     sentEmailCount(count) {
         assert.equal(this.#snapshots.length, count, 'Email count does not match');
+
+        return this;
     }
 
     /**
