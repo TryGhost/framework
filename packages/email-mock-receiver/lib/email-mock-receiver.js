@@ -29,7 +29,12 @@ class EmailMockReceiver {
         return this.#sendResponse;
     }
 
-    sentEmailCount(count) {
+    /**
+     *
+     * @param {Number} count number of sent emails to expect
+     * @returns {EmailMockReceiver} current instance
+     */
+    assertSentEmailCount(count) {
         assert.equal(this.#snapshots.length, count, 'Email count does not match');
 
         return this;

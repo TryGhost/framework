@@ -39,7 +39,7 @@ describe('Email mock receiver', function () {
             .matchHTMLSnapshot()
             .matchPlaintextSnapshot()
             .matchMetadataSnapshot()
-            .sentEmailCount(1);
+            .assertSentEmailCount(1);
 
         assert.equal(snapshotManager.assertSnapshot.calledThrice, true);
         assert.deepEqual(snapshotManager.assertSnapshot.args[0][0], {
@@ -245,31 +245,31 @@ describe('Email mock receiver', function () {
         });
     });
 
-    describe('sentEmailCount', function () {
+    describe('assertSentEmailCount', function () {
         it('Can assert email count', function () {
             emailMockReceiver.send({html: '<div>test</div>'});
-            emailMockReceiver.sentEmailCount(1);
+            emailMockReceiver.assertSentEmailCount(1);
         });
 
         it('Can assert email count with multiple send requests are executed', function () {
             emailMockReceiver.send({html: '<div>test 1</div>'});
             emailMockReceiver.send({html: '<div>test 2</div>'});
-            emailMockReceiver.sentEmailCount(2);
+            emailMockReceiver.assertSentEmailCount(2);
         });
 
         it('Can reset email count', function () {
             emailMockReceiver.send({html: '<div>test 1</div>'});
-            emailMockReceiver.sentEmailCount(1);
+            emailMockReceiver.assertSentEmailCount(1);
 
             emailMockReceiver.reset();
-            emailMockReceiver.sentEmailCount(0);
+            emailMockReceiver.assertSentEmailCount(0);
         });
 
         it('Throws error when email count is not equal to expected', function () {
             emailMockReceiver.send({html: '<div>test 1</div>'});
 
             assert.throws(function () {
-                emailMockReceiver.sentEmailCount(2);
+                emailMockReceiver.assertSentEmailCount(2);
             });
         });
     });
