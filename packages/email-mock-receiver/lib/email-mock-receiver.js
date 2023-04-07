@@ -14,19 +14,22 @@ class EmailMockReceiver {
     /**
      * Method mocking email sending logic
      *
-     * @param {Object} message
-     * @param {string} message.subject - email subject
-     * @param {string} message.html - email content
-     * @param {string} message.to - email recipient address
-     * @param {string} [message.replyTo]
-     * @param {string} [message.from] - sender email address
-     * @param {string} [message.text] - text version of this message
+     * @param {EmailMessage} message - email message
      */
     async send(message) {
         // store snapshot
         this.#snapshots.push(message);
 
         return this.#sendResponse;
+    }
+
+    /**
+     *
+     * @param {Number} [index] zero-based index of the sent email
+     * @returns {EmailMessage}
+     */
+    getSentEmail(index = 0) {
+        return this.#snapshots[index];
     }
 
     /**
@@ -127,4 +130,14 @@ module.exports = EmailMockReceiver;
  * @typedef {Object} Replacement
  * @prop {String|RegExp} [pattern] - pattern to match the dynamic content
  * @prop {String} [replacement] - replacement for the matched pattern
+ */
+
+/**
+ * @typedef {Object} EmailMessage
+ * @prop {String} subject - email subject
+ * @prop {String} html - email HTML content
+ * @prop {String} to - email recipient address
+ * @prop {String} [replyTo] - email reply-to address
+ * @prop {String} [from] - sender email address
+ * @prop {String} [text] - text version of email message
  */

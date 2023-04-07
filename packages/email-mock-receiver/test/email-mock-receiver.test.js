@@ -273,4 +273,25 @@ describe('Email mock receiver', function () {
             });
         });
     });
+
+    describe('getSentEmail', function () {
+        it('Can get sent email', function () {
+            emailMockReceiver.send({html: '<div>test</div>'});
+            assert.equal(emailMockReceiver.getSentEmail(0).html, '<div>test</div>');
+        });
+
+        it('Can get sent email with multiple send requests are executed', function () {
+            emailMockReceiver.send({html: '<div>test 1</div>'});
+            emailMockReceiver.send({html: '<div>test 2</div>'});
+
+            assert.equal(emailMockReceiver.getSentEmail(0).html, '<div>test 1</div>');
+            assert.equal(emailMockReceiver.getSentEmail(1).html, '<div>test 2</div>');
+        });
+
+        it('Returns undefined when email index is out of bounds', function () {
+            emailMockReceiver.send({html: '<div>test 1</div>'});
+
+            assert.equal(emailMockReceiver.getSentEmail(1), undefined);
+        });
+    });
 });
