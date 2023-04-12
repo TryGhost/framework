@@ -51,6 +51,7 @@ class GhostLogger {
         this.http = options.http || {};
         this.useLocalTime = options.useLocalTime || false;
         this.metadata = options.metadata || {};
+        this.loadSerializers = options.loadSerializers || null;
 
         // CASE: stdout has to be on the first position in the transport,  because if the GhostLogger itself logs, you won't see the stdout print
         if (this.transports.indexOf('stdout') !== -1 && this.transports.indexOf('stdout') !== 0) {
@@ -397,6 +398,11 @@ class GhostLogger {
      *   - removing/replacing sensitive data from logging to a stream/transport
      */
     setSerializers() {
+        if (this.loadSerializers) {
+            this.serializers = require(this.loadSerializers);
+            return;
+        };
+
         this.serializers = {
             req: (req) => {
                 const requestLog = {
