@@ -198,7 +198,7 @@ class ExpectRequest extends Request {
 
         error.message = `Expected statusCode ${assertion.expected}, got statusCode ${response.statusCode} ${error.contextString}`;
 
-        if (response.body && response.body.errors && response.body.errors[0].message) {
+        if (response.body && response.body.errors && response.body.errors[0] && response.body.errors[0].message) {
             error.message += `\n${response.body.errors[0].message}`;
 
             if (response.body.errors[0].context) {
