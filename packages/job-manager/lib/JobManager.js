@@ -9,7 +9,7 @@ const {UnhandledJobError, IncorrectUsageError} = require('@tryghost/errors');
 const logging = require('@tryghost/logging');
 const isCronExpression = require('./is-cron-expression');
 const assembleBreeJob = require('./assemble-bree-job');
-const JobsRepository = require('./jobs-repository');
+const JobsRepository = require('./JobsRepository');
 
 const worker = async (task, callback) => {
     try {
