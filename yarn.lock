@@ -740,10 +740,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@elastic/elasticsearch@8.8.1":
-  version "8.8.1"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.8.1.tgz#a3cee66f8588f3534eb6641530994daac9eb0caa"
-  integrity sha512-ibArPKHEmak3jao7xts2gROATiwPQo9aOrWWdix5mJcX1gnjm/UeJBVO901ROmaxFVPKxVnjC9Op3gJYkqagjg==
+"@elastic/elasticsearch@8.9.0":
+  version "8.9.0"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.9.0.tgz#d132021c6c12e4171fe14371609a5c69b535edd4"
+  integrity sha512-UyolnzjOYTRL2966TYS3IoJP4tQbvak/pmYmbP3JdphD53RjkyVDdxMpTBv+2LcNBRrvYPTzxQbpRW/nGSXA9g==
   dependencies:
     "@elastic/transport" "^8.3.2"
     tslib "^2.4.0"
