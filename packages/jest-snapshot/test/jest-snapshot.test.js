@@ -45,7 +45,16 @@ describe('Jest Snapshot', function () {
 
     it('mochaHooks: beforeEach', function () {
         const setTestSpy = sinon.stub(snapshotTools.snapshotManager, 'setCurrentTest').returns();
-        snapshotTools.mochaHooks.beforeEach.call({currentTest: {file: 'test', fullTitle: () => { }}});
+        snapshotTools.mochaHooks.beforeEach.call({currentTest: {file: 'test', fullTitle: () => { }, currentRetry: () => 0}});
         sinon.assert.calledOnce(setTestSpy);
+    });
+
+    it('mochaHooks: beforeEach with retries', function () {
+        const setTestSpy = sinon.stub(snapshotTools.snapshotManager, 'setCurrentTest').returns();
+        const resetRegistrySpy = sinon.stub(snapshotTools.snapshotManager, 'resetRegistryForCurrentTest').returns();
+        snapshotTools.mochaHooks.beforeEach.call({currentTest: {file: 'test', fullTitle: () => { }, currentRetry: () => 0}});
+        snapshotTools.mochaHooks.beforeEach.call({currentTest: {file: 'test', fullTitle: () => { }, currentRetry: () => 1}});
+        sinon.assert.calledTwice(setTestSpy);
+        sinon.assert.calledOnce(resetRegistrySpy);
     });
 });

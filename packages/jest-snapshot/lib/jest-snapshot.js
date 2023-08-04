@@ -18,6 +18,11 @@ const mochaHooks = {
     beforeEach() {
         const {currentTest} = this;
 
+        if (currentTest.currentRetry() > 0) {
+            // Reset registry for this test only
+            snapshotManager.resetRegistryForCurrentTest();
+        }
+
         snapshotManager.setCurrentTest({
             filename: currentTest.file + '.snap',
             nameTemplate: currentTest.fullTitle()

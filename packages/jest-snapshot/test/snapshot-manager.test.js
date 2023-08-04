@@ -24,6 +24,21 @@ describe('Snapshot Manager', function () {
         assert.deepEqual(snapshotMatcher.registry, {});
     });
 
+    it('resetRegistryForCurrentTest', function () {
+        const snapshotMatcher = new SnapshotManager();
+        assert.deepEqual(snapshotMatcher.registry, {});
+
+        snapshotMatcher.registry = {file: {foo: 'bar', baz: 'qux'}};
+        assert.deepEqual(snapshotMatcher.registry, {file: {foo: 'bar', baz: 'qux'}});
+
+        snapshotMatcher.setCurrentTest({filename: 'file', nameTemplate: 'foo'});
+
+        snapshotMatcher.resetRegistryForCurrentTest();
+        assert.deepEqual(snapshotMatcher.registry, {file: {baz: 'qux'}});
+
+        snapshotMatcher.resetRegistry();
+    });
+
     it('setCurrentTest', function () {
         const snapshotMatcher = new SnapshotManager();
         assert.deepEqual(snapshotMatcher.currentTest, {});
@@ -68,7 +83,7 @@ describe('Snapshot Manager', function () {
         const {test} = this;
         inputPath = test.file + '.snap';
         outputPath = snapshotMatcher._resolveSnapshotFilePath(inputPath);
-        assert.match(outputPath, /\/framework\/packages\/jest-snapshot\/test\/__snapshots__\/snapshot-manager\.test\.js\.snap/);
+        assert.match(outputPath, /\/packages\/jest-snapshot\/test\/__snapshots__\/snapshot-manager\.test\.js\.snap/);
     });
 
     it('_getConfig', function () {
