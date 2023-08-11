@@ -36,6 +36,8 @@ describe('Snapshot Manager', function () {
         snapshotMatcher.resetRegistryForCurrentTest();
         assert.deepEqual(snapshotMatcher.registry, {file: {baz: 'qux'}});
 
+        assert.doesNotThrow(() => snapshotMatcher.resetRegistryForCurrentTest(), 'should not throw if no registry exists for current test');
+
         snapshotMatcher.resetRegistry();
     });
 

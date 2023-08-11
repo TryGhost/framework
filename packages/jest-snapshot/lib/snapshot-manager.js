@@ -63,7 +63,9 @@ class SnapshotManager {
 
     resetRegistryForCurrentTest() {
         const testTitle = this.currentTest.nameTemplate;
-        delete this.registry[this.currentTest.filename][testTitle];
+        if (this.currentTest.filename in this.registry && testTitle in this.registry[this.currentTest.filename]) {
+            delete this.registry[this.currentTest.filename][testTitle];
+        }
     }
 
     setCurrentTest(testConfig) {
