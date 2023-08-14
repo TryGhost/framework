@@ -1,4 +1,21 @@
+const errors = require('@tryghost/errors');
+
 const defaultOptions = {};
+
+function throwOnSymlinks(entry) {
+    // Check if symlink
+    const mode = (entry.externalFileAttributes >> 16) & 0xFFFF;
+    // check if it's a symlink or dir (using stat mode constants)
+    const IFMT = 61440;
+    const IFLNK = 40960;
+    const symlink = (mode & IFMT) === IFLNK;
+
+    if (symlink) {
+        throw new errors.UnsupportedMediaTypeError({
+            message: 'Symlinks in ZIP-files are not allowed'
+        });
+    }
+}
 
 /**
  * Extract
@@ -18,6 +35,15 @@ module.exports = (zipToExtract, destination, options) => {
     const extract = require('extract-zip');
 
     opts.dir = destination;
+
+    if (opts.onEntry) {
+        opts.onEntry = (entry, zipfile) => {
+            throwOnSymlinks(entry);
+            options.onEntry(entry, zipfile);
+        };
+    } else {
+        opts.onEntry = throwOnSymlinks;
+    }
 
     return extract(zipToExtract, opts).then(() => {
         return {path: destination};
