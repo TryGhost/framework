@@ -25,7 +25,7 @@
     "sinon": "15.0.4"
   },
   "dependencies": {
-    "@jest/expect": "^28.0.1",
+    "@jest/expect": "^29.0.0",
     "@jest/expect-utils": "^28.0.1",
     "@tryghost/errors": "^1.2.26",
     "jest-snapshot": "^29.0.0"
