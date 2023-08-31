@@ -56,7 +56,9 @@ module.exports = function (Bookshelf) {
                 const clientUpdatedAt = moment(self.clientData.updated_at || self.serverData.updated_at || new Date());
                 const serverUpdatedAt = moment(self.serverData.updated_at || clientUpdatedAt);
 
-                if (Object.keys(changed).length) {
+                const changedFields = Object.keys(changed);
+
+                if (changedFields.length) {
                     if (clientUpdatedAt.diff(serverUpdatedAt) !== 0) {
                         // @NOTE: This will rollback the update. We cannot know if relations were updated before doing the update.
                         throw new errors.UpdateCollisionError({
@@ -64,6 +66,7 @@ module.exports = function (Bookshelf) {
                             code: 'UPDATE_COLLISION',
                             level: 'critical',
                             errorDetails: {
+                                changedFields,
                                 clientUpdatedAt: self.clientData.updated_at,
                                 serverUpdatedAt: self.serverData.updated_at
                             }
