@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-collision",
-  "version": "0.1.36",
+  "version": "0.1.37",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/bookshelf-collision",
   "author": "Ghost Foundation",
   "license": "MIT",
