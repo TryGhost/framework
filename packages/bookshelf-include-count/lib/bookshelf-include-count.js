@@ -108,7 +108,6 @@ module.exports = function (Bookshelf) {
             return modelProto.sync.apply(this, arguments);
         },
 
-        // Warning: Make sure this method always returns a Bluebird Promise (modelProto.save.apply does, so returning that is fine)
         save: function save() {
             // the count__ variables are not 'permitted' and will get removed after a save
             // so this will make sure they are kept alive after a save (unless they are also still available after the save)
