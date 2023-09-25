@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/request",
-  "version": "0.1.41",
+  "version": "1.0.0",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/request",
   "author": "Ghost Foundation",
   "license": "MIT",
