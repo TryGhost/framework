@@ -2,10 +2,9 @@
 // const testUtils = require('./utils');
 require('./utils');
 const should = require('should');
-const rewire = require('rewire');
 const nock = require('nock');
 
-const request = rewire('../lib/request');
+const request = require('../lib/request');
 
 describe('Request', function () {
     it('[success] should return response for http request', function () {
@@ -135,13 +134,8 @@ describe('Request', function () {
             },
             retry: {
                 // Set delay between retries to 1ms - 2 retries total
-                retries: (retry) => {
-                    if (retry > 2) {
-                        return 0;
-                    } else { 
-                        return 1;
-                    }
-                }
+                limit: 2,
+                backoffLimit: 1
             }
         };
 
@@ -167,8 +161,12 @@ describe('Request', function () {
             headers: {
                 'User-Agent': 'Mozilla/5.0'
             },
-            timeout: 1,
-            retry: 0 // got retries by default so we're disabling this behavior
+            timeout: {
+                request: 1
+            },
+            retry: {
+                limit: 0
+            } // got retries by default so we're disabling this behavior
         };
 
         nock('http://some-website.com')

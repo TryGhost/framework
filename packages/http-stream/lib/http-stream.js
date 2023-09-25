@@ -13,14 +13,15 @@ class HttpStream {
                 throw new GhostError.IncorrectUsageError({message: 'Type Error: Http transport requires log data to be an object'});
             }
 
-            let body = { 
+            const options = {
                 ...this.config,
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
+                json: data
             };
+            const {url} = options;
+            delete options.url;
 
-            return await request(this.config.url, body);
+            return await request(url, options);
         } catch (error) {
             debug('Failed to ship log', error.message);
             return false;
