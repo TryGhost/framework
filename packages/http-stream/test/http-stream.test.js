@@ -2,7 +2,7 @@ require('should');
 const HttpStream = require('../index');
 
 const testConfig = {
-    url: 'http://localhost:3001'
+    url: 'http://127.0.0.1:3001'
 };
 
 describe('HttpStream', function () {
