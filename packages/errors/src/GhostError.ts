@@ -15,7 +15,7 @@ export interface GhostErrorOptions {
     property?: string;
     redirect?: string;
     hideStack?: boolean;
-    err?: Error;
+    err?: Error | string;
 }
 
 export class GhostError extends Error {
