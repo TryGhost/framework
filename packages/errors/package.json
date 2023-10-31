@@ -4,16 +4,24 @@
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/errors",
   "author": "Ghost Foundation",
   "license": "MIT",
-  "main": "index.js",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "types": "types/index.d.ts",
   "scripts": {
     "dev": "echo \"Implement me!\"",
+    "build": "yarn build:cjs && yarn build:es && yarn build:types",
+    "build:cjs": "yarn esbuild src/*.ts --target=es2020 --outdir=cjs --format=cjs",
+    "build:es": "yarn esbuild src/*.ts --target=es2020 --outdir=es --format=esm",
+    "build:types": "tsc --emitDeclarationOnly --declaration --declarationMap --outDir types",
     "test": "TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' NODE_ENV=testing c8 --check-coverage --all --reporter text --reporter cobertura  mocha -r ts-node/register './test/**/*.test.ts'",
     "lint": "eslint . --ext .js --cache",
     "posttest": "yarn lint"
   },
   "files": [
-    "index.js",
-    "lib"
+    "cjs",
+    "es",
+    "types",
+    "src"
   ],
   "publishConfig": {
     "access": "public"
@@ -23,6 +31,7 @@
     "@types/mocha": "^10.0.3",
     "@types/uuid": "^9.0.6",
     "c8": "8.0.1",
+    "esbuild": "^0.19.5",
     "mocha": "10.2.0",
     "should": "13.2.3",
     "ts-node": "^10.9.1",
