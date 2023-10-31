@@ -1,7 +1,4 @@
 import deepCopy from '@stdlib/utils-copy';
-import extend from 'lodash/extend';
-import merge from 'lodash/merge';
-import omit from 'lodash/omit';
 import {GhostError} from './GhostError';
 import * as errors from './errors';
 
@@ -62,10 +59,14 @@ const _private = {
             default: 'server_error'
         };
 
-        return merge({
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const {detail, code, ...properties} = _private.serialize(err);
+
+        return {
             error: err.code || matchTable[err.name] || 'server_error',
-            error_description: err.message
-        }, omit(_private.serialize(err), ['detail', 'code']));
+            error_description: err.message,
+            ...properties
+        };
     },
 
     /**
@@ -115,9 +116,10 @@ const _private = {
             internalError = new errorsWithBase[errorFormat.title || errorFormat.name || errors.InternalServerError.name](_private.deserialize(errorFormat));
         } catch (err) {
             // CASE: you receive a JSON format error, but the error prototype is unknown
-            internalError = new errors.InternalServerError(extend({
-                errorType: errorFormat.title || errorFormat.name
-            }, _private.deserialize(errorFormat)));
+            internalError = new errors.InternalServerError({
+                errorType: errorFormat.title || errorFormat.name,
+                ..._private.deserialize(errorFormat)
+            });
         }
 
         if (errorFormat.source && errorFormat.source.pointer) {

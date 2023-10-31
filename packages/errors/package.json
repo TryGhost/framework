@@ -32,6 +32,7 @@
     "@types/uuid": "^9.0.6",
     "c8": "8.0.1",
     "esbuild": "^0.19.5",
+    "lodash": "^4.17.21",
     "mocha": "10.2.0",
     "should": "13.2.3",
     "ts-node": "^10.9.1",
@@ -39,7 +40,6 @@
   },
   "dependencies": {
     "@stdlib/utils-copy": "^0.0.7",
-    "lodash": "^4.17.21",
     "uuid": "^9.0.0"
   }
 }
