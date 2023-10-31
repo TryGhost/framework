@@ -1,5 +1,5 @@
 const {jestExpect} = require('@jest/expect');
-const SnapshotManager = require('./snapshot-manager');
+const SnapshotManager = require('./SnapshotManager');
 const snapshotManager = new SnapshotManager();
 
 function matchSnapshotAssertion(properties) {

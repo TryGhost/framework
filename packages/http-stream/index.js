@@ -1,1 +1,1 @@
-module.exports = require('./lib/http-stream');
+module.exports = require('./lib/HttpStream');

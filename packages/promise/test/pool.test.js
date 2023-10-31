@@ -1,7 +1,7 @@
 require('./utils');
 const {promisify} = require('util');
 const {pool} = require('../');
-const assert = require('assert');
+const assert = require('assert/strict');
 
 describe('Promise pool', function () {
     it('preserves order', function () {

@@ -1,5 +1,5 @@
 const {assert, sinon, stubCookies} = require('./utils');
-const {Request, RequestOptions} = require('../lib/request');
+const {Request, RequestOptions} = require('../lib/Request');
 const FormData = require('form-data');
 const Stream = require('stream');
 

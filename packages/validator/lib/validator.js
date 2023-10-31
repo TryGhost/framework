@@ -4,7 +4,7 @@ const baseValidator = require('validator');
 const moment = require('moment-timezone');
 const assert = require('assert');
 
-const isEmailCustom = require('./isEmail');
+const isEmailCustom = require('./is-email');
 
 const allowedValidators = [
     'isLength',

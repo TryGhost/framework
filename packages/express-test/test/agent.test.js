@@ -1,6 +1,6 @@
 const {assert} = require('./utils');
 
-const Agent = require('../lib/agent');
+const Agent = require('../lib/Agent');
 
 describe('Agent', function () {
     describe('Class methods', function () {
@@ -224,8 +224,8 @@ describe('Agent', function () {
 
             const test = agent.get('/');
 
-            assert.equal(test instanceof require('../lib/expect-request'), true);
-            assert.equal(test instanceof require('../lib/request'), true);
+            assert.equal(test instanceof require('../lib/ExpectRequest'), true);
+            assert.equal(test instanceof require('../lib/Request'), true);
             assert.equal(test.app, fn);
             assert.equal(test.reqOptions.method, 'GET');
             assert.equal(test.reqOptions.url, '/');

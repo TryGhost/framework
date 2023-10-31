@@ -1,8 +1,8 @@
 const {assert, sinon, stubCookies} = require('./utils');
 
-const {ExpectRequest, RequestOptions} = require('../lib/expect-request');
+const {ExpectRequest, RequestOptions} = require('../lib/ExpectRequest');
 const {snapshotManager} = require('@tryghost/jest-snapshot');
-const Request = require('../lib/request');
+const Request = require('../lib/Request');
 
 describe('ExpectRequest', function () {
     afterEach(function () {

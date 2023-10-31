@@ -3,11 +3,11 @@
  * https://github.com/validatorjs/validator.js/blob/531dc7f1f75613bec75c6d888b46480455e78dc7/src/lib/isEmail.js
  */
 /* eslint-disable camelcase */
-const assertString = require('./util/assertString');
+const assertString = require('./util/assert-string');
 const merge = require('./util/merge');
-const isByteLength = require('./isByteLength');
-const isFQDN = require('./isFQDN');
-const isIP = require('./isIP');
+const isByteLength = require('./is-byte-length');
+const isFQDN = require('./is-fqdn');
+const isIP = require('./is-ip');
 
 const default_email_options = {
     allow_display_name: false,
