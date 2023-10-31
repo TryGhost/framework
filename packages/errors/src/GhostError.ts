@@ -1,5 +1,5 @@
-import uuid from 'uuid';
-import * as utils from './utils';
+import {v1 as uuidv1} from 'uuid';
+import {wrapStack} from './wrap-stack';
 
 export interface GhostErrorOptions {
     message?: string;
@@ -42,7 +42,7 @@ export class GhostError extends Error {
         this.errorType = 'InternalServerError';
         this.level = 'normal';
         this.message = 'The server has encountered an error.';
-        this.id = uuid.v1();
+        this.id = uuidv1();
 
         /**
          * custom overrides
@@ -50,6 +50,8 @@ export class GhostError extends Error {
         this.id = options.id || this.id;
         this.statusCode = options.statusCode || this.statusCode;
         this.level = options.level || this.level;
+        this.context = options.context;
+        this.help = options.help;
         this.errorType = this.name = options.errorType || this.errorType;
         this.errorDetails = options.errorDetails;
         this.code = options.code || null;
@@ -82,7 +84,7 @@ export class GhostError extends Error {
                 }
 
                 if (property === 'stack' && !this.hideStack) {
-                    this[property] = utils.wrapStack(this, options.err as Error);
+                    this[property] = wrapStack(this, options.err as Error);
                     return;
                 }
 

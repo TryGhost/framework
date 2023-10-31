@@ -1,60 +1,62 @@
 // Switch these lines once there are useful utils
 // const testUtils = require('./utils');
-require('./utils');
+import './utils';
 
-const errors = require('../');
+import should from 'should';
+import errors, {utils} from '../src';
+import {GhostError} from '../src/GhostError';
 
 describe('Errors', function () {
     it('Ensure we inherit from Error', function () {
-        var ghostError = new errors.InternalServerError();
+        const ghostError = new errors.InternalServerError();
         (ghostError instanceof Error).should.eql(true);
     });
 
     describe('Inherit from other error', function () {
         it('default', function () {
-            var someError = new Error(), ghostError;
+            const someError = new Error() as Error & {context?: string; help?: string};
 
             someError.message = 'test';
             someError.context = 'test';
             someError.help = 'test';
 
-            ghostError = new errors.InternalServerError({err: someError});
-            ghostError.stack.should.match(/Error: test/);
-            ghostError.context.should.eql(someError.context);
-            ghostError.help.should.eql(someError.help);
+            const ghostError = new errors.InternalServerError({err: someError});
+            ghostError.stack!.should.match(/Error: test/);
+            ghostError.context!.should.eql(someError.context);
+            ghostError.help!.should.eql(someError.help);
         });
 
         it('has nested object', function () {
-            var someError = new Error(), ghostError;
+            const someError = new Error() as Error & {obj?: {a: string}};
 
             someError.obj = {
                 a: 'b'
             };
 
-            ghostError = new errors.InternalServerError({
+            const ghostError = new errors.InternalServerError({
                 err: someError
-            });
+            }) as Error & {obj?: {a: string}};
 
-            ghostError.obj.should.eql(someError.obj);
+            ghostError.obj!.should.eql(someError.obj);
         });
 
         it('with custom attribute', function () {
-            var someError = new Error(), ghostError;
+            const someError = new Error() as Error & {context?: string};
 
             someError.context = 'test';
 
-            ghostError = new errors.InternalServerError({
+            const ghostError = new errors.InternalServerError({
                 err: someError,
                 context: 'context'
             });
 
-            ghostError.context.should.eql('test');
+            ghostError.context!.should.eql('test');
         });
 
         it('with custom message', function () {
-            var someError = new Error(), ghostError;
+            const someError = new Error();
 
-            ghostError = new errors.InternalServerError({
+            const ghostError = new errors.InternalServerError({
                 err: someError,
                 message: 'test'
             });
@@ -63,33 +65,33 @@ describe('Errors', function () {
         });
 
         it('error is string', function () {
-            var ghostError = new errors.InternalServerError({
+            const ghostError = new errors.InternalServerError({
                 err: 'string'
             });
-            ghostError.stack.should.match(/Error: string/);
+            ghostError.stack!.should.match(/Error: string/);
         });
     });
 
     describe('isGhostError', function () {
         it('can determine non-Ghost errors', function () {
-            var isGhostError = errors.utils.isGhostError(new Error());
+            const isGhostError = utils.isGhostError(new Error());
             isGhostError.should.eql(false);
         });
 
         it('can determine standard GhostError errors', function () {
-            var isGhostError = errors.utils.isGhostError(new errors.NotFoundError());
+            const isGhostError = utils.isGhostError(new errors.NotFoundError());
             isGhostError.should.eql(true);
         });
 
         it('can determine new non-GhostError errors', function () {
             class NonGhostError extends Error {
-                constructor(options) {
+                constructor(options: {message: string}) {
                     super(options.message);
                 }
             }
 
             class CustomNonGhostError extends NonGhostError {
-                constructor(options) {
+                constructor(options: {message: string}) {
                     super(options);
                 }
             }
@@ -98,22 +100,23 @@ describe('Errors', function () {
                 message: 'Doesn\'t inherit from GhostError'
             });
 
-            var isGhostError = errors.utils.isGhostError(err);
+            const isGhostError = utils.isGhostError(err);
             isGhostError.should.eql(false);
         });
     });
 
     describe('Serialization', function () {
         it('Can serialize/deserialize error', function () {
-            var err = new errors.BadRequestError({
+            let err = new errors.BadRequestError({
                 help: 'do you need help?',
                 context: 'i can\'t help',
                 property: 'email'
             });
 
-            var serialized = errors.utils.serialize(err);
+            let serialized = utils.serialize(err);
 
-            serialized.should.be.a.JSONErrorResponse({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (serialized.should as any).be.a.JSONErrorResponse({
                 status: 400,
                 code: 'BadRequestError',
                 title: 'BadRequestError',
@@ -127,7 +130,7 @@ describe('Errors', function () {
                 }
             });
 
-            var deserialized = errors.utils.deserialize(serialized);
+            const deserialized = utils.deserialize(serialized);
             (deserialized instanceof Error).should.eql(true);
 
             deserialized.id.should.eql(serialized.errors[0].id);
@@ -140,9 +143,10 @@ describe('Errors', function () {
             deserialized.property.should.eql('email');
 
             err = new errors.BadRequestError();
-            serialized = errors.utils.serialize(err);
+            serialized = utils.serialize(err);
 
-            serialized.should.be.a.JSONErrorResponse({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (serialized.should as any).be.a.JSONErrorResponse({
                 status: 400,
                 code: 'BadRequestError',
                 title: 'BadRequestError',
@@ -158,20 +162,21 @@ describe('Errors', function () {
         });
 
         it('cannot serialize nothing', function () {
-            errors.utils.serialize().message.should.eql('Something went wrong.');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            utils.serialize(undefined as any).message.should.eql('Something went wrong.');
         });
 
         it('deserializing nothing results in a plain InternalServerError (the default)', function () {
-            errors.utils.deserialize({}).message.should.eql('The server has encountered an error.');
-            errors.utils.deserialize({errors: null}).message.should.eql('The server has encountered an error.');
+            utils.deserialize({}).message.should.eql('The server has encountered an error.');
+            utils.deserialize({errors: null}).message.should.eql('The server has encountered an error.');
         });
 
         it('oauth serialize', function () {
-            var err = new errors.NoPermissionError({
+            const err = new errors.NoPermissionError({
                 message: 'Permissions you need to have.'
             });
 
-            var serialized = errors.utils.serialize(err, {format: 'oauth'});
+            const serialized = utils.serialize(err, {format: 'oauth'});
 
             serialized.error.should.eql('access_denied');
             serialized.error_description.should.eql('Permissions you need to have.');
@@ -183,7 +188,7 @@ describe('Errors', function () {
             should.not.exist(serialized.detail);
             should.not.exist(serialized.code);
 
-            var deserialized = errors.utils.deserialize(serialized, {});
+            const deserialized = utils.deserialize(serialized);
 
             (deserialized instanceof errors.NoPermissionError).should.eql(true);
             (deserialized instanceof Error).should.eql(true);
@@ -196,7 +201,7 @@ describe('Errors', function () {
         });
 
         it('[success] deserialize jsonapi, but target error name is unknown', function () {
-            var deserialized = errors.utils.deserialize({
+            const deserialized = utils.deserialize({
                 errors: [{
                     name: 'UnknownError',
                     message: 'message'
@@ -211,19 +216,19 @@ describe('Errors', function () {
         });
 
         it('[failure] deserialize jsonapi, but obj is empty', function () {
-            var deserialized = errors.utils.deserialize({});
+            const deserialized = utils.deserialize({});
             (deserialized instanceof errors.InternalServerError).should.eql(true);
             (deserialized instanceof Error).should.eql(true);
         });
 
         it('[failure] deserialize oauth, but obj is empty', function () {
-            var deserialized = errors.utils.deserialize({});
+            const deserialized = utils.deserialize({});
             (deserialized instanceof errors.InternalServerError).should.eql(true);
             (deserialized instanceof Error).should.eql(true);
         });
 
         it('[failure] serialize oauth, but obj is empty', function () {
-            var serialized = errors.utils.serialize({}, {format: 'oauth'});
+            const serialized = utils.serialize({} as GhostError, {format: 'oauth'});
             serialized.error.should.eql('server_error');
         });
     });
@@ -237,9 +242,9 @@ Stack Line 2`;
             const error = new Error('Test');
             error.stack = testStack;
 
-            const {stack} = errors.utils.prepareStackForUser(error);
+            const {stack} = utils.prepareStackForUser(error);
 
-            stack.should.eql(`Error: Line 0 - Message
+            stack!.should.eql(`Error: Line 0 - Message
 Stack Trace:
 Stack Line 1
 Stack Line 2`);
@@ -250,13 +255,13 @@ Stack Line 2`);
 Stack Line 1
 Stack Line 2`;
 
-            const error = new Error('Test');
+            const error = new Error('Test') as Error & {context?: string};
             error.stack = testStack;
             error.context = 'Line 1 - Context';
 
-            const {stack} = errors.utils.prepareStackForUser(error);
+            const {stack} = utils.prepareStackForUser(error);
 
-            stack.should.eql(`Error: Line 0 - Message
+            stack!.should.eql(`Error: Line 0 - Message
 Line 1 - Context
 Stack Trace:
 Stack Line 1
@@ -268,13 +273,13 @@ Stack Line 2`);
 Stack Line 1
 Stack Line 2`;
 
-            const error = new Error('Test');
+            const error = new Error('Test') as Error & {help?: string};
             error.stack = testStack;
             error.help = 'Line 2 - Help';
 
-            const {stack} = errors.utils.prepareStackForUser(error);
+            const {stack} = utils.prepareStackForUser(error);
 
-            stack.should.eql(`Error: Line 0 - Message
+            stack!.should.eql(`Error: Line 0 - Message
 Line 2 - Help
 Stack Trace:
 Stack Line 1
@@ -286,14 +291,14 @@ Stack Line 2`);
 Stack Line 1
 Stack Line 2`;
 
-            const error = new Error('Test');
+            const error = new Error('Test') as Error & {context?: string; help?: string};
             error.stack = testStack;
             error.context = 'Line 1 - Context';
             error.help = 'Line 2 - Help';
 
-            const {stack} = errors.utils.prepareStackForUser(error);
+            const {stack} = utils.prepareStackForUser(error);
 
-            stack.should.eql(`Error: Line 0 - Message
+            stack!.should.eql(`Error: Line 0 - Message
 Line 1 - Context
 Line 2 - Help
 Stack Trace:
@@ -309,14 +314,14 @@ Stack Line 2`);
 Stack Line 1
 Stack Line 2`;
 
-            const error = new Error('Test');
+            const error = new Error('Test') as Error & {context?: string; help?: string};
             error.stack = testStack;
             error.context = 'Line 1 - Context';
             error.help = 'Line 2 - Help';
 
-            const {stack} = errors.utils.prepareStackForUser(error);
+            const {stack} = utils.prepareStackForUser(error);
 
-            stack.should.eql(`Error: Line 0 - Message
+            stack!.should.eql(`Error: Line 0 - Message
 Line 1 - Context
 Line 2 - Help`);
 

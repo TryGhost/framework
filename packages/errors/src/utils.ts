@@ -128,12 +128,6 @@ const _private = {
     }
 };
 
-export function wrapStack(err: Error, internalErr: Error) {
-    const extraLine = (err.stack?.split(/\n/g) || [])[1];
-    const [firstLine, ...rest] = internalErr.stack?.split(/\n/g) || [];
-    return [firstLine, extraLine, ...rest].join('\n');
-};
-
 /**
  * @description Serialize GhostError instance to error JSON format
  *
@@ -168,7 +162,7 @@ export function serialize(err: GhostError, options?: {format: 'jsonapi' | 'oauth
 /**
  * @description Deserialize from error JSON format to GhostError instance
  */
-export function deserialize(errorFormat: AnyObject) {
+export function deserialize(errorFormat: AnyObject): AnyObject {
     let internalError = {};
 
     if (errorFormat.errors) {
@@ -184,6 +178,8 @@ export function deserialize(errorFormat: AnyObject) {
  * @description Replace the stack with a user-facing one
  * @returns Clone of the original error with a user-facing stack
  */
+export function prepareStackForUser(error: GhostError): GhostError
+export function prepareStackForUser(error: Error): Error
 export function prepareStackForUser(error: Error): Error {
     const stackbits = error.stack?.split(/\n/) || [];
 

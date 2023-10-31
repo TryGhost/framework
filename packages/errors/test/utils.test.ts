@@ -1,14 +1,14 @@
-const assert = require('assert/strict');
+import assert from 'assert/strict';
 
-const errors = require('..');
-const utils = require('../lib/utils');
+import errors from '../src';
+import * as utils from '../src/utils';
 
 describe('Error Utils', function () {
     describe('prepareStackForUser', function () {
         it('returns full error clone of nested errors', function () {
-            const originalError = new Error({
-                message: 'I am the original one!'
-            });
+            const originalError = new Error('I am the original one!') as Error & {custom?: string};
+            originalError.custom = 'I am custom!';
+
             const ghostError = new errors.ValidationError({
                 message: 'mistakes were made',
                 help: 'help yourself',
@@ -24,6 +24,7 @@ describe('Error Utils', function () {
             assert.equal(processedError.errorType, ghostError.errorType);
 
             assert.equal(processedError.errorDetails.originalError.message, originalError.message);
+            assert.equal(processedError.errorDetails.originalError.custom, originalError.custom);
 
             originalError.message = 'changed';
             assert.notEqual(processedError.message, originalError.message);
@@ -31,9 +32,7 @@ describe('Error Utils', function () {
 
         it('Preserves the stack trace', function () {
             const errorCreatingFunction = () => {
-                return new Error({
-                    message: 'Original error'
-                });
+                return new Error('Original error');
             };
             const originalError = errorCreatingFunction();
             const ghostError = new errors.EmailError({
@@ -41,7 +40,7 @@ describe('Error Utils', function () {
                 err: originalError
             });
 
-            assert.equal(ghostError.stack.includes('errorCreatingFunction'), true);
+            assert.equal(ghostError.stack!.includes('errorCreatingFunction'), true);
         });
     });
 });
