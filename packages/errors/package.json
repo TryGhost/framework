@@ -7,6 +7,8 @@
   "main": "cjs/index.js",
   "module": "es/index.js",
   "types": "types/index.d.ts",
+  "source": "src/index.ts",
+  "sideEffects": false,
   "scripts": {
     "dev": "echo \"Implement me!\"",
     "build": "yarn build:cjs && yarn build:es && yarn build:types",
