@@ -168,12 +168,13 @@ describe('Webhook Mock Receiver', function () {
             await webhookMockReceiver.matchHeaderSnapshot();
 
             assert.equal(snapshotManager.assertSnapshot.calledOnce, true);
-            assert.deepEqual(snapshotManager.assertSnapshot.args[0][0], {
-                headers: {
-                    'accept-encoding': 'gzip, deflate',
-                    foo: 'bar',
-                    'user-agent': 'got/9.6.0 (https://github.com/sindresorhus/got)'
-                }
+            assert.deepEqual(Object.keys(snapshotManager.assertSnapshot.args[0][0]), ['headers']);
+            assert.deepEqual({
+                ...snapshotManager.assertSnapshot.args[0][0].headers
+            }, {
+                'accept-encoding': 'gzip, deflate',
+                foo: 'bar',
+                'user-agent': 'got/9.6.0 (https://github.com/sindresorhus/got)'
             });
 
             assert.deepEqual(snapshotManager.assertSnapshot.args[0][1].field, 'headers');
