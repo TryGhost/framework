@@ -11,11 +11,13 @@
   "sideEffects": false,
   "scripts": {
     "dev": "echo \"Implement me!\"",
+    "prepare": "NODE_ENV=production yarn build",
+    "pretest": "NODE_ENV=production yarn build",
     "build": "yarn build:cjs && yarn build:es && yarn build:types",
     "build:cjs": "yarn esbuild src/*.ts --target=es2020 --outdir=cjs --format=cjs",
     "build:es": "yarn esbuild src/*.ts --target=es2020 --outdir=es --format=esm",
     "build:types": "tsc --emitDeclarationOnly --declaration --declarationMap --outDir types",
-    "test": "TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' NODE_ENV=testing c8 --check-coverage --all --reporter text --reporter cobertura  mocha -r ts-node/register './test/**/*.test.ts'",
+    "test": "TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' NODE_ENV=testing c8 --check-coverage --all -n src --reporter text --reporter cobertura  mocha -r ts-node/register './test/**/*.test.ts'",
     "lint": "eslint . --ext .js --cache",
     "posttest": "yarn lint"
   },
