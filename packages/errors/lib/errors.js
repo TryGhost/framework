@@ -39,9 +39,8 @@ class GhostError extends Error {
         if (options.err) {
             // CASE: Support err as string (it happens that third party libs return a string instead of an error instance)
             if (isString(options.err)) {
-                /* eslint-disable no-restricted-syntax */
+                // eslint-disable-next-line ghost/ghost-custom/no-native-error
                 options.err = new Error(options.err);
-                /* eslint-enable no-restricted-syntax */
             }
 
             Object.getOwnPropertyNames(options.err).forEach((property) => {

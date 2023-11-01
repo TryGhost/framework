@@ -1,2 +1,2 @@
-module.exports = require('./lib/elasticsearch');
-module.exports.BunyanStream = require('./lib/elasticsearch-bunyan');
+module.exports = require('./lib/ElasticSearch');
+module.exports.BunyanStream = require('./lib/ElasticSearchBunyan');

@@ -1,4 +1,4 @@
-module.exports = require('./lib/agent');
+module.exports = require('./lib/Agent');
 
 // NOTE: exposing jest-snapshot as a part of express-test to avoid
 //       version mismatching on the client side

@@ -1,4 +1,4 @@
-const ElasticSearch = require('./elasticsearch');
+const ElasticSearch = require('./ElasticSearch');
 const {PassThrough} = require('stream');
 const split = require('split2');
 

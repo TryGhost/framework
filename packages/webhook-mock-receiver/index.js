@@ -1,1 +1,1 @@
-module.exports = require('./lib/webhook-mock-receiver');
+module.exports = require('./lib/WebhookMockReceiver');

@@ -3,7 +3,7 @@
  * https://github.com/validatorjs/validator.js/blob/531dc7f1f75613bec75c6d888b46480455e78dc7/src/lib/isFQDN.js
  */
 /* eslint-disable camelcase */
-const assertString = require('./util/assertString');
+const assertString = require('./util/assert-string');
 const merge = require('./util/merge');
 
 const default_fqdn_options = {

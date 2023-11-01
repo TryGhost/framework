@@ -1,1 +1,1 @@
-module.exports = require('./lib/pretty-stream');
+module.exports = require('./lib/PrettyStream');

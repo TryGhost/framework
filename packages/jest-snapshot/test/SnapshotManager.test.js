@@ -1,6 +1,6 @@
 const {assert, sinon} = require('./utils');
 
-const SnapshotManager = require('../lib/snapshot-manager');
+const SnapshotManager = require('../lib/SnapshotManager');
 
 describe('Snapshot Manager', function () {
     afterEach(function () {
@@ -85,7 +85,7 @@ describe('Snapshot Manager', function () {
         const {test} = this;
         inputPath = test.file + '.snap';
         outputPath = snapshotMatcher._resolveSnapshotFilePath(inputPath);
-        assert.match(outputPath, /\/packages\/jest-snapshot\/test\/__snapshots__\/snapshot-manager\.test\.js\.snap/);
+        assert.match(outputPath, /\/packages\/jest-snapshot\/test\/__snapshots__\/SnapshotManager\.test\.js\.snap/);
     });
 
     it('_getConfig', function () {
@@ -108,14 +108,14 @@ describe('Snapshot Manager', function () {
         });
 
         let config = snapshotMatcher._getConfig();
-        assert.match(config.testFile, /\/__snapshots__\/snapshot-manager\.test\.js\.snap/);
+        assert.match(config.testFile, /\/__snapshots__\/SnapshotManager\.test\.js\.snap/);
         assert.equal(config.snapshotName, 'Snapshot Manager _getConfig 1');
         assert.equal(config.willUpdate, 'new');
         sinon.assert.calledOnce(nameSpy);
 
         process.env.SNAPSHOT_UPDATE = 1;
         config = snapshotMatcher._getConfig();
-        assert.match(config.testFile, /\/__snapshots__\/snapshot-manager\.test\.js\.snap/);
+        assert.match(config.testFile, /\/__snapshots__\/SnapshotManager\.test\.js\.snap/);
         assert.equal(config.snapshotName, 'Snapshot Manager _getConfig 2');
         assert.equal(config.willUpdate, 'all');
         sinon.assert.calledTwice(nameSpy);

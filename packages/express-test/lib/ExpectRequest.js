@@ -1,5 +1,5 @@
 const assert = require('assert');
-const {Request, RequestOptions} = require('./request');
+const {Request, RequestOptions} = require('./Request');
 const {snapshotManager} = require('@tryghost/jest-snapshot');
 
 /**
@@ -30,7 +30,8 @@ class ExpectRequest extends Request {
 
     expect(callback) {
         if (typeof callback !== 'function') {
-            throw new Error(/* eslint-disable-line no-restricted-syntax */
+            // eslint-disable-next-line ghost/ghost-custom/no-native-error
+            throw new Error(
                 'express-test expect() requires a callback function, did you mean expectStatus or expectHeader?'
             );
         }

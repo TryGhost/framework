@@ -73,7 +73,7 @@ class WebhookMockReceiver {
         };
 
         this.snapshotManager.assertSnapshot(this.headers, assertion);
-        
+
         return this;
     }
 }

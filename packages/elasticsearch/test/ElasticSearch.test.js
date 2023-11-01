@@ -4,7 +4,7 @@ const sandbox = sinon.createSandbox();
 
 const {Client} = require('@elastic/elasticsearch');
 const ElasticSearch = require('../index');
-const ElasticSearchBunyan = require('../lib/elasticsearch-bunyan');
+const ElasticSearchBunyan = require('../lib/ElasticSearchBunyan');
 
 const testClientConfig = {
     node: 'http://test-elastic-client',

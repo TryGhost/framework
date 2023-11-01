@@ -1,6 +1,7 @@
+/* eslint-disable ghost/ghost-custom/no-native-error */
 const {CookieJar} = require('cookiejar');
-const ExpectRequest = require('./expect-request');
-const {RequestOptions} = require('./request');
+const ExpectRequest = require('./ExpectRequest');
+const {RequestOptions} = require('./Request');
 const {normalizeURL} = require('./utils');
 
 /**

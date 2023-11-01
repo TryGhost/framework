@@ -1,4 +1,4 @@
-const assert = require('assert');
+const assert = require('assert/strict');
 const got = require('got');
 const sinon = require('sinon');
 
@@ -54,7 +54,7 @@ describe('Webhook Mock Receiver', function () {
                 },
                 json: true
             });
-            
+
             assert.deepEqual(webhookMockReceiver.body, {
                 body: {
                     avocado: 'toast'
@@ -146,7 +146,7 @@ describe('Webhook Mock Receiver', function () {
 
             await webhookMockReceiver.receivedRequest();
             webhookMockReceiver.matchBodySnapshot();
-           
+
             assert.equal(snapshotManager.assertSnapshot.calledOnce, true);
             assert.deepEqual(snapshotManager.assertSnapshot.args[0][0], {
                 body: {
@@ -168,12 +168,13 @@ describe('Webhook Mock Receiver', function () {
             await webhookMockReceiver.matchHeaderSnapshot();
 
             assert.equal(snapshotManager.assertSnapshot.calledOnce, true);
-            assert.deepEqual(snapshotManager.assertSnapshot.args[0][0], {
-                headers: {
-                    'accept-encoding': 'gzip, deflate',
-                    foo: 'bar',
-                    'user-agent': 'got/9.6.0 (https://github.com/sindresorhus/got)'
-                }
+            assert.deepEqual(Object.keys(snapshotManager.assertSnapshot.args[0][0]), ['headers']);
+            assert.deepEqual({
+                ...snapshotManager.assertSnapshot.args[0][0].headers
+            }, {
+                'accept-encoding': 'gzip, deflate',
+                foo: 'bar',
+                'user-agent': 'got/9.6.0 (https://github.com/sindresorhus/got)'
             });
 
             assert.deepEqual(snapshotManager.assertSnapshot.args[0][1].field, 'headers');

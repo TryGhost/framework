@@ -2,7 +2,7 @@
 // const testUtils = require('./utils');
 require('./utils');
 
-const getConfig = require('../lib/GhostConfig');
+const getConfig = require('../lib/get-config');
 const rootUtils = require('@tryghost/root-utils');
 const sandbox = sinon.createSandbox();
 const {join} = require('path');
