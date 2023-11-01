@@ -53,6 +53,41 @@ describe('Errors', function () {
             ghostError.context!.should.eql('test');
         });
 
+        it('does not overwrite key attributes', function () {
+            const someError = new Error() as Error & {errorType?: string; statusCode?: number; level?: string; code?: string};
+
+            someError.errorType = 'test';
+            someError.name = 'test';
+            someError.statusCode = 0;
+            someError.message = 'test';
+            someError.level = 'test';
+            someError.code = 'TEST_CODE';
+
+            const ghostError = new errors.InternalServerError({
+                err: someError,
+                code: 'CODE'
+            });
+
+            ghostError.errorType!.should.eql('InternalServerError');
+            ghostError.name!.should.eql('InternalServerError');
+            ghostError.statusCode!.should.eql(500);
+            ghostError.message!.should.eql('The server has encountered an error.');
+            ghostError.level!.should.eql('critical');
+            ghostError.code!.should.eql('CODE');
+        });
+
+        it('defaults to the original error code', function () {
+            const someError = new Error() as Error & {code?: string};
+
+            someError.code = 'TEST_CODE';
+
+            const ghostError = new errors.InternalServerError({
+                err: someError
+            });
+
+            ghostError.code!.should.eql('TEST_CODE');
+        });
+
         it('with custom message', function () {
             const someError = new Error();
 
@@ -223,6 +258,12 @@ describe('Errors', function () {
 
         it('[failure] deserialize oauth, but obj is empty', function () {
             const deserialized = utils.deserialize({});
+            (deserialized instanceof errors.InternalServerError).should.eql(true);
+            (deserialized instanceof Error).should.eql(true);
+        });
+
+        it('[failure] deserialize oauth, but name is not an error name', function () {
+            const deserialized = utils.deserialize({name: 'random_oauth_error'});
             (deserialized instanceof errors.InternalServerError).should.eql(true);
             (deserialized instanceof Error).should.eql(true);
         });
@@ -560,12 +601,12 @@ Line 2 - Help`);
 
         // This error doesn't make sense because it has an OK status code..
         // I think this should have been an EmptyImageError with a 400
-        it.skip('NoContentError', function () {
+        it('NoContentError', function () {
             const error = new errors.NoContentError();
             error.statusCode.should.eql(204);
             error.level.should.eql('normal');
             error.errorType.should.eql('NoContentError');
-            error.message.should.eql('');
+            error.message.should.eql('The server has encountered an error.');
             error.hideStack.should.be.true();
         });
 
