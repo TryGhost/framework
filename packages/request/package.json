@@ -19,7 +19,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "c8": "8.0.1",
+    "c8": "9.0.0",
     "mocha": "10.2.0",
     "nock": "13.4.0",
     "rewire": "7.0.0",
