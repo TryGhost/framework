@@ -788,10 +788,10 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
-"@elastic/elasticsearch@8.11.0":
-  version "8.11.0"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.11.0.tgz#6cc62f29cd139740b4f69d30f76a58a093befc34"
-  integrity sha512-1UEQFdGLuKdROLJnMTjegasRM3X9INm/PVADoIVgdTfuv6DeJ17UMuNwYSkCrLrC0trLjjGV4YganpbJJX/VLg==
+"@elastic/elasticsearch@8.12.0":
+  version "8.12.0"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.12.0.tgz#5accb96b46214e6fb680fbb3d137f78f637cbe20"
+  integrity sha512-cgUfEYyyXao/VqqS5RGsRMBKVck1fhPYX2Aux7jOwPqMAGE+VE+ra7KhU0T2ZqIpahPCbvx4ro4WPzhBrsVH6A==
   dependencies:
     "@elastic/transport" "^8.4.0"
     tslib "^2.4.0"
