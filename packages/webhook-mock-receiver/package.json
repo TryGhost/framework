@@ -23,7 +23,7 @@
   "devDependencies": {
     "c8": "9.1.0",
     "got": "9.6.0",
-    "mocha": "10.2.0",
+    "mocha": "10.3.0",
     "sinon": "17.0.1"
   },
   "dependencies": {
