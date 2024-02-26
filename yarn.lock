@@ -776,18 +776,18 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
-"@elastic/elasticsearch@8.12.1":
-  version "8.12.1"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.12.1.tgz#fd80ef7a4cb959832ae01623a428055f65ffa0e4"
-  integrity sha512-/dJtxtvoN2vRXip6xUrEyzthhzVUOKL8L9YNq25HpMwqiqrJTK70/dOp6GM8oTVQ87UPyJBiiCxQY2+cvg2XWw==
+"@elastic/elasticsearch@8.12.2":
+  version "8.12.2"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.12.2.tgz#7a241f739a509cc59faee85f79a4c9e9e5ba9128"
+  integrity sha512-04NvH3LIgcv1Uwguorfw2WwzC9Lhfsqs9f0L6uq6MrCw0lqe/HOQ6E8vJ6EkHAA15iEfbhtxOtenbZVVcE+mAQ==
   dependencies:
-    "@elastic/transport" "^8.4.0"
+    "@elastic/transport" "^8.4.1"
     tslib "^2.4.0"
 
-"@elastic/transport@^8.4.0":
-  version "8.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-8.4.0.tgz#e1ec05f7a2857162c161e2c97008f9b21301a673"
-  integrity sha512-Yb3fDa7yGD0ca3uMbL64M3vM1cE5h5uHmBcTjkdB4VpCasRNKSd09iDpwqX8zX1tbBtxcaKYLceKthWvPeIxTw==
+"@elastic/transport@^8.4.1":
+  version "8.4.1"
+  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-8.4.1.tgz#f98c5a5e2156bcb3f01170b4aca7e7de4d8b61b8"
+  integrity sha512-/SXVuVnuU5b4dq8OFY4izG+dmGla185PcoqgK6+AJMpmOeY1QYVNbWtCwvSvoAANN5D/wV+EBU8+x7Vf9EphbA==
   dependencies:
     debug "^4.3.4"
     hpagent "^1.0.0"
