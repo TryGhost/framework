@@ -137,6 +137,17 @@ export class RequestNotAcceptableError extends GhostError {
     }
 }
 
+export class RangeNotSatisfiableError extends GhostError {
+    constructor(options: GhostErrorOptions = {}) {
+        super(mergeOptions(options, {
+            statusCode: 416,
+            errorType: 'RangeNotSatisfiableError',
+            message: 'Range not satisfiable for provided Range header.',
+            hideStack: true
+        }));
+    }
+}
+
 export class RequestEntityTooLargeError extends GhostError {
     constructor(options: GhostErrorOptions = {}) {
         super(mergeOptions(options, {

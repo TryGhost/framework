@@ -488,6 +488,15 @@ Line 2 - Help`);
             error.hideStack.should.be.false();
         });
 
+        it('RangeNotSatisfiableError', function () {
+            const error = new errors.RangeNotSatisfiableError();
+            error.statusCode.should.eql(416);
+            error.level.should.eql('normal');
+            error.errorType.should.eql('RangeNotSatisfiableError');
+            error.message.should.eql('Range not satisfiable for provided Range header.');
+            error.hideStack.should.be.true();
+        });
+
         it('TokenRevocationError', function () {
             const error = new errors.TokenRevocationError();
             error.statusCode.should.eql(503);
