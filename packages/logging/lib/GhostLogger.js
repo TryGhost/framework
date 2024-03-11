@@ -5,7 +5,7 @@ const isObject = require('lodash/isObject');
 const isEmpty = require('lodash/isEmpty');
 const includes = require('lodash/includes');
 const bunyan = require('bunyan');
-const fs = require('fs-extra');
+const fs = require('fs');
 const jsonStringifySafe = require('json-stringify-safe');
 
 /**
@@ -287,7 +287,7 @@ class GhostLogger {
         const sanitizedDomain = this.domain.replace(/[^\w]/gi, '_');
 
         // CASE: target log folder does not exist, show warning
-        if (!fs.pathExistsSync(this.path)) {
+        if (!fs.existsSync(this.path)) {
             this.error('Target log folder does not exist: ' + this.path);
             return;
         }
