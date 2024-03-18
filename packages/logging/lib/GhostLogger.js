@@ -420,6 +420,10 @@ class GhostLogger {
                     requestLog.body = this.removeSensitiveData(req.body);
                 }
 
+                if (req.queueDepth) {
+                    requestLog.queueDepth = this.queueDepth;
+                }
+
                 return requestLog;
             },
             res: (res) => {
