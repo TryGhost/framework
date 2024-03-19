@@ -421,7 +421,7 @@ class GhostLogger {
                 }
 
                 if (req.queueDepth) {
-                    requestLog.queueDepth = this.queueDepth;
+                    requestLog.queueDepth = req.queueDepth;
                 }
 
                 return requestLog;
