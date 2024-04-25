@@ -17,6 +17,14 @@ function throwOnSymlinks(entry) {
     }
 }
 
+function throwOnLargeFilenames(entry) {
+    if (Buffer.byteLength(entry.fileName, 'utf8') >= 254) {
+        throw new errors.IncorrectUsageError({
+            message: 'File names of 254 bytes or more are not allowed'
+        });
+    }
+}
+
 /**
  * Extract
  *
@@ -36,14 +44,14 @@ module.exports = (zipToExtract, destination, options) => {
 
     opts.dir = destination;
 
-    if (opts.onEntry) {
-        opts.onEntry = (entry, zipfile) => {
-            throwOnSymlinks(entry);
-            options.onEntry(entry, zipfile);
-        };
-    } else {
-        opts.onEntry = throwOnSymlinks;
-    }
+    const originalOnEntry = opts.onEntry;
+    opts.onEntry = (entry, zipfile) => {
+        throwOnSymlinks(entry);
+        throwOnLargeFilenames(entry);
+        if (originalOnEntry) {
+            originalOnEntry(entry, zipfile);
+        }
+    };
 
     return extract(zipToExtract, opts).then(() => {
         return {path: destination};
