@@ -102,13 +102,13 @@ describe('Extract zip', function () {
         fs.existsSync(path.join(unzipDestination, 'package.json')).should.be.true();
     });
 
-    it('throws if the zip contains a file with more than 254 bytes or more', async function () {
-        const longFileName = 'a'.repeat(250) + '.txt'; // 254 characters
+    it('throws if the zip contains a filename with 254 or more bytes', async function () {
+        const longFileName = 'a'.repeat(250) + '.txt'; // 254 bytes
         longFilePath = path.join(themeFolder, longFileName);
 
         fs.writeFileSync(longFilePath, 'test content');
 
         await compress(themeFolder, zipDestination);
-        await extract(zipDestination, unzipDestination).should.be.rejectedWith('File names of 254 bytes or more are not allowed');
+        await extract(zipDestination, unzipDestination).should.be.rejectedWith('File names in the zip folder must be shorter than 254 characters.');
     });
 });
