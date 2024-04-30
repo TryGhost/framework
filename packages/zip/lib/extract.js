@@ -12,7 +12,15 @@ function throwOnSymlinks(entry) {
 
     if (symlink) {
         throw new errors.UnsupportedMediaTypeError({
-            message: 'Symlinks in ZIP-files are not allowed'
+            message: 'Symlinks are not allowed in the zip folder.'
+        });
+    }
+}
+
+function throwOnLargeFilenames(entry) {
+    if (Buffer.byteLength(entry.fileName, 'utf8') >= 254) {
+        throw new errors.UnsupportedMediaTypeError({
+            message: 'File names in the zip folder must be shorter than 254 characters.'
         });
     }
 }
@@ -36,14 +44,14 @@ module.exports = (zipToExtract, destination, options) => {
 
     opts.dir = destination;
 
-    if (opts.onEntry) {
-        opts.onEntry = (entry, zipfile) => {
-            throwOnSymlinks(entry);
-            options.onEntry(entry, zipfile);
-        };
-    } else {
-        opts.onEntry = throwOnSymlinks;
-    }
+    const originalOnEntry = opts.onEntry;
+    opts.onEntry = (entry, zipfile) => {
+        throwOnSymlinks(entry);
+        throwOnLargeFilenames(entry);
+        if (originalOnEntry) {
+            originalOnEntry(entry, zipfile);
+        }
+    };
 
     return extract(zipToExtract, opts).then(() => {
         return {path: destination};
