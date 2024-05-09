@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/debug",
-  "version": "0.1.29",
+  "version": "0.1.30",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/debug",
   "author": "Ghost Foundation",
   "license": "MIT",
@@ -25,7 +25,7 @@
     "sinon": "17.0.2"
   },
   "dependencies": {
-    "@tryghost/root-utils": "^0.3.27",
+    "@tryghost/root-utils": "^0.3.28",
     "debug": "^4.3.1"
   }
 }
