@@ -190,9 +190,16 @@ const pagination = function pagination(bookshelf) {
                 }
 
                 countQuery.clear('select');
-                countPromise = countQuery.select(
-                    bookshelf.knex.raw('count(distinct ' + tableName + '.' + idAttribute + ') as aggregate')
-                );
+                //skipping distinct for simple queries, where we know that the result set will always be unique, as it adds a lot of latency
+                if (options.useBasicCount) {
+                    countPromise = countQuery.select(
+                        bookshelf.knex.raw('count(*) as aggregate')
+                    );
+                } else {
+                    countPromise = countQuery.select(
+                        bookshelf.knex.raw('count(distinct ' + tableName + '.' + idAttribute + ') as aggregate')
+                    );
+                }
             }
 
             return countPromise.then(function (countResult) {
