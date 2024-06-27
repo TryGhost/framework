@@ -190,7 +190,7 @@ const pagination = function pagination(bookshelf) {
                 }
 
                 countQuery.clear('select');
-                //skipping distinct for simple queries, where we know that the result set will always be unique, as it adds a lot of latency
+                //skipping distinct for simple queries, where we know that the result set will always be unique, as distinct adds a lot of latency
                 if (options.useBasicCount) {
                     countPromise = countQuery.select(
                         bookshelf.knex.raw('count(*) as aggregate')
