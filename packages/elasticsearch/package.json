@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/elasticsearch",
-  "version": "3.0.19",
+  "version": "3.0.20",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/elasticsearch",
   "author": "Ghost Foundation",
   "license": "MIT",
@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@elastic/elasticsearch": "8.14.0",
-    "@tryghost/debug": "^0.1.30",
+    "@tryghost/debug": "^0.1.31",
     "split2": "4.2.0"
   }
 }
