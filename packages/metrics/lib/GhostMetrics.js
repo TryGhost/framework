@@ -1,12 +1,5 @@
 const jsonStringifySafe = require('json-stringify-safe');
 
-try {
-    const allSettled = require('promise.allsettled');
-    allSettled.shim();
-} catch (err) {
-    // no-op - shim not required
-}
-
 /**
  * @description Metric shipper class built on the loggingrc config used in Ghost projects
  */

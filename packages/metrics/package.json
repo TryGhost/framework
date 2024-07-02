@@ -30,8 +30,5 @@
     "@tryghost/pretty-stream": "^0.1.25",
     "@tryghost/root-utils": "^0.3.29",
     "json-stringify-safe": "^5.0.1"
-  },
-  "optionalDependencies": {
-    "promise.allsettled": "^1.0.5"
   }
 }
