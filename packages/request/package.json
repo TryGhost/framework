@@ -31,7 +31,7 @@
     "@tryghost/validator": "^0.2.12",
     "@tryghost/version": "^0.1.29",
     "cacheable-lookup": "7.0.0",
-    "got": "13.0.0",
+    "got": "14.4.1",
     "lodash": "^4.17.21"
   }
 }
