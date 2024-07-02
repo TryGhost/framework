@@ -43,7 +43,7 @@
     "typescript": "5.2.2"
   },
   "dependencies": {
-    "@stdlib/utils-copy": "^0.0.7",
+    "@stdlib/utils-copy": "^0.2.0",
     "uuid": "^9.0.0"
   }
 }
