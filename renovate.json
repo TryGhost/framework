@@ -3,6 +3,7 @@
     "@tryghost:quietJS"
   ],
   "ignoreDeps": [
+    "@elastic/elasticsearch",
     "moment-timezone",
     "validator"
   ]
