@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-transaction-events",
-  "version": "0.2.15",
+  "version": "0.2.16",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/bookshelf-transaction-events",
   "author": "Ghost Foundation",
   "license": "MIT",
