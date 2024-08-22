@@ -33,6 +33,7 @@ const filter = function filter(Bookshelf) {
             }
 
             let custom = options.filter;
+            let cte = options.useCTE;
             let extra = this.extraFilters(options);
             let overrides = this.enforcedFilters(options);
             let defaults = this.defaultFilters(options);
@@ -59,7 +60,8 @@ const filter = function filter(Bookshelf) {
                         expansions: expansions,
                         overrides: overrides,
                         defaults: defaults,
-                        transformer: transformer
+                        transformer: transformer,
+                        cte: cte
                     }).querySQL(qb);
                 });
             } catch (err) {
