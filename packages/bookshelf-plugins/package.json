@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-plugins",
-  "version": "0.6.21",
+  "version": "0.6.22",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/bookshelf-plugins",
   "author": "Ghost Foundation",
   "license": "MIT",
@@ -24,15 +24,15 @@
     "sinon": "18.0.0"
   },
   "dependencies": {
-    "@tryghost/bookshelf-collision": "^0.1.45",
-    "@tryghost/bookshelf-custom-query": "^0.1.27",
-    "@tryghost/bookshelf-eager-load": "^0.1.31",
-    "@tryghost/bookshelf-filter": "^0.5.17",
-    "@tryghost/bookshelf-has-posts": "^0.1.32",
-    "@tryghost/bookshelf-include-count": "^0.3.15",
-    "@tryghost/bookshelf-order": "^0.1.27",
-    "@tryghost/bookshelf-pagination": "^0.1.48",
-    "@tryghost/bookshelf-search": "^0.1.27",
-    "@tryghost/bookshelf-transaction-events": "^0.2.16"
+    "@tryghost/bookshelf-collision": "^0.1.46",
+    "@tryghost/bookshelf-custom-query": "^0.1.28",
+    "@tryghost/bookshelf-eager-load": "^0.1.32",
+    "@tryghost/bookshelf-filter": "^0.5.18",
+    "@tryghost/bookshelf-has-posts": "^0.1.33",
+    "@tryghost/bookshelf-include-count": "^0.3.16",
+    "@tryghost/bookshelf-order": "^0.1.28",
+    "@tryghost/bookshelf-pagination": "^0.1.49",
+    "@tryghost/bookshelf-search": "^0.1.28",
+    "@tryghost/bookshelf-transaction-events": "^0.2.17"
   }
 }
