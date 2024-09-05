@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-plugins",
-  "version": "0.6.23",
+  "version": "0.6.24",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/bookshelf-plugins",
   "author": "Ghost Foundation",
   "license": "MIT",
@@ -27,7 +27,7 @@
     "@tryghost/bookshelf-collision": "^0.1.46",
     "@tryghost/bookshelf-custom-query": "^0.1.28",
     "@tryghost/bookshelf-eager-load": "^0.1.32",
-    "@tryghost/bookshelf-filter": "^0.5.19",
+    "@tryghost/bookshelf-filter": "^0.5.20",
     "@tryghost/bookshelf-has-posts": "^0.1.33",
     "@tryghost/bookshelf-include-count": "^0.3.16",
     "@tryghost/bookshelf-order": "^0.1.28",
