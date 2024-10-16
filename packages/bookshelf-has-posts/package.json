@@ -21,7 +21,7 @@
   "devDependencies": {
     "mocha": "10.7.3",
     "should": "13.2.3",
-    "sinon": "18.0.0"
+    "sinon": "19.0.2"
   },
   "dependencies": {
     "@tryghost/debug": "^0.1.33",
