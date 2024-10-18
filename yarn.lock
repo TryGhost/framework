@@ -2672,9 +2672,9 @@
   integrity sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==
 
 "@types/lodash@^4.14.200":
-  version "4.17.10"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.17.10.tgz#64f3edf656af2fe59e7278b73d3e62404144a6e6"
-  integrity sha512-YpS0zzoduEhuOWjAotS6A5AVCva7X4lVlYLF0FYHAY9sdraBfnatttHItlWeZdGhuEkf+OzMNg2ZYAx8t+52uQ==
+  version "4.17.11"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.17.11.tgz#8d01705ee14865015a0520e80b7ce95f3c2f7060"
+  integrity sha512-jzqWo/uQP/iqeGGTjhgFp2yaCrCYTauASQcpdzESNCkHjSprBJVcZP9KG9aQ0q+xcsXiKd/iuw/4dLjS3Odc7Q==
 
 "@types/minimatch@^3.0.3":
   version "3.0.5"
@@ -2687,9 +2687,9 @@
   integrity sha512-sicdRoWtYevwxjOHNMPTl3vSfJM6oyW8o1wXeI7uww6b6xHg8eBznQDNSGBCDJmsE8UMxP05JgZRtsKbTqt//Q==
 
 "@types/node@*":
-  version "22.7.5"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.7.5.tgz#cfde981727a7ab3611a481510b473ae54442b92b"
-  integrity sha512-jML7s2NAzMWc//QSJ1a3prpk78cOPchGvXJsC3C6R6PSMoooztvRVQEz89gmBTBY1SPMaqo5teB4uNHPdetShQ==
+  version "22.7.6"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.7.6.tgz#3ec3e2b071e136cd11093c19128405e1d1f92f33"
+  integrity sha512-/d7Rnj0/ExXDMcioS78/kf1lMzYk4BZV8MZGTBKzTGZ6/406ukkbYlIsZmMPhcR5KlkunDHQLrtAVmSq7r+mSw==
   dependencies:
     undici-types "~6.19.2"
 
