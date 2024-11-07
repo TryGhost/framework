@@ -12,6 +12,15 @@ class SnapshotManager {
         this.defaultSnapshotPath = '__snapshots__';
     }
 
+    /**
+     * Looks in the registry for a snapshot with the same filename and nameTemplate
+     * If needed, increments the counter
+     * Returns nametemplate with the counter appended.
+     *
+     * @param {string} snapshotFilename e.g. 'my-fake.test.js.snap'
+     * @param {string} snapshotNameTemplate e.g. 'My fake test title'
+     * @returns {string} e.g. 'My fake test title 1'
+     */
     _getNameForSnapshot(snapshotFilename, snapshotNameTemplate) {
         if (!this.registry[snapshotFilename]) {
             this.registry[snapshotFilename] = {};
@@ -23,6 +32,11 @@ class SnapshotManager {
         return `${snapshotNameTemplate} ${nextCounter}`;
     }
 
+    /**
+     * Resolves the snapshot file path by appending the defaultSnapshotPath to the filename
+     * @param {string} testFile e.g. 'my-fake.test.js.snap'
+     * @returns {string} e.g. '__snapshots__/my-fake.test.js.snap'
+     */
     _resolveSnapshotFilePath(testFile) {
         const parsedPath = path.parse(testFile);
 
@@ -31,6 +45,11 @@ class SnapshotManager {
         return path.format(parsedPath);
     }
 
+    /**
+     * Returns config for the current test
+     * Throws an error if the current test is not configured
+     * @returns {Object} e.g. {testFile: '__snapshots__/my-fake.test.js.snap', snapshotName: 'My fake test title 1', willUpdate: 'new'}
+     */
     _getConfig() {
         if (!this.currentTest.filename || !this.currentTest.nameTemplate) {
             throw new errors.IncorrectUsageError({
@@ -57,10 +76,16 @@ class SnapshotManager {
         return {testFile, snapshotName, willUpdate};
     }
 
+    /**
+     * Resets the registry to an empty object
+     */
     resetRegistry() {
         this.registry = {};
     }
 
+    /**
+     * Resets the registry for the current test only
+     */
     resetRegistryForCurrentTest() {
         const testTitle = this.currentTest.nameTemplate;
         if (this.currentTest.filename in this.registry && testTitle in this.registry[this.currentTest.filename]) {
@@ -68,10 +93,21 @@ class SnapshotManager {
         }
     }
 
+    /**
+     * @param {Object} testConfig
+     * @param {String} testConfig.filename full path to the test file including the .snap extension
+     * @param {String} testConfig.nameTemplate the full name of the test - all the describe and it names concatenated
+     */
     setCurrentTest(testConfig) {
         this.currentTest = testConfig;
     }
 
+    /**
+     * Gets a SnapshotState instance for the current test
+     * @param {string} testFile e.g. '__snapshots__/my-fake.test.js.snap'
+     * @param {string} willUpdate e.g. 'new'
+     * @returns {SnapshotState}
+     */
     getSnapshotState(testFile, willUpdate) {
         // Initialize the SnapshotState, it’s responsible for actually matching
         // actual snapshot with expected one and storing results
@@ -80,6 +116,13 @@ class SnapshotManager {
         });
     }
 
+    /**
+     * Asserts the snapshot values match using the match function
+     * Does some formatting of the error message
+     *
+     * @param {{field: string}} response
+     * @param {{properties: Object, field: string, error: Object, hint: string}} assertion
+     */
     assertSnapshot(response, assertion) {
         const {properties, field, error} = assertion;
 
@@ -116,6 +159,17 @@ class SnapshotManager {
         assert.equal(match.pass, true, error);
     }
 
+    /**
+     * Calls Jest's toMatchSnapshot function
+     * Binds the snapshotState, currentTestName, utils and equals function to the matcher
+     * Executes the matcher
+     * Saves the snapshot state
+     *
+     * @param {Object} received - our actual value
+     * @param {Object} [properties] - the properties we want to match against
+     * @param {string} [hint] - a hint to help with the match
+     * @returns {Object} result of the match
+     */
     match(received, properties = {}, hint) {
         const {testFile, snapshotName, willUpdate} = this._getConfig();
 
