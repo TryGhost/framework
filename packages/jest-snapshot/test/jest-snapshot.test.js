@@ -13,13 +13,13 @@ describe('Jest Snapshot', function () {
 
         const {any, anything, stringMatching} = snapshotTools;
 
-        // Check the methods we export from other packages still exist and are
+        // Check the methods we export from other packages still exist and are functions
         assert.equal(typeof any, 'function');
         assert.equal(typeof anything, 'function');
         assert.equal(typeof stringMatching, 'function');
     });
 
-    it('matchSnapshotAssertion', function () {
+    it('matchSnapshotAssertion calls the match function and asserts the result', function () {
         const matchSnapshotSpy = sinon.stub(snapshotTools.snapshotManager, 'match').returns(
             {
                 message: () => { },
@@ -37,24 +37,26 @@ describe('Jest Snapshot', function () {
         sinon.assert.calledOnceWithExactly(matchSnapshotSpy, fakeThis.obj, fakeProps);
     });
 
-    it('mochaHooks: beforeAll', function () {
-        const registrySpy = sinon.stub(snapshotTools.snapshotManager, 'resetRegistry');
-        snapshotTools.mochaHooks.beforeAll();
-        sinon.assert.calledOnce(registrySpy);
-    });
+    describe('mochaHooks', function () {
+        it('beforeAll correctly resets the registry', function () {
+            const registrySpy = sinon.stub(snapshotTools.snapshotManager, 'resetRegistry');
+            snapshotTools.mochaHooks.beforeAll();
+            sinon.assert.calledOnce(registrySpy);
+        });
 
-    it('mochaHooks: beforeEach', function () {
-        const setTestSpy = sinon.stub(snapshotTools.snapshotManager, 'setCurrentTest').returns();
-        snapshotTools.mochaHooks.beforeEach.call({currentTest: {file: 'test', fullTitle: () => { }, currentRetry: () => 0}});
-        sinon.assert.calledOnce(setTestSpy);
-    });
+        it('beforeEach correctly sets the current test', function () {
+            const setTestSpy = sinon.stub(snapshotTools.snapshotManager, 'setCurrentTest').returns();
+            snapshotTools.mochaHooks.beforeEach.call({currentTest: {file: 'test', fullTitle: () => { }, currentRetry: () => 0}});
+            sinon.assert.calledOnce(setTestSpy);
+        });
 
-    it('mochaHooks: beforeEach with retries', function () {
-        const setTestSpy = sinon.stub(snapshotTools.snapshotManager, 'setCurrentTest').returns();
-        const resetRegistrySpy = sinon.stub(snapshotTools.snapshotManager, 'resetRegistryForCurrentTest').returns();
-        snapshotTools.mochaHooks.beforeEach.call({currentTest: {file: 'test', fullTitle: () => { }, currentRetry: () => 0}});
-        snapshotTools.mochaHooks.beforeEach.call({currentTest: {file: 'test', fullTitle: () => { }, currentRetry: () => 1}});
-        sinon.assert.calledTwice(setTestSpy);
-        sinon.assert.calledOnce(resetRegistrySpy);
+        it('beforeEach with retries correctly resets the registry for the current test', function () {
+            const setTestSpy = sinon.stub(snapshotTools.snapshotManager, 'setCurrentTest').returns();
+            const resetRegistrySpy = sinon.stub(snapshotTools.snapshotManager, 'resetRegistryForCurrentTest').returns();
+            snapshotTools.mochaHooks.beforeEach.call({currentTest: {file: 'test', fullTitle: () => { }, currentRetry: () => 0}});
+            snapshotTools.mochaHooks.beforeEach.call({currentTest: {file: 'test', fullTitle: () => { }, currentRetry: () => 1}});
+            sinon.assert.calledTwice(setTestSpy);
+            sinon.assert.calledOnce(resetRegistrySpy);
+        });
     });
 });

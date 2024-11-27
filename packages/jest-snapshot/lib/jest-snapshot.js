@@ -12,9 +12,20 @@ function matchSnapshotAssertion(properties) {
 }
 
 const mochaHooks = {
+
+    /**
+     * Runs before all tests
+     * Resets the registry so we start with a clean slate
+     */
     beforeAll() {
         snapshotManager.resetRegistry();
     },
+
+    /**
+     * Runs before each test
+     * Passes the current test config to the snapshot manager
+     * If we're running a retry, reset the registry for this test only
+     */
     beforeEach() {
         const {currentTest} = this;
 
