@@ -11,7 +11,7 @@ class SnapshotManager {
     constructor() {
         this.registry = {};
         this.currentTest = {};
-        this.defaultSnapshotPath = '__snapshots__';
+        this.defaultSnapshotRoot = '__snapshots__';
     }
 
     /**
@@ -19,41 +19,41 @@ class SnapshotManager {
      * If needed, increments the counter
      * Returns nametemplate with the counter appended.
      *
-     * @param {string} snapshotFilename e.g. 'my-fake.test.js.snap'
-     * @param {string} snapshotNameTemplate e.g. 'My fake test title'
+     * @param {string} testPath e.g. '/path/to/tests/my-fake.test.js'
+     * @param {string} testTitle e.g. 'My fake test title'
      * @returns {string} e.g. 'My fake test title 1'
      */
-    _getNameForSnapshot(snapshotFilename, snapshotNameTemplate) {
-        if (!this.registry[snapshotFilename]) {
-            this.registry[snapshotFilename] = {};
+    _getNameForSnapshot(testPath, testTitle) {
+        if (!(testPath in this.registry)) {
+            this.registry[testPath] = {};
         }
 
-        const nextCounter = (this.registry[snapshotFilename][snapshotNameTemplate] || 0) + 1;
-        this.registry[snapshotFilename][snapshotNameTemplate] = nextCounter;
+        const nextCounter = (this.registry[testPath][testTitle] || 0) + 1;
+        this.registry[testPath][testTitle] = nextCounter;
 
-        return `${snapshotNameTemplate} ${nextCounter}`;
+        return `${testTitle} ${nextCounter}`;
     }
 
     /**
      * Takes the full path to the test file and returns the full path to the snapshot file
      *
-     * @param {string} testFile e.g. '/path/to/tests/my-fake.test.js'
-     * @returns {string} e.g. '/path/to/tests/__snapshots__/my-fake.test.js.snap'
+     * @param {string} testPath e.g. '/path/to/tests/my-fake.test.js'
+     * @returns {string} snapshotFilePath e.g. '/path/to/tests/__snapshots__/my-fake.test.js.snap'
      */
-    _resolveSnapshotFilePath(testFile) {
+    _resolveSnapshotFilePath(testPath) {
         return path.join(
-            path.join(path.dirname(testFile), this.defaultSnapshotPath),
-            path.basename(testFile) + DOT_EXTENSION
+            path.join(path.dirname(testPath), this.defaultSnapshotRoot),
+            path.basename(testPath) + DOT_EXTENSION
         );
     }
 
     /**
      * Returns config for the current test
      * Throws an error if the current test is not configured
-     * @returns {Object} e.g. {testFile: '__snapshots__/my-fake.test.js.snap', snapshotName: 'My fake test title 1', willUpdate: 'new'}
+     * @returns {Object} e.g. {snapshotPath: 'test/__snapshots__/my-fake.test.js.snap', snapshotName: 'My fake test title 1', willUpdate: 'new'}
      */
     _getConfig() {
-        if (!this.currentTest.filename || !this.currentTest.nameTemplate) {
+        if (!this.currentTest.testPath || !this.currentTest.testTitle) {
             throw new errors.IncorrectUsageError({
                 message: 'Unable to run snapshot tests, current test was not configured',
                 context: 'Snapshot testing requires current test filename and nameTemplate to be set for each test',
@@ -61,9 +61,9 @@ class SnapshotManager {
             });
         }
 
-        let testFile = this.currentTest.filename;
-        const testTitle = this.currentTest.nameTemplate;
-        const snapshotName = this._getNameForSnapshot(testFile, testTitle);
+        const {testPath, testTitle} = this.currentTest;
+
+        const snapshotName = this._getNameForSnapshot(testPath, testTitle);
         const updateSnapshots = (
             process.env.SNAPSHOT_UPDATE
             || process.env.UPDATE_SNAPSHOT
@@ -73,9 +73,9 @@ class SnapshotManager {
         const willUpdate = updateSnapshots ? 'all' : 'new';
 
         // Set full path
-        testFile = this._resolveSnapshotFilePath(testFile);
+        const snapshotPath = this._resolveSnapshotFilePath(testPath);
 
-        return {testFile, snapshotName, willUpdate};
+        return {snapshotPath, snapshotName, willUpdate};
     }
 
     /**
@@ -89,16 +89,16 @@ class SnapshotManager {
      * Resets the registry for the current test only
      */
     resetRegistryForCurrentTest() {
-        const testTitle = this.currentTest.nameTemplate;
-        if (this.currentTest.filename in this.registry && testTitle in this.registry[this.currentTest.filename]) {
-            delete this.registry[this.currentTest.filename][testTitle];
+        const {testPath, testTitle} = this.currentTest;
+        if (testPath in this.registry && testTitle in this.registry[testPath]) {
+            delete this.registry[testPath][testTitle];
         }
     }
 
     /**
      * @param {Object} testConfig
-     * @param {String} testConfig.filename full path to the test file
-     * @param {String} testConfig.nameTemplate the full name of the test - all the describe and it names concatenated
+     * @param {String} testConfig.testPath full path to the test file
+     * @param {String} testConfig.testTitle the full title of the test - all the describe and it names concatenated
      */
     setCurrentTest(testConfig) {
         this.currentTest = testConfig;
@@ -106,14 +106,14 @@ class SnapshotManager {
 
     /**
      * Gets a SnapshotState instance for the current test
-     * @param {string} testFile e.g. '__snapshots__/my-fake.test.js.snap'
+     * @param {string} snapshotPath e.g. 'test/__snapshots__/my-fake.test.js.snap'
      * @param {string} willUpdate e.g. 'new'
      * @returns {SnapshotState}
      */
-    getSnapshotState(testFile, willUpdate) {
+    getSnapshotState(snapshotPath, willUpdate) {
         // Initialize the SnapshotState, it’s responsible for actually matching
         // actual snapshot with expected one and storing results
-        return new SnapshotState(testFile, {
+        return new SnapshotState(snapshotPath, {
             updateSnapshot: willUpdate
         });
     }
@@ -173,9 +173,9 @@ class SnapshotManager {
      * @returns {Object} result of the match
      */
     match(received, properties = {}, hint) {
-        const {testFile, snapshotName, willUpdate} = this._getConfig();
+        const {snapshotPath, snapshotName, willUpdate} = this._getConfig();
 
-        const snapshotState = this.getSnapshotState(testFile, willUpdate);
+        const snapshotState = this.getSnapshotState(snapshotPath, willUpdate);
         const matcher = toMatchSnapshot.bind({
             snapshotState,
             currentTestName: snapshotName,

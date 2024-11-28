@@ -18,7 +18,7 @@ describe('Snapshot Manager', function () {
         assert.deepEqual(snapshotManager.registry, {});
 
         snapshotManager.registry = {
-            'test.js': {
+            'test/my-fake.test.js': {
                 bar: 1,
                 foo: 2
             }
@@ -39,21 +39,21 @@ describe('Snapshot Manager', function () {
         assert.deepEqual(snapshotManager.registry, {});
 
         snapshotManager.registry = {
-            'test.js': {
+            'test/my-fake.test.js': {
                 bar: 1,
                 foo: 2
             }
         };
 
-        snapshotManager.setCurrentTest({filename: 'test.js', nameTemplate: 'foo'});
+        snapshotManager.setCurrentTest({testPath: 'test/my-fake.test.js', testTitle: 'foo'});
 
         snapshotManager.resetRegistryForCurrentTest();
-        assert.deepEqual(snapshotManager.registry, {'test.js': {bar: 1}});
+        assert.deepEqual(snapshotManager.registry, {'test/my-fake.test.js': {bar: 1}});
     });
 
     it('resetRegistryForCurrentTest: will not throw if no registry exists for current test', function () {
         const snapshotManager = new SnapshotManager();
-        snapshotManager.setCurrentTest({filename: 'test.js', nameTemplate: 'foo'});
+        snapshotManager.setCurrentTest({testPath: 'test/my-fake.test.js', testTitle: 'foo'});
 
         assert.doesNotThrow(() => snapshotManager.resetRegistryForCurrentTest(), 'should not throw if no registry exists for current test');
     });
@@ -70,17 +70,17 @@ describe('Snapshot Manager', function () {
         const snapshotManager = new SnapshotManager();
 
         assert.equal(
-            snapshotManager._getNameForSnapshot('foo.js.snap', 'testing bar'),
+            snapshotManager._getNameForSnapshot('test/my-fake.test.js', 'testing bar'),
             'testing bar 1'
         );
 
         assert.equal(
-            snapshotManager._getNameForSnapshot('foo.js.snap', 'testing baz'),
+            snapshotManager._getNameForSnapshot('test/my-fake.test.js', 'testing baz'),
             'testing baz 1'
         );
 
         assert.equal(
-            snapshotManager._getNameForSnapshot('foo.js.snap', 'testing bar'),
+            snapshotManager._getNameForSnapshot('test/my-fake.test.js', 'testing bar'),
             'testing bar 2'
         );
     });
@@ -133,12 +133,12 @@ describe('Snapshot Manager', function () {
         let nameSpy = sinon.spy(snapshotManager, '_getNameForSnapshot');
 
         snapshotManager.setCurrentTest({
-            filename: 'test/my-fake.test.js',
-            nameTemplate: 'My fake test title'
+            testPath: 'test/my-fake.test.js',
+            testTitle: 'My fake test title'
         });
 
         let config = snapshotManager._getConfig();
-        assert.equal(config.testFile, 'test/__snapshots__/my-fake.test.js.snap');
+        assert.equal(config.snapshotPath, 'test/__snapshots__/my-fake.test.js.snap');
         assert.equal(config.snapshotName, 'My fake test title 1');
         assert.equal(config.willUpdate, 'new');
         sinon.assert.calledOnce(nameSpy);
@@ -149,14 +149,14 @@ describe('Snapshot Manager', function () {
         let nameSpy = sinon.spy(snapshotManager, '_getNameForSnapshot');
 
         snapshotManager.setCurrentTest({
-            filename: 'test/my-fake.test.js',
-            nameTemplate: 'My fake test title'
+            testPath: 'test/my-fake.test.js',
+            testTitle: 'My fake test title'
         });
 
         process.env.SNAPSHOT_UPDATE = 1;
 
         let config = snapshotManager._getConfig();
-        assert.equal(config.testFile, 'test/__snapshots__/my-fake.test.js.snap');
+        assert.equal(config.snapshotPath, 'test/__snapshots__/my-fake.test.js.snap');
         assert.equal(config.snapshotName, 'My fake test title 1');
         assert.equal(config.willUpdate, 'all');
         sinon.assert.calledOnce(nameSpy);
@@ -250,7 +250,7 @@ describe('Snapshot Manager', function () {
             const snapshotManager = new SnapshotManager();
 
             const configStub = sinon.stub(snapshotManager, '_getConfig').returns({
-                testFile: 'foo.js',
+                snapshotPath: 'test/__snapshots__/foo.js.snap',
                 snapshotName: 'testing bar 1',
 
                 // Ensure this doesn't result in files being written
@@ -268,7 +268,7 @@ describe('Snapshot Manager', function () {
             const snapshotManager = new SnapshotManager();
 
             const configStub = sinon.stub(snapshotManager, '_getConfig').returns({
-                testFile: 'foo.js',
+                snapshotPath: 'test/__snapshots__/foo.js.snap',
                 snapshotName: 'testing bar 1',
 
                 // Ensure this doesn't result in files being written
@@ -285,7 +285,7 @@ describe('Snapshot Manager', function () {
             const snapshotManager = new SnapshotManager();
 
             const configStub = sinon.stub(snapshotManager, '_getConfig').returns({
-                testFile: 'foo.js',
+                snapshotPath: 'test/__snapshots__/foo.js.snap',
                 snapshotName: 'testing bar 1',
 
                 // Ensure this doesn't result in files being written
