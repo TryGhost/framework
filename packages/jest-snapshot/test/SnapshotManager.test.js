@@ -11,6 +11,7 @@ describe('Snapshot Manager', function () {
         const snapshotManager = new SnapshotManager();
         assert.deepEqual(snapshotManager.registry, {});
         assert.deepEqual(snapshotManager.currentTest, {});
+        assert.equal(snapshotManager.willUpdate, 'new');
     });
 
     it('resetRegistry: will empty the registry when called', function () {
@@ -121,7 +122,7 @@ describe('Snapshot Manager', function () {
         const originalValue = process.env.SNAPSHOT_UPDATE || '';
         process.env.SNAPSHOT_UPDATE = 1;
         const snapshotManager = new SnapshotManager();
-        assert.equal(snapshotManager._willUpdate(), 'all');
+        assert.equal(snapshotManager.willUpdate, 'all');
         process.env.SNAPSHOT_UPDATE = originalValue;
     });
 
@@ -129,7 +130,7 @@ describe('Snapshot Manager', function () {
         const originalValue = process.env.SNAPSHOT_UPDATE || '';
         process.env.SNAPSHOT_UPDATE = '';
         const snapshotManager = new SnapshotManager();
-        assert.equal(snapshotManager._willUpdate(), 'new');
+        assert.equal(snapshotManager.willUpdate, 'new');
         process.env.SNAPSHOT_UPDATE = originalValue;
     });
 
@@ -246,7 +247,7 @@ describe('Snapshot Manager', function () {
             const snapshotManager = new SnapshotManager();
 
             // Ensure this doesn't result in files being written
-            sinon.stub(snapshotManager, '_willUpdate').returns('none');
+            snapshotManager.willUpdate = 'none';
 
             const configStub = sinon.stub(snapshotManager, '_getConfig').returns({
                 snapshotPath: 'test/__snapshots__/foo.js.snap',
@@ -264,7 +265,7 @@ describe('Snapshot Manager', function () {
             const snapshotManager = new SnapshotManager();
 
             // Ensure this doesn't result in files being written
-            sinon.stub(snapshotManager, '_willUpdate').returns('none');
+            snapshotManager.willUpdate = 'none';
 
             const configStub = sinon.stub(snapshotManager, '_getConfig').returns({
                 snapshotPath: 'test/__snapshots__/foo.js.snap',
@@ -281,7 +282,7 @@ describe('Snapshot Manager', function () {
             const snapshotManager = new SnapshotManager();
 
             // Ensure this doesn't result in files being written
-            sinon.stub(snapshotManager, '_willUpdate').returns('none');
+            snapshotManager.willUpdate = 'none';
 
             const configStub = sinon.stub(snapshotManager, '_getConfig').returns({
                 snapshotPath: 'test/__snapshots__/foo.js.snap',

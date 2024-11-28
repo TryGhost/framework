@@ -7,26 +7,29 @@ const {makeMessageFromMatchMessage} = require('./utils');
 
 const DOT_EXTENSION = `.${EXTENSION}`;
 
+/**
+ * Determines whether to update all snapshots or only new ones
+ * @returns {string} e.g. 'all' or 'new'
+ */
+function willUpdate() {
+    const updateSnapshots = (
+        process.env.SNAPSHOT_UPDATE
+        || process.env.UPDATE_SNAPSHOT
+        || process.env.SNAPSHOTS_UPDATE
+        || process.env.UPDATE_SNAPSHOTS
+    );
+
+    return updateSnapshots ? 'all' : 'new';
+}
+
 class SnapshotManager {
     constructor() {
         this.registry = {};
         this.currentTest = {};
         this.defaultSnapshotRoot = '__snapshots__';
-    }
 
-    /**
-     * Determines whether to update all snapshots or only new ones
-     * @returns {string} e.g. 'all' or 'new'
-     */
-    _willUpdate() {
-        const updateSnapshots = (
-            process.env.SNAPSHOT_UPDATE
-            || process.env.UPDATE_SNAPSHOT
-            || process.env.SNAPSHOTS_UPDATE
-            || process.env.UPDATE_SNAPSHOTS
-        );
-
-        return updateSnapshots ? 'all' : 'new';
+        // Set willUpdate once, as it  can't change whilst we are running
+        this.willUpdate = willUpdate();
     }
 
     /**
@@ -116,12 +119,10 @@ class SnapshotManager {
      * @returns {SnapshotState}
      */
     getSnapshotState(snapshotPath) {
-        const willUpdate = this._willUpdate();
-
         // Initialize the SnapshotState, it’s responsible for actually matching
         // actual snapshot with expected one and storing results
         return new SnapshotState(snapshotPath, {
-            updateSnapshot: willUpdate
+            updateSnapshot: this.willUpdate
         });
     }
 
