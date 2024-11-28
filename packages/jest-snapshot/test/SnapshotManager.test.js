@@ -8,124 +8,124 @@ describe('Snapshot Manager', function () {
     });
 
     it('can create a new instance', function () {
-        const snapshotMatcher = new SnapshotManager();
-        assert.deepEqual(snapshotMatcher.registry, {});
-        assert.deepEqual(snapshotMatcher.currentTest, {});
+        const snapshotManager = new SnapshotManager();
+        assert.deepEqual(snapshotManager.registry, {});
+        assert.deepEqual(snapshotManager.currentTest, {});
     });
 
     it('resetRegistry: will empty the registry when called', function () {
-        const snapshotMatcher = new SnapshotManager();
-        assert.deepEqual(snapshotMatcher.registry, {});
+        const snapshotManager = new SnapshotManager();
+        assert.deepEqual(snapshotManager.registry, {});
 
-        snapshotMatcher.registry = {
+        snapshotManager.registry = {
             'test.js': {
                 bar: 1,
                 foo: 2
             }
         };
 
-        snapshotMatcher.resetRegistry();
+        snapshotManager.resetRegistry();
 
-        assert.deepEqual(snapshotMatcher.registry, {});
+        assert.deepEqual(snapshotManager.registry, {});
     });
 
     it('resetRegistry: will not throw if no registry exists', function () {
-        const snapshotMatcher = new SnapshotManager();
-        assert.doesNotThrow(() => snapshotMatcher.resetRegistry());
+        const snapshotManager = new SnapshotManager();
+        assert.doesNotThrow(() => snapshotManager.resetRegistry());
     });
 
     it('resetRegistryForCurrentTest: will empty the registry for the current test when called', function () {
-        const snapshotMatcher = new SnapshotManager();
-        assert.deepEqual(snapshotMatcher.registry, {});
+        const snapshotManager = new SnapshotManager();
+        assert.deepEqual(snapshotManager.registry, {});
 
-        snapshotMatcher.registry = {
+        snapshotManager.registry = {
             'test.js': {
                 bar: 1,
                 foo: 2
             }
         };
 
-        snapshotMatcher.setCurrentTest({filename: 'test.js', nameTemplate: 'foo'});
+        snapshotManager.setCurrentTest({filename: 'test.js', nameTemplate: 'foo'});
 
-        snapshotMatcher.resetRegistryForCurrentTest();
-        assert.deepEqual(snapshotMatcher.registry, {'test.js': {bar: 1}});
+        snapshotManager.resetRegistryForCurrentTest();
+        assert.deepEqual(snapshotManager.registry, {'test.js': {bar: 1}});
     });
 
     it('resetRegistryForCurrentTest: will not throw if no registry exists for current test', function () {
-        const snapshotMatcher = new SnapshotManager();
-        snapshotMatcher.setCurrentTest({filename: 'test.js', nameTemplate: 'foo'});
+        const snapshotManager = new SnapshotManager();
+        snapshotManager.setCurrentTest({filename: 'test.js', nameTemplate: 'foo'});
 
-        assert.doesNotThrow(() => snapshotMatcher.resetRegistryForCurrentTest(), 'should not throw if no registry exists for current test');
+        assert.doesNotThrow(() => snapshotManager.resetRegistryForCurrentTest(), 'should not throw if no registry exists for current test');
     });
 
     it('setCurrentTest: results in currentTest being set', function () {
-        const snapshotMatcher = new SnapshotManager();
-        assert.deepEqual(snapshotMatcher.currentTest, {});
+        const snapshotManager = new SnapshotManager();
+        assert.deepEqual(snapshotManager.currentTest, {});
 
-        snapshotMatcher.setCurrentTest({foo: 'bar'});
-        assert.deepEqual(snapshotMatcher.currentTest, {foo: 'bar'});
+        snapshotManager.setCurrentTest({foo: 'bar'});
+        assert.deepEqual(snapshotManager.currentTest, {foo: 'bar'});
     });
 
     it('_getNameForSnapshot: will increment the counter for each snapshot name correctly', function () {
-        const snapshotMatcher = new SnapshotManager();
+        const snapshotManager = new SnapshotManager();
 
         assert.equal(
-            snapshotMatcher._getNameForSnapshot('foo.js.snap', 'testing bar'),
+            snapshotManager._getNameForSnapshot('foo.js.snap', 'testing bar'),
             'testing bar 1'
         );
 
         assert.equal(
-            snapshotMatcher._getNameForSnapshot('foo.js.snap', 'testing baz'),
+            snapshotManager._getNameForSnapshot('foo.js.snap', 'testing baz'),
             'testing baz 1'
         );
 
         assert.equal(
-            snapshotMatcher._getNameForSnapshot('foo.js.snap', 'testing bar'),
+            snapshotManager._getNameForSnapshot('foo.js.snap', 'testing bar'),
             'testing bar 2'
         );
     });
 
     it('_resolveSnapshotFilePath: will resolve the snapshot file path correctly', function () {
-        const snapshotMatcher = new SnapshotManager();
+        const snapshotManager = new SnapshotManager();
 
         // Fake path with test file inside test folder
         let inputPath = '/full/path/to/tests/foo.js.snap';
-        let outputPath = snapshotMatcher._resolveSnapshotFilePath(inputPath);
+        let outputPath = snapshotManager._resolveSnapshotFilePath(inputPath);
         assert.equal(outputPath, '/full/path/to/tests/__snapshots__/foo.js.snap');
 
         // Fake path with test file nested beneath test folder
         inputPath = '/full/path/to/tests/unit/foo.js.snap';
-        outputPath = snapshotMatcher._resolveSnapshotFilePath(inputPath);
+        outputPath = snapshotManager._resolveSnapshotFilePath(inputPath);
         assert.equal(outputPath, '/full/path/to/tests/unit/__snapshots__/foo.js.snap');
 
         // Real example mocha context
         const {test} = this;
         inputPath = test.file + '.snap';
-        outputPath = snapshotMatcher._resolveSnapshotFilePath(inputPath);
+        outputPath = snapshotManager._resolveSnapshotFilePath(inputPath);
         assert.match(outputPath, /\/packages\/jest-snapshot\/test\/__snapshots__\/SnapshotManager\.test\.js\.snap/);
     });
 
     it('_getConfig: will throw if no current test is set', function () {
-        const snapshotMatcher = new SnapshotManager();
+        const snapshotManager = new SnapshotManager();
 
         // If there's no currentTest...
         const assertFn = () => {
-            snapshotMatcher._getConfig();
+            snapshotManager._getConfig();
         };
 
         assert.throws(assertFn, {message: 'Unable to run snapshot tests, current test was not configured'});
     });
 
     it('_getConfig: will return the correct config when a current test is set', function () {
-        const snapshotMatcher = new SnapshotManager();
-        let nameSpy = sinon.spy(snapshotMatcher, '_getNameForSnapshot');
+        const snapshotManager = new SnapshotManager();
+        let nameSpy = sinon.spy(snapshotManager, '_getNameForSnapshot');
 
-        snapshotMatcher.setCurrentTest({
+        snapshotManager.setCurrentTest({
             filename: 'my-fake.test.js.snap',
             nameTemplate: 'My fake test title'
         });
 
-        let config = snapshotMatcher._getConfig();
+        let config = snapshotManager._getConfig();
         assert.equal(config.testFile, '__snapshots__/my-fake.test.js.snap');
         assert.equal(config.snapshotName, 'My fake test title 1');
         assert.equal(config.willUpdate, 'new');
@@ -133,17 +133,17 @@ describe('Snapshot Manager', function () {
     });
 
     it('_getConfig: will return config with willUpdate set to all when the environment variable is set', function () {
-        const snapshotMatcher = new SnapshotManager();
-        let nameSpy = sinon.spy(snapshotMatcher, '_getNameForSnapshot');
+        const snapshotManager = new SnapshotManager();
+        let nameSpy = sinon.spy(snapshotManager, '_getNameForSnapshot');
 
-        snapshotMatcher.setCurrentTest({
+        snapshotManager.setCurrentTest({
             filename: 'my-fake.test.js.snap',
             nameTemplate: 'My fake test title'
         });
 
         process.env.SNAPSHOT_UPDATE = 1;
 
-        let config = snapshotMatcher._getConfig();
+        let config = snapshotManager._getConfig();
         assert.equal(config.testFile, '__snapshots__/my-fake.test.js.snap');
         assert.equal(config.snapshotName, 'My fake test title 1');
         assert.equal(config.willUpdate, 'all');
@@ -235,9 +235,9 @@ describe('Snapshot Manager', function () {
 
     describe('match', function () {
         it('returns a failure when the snapshot does not match', function () {
-            const snapshotMatcher = new SnapshotManager();
+            const snapshotManager = new SnapshotManager();
 
-            const configStub = sinon.stub(snapshotMatcher, '_getConfig').returns({
+            const configStub = sinon.stub(snapshotManager, '_getConfig').returns({
                 testFile: 'foo.js.snap',
                 snapshotName: 'testing bar 1',
 
@@ -245,7 +245,7 @@ describe('Snapshot Manager', function () {
                 willUpdate: 'none'
             });
 
-            const result = snapshotMatcher.match({});
+            const result = snapshotManager.match({});
             sinon.assert.calledOnce(configStub);
             assert.equal(result.pass, false);
             assert.equal(typeof result.message, 'function');
@@ -253,9 +253,9 @@ describe('Snapshot Manager', function () {
         });
 
         it('match can accept a name hint for failure messages', function () {
-            const snapshotMatcher = new SnapshotManager();
+            const snapshotManager = new SnapshotManager();
 
-            const configStub = sinon.stub(snapshotMatcher, '_getConfig').returns({
+            const configStub = sinon.stub(snapshotManager, '_getConfig').returns({
                 testFile: 'foo.js.snap',
                 snapshotName: 'testing bar 1',
 
@@ -263,16 +263,16 @@ describe('Snapshot Manager', function () {
                 willUpdate: 'none'
             });
 
-            const result = snapshotMatcher.match({}, {}, '[headers]');
+            const result = snapshotManager.match({}, {}, '[headers]');
             sinon.assert.calledOnce(configStub);
             assert.equal(result.pass, false);
             assert.match(result.message(), /testing bar 1:.*?\[headers\]/);
         });
 
         it('executes matcher without properties', function () {
-            const snapshotMatcher = new SnapshotManager();
+            const snapshotManager = new SnapshotManager();
 
-            const configStub = sinon.stub(snapshotMatcher, '_getConfig').returns({
+            const configStub = sinon.stub(snapshotManager, '_getConfig').returns({
                 testFile: 'foo.js.snap',
                 snapshotName: 'testing bar 1',
 
@@ -280,7 +280,7 @@ describe('Snapshot Manager', function () {
                 willUpdate: 'none'
             });
 
-            const result = snapshotMatcher.match('foo', null, '[html]');
+            const result = snapshotManager.match('foo', null, '[html]');
             sinon.assert.calledOnce(configStub);
             assert.equal(result.pass, false);
             assert.equal(typeof result.message, 'function');
