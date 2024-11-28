@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`My first test 1 1`] = `
+Object {
+  "foo": "bar",
+}
+`;
+
+exports[`My second test 1 1`] = `
+Object {
+  "bar": "baz",
+}
+`;
+
+exports[`My second test 2 1`] = `
+Object {
+  "bar": "baz",
+}
+`;
