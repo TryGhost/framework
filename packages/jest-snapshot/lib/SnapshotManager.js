@@ -79,12 +79,9 @@ class SnapshotManager {
         const {testPath, testTitle} = this.currentTest;
 
         const snapshotName = this._getNameForSnapshot(testPath, testTitle);
-        const willUpdate = this._willUpdate();
-
-        // Set full path
         const snapshotPath = this._resolveSnapshotFilePath(testPath);
 
-        return {snapshotPath, snapshotName, willUpdate};
+        return {snapshotPath, snapshotName};
     }
 
     /**
@@ -116,10 +113,11 @@ class SnapshotManager {
     /**
      * Gets a SnapshotState instance for the current test
      * @param {string} snapshotPath e.g. 'test/__snapshots__/my-fake.test.js.snap'
-     * @param {string} willUpdate e.g. 'new'
      * @returns {SnapshotState}
      */
-    getSnapshotState(snapshotPath, willUpdate) {
+    getSnapshotState(snapshotPath) {
+        const willUpdate = this._willUpdate();
+
         // Initialize the SnapshotState, it’s responsible for actually matching
         // actual snapshot with expected one and storing results
         return new SnapshotState(snapshotPath, {
@@ -182,9 +180,10 @@ class SnapshotManager {
      * @returns {Object} result of the match
      */
     match(received, properties = {}, hint) {
-        const {snapshotPath, snapshotName, willUpdate} = this._getConfig();
+        const {snapshotPath, snapshotName} = this._getConfig();
 
-        const snapshotState = this.getSnapshotState(snapshotPath, willUpdate);
+        const snapshotState = this.getSnapshotState(snapshotPath);
+
         const matcher = toMatchSnapshot.bind({
             snapshotState,
             currentTestName: snapshotName,

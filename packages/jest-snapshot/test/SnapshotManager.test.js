@@ -156,28 +156,8 @@ describe('Snapshot Manager', function () {
         let config = snapshotManager._getConfig();
         assert.equal(config.snapshotPath, 'test/__snapshots__/my-fake.test.js.snap');
         assert.equal(config.snapshotName, 'My fake test title 1');
-        assert.equal(config.willUpdate, 'new');
+
         sinon.assert.calledOnce(nameSpy);
-    });
-
-    it('_getConfig: will return config with willUpdate set to all when the environment variable is set', function () {
-        const snapshotManager = new SnapshotManager();
-        let nameSpy = sinon.spy(snapshotManager, '_getNameForSnapshot');
-
-        snapshotManager.setCurrentTest({
-            testPath: 'test/my-fake.test.js',
-            testTitle: 'My fake test title'
-        });
-
-        process.env.SNAPSHOT_UPDATE = 1;
-
-        let config = snapshotManager._getConfig();
-        assert.equal(config.snapshotPath, 'test/__snapshots__/my-fake.test.js.snap');
-        assert.equal(config.snapshotName, 'My fake test title 1');
-        assert.equal(config.willUpdate, 'all');
-        sinon.assert.calledOnce(nameSpy);
-
-        process.env.SNAPSHOT_UPDATE = 0;
     });
 
     describe('assert snapshot', function () {
@@ -265,12 +245,12 @@ describe('Snapshot Manager', function () {
         it('returns a failure when the snapshot does not match', function () {
             const snapshotManager = new SnapshotManager();
 
+            // Ensure this doesn't result in files being written
+            sinon.stub(snapshotManager, '_willUpdate').returns('none');
+
             const configStub = sinon.stub(snapshotManager, '_getConfig').returns({
                 snapshotPath: 'test/__snapshots__/foo.js.snap',
-                snapshotName: 'testing bar 1',
-
-                // Ensure this doesn't result in files being written
-                willUpdate: 'none'
+                snapshotName: 'testing bar 1'
             });
 
             const result = snapshotManager.match({});
@@ -283,12 +263,12 @@ describe('Snapshot Manager', function () {
         it('match can accept a name hint for failure messages', function () {
             const snapshotManager = new SnapshotManager();
 
+            // Ensure this doesn't result in files being written
+            sinon.stub(snapshotManager, '_willUpdate').returns('none');
+
             const configStub = sinon.stub(snapshotManager, '_getConfig').returns({
                 snapshotPath: 'test/__snapshots__/foo.js.snap',
-                snapshotName: 'testing bar 1',
-
-                // Ensure this doesn't result in files being written
-                willUpdate: 'none'
+                snapshotName: 'testing bar 1'
             });
 
             const result = snapshotManager.match({}, {}, '[headers]');
@@ -300,12 +280,12 @@ describe('Snapshot Manager', function () {
         it('executes matcher without properties', function () {
             const snapshotManager = new SnapshotManager();
 
+            // Ensure this doesn't result in files being written
+            sinon.stub(snapshotManager, '_willUpdate').returns('none');
+
             const configStub = sinon.stub(snapshotManager, '_getConfig').returns({
                 snapshotPath: 'test/__snapshots__/foo.js.snap',
-                snapshotName: 'testing bar 1',
-
-                // Ensure this doesn't result in files being written
-                willUpdate: 'none'
+                snapshotName: 'testing bar 1'
             });
 
             const result = snapshotManager.match('foo', null, '[html]');
