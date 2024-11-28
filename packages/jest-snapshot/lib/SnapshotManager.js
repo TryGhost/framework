@@ -1,9 +1,11 @@
-const {SnapshotState, toMatchSnapshot} = require('jest-snapshot');
+const {SnapshotState, toMatchSnapshot, EXTENSION} = require('jest-snapshot');
 const errors = require('@tryghost/errors');
 const utils = require('@jest/expect-utils');
 const assert = require('assert');
 const path = require('path');
 const {makeMessageFromMatchMessage} = require('./utils');
+
+const DOT_EXTENSION = `.${EXTENSION}`;
 
 class SnapshotManager {
     constructor() {
@@ -33,16 +35,16 @@ class SnapshotManager {
     }
 
     /**
-     * Resolves the snapshot file path by appending the defaultSnapshotPath to the filename
-     * @param {string} testFile e.g. 'my-fake.test.js.snap'
-     * @returns {string} e.g. '__snapshots__/my-fake.test.js.snap'
+     * Takes the full path to the test file and returns the full path to the snapshot file
+     *
+     * @param {string} testFile e.g. '/path/to/tests/my-fake.test.js'
+     * @returns {string} e.g. '/path/to/tests/__snapshots__/my-fake.test.js.snap'
      */
     _resolveSnapshotFilePath(testFile) {
-        const parsedPath = path.parse(testFile);
-
-        parsedPath.dir = path.join(parsedPath.dir, this.defaultSnapshotPath);
-
-        return path.format(parsedPath);
+        return path.join(
+            path.join(path.dirname(testFile), this.defaultSnapshotPath),
+            path.basename(testFile) + DOT_EXTENSION
+        );
     }
 
     /**
@@ -95,7 +97,7 @@ class SnapshotManager {
 
     /**
      * @param {Object} testConfig
-     * @param {String} testConfig.filename full path to the test file including the .snap extension
+     * @param {String} testConfig.filename full path to the test file
      * @param {String} testConfig.nameTemplate the full name of the test - all the describe and it names concatenated
      */
     setCurrentTest(testConfig) {

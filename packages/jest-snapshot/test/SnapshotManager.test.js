@@ -89,20 +89,32 @@ describe('Snapshot Manager', function () {
         const snapshotManager = new SnapshotManager();
 
         // Fake path with test file inside test folder
-        let inputPath = '/full/path/to/tests/foo.js.snap';
+        let inputPath = '/full/path/to/tests/foo.js';
         let outputPath = snapshotManager._resolveSnapshotFilePath(inputPath);
         assert.equal(outputPath, '/full/path/to/tests/__snapshots__/foo.js.snap');
 
         // Fake path with test file nested beneath test folder
-        inputPath = '/full/path/to/tests/unit/foo.js.snap';
+        inputPath = '/full/path/to/tests/unit/foo.js';
         outputPath = snapshotManager._resolveSnapshotFilePath(inputPath);
         assert.equal(outputPath, '/full/path/to/tests/unit/__snapshots__/foo.js.snap');
 
         // Real example mocha context
         const {test} = this;
-        inputPath = test.file + '.snap';
+        inputPath = test.file;
         outputPath = snapshotManager._resolveSnapshotFilePath(inputPath);
         assert.match(outputPath, /\/packages\/jest-snapshot\/test\/__snapshots__\/SnapshotManager\.test\.js\.snap/);
+    });
+
+    it('_resolveSnapshotFilePath: resolve snapshot files paths exactly the same as jest', function () {
+        const snapshotManager = new SnapshotManager();
+
+        // https://github.com/jestjs/jest/blob/main/packages/jest-snapshot/src/__tests__/SnapshotResolver.test.ts#L32-L36
+        // expect(snapshotResolver.resolveSnapshotPath('/abc/cde/a.test.js')).toBe(
+        //   path.join('/abc', 'cde', '__snapshots__', 'a.test.js.snap'),
+        // );
+
+        const result = snapshotManager._resolveSnapshotFilePath('/abc/cde/a.test.js');
+        assert.equal(result, '/abc/cde/__snapshots__/a.test.js.snap');
     });
 
     it('_getConfig: will throw if no current test is set', function () {
@@ -121,12 +133,12 @@ describe('Snapshot Manager', function () {
         let nameSpy = sinon.spy(snapshotManager, '_getNameForSnapshot');
 
         snapshotManager.setCurrentTest({
-            filename: 'my-fake.test.js.snap',
+            filename: 'test/my-fake.test.js',
             nameTemplate: 'My fake test title'
         });
 
         let config = snapshotManager._getConfig();
-        assert.equal(config.testFile, '__snapshots__/my-fake.test.js.snap');
+        assert.equal(config.testFile, 'test/__snapshots__/my-fake.test.js.snap');
         assert.equal(config.snapshotName, 'My fake test title 1');
         assert.equal(config.willUpdate, 'new');
         sinon.assert.calledOnce(nameSpy);
@@ -137,14 +149,14 @@ describe('Snapshot Manager', function () {
         let nameSpy = sinon.spy(snapshotManager, '_getNameForSnapshot');
 
         snapshotManager.setCurrentTest({
-            filename: 'my-fake.test.js.snap',
+            filename: 'test/my-fake.test.js',
             nameTemplate: 'My fake test title'
         });
 
         process.env.SNAPSHOT_UPDATE = 1;
 
         let config = snapshotManager._getConfig();
-        assert.equal(config.testFile, '__snapshots__/my-fake.test.js.snap');
+        assert.equal(config.testFile, 'test/__snapshots__/my-fake.test.js.snap');
         assert.equal(config.snapshotName, 'My fake test title 1');
         assert.equal(config.willUpdate, 'all');
         sinon.assert.calledOnce(nameSpy);
@@ -238,7 +250,7 @@ describe('Snapshot Manager', function () {
             const snapshotManager = new SnapshotManager();
 
             const configStub = sinon.stub(snapshotManager, '_getConfig').returns({
-                testFile: 'foo.js.snap',
+                testFile: 'foo.js',
                 snapshotName: 'testing bar 1',
 
                 // Ensure this doesn't result in files being written
@@ -256,7 +268,7 @@ describe('Snapshot Manager', function () {
             const snapshotManager = new SnapshotManager();
 
             const configStub = sinon.stub(snapshotManager, '_getConfig').returns({
-                testFile: 'foo.js.snap',
+                testFile: 'foo.js',
                 snapshotName: 'testing bar 1',
 
                 // Ensure this doesn't result in files being written
@@ -273,7 +285,7 @@ describe('Snapshot Manager', function () {
             const snapshotManager = new SnapshotManager();
 
             const configStub = sinon.stub(snapshotManager, '_getConfig').returns({
-                testFile: 'foo.js.snap',
+                testFile: 'foo.js',
                 snapshotName: 'testing bar 1',
 
                 // Ensure this doesn't result in files being written

@@ -35,7 +35,7 @@ const mochaHooks = {
         }
 
         snapshotManager.setCurrentTest({
-            filename: currentTest.file + '.snap',
+            filename: currentTest.file,
             nameTemplate: currentTest.fullTitle()
         });
     }
