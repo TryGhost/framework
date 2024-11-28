@@ -15,6 +15,21 @@ class SnapshotManager {
     }
 
     /**
+     * Determines whether to update all snapshots or only new ones
+     * @returns {string} e.g. 'all' or 'new'
+     */
+    _willUpdate() {
+        const updateSnapshots = (
+            process.env.SNAPSHOT_UPDATE
+            || process.env.UPDATE_SNAPSHOT
+            || process.env.SNAPSHOTS_UPDATE
+            || process.env.UPDATE_SNAPSHOTS
+        );
+
+        return updateSnapshots ? 'all' : 'new';
+    }
+
+    /**
      * Looks in the registry for a snapshot with the same filename and nameTemplate
      * If needed, increments the counter
      * Returns nametemplate with the counter appended.
@@ -64,13 +79,7 @@ class SnapshotManager {
         const {testPath, testTitle} = this.currentTest;
 
         const snapshotName = this._getNameForSnapshot(testPath, testTitle);
-        const updateSnapshots = (
-            process.env.SNAPSHOT_UPDATE
-            || process.env.UPDATE_SNAPSHOT
-            || process.env.SNAPSHOTS_UPDATE
-            || process.env.UPDATE_SNAPSHOTS
-        );
-        const willUpdate = updateSnapshots ? 'all' : 'new';
+        const willUpdate = this._willUpdate();
 
         // Set full path
         const snapshotPath = this._resolveSnapshotFilePath(testPath);

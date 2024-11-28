@@ -117,6 +117,22 @@ describe('Snapshot Manager', function () {
         assert.equal(result, '/abc/cde/__snapshots__/a.test.js.snap');
     });
 
+    it('_willUpdate: will return all when the environment variable is set', function () {
+        const originalValue = process.env.SNAPSHOT_UPDATE || '';
+        process.env.SNAPSHOT_UPDATE = 1;
+        const snapshotManager = new SnapshotManager();
+        assert.equal(snapshotManager._willUpdate(), 'all');
+        process.env.SNAPSHOT_UPDATE = originalValue;
+    });
+
+    it('_willUpdate: will return new when the environment variable is not set', function () {
+        const originalValue = process.env.SNAPSHOT_UPDATE || '';
+        process.env.SNAPSHOT_UPDATE = '';
+        const snapshotManager = new SnapshotManager();
+        assert.equal(snapshotManager._willUpdate(), 'new');
+        process.env.SNAPSHOT_UPDATE = originalValue;
+    });
+
     it('_getConfig: will throw if no current test is set', function () {
         const snapshotManager = new SnapshotManager();
 
