@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "c8": "10.1.2",
-    "express": "4.21.1",
+    "express": "4.21.2",
     "express-session": "1.18.1",
     "form-data": "^4.0.0",
     "mocha": "10.7.3",
