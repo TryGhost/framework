@@ -1,12 +1,7 @@
-const each = require('lodash/each');
-const upperFirst = require('lodash/upperFirst');
-const toArray = require('lodash/toArray');
-const isObject = require('lodash/isObject');
-const isEmpty = require('lodash/isEmpty');
-const includes = require('lodash/includes');
 const bunyan = require('bunyan');
 const fs = require('fs');
 const jsonStringifySafe = require('json-stringify-safe');
+const utils = require('./utils');
 
 /**
  * @description Ghost's logger class.
@@ -78,15 +73,15 @@ class GhostLogger {
         this.streams = {};
         this.setSerializers();
 
-        if (includes(this.transports, 'stderr') && !includes(this.transports, 'stdout')) {
+        if (utils.includes(this.transports, 'stderr') && !utils.includes(this.transports, 'stdout')) {
             this.transports.push('stdout');
         }
 
         this.transports.forEach((transport) => {
-            let transportFn = `set${upperFirst(transport)}Stream`;
+            let transportFn = `set${utils.upperFirst(transport)}Stream`;
 
             if (!this[transportFn]) {
-                throw new Error(`${upperFirst(transport)} is an invalid transport`); // eslint-disable-line
+                throw new Error(`${utils.upperFirst(transport)} is an invalid transport`); // eslint-disable-line
             }
 
             this[transportFn]();
@@ -147,11 +142,11 @@ class GhostLogger {
      * Setup stream for posting the message to a parent instance
      */
     setParentStream() {
-        const {parentPort} = require('worker_threads');
+        const { parentPort } = require('worker_threads');
         const bunyanStream = {
             // Parent stream only supports sending a string
             write: (bunyanObject) => {
-                const {msg} = bunyanObject;
+                const { msg } = bunyanObject;
                 parentPort.postMessage(msg);
             }
         };
@@ -461,7 +456,7 @@ class GhostLogger {
 
         each(obj, (value, key) => {
             try {
-                if (isObject(value)) {
+                if (utils.isObject(value)) {
                     value = this.removeSensitiveData(value);
                 }
 
@@ -499,11 +494,11 @@ class GhostLogger {
             }
         }
 
-        each(args, function (value) {
+        each(args, function(value) {
             if (value instanceof Error) {
                 modifiedObject.err = value;
-            } else if (isObject(value)) {
-                each(Object.keys(value), function (key) {
+            } else if (utils.isObject(value)) {
+                each(Object.keys(value), function(key) {
                     modifiedObject[key] = value[key];
                 });
             } else {
@@ -517,7 +512,7 @@ class GhostLogger {
             modifiedObject.time = currentDate.toISOString();
         }
 
-        if (!isEmpty(modifiedObject)) {
+        if (!utils.isEmpty(modifiedObject)) {
             if (modifiedObject.err) {
                 modifiedMessages.push(modifiedObject.err.message);
             }
@@ -529,7 +524,7 @@ class GhostLogger {
         each(this.streams, (logger) => {
             // If we have both a stdout and a stderr stream, don't log errors to stdout
             // because it would result in duplicate logs
-            if (type === 'error' && logger.name === 'stdout' && includes(this.transports, 'stderr')) {
+            if (type === 'error' && logger.name === 'stdout' && utils.includes(this.transports, 'stderr')) {
                 return;
             }
 
@@ -564,27 +559,27 @@ class GhostLogger {
     }
 
     trace() {
-        this.log('trace', toArray(arguments));
+        this.log('trace', utils.toArray(arguments));
     }
 
     debug() {
-        this.log('debug', toArray(arguments));
+        this.log('debug', utils.toArray(arguments));
     }
 
     info() {
-        this.log('info', toArray(arguments));
+        this.log('info', utils.toArray(arguments));
     }
 
     warn() {
-        this.log('warn', toArray(arguments));
+        this.log('warn', utils.toArray(arguments));
     }
 
     error() {
-        this.log('error', toArray(arguments));
+        this.log('error', utils.toArray(arguments));
     }
 
     fatal() {
-        this.log('fatal', toArray(arguments));
+        this.log('fatal', utils.toArray(arguments));
     }
 
     /**
