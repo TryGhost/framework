@@ -49,14 +49,14 @@
     tslib "^2.6.2"
 
 "@aws-sdk/client-ses@^3.31.0":
-  version "3.734.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-ses/-/client-ses-3.734.0.tgz#4546c9a0c11d63ba390b52d30b942fcc8bcb83db"
-  integrity sha512-UivyDyjEriXtBin5KMjqFVUZiTJkibLT6Td62GgABKuAItJh19kQU3EcJ6nyYCAqEmpAapwTZWJzFLf27QyauQ==
+  version "3.738.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-ses/-/client-ses-3.738.0.tgz#9290b037cf9962fb70c60836181d6b5754ecda96"
+  integrity sha512-/5HyM58w/l+v9iHtuoMcRl/B1GOpDM53ipPziMpnW+ZQchysyH8z8JQ3wJCBUSdNONqSGE3U5QK21VcHm5B2xw==
   dependencies:
     "@aws-crypto/sha256-browser" "5.2.0"
     "@aws-crypto/sha256-js" "5.2.0"
     "@aws-sdk/core" "3.734.0"
-    "@aws-sdk/credential-provider-node" "3.734.0"
+    "@aws-sdk/credential-provider-node" "3.738.0"
     "@aws-sdk/middleware-host-header" "3.734.0"
     "@aws-sdk/middleware-logger" "3.734.0"
     "@aws-sdk/middleware-recursion-detection" "3.734.0"
@@ -201,10 +201,10 @@
     "@smithy/types" "^4.1.0"
     tslib "^2.6.2"
 
-"@aws-sdk/credential-provider-node@3.734.0":
-  version "3.734.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/credential-provider-node/-/credential-provider-node-3.734.0.tgz#86d54171c11cab5b64bfa55ab0def5e807440ad2"
-  integrity sha512-9NOSNbkPVb91JwaXOhyfahkzAwWdMsbWHL6fh5/PHlXYpsDjfIfT23I++toepNF2nODAJNLnOEHGYIxgNgf6jQ==
+"@aws-sdk/credential-provider-node@3.738.0":
+  version "3.738.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/credential-provider-node/-/credential-provider-node-3.738.0.tgz#0a470fc4d2e791c26da57261b8b14f07de43cd74"
+  integrity sha512-3MuREsazwBxghKb2sQQHvie+uuK4dX4/ckFYiSoffzJQd0YHxaGxf8cr4NOSCQCUesWu8D3Y0SzlnHGboVSkpA==
   dependencies:
     "@aws-sdk/credential-provider-env" "3.734.0"
     "@aws-sdk/credential-provider-http" "3.734.0"
