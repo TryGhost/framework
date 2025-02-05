@@ -459,7 +459,8 @@ class GhostLogger {
     removeSensitiveData(obj) {
         let newObj = {};
 
-        each(obj, (value, key) => {
+        for (const key in obj) {
+            let value = obj[key];
             try {
                 if (isObject(value)) {
                     value = this.removeSensitiveData(value);
@@ -473,7 +474,7 @@ class GhostLogger {
             } catch (err) {
                 newObj[key] = value;
             }
-        });
+        }
 
         return newObj;
     }
