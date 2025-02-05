@@ -3,12 +3,13 @@ const Transform = require('stream').Transform;
 const format = require('util').format;
 const prettyjson = require('prettyjson');
 const each = require('lodash/each');
-const omit = require('lodash/omit');
 const get = require('lodash/get');
 const isArray = require('lodash/isArray');
 const isEmpty = require('lodash/isEmpty');
 const isObject = require('lodash/isObject');
-const isString = require('lodash/isString');
+
+const OMITTED_KEYS = ['time', 'level', 'name', 'hostname', 'pid', 'v', 'msg'];
+
 const _private = {
     levelFromName: {
         10: 'trace',
@@ -83,7 +84,7 @@ class PrettyStream extends Transform {
     }
 
     _transform(data, enc, cb) {
-        if (!isString(data)) {
+        if (typeof data !== 'string') {
             data = data.toString();
         }
 
@@ -125,7 +126,7 @@ class PrettyStream extends Transform {
             output += format('[%s] %s %s\n', time, logLevel, bodyPretty);
         }
 
-        each(omit(data, ['time', 'level', 'name', 'hostname', 'pid', 'v', 'msg']), function (value, key) {
+        each(Object.fromEntries(Object.entries(data).filter(([key]) => !OMITTED_KEYS.includes(key))), function (value, key) {
             // we always output errors for now
             if (isObject(value) && value.message && value.stack) {
                 let error = '\n';
