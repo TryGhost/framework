@@ -27,6 +27,6 @@
     "sinon": "18.0.0"
   },
   "dependencies": {
-    "p-wait-for": "3.2.0"
+    "p-wait-for": "5.0.2"
   }
 }
