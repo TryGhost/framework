@@ -1,4 +1,4 @@
-const moment = require('moment');
+const dateFormat = require('date-format');
 const Transform = require('stream').Transform;
 const format = require('util').format;
 const prettyjson = require('prettyjson');
@@ -100,7 +100,19 @@ class PrettyStream extends Transform {
         }
 
         let output = '';
-        const time = moment(data.time).format('YYYY-MM-DD HH:mm:ss');
+
+        // Convert the time to UTC
+        const now = new Date();
+        const dataTime = new Date(data.time);
+
+        // If the timezone offset is equal to the current timezone offset, and that timezone offset is not 0,
+        // then we need to adjust the time
+        if (dataTime.getTimezoneOffset() === now.getTimezoneOffset() && dataTime.getTimezoneOffset() !== 0) {
+            dataTime.setMinutes(dataTime.getMinutes() + dataTime.getTimezoneOffset());
+        }
+
+        const time = dateFormat.asString('yyyy-MM-dd hh:mm:ss', dataTime);
+
         let logLevel = _private.levelFromName[data.level].toUpperCase();
         const codes = _private.colors[_private.colorForLevel[data.level]];
         let bodyPretty = '';
