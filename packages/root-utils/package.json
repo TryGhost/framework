@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/root-utils",
-  "version": "0.3.31",
+  "version": "0.3.32",
   "repository": "https://github.com/TryGhost/framework/tree/main/packages/root-utils",
   "author": "Ghost Foundation",
   "license": "MIT",
