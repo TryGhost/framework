@@ -103,7 +103,7 @@ class PrettyStream extends Transform {
 
         // Convert the time to UTC
         const now = new Date();
-        const dataTime = new Date(data.time);
+        const dataTime = new Date(data.time || now);
 
         // If the timezone offset is equal to the current timezone offset, and that timezone offset is not 0,
         // then we need to adjust the time

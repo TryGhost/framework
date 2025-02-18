@@ -3,6 +3,7 @@
 require('./utils');
 const PrettyStream = require('../index');
 const Writable = require('stream').Writable;
+const sinon = require('sinon');
 
 describe('PrettyStream', function () {
     describe('short mode', function () {
@@ -246,6 +247,28 @@ describe('PrettyStream', function () {
                         code: 'GS005-TPL-ERR'
                     }])
                 }
+            }));
+        });
+
+        it('data with no time field', function (done) {
+            var ghostPrettyStream = new PrettyStream({mode: 'short'});
+            var writeStream = new Writable();
+
+            // Hardcode the datetime so we don't have flaky tests
+            sinon.useFakeTimers(new Date('2024-12-15T13:17:00.000Z'));
+
+            writeStream._write = function (data) {
+                data = data.toString();
+                data.should.eql(`[2024-12-15 13:17:00] \u001b[36mINFO\u001b[39m Ghost starts now.\n`);
+                done();
+            };
+
+            ghostPrettyStream.pipe(writeStream);
+
+            // Write the body with no time field
+            ghostPrettyStream.write(JSON.stringify({
+                level: 30,
+                msg: 'Ghost starts now.'
             }));
         });
     });
