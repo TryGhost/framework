@@ -1,9 +1,11 @@
 {
   "name": "@tryghost/job-manager",
-  "private": true,
-  "version": "0.0.0",
+  "version": "0.9.0",
   "author": "Ghost Foundation",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "index.js",
   "scripts": {
     "dev": "echo \"Implement me!\"",
