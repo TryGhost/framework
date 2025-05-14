@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "repository": "https://github.com/TryGhost/Ghost/tree/main/packages/prometheus-metrics",
   "author": "Ghost Foundation",
-  "private": true,
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
