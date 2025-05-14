@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/prometheus-metrics",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "repository": "https://github.com/TryGhost/Ghost/tree/main/packages/prometheus-metrics",
   "author": "Ghost Foundation",
   "publishConfig": {
