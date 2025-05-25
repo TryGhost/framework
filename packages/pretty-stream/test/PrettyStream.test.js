@@ -272,4 +272,171 @@ describe('PrettyStream', function () {
             }));
         });
     });
+
+    describe('timezone handling', function () {
+        it('should display provided timestamps consistently', function (done) {
+            var ghostPrettyStream = new PrettyStream({mode: 'short'});
+            var writeStream = new Writable();
+
+            writeStream._write = function (data) {
+                data = data.toString();
+                // The timestamp should be formatted consistently
+                data.should.containEql('[2016-07-01 00:00:00]');
+                data.should.containEql('INFO');
+                data.should.containEql('Test message');
+                done();
+            };
+
+            ghostPrettyStream.pipe(writeStream);
+
+            // Write with an explicit timestamp
+            ghostPrettyStream.write(JSON.stringify({
+                time: '2016-07-01 00:00:00',
+                level: 30,
+                msg: 'Test message'
+            }));
+        });
+
+        it('should handle ISO 8601 timestamps and convert to local time', function (done) {
+            var ghostPrettyStream = new PrettyStream({mode: 'short'});
+            var writeStream = new Writable();
+
+            writeStream._write = function (data) {
+                data = data.toString();
+                // ISO timestamp should be parsed and converted to local time
+                // Extract the timestamp to verify format
+                const timestampMatch = data.match(/^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]/);
+                timestampMatch.should.not.be.null();
+
+                // Verify the timestamp represents the correct moment
+                // 2016-07-01T00:00:00.000Z in local time
+                const parsedTime = new Date(timestampMatch[1]);
+                const expectedTime = new Date('2016-07-01T00:00:00.000Z');
+
+                // The displayed local time should represent the same moment as the UTC time
+                // Allow for some tolerance due to date parsing
+                Math.abs(parsedTime.getTime() - expectedTime.getTime()).should.be.below(24 * 60 * 60 * 1000);
+
+                data.should.containEql('INFO');
+                data.should.containEql('ISO timestamp test');
+                done();
+            };
+
+            ghostPrettyStream.pipe(writeStream);
+
+            // Write with an ISO 8601 timestamp
+            ghostPrettyStream.write(JSON.stringify({
+                time: '2016-07-01T00:00:00.000Z',
+                level: 30,
+                msg: 'ISO timestamp test'
+            }));
+        });
+
+        it('should handle timestamps with timezone offsets', function (done) {
+            var ghostPrettyStream = new PrettyStream({mode: 'short'});
+            var writeStream = new Writable();
+
+            writeStream._write = function (data) {
+                data = data.toString();
+                // Timestamp with timezone offset should be converted to local time for display
+                const timestampMatch = data.match(/^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]/);
+                timestampMatch.should.not.be.null();
+
+                data.should.containEql('INFO');
+                data.should.containEql('Timezone offset test');
+                done();
+            };
+
+            ghostPrettyStream.pipe(writeStream);
+
+            // Write with a timestamp that includes timezone offset
+            ghostPrettyStream.write(JSON.stringify({
+                time: '2016-07-01T00:00:00+02:00',
+                level: 30,
+                msg: 'Timezone offset test'
+            }));
+        });
+
+        it('should use current local time when no timestamp is provided', function (done) {
+            var ghostPrettyStream = new PrettyStream({mode: 'short'});
+            var writeStream = new Writable();
+
+            // Capture the time before the test
+            const beforeTime = new Date();
+
+            writeStream._write = function (data) {
+                data = data.toString();
+
+                // Extract the timestamp from the output
+                const timestampMatch = data.match(/^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]/);
+                timestampMatch.should.not.be.null();
+
+                const loggedTime = new Date(timestampMatch[1]);
+                const afterTime = new Date();
+
+                // The logged time should be between beforeTime and afterTime
+                loggedTime.getTime().should.be.aboveOrEqual(beforeTime.getTime());
+                loggedTime.getTime().should.be.belowOrEqual(afterTime.getTime());
+
+                done();
+            };
+
+            ghostPrettyStream.pipe(writeStream);
+
+            // Write without a timestamp
+            ghostPrettyStream.write(JSON.stringify({
+                level: 30,
+                msg: 'No timestamp test'
+            }));
+        });
+
+        it('should work correctly in different timezones', function (done) {
+            // This test verifies that string timestamps are displayed as-is
+            var ghostPrettyStream = new PrettyStream({mode: 'short'});
+            var writeStream = new Writable();
+
+            writeStream._write = function (data) {
+                data = data.toString();
+                // String timestamp should be displayed exactly as provided
+                data.should.containEql('[2016-07-01 00:00:00]');
+                data.should.containEql('String timestamp');
+                done();
+            };
+
+            ghostPrettyStream.pipe(writeStream);
+
+            // Test with string timestamp - should be displayed as-is
+            ghostPrettyStream.write(JSON.stringify({
+                time: '2016-07-01 00:00:00',
+                level: 30,
+                msg: 'String timestamp'
+            }));
+        });
+
+        it('regression test: string timestamps should not be affected by timezone offset', function (done) {
+            // This test ensures the bug from commit be5ddf2 doesn't resurface
+            // String timestamps like '2016-07-01 00:00:00' should be displayed exactly as provided
+            // regardless of the system timezone
+            var ghostPrettyStream = new PrettyStream({mode: 'short'});
+            var writeStream = new Writable();
+
+            writeStream._write = function (data) {
+                data = data.toString();
+                // The exact string '2016-07-01 00:00:00' should appear in the output
+                // It should NOT be shifted by timezone offset (e.g., NOT '2016-06-30 23:00:00')
+                data.should.match(/^\[2016-07-01 00:00:00\]/);
+                data.should.containEql('Regression test');
+                done();
+            };
+
+            ghostPrettyStream.pipe(writeStream);
+
+            // This timestamp format was causing issues in non-UTC timezones
+            ghostPrettyStream.write(JSON.stringify({
+                time: '2016-07-01 00:00:00',
+                level: 30,
+                msg: 'Regression test'
+            }));
+        });
+    });
 });

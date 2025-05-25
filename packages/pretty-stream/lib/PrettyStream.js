@@ -101,17 +101,23 @@ class PrettyStream extends Transform {
 
         let output = '';
 
-        // Convert the time to UTC
-        const now = new Date();
-        const dataTime = new Date(data.time || now);
+        // Handle time formatting
+        let time;
 
-        // If the timezone offset is equal to the current timezone offset, and that timezone offset is not 0,
-        // then we need to adjust the time
-        if (dataTime.getTimezoneOffset() === now.getTimezoneOffset() && dataTime.getTimezoneOffset() !== 0) {
-            dataTime.setMinutes(dataTime.getMinutes() + dataTime.getTimezoneOffset());
+        if (data.time) {
+            // If time is provided as a string in the expected format, use it directly
+            if (typeof data.time === 'string' && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(data.time)) {
+                time = data.time;
+            } else {
+                // Otherwise, parse and format it
+                const dataTime = new Date(data.time);
+                time = dateFormat.asString('yyyy-MM-dd hh:mm:ss', dataTime);
+            }
+        } else {
+            // No time provided, use current time
+            const now = new Date();
+            time = dateFormat.asString('yyyy-MM-dd hh:mm:ss', now);
         }
-
-        const time = dateFormat.asString('yyyy-MM-dd hh:mm:ss', dataTime);
 
         let logLevel = _private.levelFromName[data.level].toUpperCase();
         const codes = _private.colors[_private.colorForLevel[data.level]];
