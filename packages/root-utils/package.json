@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/root-utils",
-  "version": "0.3.32",
+  "version": "0.3.33",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
