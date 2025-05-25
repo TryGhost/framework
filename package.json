@@ -1,6 +1,9 @@
 {
   "private": true,
-  "repository": "https://github.com/TryGhost/framework",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TryGhost/framework.git"
+  },
   "author": "Ghost Foundation",
   "license": "MIT",
   "workspaces": [

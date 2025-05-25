@@ -1,7 +1,11 @@
 {
   "name": "@tryghost/bookshelf-include-count",
   "version": "0.3.17",
-  "repository": "https://github.com/TryGhost/framework/tree/main/packages/bookshelf-include-count",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TryGhost/framework.git",
+    "directory": "packages/bookshelf-include-count"
+  },
   "author": "Ghost Foundation",
   "license": "MIT",
   "main": "index.js",

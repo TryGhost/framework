@@ -1,7 +1,11 @@
 {
   "name": "@tryghost/promise",
   "version": "0.3.14",
-  "repository": "https://github.com/TryGhost/framework/tree/main/packages/promise",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TryGhost/framework.git",
+    "directory": "packages/promise"
+  },
   "author": "Ghost Foundation",
   "license": "MIT",
   "main": "index.js",

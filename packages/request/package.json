@@ -1,7 +1,11 @@
 {
   "name": "@tryghost/request",
   "version": "1.0.10",
-  "repository": "https://github.com/TryGhost/framework/tree/main/packages/request",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TryGhost/framework.git",
+    "directory": "packages/request"
+  },
   "author": "Ghost Foundation",
   "license": "MIT",
   "main": "index.js",

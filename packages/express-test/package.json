@@ -1,7 +1,11 @@
 {
   "name": "@tryghost/express-test",
   "version": "0.13.17",
-  "repository": "https://github.com/TryGhost/framework/tree/main/packages/express-test",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TryGhost/framework.git",
+    "directory": "packages/express-test"
+  },
   "author": "Ghost Foundation",
   "license": "MIT",
   "main": "index.js",

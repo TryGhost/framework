@@ -1,6 +1,11 @@
 {
   "name": "@tryghost/security",
   "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TryGhost/framework.git",
+    "directory": "packages/security"
+  },
   "author": "Ghost Foundation",
   "license": "MIT",
   "main": "index.js",

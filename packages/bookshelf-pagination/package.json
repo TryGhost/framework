@@ -1,7 +1,11 @@
 {
   "name": "@tryghost/bookshelf-pagination",
   "version": "0.1.50",
-  "repository": "https://github.com/TryGhost/framework/tree/main/packages/bookshelf-pagination",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TryGhost/framework.git",
+    "directory": "packages/bookshelf-pagination"
+  },
   "author": "Ghost Foundation",
   "license": "MIT",
   "main": "index.js",

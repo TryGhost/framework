@@ -1,7 +1,11 @@
 {
   "name": "@tryghost/bookshelf-filter",
   "version": "0.5.22",
-  "repository": "https://github.com/TryGhost/framework/tree/main/packages/bookshelf-filter",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TryGhost/framework.git",
+    "directory": "packages/bookshelf-filter"
+  },
   "author": "Ghost Foundation",
   "license": "MIT",
   "main": "index.js",

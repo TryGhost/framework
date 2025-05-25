@@ -1,7 +1,11 @@
 {
   "name": "@tryghost/http-cache-utils",
   "version": "0.1.19",
-  "repository": "https://github.com/TryGhost/framework/tree/main/packages/http-cache-utils",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TryGhost/framework.git",
+    "directory": "packages/http-cache-utils"
+  },
   "author": "Ghost Foundation",
   "license": "MIT",
   "main": "index.js",

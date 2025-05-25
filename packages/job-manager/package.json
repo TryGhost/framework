@@ -38,5 +38,10 @@
     "fastq": "1.19.1",
     "p-wait-for": "3.2.0",
     "workerpool": "9.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TryGhost/framework.git",
+    "directory": "packages/job-manager"
   }
 }

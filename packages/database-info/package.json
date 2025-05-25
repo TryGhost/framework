@@ -1,7 +1,11 @@
 {
   "name": "@tryghost/database-info",
   "version": "0.3.29",
-  "repository": "https://github.com/TryGhost/framework/tree/main/packages/database-info",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TryGhost/framework.git",
+    "directory": "packages/database-info"
+  },
   "author": "Ghost Foundation",
   "license": "MIT",
   "main": "index.js",

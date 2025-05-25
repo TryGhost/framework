@@ -1,7 +1,11 @@
 {
   "name": "@tryghost/bookshelf-order",
   "version": "0.1.29",
-  "repository": "https://github.com/TryGhost/framework/tree/main/packages/bookshelf-order",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TryGhost/framework.git",
+    "directory": "packages/bookshelf-order"
+  },
   "author": "Ghost Foundation",
   "license": "MIT",
   "main": "index.js",

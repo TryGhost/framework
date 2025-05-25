@@ -1,7 +1,11 @@
 {
   "name": "@tryghost/config",
   "version": "0.2.26",
-  "repository": "https://github.com/TryGhost/framework/tree/main/packages/config",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TryGhost/framework.git",
+    "directory": "packages/config"
+  },
   "author": "Ghost Foundation",
   "license": "MIT",
   "main": "index.js",

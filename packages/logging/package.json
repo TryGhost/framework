@@ -1,7 +1,11 @@
 {
   "name": "@tryghost/logging",
   "version": "2.4.21",
-  "repository": "https://github.com/TryGhost/framework/tree/main/packages/logging",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TryGhost/framework.git",
+    "directory": "packages/logging"
+  },
   "author": "Ghost Foundation",
   "license": "MIT",
   "main": "index.js",

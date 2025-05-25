@@ -1,7 +1,11 @@
 {
   "name": "@tryghost/bookshelf-collision",
   "version": "0.1.47",
-  "repository": "https://github.com/TryGhost/framework/tree/main/packages/bookshelf-collision",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TryGhost/framework.git",
+    "directory": "packages/bookshelf-collision"
+  },
   "author": "Ghost Foundation",
   "license": "MIT",
   "main": "index.js",

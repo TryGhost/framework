@@ -1,7 +1,11 @@
 {
   "name": "@tryghost/elasticsearch",
   "version": "3.0.23",
-  "repository": "https://github.com/TryGhost/framework/tree/main/packages/elasticsearch",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TryGhost/framework.git",
+    "directory": "packages/elasticsearch"
+  },
   "author": "Ghost Foundation",
   "license": "MIT",
   "main": "index.js",
