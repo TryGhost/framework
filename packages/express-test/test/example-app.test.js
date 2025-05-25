@@ -360,6 +360,31 @@ describe('Example App', function () {
             }
         });
 
+        it('can upload a file using the attach method', async function () {
+            const fileContents = await fs.readFile(__dirname + '/fixtures/ghost-favicon.png');
+
+            const {body} = await agent
+                .post('/api/upload/')
+                .attach('image', __dirname + '/fixtures/ghost-favicon.png')
+                .expectStatus(200);
+
+            assert.equal(body.originalname, 'ghost-favicon.png');
+            assert.equal(body.mimetype, 'image/png');
+            assert.equal(body.size, fileContents.length);
+            assert.equal(body.fieldname, 'image');
+
+            // Do a real comparison in the uploaded file to check if it was uploaded and saved correctly
+            const uploadedFileContents = await fs.readFile(body.path);
+            assert.deepEqual(uploadedFileContents, fileContents);
+
+            // Delete the file
+            try {
+                await fs.unlink(body.path);
+            } catch (e) {
+                // ignore if this fails
+            }
+        });
+
         it('can stream body', async function () {
             const stat = await fs.stat(__dirname + '/fixtures/long-json-body.json');
             const stream = createReadStream(__dirname + '/fixtures/long-json-body.json');

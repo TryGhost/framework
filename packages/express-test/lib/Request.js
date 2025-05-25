@@ -1,7 +1,7 @@
 const {default: reqresnext} = require('reqresnext');
 const {CookieAccessInfo} = require('cookiejar');
 const {parse} = require('url');
-const {isJSON} = require('./utils');
+const {isJSON, attachFile} = require('./utils');
 const {Readable} = require('stream');
 
 class RequestOptions {
@@ -22,6 +22,11 @@ class Request {
         this.app = app;
         this.reqOptions = reqOptions instanceof RequestOptions ? reqOptions : new RequestOptions(reqOptions);
         this.cookieJar = cookieJar;
+    }
+
+    attach(name, filePath) {
+        const formData = attachFile(name, filePath);
+        return this.body(formData);
     }
 
     /**
