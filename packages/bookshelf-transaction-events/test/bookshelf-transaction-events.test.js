@@ -31,7 +31,7 @@ describe('Bookshelf transaction events', function () {
 
         await trx.commit();
 
-        assert(trx.isCompleted());
-        assert(trx.commit.calledBefore(trx.emit));
+        assert.ok(trx.isCompleted());
+        assert.ok(trx.commit.calledBefore(trx.emit));
     });
 });
