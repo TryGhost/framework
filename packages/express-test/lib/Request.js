@@ -22,11 +22,15 @@ class Request {
         this.app = app;
         this.reqOptions = reqOptions instanceof RequestOptions ? reqOptions : new RequestOptions(reqOptions);
         this.cookieJar = cookieJar;
+        this._formData = null; // Track FormData instance for multiple attachments
     }
 
     attach(name, filePath) {
-        const formData = attachFile(name, filePath);
-        return this.body(formData);
+        // Use the utility to create or append to FormData
+        this._formData = attachFile(name, filePath, this._formData);
+
+        // Set the body to the FormData instance
+        return this.body(this._formData);
     }
 
     /**

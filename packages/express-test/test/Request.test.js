@@ -339,6 +339,61 @@ describe('Request', function () {
             assert.equal(request.reqOptions.headers.foo, 'bar');
         });
 
+        it('attach() sets body correctly with single file', async function () {
+            const fn = () => {};
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new Request(fn, jar, opts);
+
+            const path = require('path');
+            const filePath = path.join(__dirname, 'fixtures/ghost-favicon.png');
+
+            request.attach('image', filePath);
+
+            assert.equal(request._formData instanceof FormData, true);
+            assert.equal(request.reqOptions.body, undefined);
+
+            // Verify the FormData contains the file
+            const buffer = request._formData.getBuffer();
+            const content = buffer.toString();
+            assert.match(content, /Content-Disposition: form-data; name="image"/);
+            assert.match(content, /filename="ghost-favicon.png"/);
+        });
+
+        it('attach() sets body correctly with multiple files', async function () {
+            const fn = () => {};
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new Request(fn, jar, opts);
+
+            const path = require('path');
+            const fs = require('fs');
+            const imagePath = path.join(__dirname, 'fixtures/ghost-favicon.png');
+            const textPath = path.join(__dirname, 'fixtures/test-multi.txt');
+
+            // Create a test text file
+            fs.writeFileSync(textPath, 'test content');
+
+            try {
+                request
+                    .attach('image', imagePath)
+                    .attach('document', textPath);
+
+                assert.equal(request._formData instanceof FormData, true);
+
+                // Verify the FormData contains both files
+                const buffer = request._formData.getBuffer();
+                const content = buffer.toString();
+                assert.match(content, /Content-Disposition: form-data; name="image"/);
+                assert.match(content, /filename="ghost-favicon.png"/);
+                assert.match(content, /Content-Disposition: form-data; name="document"/);
+                assert.match(content, /filename="test-multi.txt"/);
+            } finally {
+                // Clean up
+                fs.unlinkSync(textPath);
+            }
+        });
+
         it('class is thenable [public api]', async function () {
             const fn = (req, res) => {
                 // This is how reqresnext works

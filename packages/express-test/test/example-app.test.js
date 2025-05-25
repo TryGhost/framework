@@ -1,4 +1,5 @@
 const {assert} = require('./utils');
+const path = require('path');
 
 const Agent = require('../'); // we require the root file
 const app = require('../example/app');
@@ -365,7 +366,7 @@ describe('Example App', function () {
 
             const {body} = await agent
                 .post('/api/upload/')
-                .attach('image', __dirname + '/fixtures/ghost-favicon.png')
+                .attach('image', path.join(__dirname, '/fixtures/ghost-favicon.png'))
                 .expectStatus(200);
 
             assert.equal(body.originalname, 'ghost-favicon.png');
@@ -380,6 +381,41 @@ describe('Example App', function () {
             // Delete the file
             try {
                 await fs.unlink(body.path);
+            } catch (e) {
+                // ignore if this fails
+            }
+        });
+
+        it('can upload multiple files using multiple attach calls', async function () {
+            // Create a text file for testing
+            const textFilePath = path.join(__dirname, '/fixtures/test-upload.txt');
+            await fs.writeFile(textFilePath, 'test content for multiple files');
+
+            const imageContents = await fs.readFile(__dirname + '/fixtures/ghost-favicon.png');
+            const textContents = await fs.readFile(textFilePath);
+
+            const {body} = await agent
+                .post('/api/upload-multiple/')
+                .attach('image', path.join(__dirname, '/fixtures/ghost-favicon.png'))
+                .attach('document', textFilePath)
+                .expectStatus(200);
+
+            // Verify both files were uploaded
+            assert.equal(body.image[0].originalname, 'ghost-favicon.png');
+            assert.equal(body.image[0].mimetype, 'image/png');
+            assert.equal(body.image[0].size, imageContents.length);
+            assert.equal(body.image[0].fieldname, 'image');
+
+            assert.equal(body.document[0].originalname, 'test-upload.txt');
+            assert.equal(body.document[0].mimetype, 'text/plain');
+            assert.equal(body.document[0].size, textContents.length);
+            assert.equal(body.document[0].fieldname, 'document');
+
+            // Clean up uploaded files
+            try {
+                await fs.unlink(body.image[0].path);
+                await fs.unlink(body.document[0].path);
+                await fs.unlink(textFilePath);
             } catch (e) {
                 // ignore if this fails
             }

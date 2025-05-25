@@ -21,8 +21,8 @@ module.exports.normalizeURL = function normalizeURL(toNormalize) {
     return normalized;
 };
 
-module.exports.attachFile = function attachFile(name, filePath) {
-    const formData = new FormData();
+module.exports.attachFile = function attachFile(name, filePath, existingFormData = null) {
+    const formData = existingFormData || new FormData();
     const fileContent = fs.readFileSync(filePath);
     const filename = path.basename(filePath);
     const contentType = mime.lookup(filePath) || 'application/octet-stream';
