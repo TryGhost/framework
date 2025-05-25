@@ -117,5 +117,39 @@ describe('Utils', function () {
             // Check that the form data contains the file content
             assert.match(content, /test content for file upload/);
         });
+
+        it('can append to existing FormData', function () {
+            const filePath1 = path.join(__dirname, 'fixtures/test-file.txt');
+            const filePath2 = path.join(__dirname, 'fixtures/ghost-favicon.png');
+
+            // Create FormData with first file
+            const formData = attachFile('file1', filePath1);
+
+            // Append second file to same FormData
+            const updatedFormData = attachFile('file2', filePath2, formData);
+
+            // Should be the same instance
+            assert.equal(formData, updatedFormData);
+
+            // Verify both files are in the FormData
+            const buffer = formData.getBuffer();
+            const content = buffer.toString();
+
+            assert.match(content, /Content-Disposition: form-data; name="file1"/);
+            assert.match(content, /filename="test-file.txt"/);
+            assert.match(content, /Content-Disposition: form-data; name="file2"/);
+            assert.match(content, /filename="ghost-favicon.png"/);
+        });
+
+        it('creates new FormData when existingFormData is null', function () {
+            const filePath = path.join(__dirname, 'fixtures/test-file.txt');
+            const formData = attachFile('testfile', filePath, null);
+
+            assert.equal(formData instanceof FormData, true);
+
+            const buffer = formData.getBuffer();
+            const content = buffer.toString();
+            assert.match(content, /Content-Disposition: form-data; name="testfile"/);
+        });
     });
 });

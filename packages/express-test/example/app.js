@@ -76,4 +76,11 @@ app.post('/api/upload/', upload.single('image'), async (req, res) => {
     return res.json(req.file);
 });
 
+app.post('/api/upload-multiple/', upload.fields([
+    {name: 'image', maxCount: 1},
+    {name: 'document', maxCount: 1}
+]), async (req, res) => {
+    return res.json(req.files);
+});
+
 module.exports = app;
