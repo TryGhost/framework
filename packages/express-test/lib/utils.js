@@ -1,7 +1,12 @@
-module.exports.isJSON = function isJSON(mime) {
+const fs = require('fs');
+const path = require('path');
+const mime = require('mime-types');
+const FormData = require('form-data');
+
+module.exports.isJSON = function isJSON(mimeType) {
     // should match /json or +json
     // but not /json-seq
-    return /[/+]json($|[^-\w])/i.test(mime);
+    return /[/+]json($|[^-\w])/i.test(mimeType);
 };
 
 module.exports.normalizeURL = function normalizeURL(toNormalize) {
@@ -14,4 +19,18 @@ module.exports.normalizeURL = function normalizeURL(toNormalize) {
     }
 
     return normalized;
+};
+
+module.exports.attachFile = function attachFile(name, filePath) {
+    const formData = new FormData();
+    const fileContent = fs.readFileSync(filePath);
+    const filename = path.basename(filePath);
+    const contentType = mime.lookup(filePath) || 'application/octet-stream';
+
+    formData.append(name, fileContent, {
+        filename,
+        contentType
+    });
+
+    return formData;
 };
