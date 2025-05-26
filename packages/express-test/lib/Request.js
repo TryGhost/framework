@@ -95,7 +95,7 @@ class Request {
                 readableStream.pause();
             },
             read: () => {
-                readableStream.read(...arguments);
+                return readableStream.read(...arguments);
             }
         };
         return this;
