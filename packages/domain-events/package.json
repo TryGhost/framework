@@ -23,7 +23,7 @@
   "devDependencies": {
     "@tryghost/logging": "^2.4.22",
     "c8": "8.0.1",
-    "mocha": "10.8.2",
+    "mocha": "11.6.0",
     "should": "13.2.3"
   },
   "repository": {
