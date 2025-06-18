@@ -1,0 +1,10 @@
+{
+    // This is an example config with comments
+    "hello": "world",
+    "test": "overriden", // inline comment
+    /* 
+     * Multi-line comment
+     * for additional configuration
+     */
+    "jsonc": true
+}
