@@ -1,0 +1,7 @@
+{
+  // Environment specific config with comments
+  "test": "root-config-jsonc",
+  "should-be-used": true,
+  // Support for additional features
+  "jsonc-feature": "enabled"
+}
