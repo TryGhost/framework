@@ -129,6 +129,55 @@ describe('Example App', function () {
         });
     });
 
+    describe('Cookie clearing functionality', function () {
+        before(async function () {
+            agent = await getAPIAgent();
+        });
+
+        it('clearCookies removes session and requires re-authentication', async function () {
+            // First, create a session
+            const sessionRes = await agent.post('/session/', {
+                body: {
+                    username: 'hello',
+                    password: 'world'
+                }
+            });
+            assert.equal(sessionRes.statusCode, 200);
+
+            // Verify we can make authenticated requests
+            const authRes = await agent.get('/foo/');
+            assert.equal(authRes.statusCode, 200);
+            assert.deepEqual(authRes.body, {foo: [{bar: 'baz'}]});
+
+            // Clear cookies
+            agent.clearCookies();
+
+            // Verify we can no longer make authenticated requests
+            const unauthRes = await agent.get('/foo/');
+            assert.equal(unauthRes.statusCode, 403);
+            assert.equal(unauthRes.text, 'Forbidden');
+        });
+
+        it('clearCookies supports chaining', async function () {
+            // Create a session
+            await agent.post('/session/', {
+                body: {
+                    username: 'hello',
+                    password: 'world'
+                }
+            });
+
+            // Verify authenticated request works
+            const authRes = await agent.get('/foo/');
+            assert.equal(authRes.statusCode, 200);
+
+            // Use logout and chain a request
+            const unauthRes = await agent.clearCookies().get('/foo/');
+            assert.equal(unauthRes.statusCode, 403);
+            assert.equal(unauthRes.text, 'Forbidden');
+        });
+    });
+
     describe('Set & Expect', function () {
         before(async function () {
             agent = await getAgent();
