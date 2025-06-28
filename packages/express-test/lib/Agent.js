@@ -91,6 +91,15 @@ class Agent {
             body: Object.assign({}, this.defaults.body, options.body)
         });
     }
+
+    /**
+     * Clear all cookies from the agent's cookie jar
+     * @returns {Agent} - Returns this for chaining
+     */
+    clearCookies() {
+        this.jar = new CookieJar();
+        return this;
+    }
 }
 
 ['get', 'post', 'put', 'patch', 'delete', 'options', 'head'].forEach((method) => {

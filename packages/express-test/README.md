@@ -37,6 +37,19 @@ return await agent
         assert.deepEqual(body, {foo: 'bar'});
     });
 ```
+
+### Cookie Management
+
+The agent maintains cookies across requests using a cookie jar. You can clear all cookies (useful for testing authentication flows):
+
+```javascript
+// Clear all cookies
+agent.clearCookies();
+
+// Both methods support chaining
+await agent.logout().get('/protected-route');
+```
+
 This is an initial version for review. More docs coming if it works :)
 
 

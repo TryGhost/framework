@@ -232,5 +232,30 @@ describe('Agent', function () {
             assert.deepEqual(test.reqOptions.headers, {});
             assert.deepEqual(test.reqOptions.body, {});
         });
+
+        it('clearCookies creates a new CookieJar and returns agent for chaining', function () {
+            const fn = () => { };
+            const opts = {};
+            const agent = new Agent(fn, opts);
+
+            const originalJar = agent.jar;
+            const result = agent.clearCookies();
+
+            assert.notEqual(agent.jar, originalJar, 'Should create a new CookieJar instance');
+            assert.equal(result, agent, 'Should return agent for chaining');
+            assert.equal(typeof agent.jar.setCookie, 'function', 'New jar should be a valid CookieJar');
+        });
+
+        it('clearCookies can be chained with other methods', function () {
+            const fn = () => { };
+            const opts = {};
+            const agent = new Agent(fn, opts);
+
+            const request = agent.clearCookies().get('/');
+
+            assert.equal(request instanceof require('../lib/ExpectRequest'), true);
+            assert.equal(request.reqOptions.method, 'GET');
+            assert.equal(request.reqOptions.url, '/');
+        });
     });
 });
