@@ -11,7 +11,7 @@ let cacheableLookup;
 
 const defaultOptions = {
     headers: {
-        'user-agent': 'Ghost/' + ghostVersion.original + ' (https://github.com/TryGhost/Ghost)'
+        'user-agent': 'Ghost/' + ghostVersion.safe + ' (https://github.com/TryGhost/Ghost)'
     },
     method: 'GET'
 };
