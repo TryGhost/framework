@@ -7,6 +7,18 @@ const nock = require('nock');
 const request = require('../lib/request');
 
 describe('Request', function () {
+    it('has "safe" version in default user-agent header', function () {
+        const url = 'http://some-website.com/endpoint/';
+
+        nock('http://some-website.com')
+            .get('/endpoint/')
+            .reply(200, 'Response body');
+
+        return request(url, {}).then(function ({req}) {
+            req.headers['user-agent'].should.match(/Ghost\/[0-9]+\.[0-9]+\s/);
+        });
+    });
+
     it('[success] should return response for http request', function () {
         const url = 'http://some-website.com/endpoint/';
         const expectedResponse = {
