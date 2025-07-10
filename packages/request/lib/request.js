@@ -16,7 +16,7 @@ const defaultOptions = {
     method: 'GET'
 };
 
-module.exports = async function request(url, options) {
+module.exports = async function request(url, options = {}) {
     // Initialise ES6 imports
     if (!got) {
         got = (await gotPromise).default;
