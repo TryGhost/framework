@@ -19,6 +19,18 @@ describe('Request', function () {
         });
     });
 
+    it('can be called with no options', function () {
+        const url = 'http://some-website.com/endpoint/';
+
+        const requestMock = nock('http://some-website.com')
+            .get('/endpoint/')
+            .reply(200, 'Response body');
+
+        return request(url).then(function () {
+            requestMock.isDone().should.be.true();
+        });
+    });
+
     it('[success] should return response for http request', function () {
         const url = 'http://some-website.com/endpoint/';
         const expectedResponse = {
