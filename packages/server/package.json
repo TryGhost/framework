@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/server",
-  "version": "0.1.52",
+  "version": "0.1.53",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -30,6 +30,6 @@
   },
   "dependencies": {
     "@tryghost/debug": "^0.1.35",
-    "@tryghost/logging": "^2.4.22"
+    "@tryghost/logging": "^2.4.23"
   }
 }
