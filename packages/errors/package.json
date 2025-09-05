@@ -48,6 +48,6 @@
   },
   "dependencies": {
     "@stdlib/utils-copy": "^0.2.0",
-    "uuid": "^9.0.0"
+    "uuid": "^12.0.0"
   }
 }
