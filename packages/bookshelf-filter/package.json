@@ -30,7 +30,7 @@
   "dependencies": {
     "@tryghost/debug": "^0.1.35",
     "@tryghost/errors": "^1.3.8",
-    "@tryghost/nql": "0.12.6",
+    "@tryghost/nql": "0.12.7",
     "@tryghost/tpl": "^0.1.35"
   }
 }
