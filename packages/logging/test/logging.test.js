@@ -457,6 +457,92 @@ describe('Logging', function () {
         });
     });
 
+    describe('filename computation', function () {
+        it('sanitizeDomain should replace non-word characters with underscores', function () {
+            var ghostLogger = new GhostLogger();
+            ghostLogger.sanitizeDomain('http://my-domain.com').should.eql('http___my_domain_com');
+            ghostLogger.sanitizeDomain('localhost').should.eql('localhost');
+            ghostLogger.sanitizeDomain('example.com:8080').should.eql('example_com_8080');
+        });
+
+        it('replaceFilenamePlaceholders should replace {env} placeholder', function () {
+            var ghostLogger = new GhostLogger({env: 'production'});
+            ghostLogger.replaceFilenamePlaceholders('{env}').should.eql('production');
+        });
+
+        it('replaceFilenamePlaceholders should replace {domain} placeholder', function () {
+            var ghostLogger = new GhostLogger({domain: 'http://example.com'});
+            ghostLogger.replaceFilenamePlaceholders('{domain}').should.eql('http___example_com');
+        });
+
+        it('replaceFilenamePlaceholders should replace both {env} and {domain} placeholders', function () {
+            var ghostLogger = new GhostLogger({
+                domain: 'http://example.com',
+                env: 'staging'
+            });
+            ghostLogger.replaceFilenamePlaceholders('{domain}-{env}').should.eql('http___example_com-staging');
+            ghostLogger.replaceFilenamePlaceholders('{env}.{domain}').should.eql('staging.http___example_com');
+        });
+
+        it('logger should return default format when no filename option provided', function () {
+            var ghostLogger = new GhostLogger({
+                domain: 'http://example.com',
+                env: 'production'
+            });
+            ghostLogger.filename.should.eql('{domain}_{env}');
+        });
+
+        it('logger should use filename template when provided', function () {
+            var ghostLogger = new GhostLogger({
+                domain: 'http://example.com',
+                env: 'production',
+                filename: '{env}'
+            });
+            ghostLogger.filename.should.eql('{env}');
+        });
+
+        it('file stream should use custom filename template', function () {
+            const tempDir = './test-logs/';
+            const rimraf = function (dir) {
+                if (fs.existsSync(dir)) {
+                    fs.readdirSync(dir).forEach(function (file) {
+                        const curPath = dir + '/' + file;
+                        if (fs.lstatSync(curPath).isDirectory()) {
+                            rimraf(curPath);
+                        } else {
+                            fs.unlinkSync(curPath);
+                        }
+                    });
+                    fs.rmdirSync(dir);
+                }
+            };
+
+            // Create temp directory
+            if (!fs.existsSync(tempDir)) {
+                fs.mkdirSync(tempDir, {recursive: true});
+            }
+
+            var ghostLogger = new GhostLogger({
+                domain: 'test.com',
+                env: 'production',
+                filename: '{env}',
+                transports: ['file'],
+                path: tempDir
+            });
+
+            ghostLogger.info('Test log message');
+
+            // Give it a moment to write
+            setTimeout(function () {
+                fs.existsSync(tempDir + 'production.log').should.eql(true);
+                fs.existsSync(tempDir + 'production.error.log').should.eql(true);
+
+                // Cleanup
+                rimraf(tempDir);
+            }, 100);
+        });
+    });
+
     describe('serialization', function () {
         it('serializes error into correct object', function (done) {
             const err = new errors.NotFoundError();

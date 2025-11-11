@@ -26,6 +26,8 @@ class GhostLogger {
      * transports:      An array of comma separated transports (e.g. stdout, stderr, geld, loggly, file)
      * rotation:        Enable or disable file rotation.
      * path:            Path where to store log files.
+     * filename:        Optional filename template for log files. Supports {env} and {domain} placeholders.
+     *                  If not provided, defaults to {domain}_{env} format.
      * loggly:          Loggly transport configuration.
      * elasticsearch:   Elasticsearch transport configuration
      * gelf:            Gelf transport configuration.
@@ -45,6 +47,7 @@ class GhostLogger {
         this.logBody = options.logBody || false;
         this.mode = process.env.MODE || options.mode || 'short';
         this.path = options.path || process.cwd();
+        this.filename = options.filename || '{domain}_{env}';
         this.loggly = options.loggly || {};
         this.elasticsearch = options.elasticsearch || {};
         this.gelf = options.gelf || {};
@@ -276,6 +279,30 @@ class GhostLogger {
     }
 
     /**
+     * @description Sanitize domain for use in filenames.
+     * Replaces all non-word characters with underscores.
+     * @param {string} domain - The domain to sanitize
+     * @returns {string} Sanitized domain safe for filenames
+     * @example
+     * sanitizeDomain('http://my-domain.com') // returns 'http___my_domain_com'
+     */
+    sanitizeDomain(domain) {
+        return domain.replace(/[^\w]/gi, '_');
+    }
+
+    /**
+     * @description Replace placeholders in filename template.
+     * @param {string} template - Filename template with placeholders
+     * @returns {string} Filename with placeholders replaced
+     */
+    // TODO: Expand to other placeholders?
+    replaceFilenamePlaceholders(template) {
+        return template
+            .replace(/{env}/g, this.env)
+            .replace(/{domain}/g, this.sanitizeDomain(this.domain));
+    }
+
+    /**
      * @description Setup file stream.
      *
      * By default we log into two files
@@ -283,8 +310,7 @@ class GhostLogger {
      * 2. file-all: everything
      */
     setFileStream() {
-        // e.g. http://my-domain.com --> http___my_domain_com
-        const sanitizedDomain = this.domain.replace(/[^\w]/gi, '_');
+        const baseFilename = this.replaceFilenamePlaceholders(this.filename);
 
         // CASE: target log folder does not exist, show warning
         if (!fs.existsSync(this.path)) {
@@ -296,7 +322,7 @@ class GhostLogger {
             if (this.rotation.useLibrary) {
                 const RotatingFileStream = require('@tryghost/bunyan-rotating-filestream');
                 const rotationConfig = {
-                    path: `${this.path}${sanitizedDomain}_${this.env}.log`,
+                    path: `${this.path}${baseFilename}.log`,
                     period: this.rotation.period,
                     threshold: this.rotation.threshold,
                     totalFiles: this.rotation.count,
@@ -310,7 +336,7 @@ class GhostLogger {
                         name: this.name,
                         streams: [{
                             stream: new RotatingFileStream(Object.assign({}, rotationConfig, {
-                                path: `${this.path}${sanitizedDomain}_${this.env}.error.log`
+                                path: `${this.path}${baseFilename}.error.log`
                             })),
                             level: 'error'
                         }],
@@ -337,7 +363,7 @@ class GhostLogger {
                         name: this.name,
                         streams: [{
                             type: 'rotating-file',
-                            path: `${this.path}${sanitizedDomain}_${this.env}.error.log`,
+                            path: `${this.path}${baseFilename}.error.log`,
                             period: this.rotation.period,
                             count: this.rotation.count,
                             level: 'error'
@@ -352,7 +378,7 @@ class GhostLogger {
                         name: this.name,
                         streams: [{
                             type: 'rotating-file',
-                            path: `${this.path}${sanitizedDomain}_${this.env}.log`,
+                            path: `${this.path}${baseFilename}.log`,
                             period: this.rotation.period,
                             count: this.rotation.count,
                             level: this.level
@@ -367,7 +393,7 @@ class GhostLogger {
                 log: bunyan.createLogger({
                     name: this.name,
                     streams: [{
-                        path: `${this.path}${sanitizedDomain}_${this.env}.error.log`,
+                        path: `${this.path}${baseFilename}.error.log`,
                         level: 'error'
                     }],
                     serializers: this.serializers
@@ -379,7 +405,7 @@ class GhostLogger {
                 log: bunyan.createLogger({
                     name: this.name,
                     streams: [{
-                        path: `${this.path}${sanitizedDomain}_${this.env}.log`,
+                        path: `${this.path}${baseFilename}.log`,
                         level: this.level
                     }],
                     serializers: this.serializers
