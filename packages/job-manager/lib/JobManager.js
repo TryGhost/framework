@@ -2,13 +2,11 @@ const path = require('path');
 const util = require('util');
 const setTimeoutPromise = util.promisify(setTimeout);
 const fastq = require('fastq');
-const later = require('@breejs/later');
-const Bree = require('bree');
+const cron = require('node-cron');
 const pWaitFor = require('p-wait-for');
 const {UnhandledJobError, IncorrectUsageError} = require('@tryghost/errors');
 const logging = require('@tryghost/logging');
 const isCronExpression = require('./is-cron-expression');
-const assembleBreeJob = require('./assemble-bree-job');
 const JobsRepository = require('./JobsRepository');
 
 const worker = async (task, callback) => {
@@ -67,25 +65,15 @@ class JobManager {
             }
             : this._jobMessageHandler;
 
-        const combinedErrorHandler = errorHandler
+        this._combinedErrorHandler = errorHandler
             ? (error, workerMeta) => {
                 errorHandler(error, workerMeta);
                 this._jobErrorHandler(error, workerMeta);
             }
             : this._jobErrorHandler;
 
-        this.bree = new Bree({
-            root: false, // set this to `false` to prevent requiring a root directory of jobs
-            hasSeconds: true, // precision is needed to avoid task overlaps after immediate execution
-            outputWorkerMetadata: true,
-            logger: logging,
-            errorHandler: combinedErrorHandler,
-            workerMessageHandler: combinedMessageHandler
-        });
-
-        this.bree.on('worker created', (name) => {
-            this._jobMessageHandler({name, message: ALL_STATUSES.started});
-        });
+        this.scheduledJobs = new Map(); // Track cron jobs: name -> cron.ScheduledTask
+        this.jobRegistry = new Map();   // Track job configs: name -> {job, data, schedule}
 
         if (JobModel) {
             this._jobsRepository = new JobsRepository({JobModel});
@@ -95,7 +83,7 @@ class JobManager {
     inlineJobHandler(jobName) {
         return async (error, result) => {
             if (error) {
-                await this._jobErrorHandler(error, {
+                await this._combinedErrorHandler(error, {
                     name: jobName
                 });
             } else {
@@ -108,6 +96,39 @@ class JobManager {
             // Can potentially standardize the result here
             return result;
         };
+    }
+
+    _executeJob(name, job, data) {
+        // Queue job execution through the inline queue
+        this.inlineQueue.push(async () => {
+            try {
+                await this._jobMessageHandler({
+                    name: name,
+                    message: ALL_STATUSES.started
+                });
+
+                if (typeof job === 'function') {
+                    await job(data);
+                } else {
+                    // Load and execute module
+                    const jobModule = require(job);
+                    await jobModule(data);
+                }
+
+                await this._jobMessageHandler({
+                    name: name,
+                    message: 'done'
+                });
+            } catch (err) {
+                logging.error(new UnhandledJobError({
+                    context: (typeof job === 'function') ? 'function' : job,
+                    err
+                }));
+
+                await this._combinedErrorHandler(err, {name});
+                throw err;
+            }
+        }, this.inlineJobHandler(name));
     }
 
     async _jobMessageHandler({name, message}) {
@@ -209,7 +230,6 @@ class JobManager {
     addJob({name, at, job, data, offloaded = true}) {
         if (offloaded) {
             logging.info('Adding offloaded job to the inline job queue');
-            let schedule;
 
             if (!name) {
                 if (typeof job === 'string') {
@@ -221,29 +241,31 @@ class JobManager {
                 }
             }
 
-            if (at && !(at instanceof Date)) {
-                if (isCronExpression(at)) {
-                    schedule = later.parse.cron(at, true);
-                } else {
-                    schedule = later.parse.text(at);
-                }
-
-                if ((schedule.error && schedule.error !== -1) || schedule.schedules.length === 0) {
+            // Only support cron expressions for POC
+            if (at) {
+                if (!isCronExpression(at)) {
                     throw new IncorrectUsageError({
-                        message: 'Invalid schedule format'
+                        message: 'Only cron expressions are supported. Use format: "0 0 * * * *"'
                     });
                 }
 
-                logging.info(`Scheduling job ${name} at ${at}. Next run on: ${later.schedule(schedule).next()}`);
-            } else if (at !== undefined) {
-                logging.info(`Scheduling job ${name} at ${at}`);
-            } else {
-                logging.info(`Scheduling job ${name} to run immediately`);
-            }
+                logging.info(`Scheduling job ${name} with cron: ${at}`);
 
-            const breeJob = assembleBreeJob(at, job, data, name);
-            this.bree.add(breeJob);
-            return this.bree.start(name);
+                const task = cron.schedule(at, () => {
+                    this._executeJob(name, job, data);
+                }, {
+                    scheduled: false  // Don't start immediately
+                });
+
+                this.scheduledJobs.set(name, task);
+                this.jobRegistry.set(name, {job, data, schedule: at});
+
+                task.start();
+            } else {
+                // No schedule = immediate execution
+                logging.info(`Scheduling job ${name} to run immediately`);
+                this._executeJob(name, job, data);
+            }
         } else {
             logging.info(`Adding one-off job to inlineQueue with current length = ${this.inlineQueue.length()} called '${name || 'anonymous'}'`);
 
@@ -403,14 +425,26 @@ class JobManager {
      * @param {String} name - job name
      */
     async removeJob(name) {
-        await this.bree.remove(name);
+        const task = this.scheduledJobs.get(name);
+        if (!task) {
+            throw new Error(`Job ${name} not found`);
+        }
+
+        task.stop();
+        this.scheduledJobs.delete(name);
+        this.jobRegistry.delete(name);
     }
 
     /**
      * @param {import('p-wait-for').Options} [options]
      */
     async shutdown(options) {
-        await this.bree.stop();
+        // Stop all cron jobs
+        for (const [name, task] of this.scheduledJobs.entries()) {
+            task.stop();
+        }
+        this.scheduledJobs.clear();
+        this.jobRegistry.clear();
 
         if (this.inlineQueue.idle()) {
             return;

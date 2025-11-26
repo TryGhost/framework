@@ -1,8 +1,9 @@
-const {isMainThread, parentPort, workerData} = require('worker_threads');
 const util = require('util');
 const setTimeoutPromise = util.promisify(setTimeout);
 
-const passTime = async (ms) => {
+const passTime = async (data) => {
+    const ms = typeof data === 'object' ? data.ms : data;
+
     if (Number.isInteger(ms)) {
         await setTimeoutPromise(ms);
     } else {
@@ -10,13 +11,4 @@ const passTime = async (ms) => {
     }
 };
 
-if (isMainThread) {
-    module.exports = passTime;
-} else {
-    (async () => {
-        await passTime(workerData.ms);
-        parentPort.postMessage('done');
-        // alternative way to signal "finished" work (not recommended)
-        // process.exit();
-    })();
-}
+module.exports = passTime;

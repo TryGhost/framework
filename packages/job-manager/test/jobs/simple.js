@@ -1,1 +1,4 @@
-setInterval(() => process.exit(0), 10);
+// Simple test job that completes immediately
+module.exports = async () => {
+    // Job completes
+};
