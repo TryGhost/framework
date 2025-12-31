@@ -20,7 +20,7 @@
     "lib"
   ],
   "devDependencies": {
-    "@sinonjs/fake-timers": "11.3.1",
+    "@sinonjs/fake-timers": "15.1.0",
     "c8": "8.0.1",
     "date-fns": "2.30.0",
     "delay": "5.0.0",
