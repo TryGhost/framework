@@ -255,7 +255,7 @@ describe('PrettyStream', function () {
             var writeStream = new Writable();
 
             // Hardcode the datetime so we don't have flaky tests
-            sinon.useFakeTimers(new Date('2024-12-15T13:17:00.000Z'));
+            sinon.useFakeTimers(new Date('2024-12-15T13:17:00.000'));
 
             writeStream._write = function (data) {
                 data = data.toString();
