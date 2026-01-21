@@ -52,4 +52,4 @@ The style rules used are available at `prettyCLI.styles`.
 
 # Copyright & License
 
-Copyright (c) 2013-2025 Ghost Foundation - Released under the [MIT license](LICENSE).
+Copyright (c) 2013-2026 Ghost Foundation - Released under the [MIT license](LICENSE).
