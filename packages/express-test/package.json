@@ -28,7 +28,7 @@
     "express-session": "1.18.1",
     "mocha": "10.7.3",
     "multer": "^2.0.0",
-    "sinon": "18.0.0"
+    "sinon": "18.0.1"
   },
   "dependencies": {
     "@tryghost/jest-snapshot": "^0.5.18",
