@@ -37,7 +37,7 @@
     "cron-validate": "1.4.5",
     "fastq": "1.20.1",
     "p-wait-for": "3.2.0",
-    "workerpool": "9.3.4"
+    "workerpool": "10.0.1"
   },
   "repository": {
     "type": "git",
