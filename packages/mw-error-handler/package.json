@@ -30,7 +30,7 @@
     "@tryghost/http-cache-utils": "^0.1.20",
     "@tryghost/tpl": "^0.1.35",
     "lodash": "4.17.23",
-    "semver": "7.7.3"
+    "semver": "7.7.4"
   },
   "repository": {
     "type": "git",
