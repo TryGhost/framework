@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-has-posts",
-  "version": "0.1.35",
+  "version": "0.1.36",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -28,7 +28,7 @@
     "sinon": "21.0.1"
   },
   "dependencies": {
-    "@tryghost/debug": "^0.1.35",
+    "@tryghost/debug": "^0.1.36",
     "lodash": "^4.17.21"
   }
 }

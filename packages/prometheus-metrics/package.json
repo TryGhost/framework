@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/prometheus-metrics",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -42,7 +42,7 @@
     "typescript": "5.9.3"
   },
   "dependencies": {
-    "@tryghost/logging": "^2.5.0",
+    "@tryghost/logging": "^2.5.1",
     "express": "4.21.2",
     "prom-client": "15.1.3",
     "stoppable": "1.1.0"

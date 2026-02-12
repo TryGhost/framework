@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/config",
-  "version": "0.2.27",
+  "version": "0.2.28",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -29,7 +29,7 @@
     "sinon": "21.0.1"
   },
   "dependencies": {
-    "@tryghost/root-utils": "^0.3.33",
+    "@tryghost/root-utils": "^0.3.34",
     "nconf": "^0.12.0"
   }
 }

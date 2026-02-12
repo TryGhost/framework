@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/logging",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -31,10 +31,10 @@
   },
   "dependencies": {
     "@tryghost/bunyan-rotating-filestream": "^0.0.7",
-    "@tryghost/elasticsearch": "^3.0.24",
-    "@tryghost/http-stream": "^0.1.37",
-    "@tryghost/pretty-stream": "^0.2.0",
-    "@tryghost/root-utils": "^0.3.33",
+    "@tryghost/elasticsearch": "^3.0.25",
+    "@tryghost/http-stream": "^0.1.38",
+    "@tryghost/pretty-stream": "^0.2.1",
+    "@tryghost/root-utils": "^0.3.34",
     "bunyan": "^1.8.15",
     "bunyan-loggly": "^1.4.2",
     "fs-extra": "^11.0.0",
