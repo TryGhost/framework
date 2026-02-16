@@ -224,7 +224,7 @@ const pagination = function pagination(bookshelf) {
 
                 if (options.orderRaw) {
                     self.query((qb) => {
-                        qb.orderByRaw(options.orderRaw);
+                        qb.orderByRaw(options.orderRaw, options.orderRawBindings);
                     });
                 }
 

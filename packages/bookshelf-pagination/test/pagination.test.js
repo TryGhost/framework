@@ -319,6 +319,52 @@ describe('pagination', function () {
             }).catch(done);
         });
 
+        it('calls orderByRaw when orderRaw is set', function (done) {
+            const mockQb = {orderByRaw: sinon.stub()};
+            model.prototype.query.callsFake(function (arg) {
+                if (typeof arg === 'function') {
+                    arg(mockQb);
+                }
+                return mockQuery;
+            });
+
+            const orderRawOptions = {orderRaw: 'CASE WHEN slug = ? THEN ? END ASC'};
+            paginationUtils.parseOptions.returns(orderRawOptions);
+
+            bookshelf.Model.prototype.fetchPage(orderRawOptions).then(function () {
+                mockQb.orderByRaw.calledOnce.should.be.true();
+                mockQb.orderByRaw.calledWith('CASE WHEN slug = ? THEN ? END ASC', undefined).should.be.true();
+
+                done();
+            }).catch(done);
+        });
+
+        it('passes orderRawBindings to orderByRaw when provided', function (done) {
+            const mockQb = {orderByRaw: sinon.stub()};
+            model.prototype.query.callsFake(function (arg) {
+                if (typeof arg === 'function') {
+                    arg(mockQb);
+                }
+                return mockQuery;
+            });
+
+            const orderRawOptions = {
+                orderRaw: 'CASE WHEN slug = ? THEN ? END ASC',
+                orderRawBindings: ['my-slug', 0]
+            };
+            paginationUtils.parseOptions.returns(orderRawOptions);
+
+            bookshelf.Model.prototype.fetchPage(orderRawOptions).then(function () {
+                mockQb.orderByRaw.calledOnce.should.be.true();
+                mockQb.orderByRaw.calledWith(
+                    'CASE WHEN slug = ? THEN ? END ASC',
+                    ['my-slug', 0]
+                ).should.be.true();
+
+                done();
+            }).catch(done);
+        });
+
         it('returns expected response', function (done) {
             paginationUtils.parseOptions.returns({});
             bookshelf.Model.prototype.fetchPage().then(function (result) {
