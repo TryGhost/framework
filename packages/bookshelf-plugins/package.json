@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-plugins",
-  "version": "0.6.28",
+  "version": "0.6.29",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -35,7 +35,7 @@
     "@tryghost/bookshelf-has-posts": "^0.1.36",
     "@tryghost/bookshelf-include-count": "^0.3.19",
     "@tryghost/bookshelf-order": "^0.1.31",
-    "@tryghost/bookshelf-pagination": "^0.1.52",
+    "@tryghost/bookshelf-pagination": "^0.1.53",
     "@tryghost/bookshelf-search": "^0.1.31",
     "@tryghost/bookshelf-transaction-events": "^0.2.20"
   }
