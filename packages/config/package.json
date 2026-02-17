@@ -30,6 +30,6 @@
   },
   "dependencies": {
     "@tryghost/root-utils": "^0.3.34",
-    "nconf": "^0.12.0"
+    "nconf": "^0.13.0"
   }
 }
