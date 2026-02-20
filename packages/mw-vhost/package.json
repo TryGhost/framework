@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/mw-vhost",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "author": "Ghost Foundation",
   "license": "MIT",
   "main": "index.js",

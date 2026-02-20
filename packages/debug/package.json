@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/debug",
-  "version": "0.1.38",
+  "version": "0.1.39",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",

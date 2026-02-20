@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-eager-load",
-  "version": "0.1.37",
+  "version": "0.1.38",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",

@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/http-stream",
-  "version": "0.1.40",
+  "version": "0.1.41",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",

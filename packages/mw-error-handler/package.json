@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/mw-error-handler",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Express middleware utilities for normalizing and rendering Ghost API errors",
   "author": "Ghost Foundation",
   "license": "MIT",

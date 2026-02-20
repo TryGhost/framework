@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/server",
-  "version": "0.1.57",
+  "version": "0.1.58",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
