@@ -1,6 +1,4 @@
-// Switch these lines once there are useful utils
-// const testUtils = require('./utils');
-require('./utils');
+const assert = require('assert/strict');
 
 describe('Lodash Template', function () {
     it('Does not get clobbered by this lib', function () {
@@ -8,6 +6,6 @@ describe('Lodash Template', function () {
         let _ = require('lodash');
 
         // @ts-ignore
-        _.templateSettings.interpolate.should.eql(/<%=([\s\S]+?)%>/g);
+        assert.deepEqual(_.templateSettings.interpolate, /<%=([\s\S]+?)%>/g);
     });
 });
