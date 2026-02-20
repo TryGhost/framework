@@ -7,15 +7,19 @@ cd "$ROOT_DIR"
 
 DRY_RUN="false"
 DIST_TAG="${NPM_DIST_TAG:-latest}"
+PACKAGE_FILTER="${PACKAGE_FILTER:-}"
 
 for arg in "$@"; do
   case "$arg" in
     --dry-run)
       DRY_RUN="true"
       ;;
+    --package=*)
+      PACKAGE_FILTER="${arg#*=}"
+      ;;
     *)
       echo "Unknown argument: $arg" >&2
-      echo "Usage: ./scripts/publish-packages.sh [--dry-run]" >&2
+      echo "Usage: ./scripts/publish-packages.sh [--dry-run] [--package=@scope/name]" >&2
       exit 1
       ;;
   esac
@@ -31,13 +35,11 @@ if ! command -v jq >/dev/null 2>&1; then
   exit 1
 fi
 
-if [[ -z "${NODE_AUTH_TOKEN:-}" && -z "${NPM_TOKEN:-}" ]]; then
-  echo "NODE_AUTH_TOKEN or NPM_TOKEN must be set for npm publish authentication." >&2
-  exit 1
-fi
-
 echo "Publish mode: $([[ "$DRY_RUN" == "true" ]] && echo "dry-run" || echo "live")"
 echo "Dist tag: $DIST_TAG"
+if [[ -n "$PACKAGE_FILTER" ]]; then
+  echo "Package filter: $PACKAGE_FILTER"
+fi
 echo
 
 published=0
@@ -49,6 +51,10 @@ while IFS= read -r package_json; do
   package_name="$(jq -r '.name' "$package_json")"
   package_version="$(jq -r '.version' "$package_json")"
   package_private="$(jq -r '.private // false' "$package_json")"
+
+  if [[ -n "$PACKAGE_FILTER" && "$package_name" != "$PACKAGE_FILTER" ]]; then
+    continue
+  fi
 
   if [[ "$package_private" == "true" ]]; then
     echo "SKIP (private): $package_name"

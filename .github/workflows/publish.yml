@@ -13,6 +13,10 @@ on:
         required: false
         type: boolean
         default: true
+      package-name:
+        description: 'Optional single package to publish (e.g. @tryghost/zip)'
+        required: false
+        type: string
 
 jobs:
   publish:
@@ -31,9 +35,9 @@ jobs:
       NODE_OPTIONS: '--max_old_space_size=8192'
       CI: true
       IS_SHIPPING: true
-      NPM_CONFIG_PROVENANCE: false
+      NPM_CONFIG_PROVENANCE: true
       NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org'
-      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      PACKAGE_FILTER: ${{ github.event.inputs['package-name'] || '' }}
 
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
@@ -49,13 +53,15 @@ jobs:
       - name: Build releasable packages
         run: yarn nx run-many -t build
 
-      - name: Configure npm auth for publish
+      # npm 11+ is required for npm Trusted Publishing (OIDC).
+      - name: Install npm 11
+        run: npm install -g npm@11
+
+      - name: Configure npm registry
         run: |
           cat > "$HOME/.npmrc" <<EOF
           registry=https://registry.npmjs.org/
           @tryghost:registry=https://registry.npmjs.org/
-          //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
-          always-auth=true
           EOF
           npm config get registry
           npm config get @tryghost:registry
