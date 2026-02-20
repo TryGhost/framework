@@ -71,3 +71,4 @@ typings/
 # Framework Custom
 build
 tsconfig.tsbuildinfo
+.nx/
