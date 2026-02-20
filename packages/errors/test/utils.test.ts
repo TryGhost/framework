@@ -5,6 +5,14 @@ import * as utils from '../src/utils';
 
 describe('Error Utils', function () {
     describe('prepareStackForUser', function () {
+        it('handles errors without stack', function () {
+            const error = new Error('no stack');
+            error.stack = undefined;
+
+            const processedError = utils.prepareStackForUser(error);
+            assert.equal(processedError.stack, 'Stack Trace:');
+        });
+
         it('returns full error clone of nested errors', function () {
             const originalError = new Error('I am the original one!') as Error & {custom?: string};
             originalError.custom = 'I am custom!';

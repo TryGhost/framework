@@ -21,7 +21,7 @@
     "build:cjs": "esbuild src/*.ts --target=es2020 --outdir=cjs --format=cjs",
     "build:es": "esbuild src/*.ts --target=es2020 --outdir=es --format=esm",
     "build:types": "tsc --emitDeclarationOnly --declaration --declarationMap --outDir types",
-    "test": "TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' NODE_ENV=testing c8 --check-coverage --all -n src --reporter text --reporter cobertura  mocha -r ts-node/register './test/**/*.test.ts'",
+    "test": "TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' NODE_ENV=testing c8 --check-coverage --100 --all -n src --reporter text --reporter cobertura  mocha -r ts-node/register './test/**/*.test.ts'",
     "lint": "eslint . --ext .js --cache",
     "posttest": "yarn lint"
   },
@@ -42,7 +42,6 @@
     "esbuild": "^0.25.0",
     "lodash": "^4.17.21",
     "mocha": "11.7.5",
-    "should": "13.2.3",
     "ts-node": "^10.9.1",
     "typescript": "5.9.3"
   },
