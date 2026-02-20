@@ -11,7 +11,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "echo \"Implement me!\"",
-    "test": "NODE_ENV=testing c8 --all --check-coverage --reporter text --reporter cobertura mocha './test/**/*.test.js'",
+    "test": "NODE_ENV=testing c8 --all --check-coverage --100 --reporter text --reporter cobertura mocha './test/**/*.test.js'",
     "lint": "eslint . --ext .js --cache",
     "posttest": "yarn lint"
   },
@@ -25,7 +25,6 @@
   "devDependencies": {
     "c8": "10.1.3",
     "mocha": "11.7.5",
-    "should": "13.2.3",
     "sinon": "21.0.1"
   },
   "dependencies": {

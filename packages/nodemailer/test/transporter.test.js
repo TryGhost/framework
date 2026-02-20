@@ -1,50 +1,87 @@
-// Switch these lines once there are useful utils
-// const testUtils = require('./utils');
-require('./utils');
-
+const assert = require('assert/strict');
+const sinon = require('sinon');
+const aws = require('@aws-sdk/client-ses');
 const nodemailer = require('../');
+const sandbox = sinon.createSandbox();
 
 describe('Transporter', function () {
+    afterEach(function () {
+        sandbox.restore();
+    });
+
     it('can create an SMTP transporter', function () {
         const transporter = nodemailer('SMTP', {});
-        transporter.transporter.name.should.equal('SMTP');
+        assert.equal(transporter.transporter.name, 'SMTP');
     });
 
     it('can create an SMTP transporter with deprecated secureConnection (true)', function () {
         const transporter = nodemailer('SMTP', {secureConnection: true});
-        transporter.transporter.name.should.equal('SMTP');
-        transporter.transporter.options.secure.should.equal(true);
+        assert.equal(transporter.transporter.name, 'SMTP');
+        assert.equal(transporter.transporter.options.secure, true);
     });
 
     it('can create an SMTP transporter with deprecated secureConnection (false)', function () {
         const transporter = nodemailer('SMTP', {secureConnection: false});
-        transporter.transporter.name.should.equal('SMTP');
-        transporter.transporter.options.secure.should.equal(false);
+        assert.equal(transporter.transporter.name, 'SMTP');
+        assert.equal(transporter.transporter.options.secure, false);
     });
 
     it('can create an SMTP transporter with Sendmail service', function () {
         const transporter = nodemailer('SMTP', {service: 'Sendmail'});
-        transporter.transporter.name.should.equal('Sendmail');
+        assert.equal(transporter.transporter.name, 'Sendmail');
     });
 
     it('can create an Sendmail transporter', function () {
         const transporter = nodemailer('Sendmail', {});
-        transporter.transporter.name.should.equal('Sendmail');
+        assert.equal(transporter.transporter.name, 'Sendmail');
     });
 
     it('can create an SES transporter', function () {
         const transporter = nodemailer('SES', {});
-        transporter.transporter.name.should.equal('SESTransport');
+        assert.equal(transporter.transporter.name, 'SESTransport');
+    });
+
+    it('can create an SES transporter with region parsed from ServiceUrl and aws-style credentials', function () {
+        const sesStub = sandbox.stub(aws, 'SES').callsFake(function SES(options) {
+            this.options = options;
+        });
+
+        nodemailer('SES', {
+            ServiceUrl: 'email-smtp.eu-west-2.amazonaws.com',
+            AWSAccessKeyID: 'key',
+            AWSSecretKey: 'secret'
+        });
+
+        assert.equal(sesStub.calledOnce, true);
+        assert.equal(sesStub.args[0][0].region, 'eu-west-2');
+        assert.deepEqual(sesStub.args[0][0].credentials, {accessKeyId: 'key', secretAccessKey: 'secret'});
+    });
+
+    it('can create an SES transporter with explicit region and modern credentials', function () {
+        const sesStub = sandbox.stub(aws, 'SES').callsFake(function SES(options) {
+            this.options = options;
+        });
+
+        nodemailer('SES', {
+            ServiceUrl: 'email-smtp.us-east-1.amazonaws.com',
+            region: 'eu-central-1',
+            accessKeyId: 'new-key',
+            secretAccessKey: 'new-secret'
+        });
+
+        assert.equal(sesStub.calledOnce, true);
+        assert.equal(sesStub.args[0][0].region, 'eu-central-1');
+        assert.deepEqual(sesStub.args[0][0].credentials, {accessKeyId: 'new-key', secretAccessKey: 'new-secret'});
     });
 
     it('can create a Direct transporter', function () {
         const transporter = nodemailer('direct', {});
-        transporter.transporter.name.should.equal('SMTP (direct)');
+        assert.equal(transporter.transporter.name, 'SMTP (direct)');
     });
 
     it('can create a Stub transporter', function () {
         const transporter = nodemailer('stub', {});
-        transporter.transporter.name.should.equal('Stub');
+        assert.equal(transporter.transporter.name, 'Stub');
     });
 
     it('can create a Mailgun transporter', function () {
@@ -54,10 +91,10 @@ describe('Transporter', function () {
                 domain: 'example.com'
             }
         });
-        transporter.transporter.name.should.equal('Mailgun');
+        assert.equal(transporter.transporter.name, 'Mailgun');
 
         // Ensure the default timeout is set
-        transporter.transporter.options.timeout.should.equal(60000);
+        assert.equal(transporter.transporter.options.timeout, 60000);
     });
 
     it('can create a Mailgun transporter with custom timeout', function () {
@@ -68,17 +105,11 @@ describe('Transporter', function () {
             },
             timeout: 10000
         });
-        transporter.transporter.name.should.equal('Mailgun');
-        transporter.transporter.options.timeout.should.equal(10000);
+        assert.equal(transporter.transporter.name, 'Mailgun');
+        assert.equal(transporter.transporter.options.timeout, 10000);
     });
 
     it('should throw an error when creating an unknown transporter', function () {
-        try {
-            const transporter = nodemailer('unknown', {});
-            transporter.should.not.exist();
-        } catch (err) {
-            // this is expected
-            should.exist(err);
-        }
+        assert.throws(() => nodemailer('unknown', {}));
     });
 });
