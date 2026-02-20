@@ -31,7 +31,7 @@ jobs:
       NODE_OPTIONS: '--max_old_space_size=8192'
       CI: true
       IS_SHIPPING: true
-      NPM_CONFIG_PROVENANCE: true
+      NPM_CONFIG_PROVENANCE: false
       NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org'
       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -48,6 +48,17 @@ jobs:
 
       - name: Build releasable packages
         run: yarn nx run-many -t build
+
+      - name: Configure npm auth for publish
+        run: |
+          cat > "$HOME/.npmrc" <<EOF
+          registry=https://registry.npmjs.org/
+          @tryghost:registry=https://registry.npmjs.org/
+          //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
+          always-auth=true
+          EOF
+          npm config get registry
+          npm config get @tryghost:registry
 
       - name: Publish to npm
         run: yarn ship:ci ${{ (github.event.inputs['dry-run'] == 'true' && '--dry-run') || '' }}
