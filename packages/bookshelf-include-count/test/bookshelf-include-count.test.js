@@ -20,7 +20,7 @@ describe('@tryghost/bookshelf-include-count', function () {
         modelSave = sinon.stub().resolves('MODEL_SAVE');
         collectionSync = sinon.stub().returns('COLLECTION_SYNC');
 
-        BaseModel = function BaseModel() {
+        BaseModel = function ModelConstructor() {
             this.attributes = {};
             this.constructor = BaseModel;
         };
@@ -40,7 +40,7 @@ describe('@tryghost/bookshelf-include-count', function () {
             return Child;
         };
 
-        BaseCollection = function BaseCollection() {
+        BaseCollection = function CollectionConstructor() {
             this.constructor = BaseCollection;
         };
         BaseCollection.prototype.sync = collectionSync;
@@ -166,6 +166,26 @@ describe('@tryghost/bookshelf-include-count', function () {
         assert.equal(model.addCounts(), undefined);
         assert.equal(model.addCounts({}), undefined);
         assert.equal(model.addCounts({withRelated: ['count.posts']}), undefined);
+    });
+
+    it('addCounts does nothing when no relation key matches withRelated entries', function () {
+        const countTags = sinon.stub();
+        const model = new Bookshelf.Model();
+        model.constructor.countRelations = sinon.stub().returns({
+            tags: countTags
+        });
+
+        const marker = sinon.stub();
+        const options = {
+            withRelated: ['author', {editor: marker}]
+        };
+
+        model.addCounts(options);
+
+        assert.equal(countTags.called, false);
+        assert.equal(options.withRelated.length, 2);
+        assert.equal(options.withRelated[0], 'author');
+        assert.deepEqual(options.withRelated[1], {editor: marker});
     });
 
     it('save preserves count__ attributes through save promise', async function () {

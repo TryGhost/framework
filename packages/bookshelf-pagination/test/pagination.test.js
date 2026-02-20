@@ -37,10 +37,10 @@ function createBookshelf({countRows, fetchResult, selectError, fetchError} = {})
         }
     };
 
-    function ModelCtor() {}
-    ModelCtor.prototype.tableName = 'posts';
-    ModelCtor.prototype.idAttribute = 'id';
-    ModelCtor.prototype.query = function (method, ...args) {
+    function ModelConstructor() {}
+    ModelConstructor.prototype.tableName = 'posts';
+    ModelConstructor.prototype.idAttribute = 'id';
+    ModelConstructor.prototype.query = function (method, ...args) {
         if (arguments.length === 0) {
             return countQuery;
         }
@@ -53,7 +53,7 @@ function createBookshelf({countRows, fetchResult, selectError, fetchError} = {})
         modelState.queryCalls.push([method, ...args]);
         return this;
     };
-    ModelCtor.prototype.fetchAll = function (options) {
+    ModelConstructor.prototype.fetchAll = function (options) {
         modelState.fetchAllArgs = options;
         if (fetchError) {
             return Promise.reject(fetchError);
@@ -62,7 +62,7 @@ function createBookshelf({countRows, fetchResult, selectError, fetchError} = {})
     };
 
     const bookshelf = {
-        Model: ModelCtor,
+        Model: ModelConstructor,
         knex: {
             raw(sql) {
                 modelState.rawCalls.push(sql);
