@@ -6,6 +6,8 @@ const FakeTimers = require('@sinonjs/fake-timers');
 const logging = require('@tryghost/logging');
 
 const JobManager = require('../index');
+const assembleBreeJob = require('../lib/assemble-bree-job');
+const JobsRepository = require('../lib/JobsRepository');
 
 const sandbox = sinon.createSandbox();
 
@@ -42,14 +44,14 @@ describe('Job Manager', function () {
     });
 
     it('public interface', function () {
-        should.exist(jobManager.addJob);
-        should.exist(jobManager.hasExecutedSuccessfully);
-        should.exist(jobManager.awaitOneOffCompletion);
-        should.exist(jobManager.awaitCompletion);
-        should.exist(jobManager.allSettled);
-        should.exist(jobManager.removeJob);
-        should.exist(jobManager.shutdown);
-        should.exist(jobManager.inlineJobHandler);
+        assert.notEqual(jobManager.addJob, undefined);
+        assert.notEqual(jobManager.hasExecutedSuccessfully, undefined);
+        assert.notEqual(jobManager.awaitOneOffCompletion, undefined);
+        assert.notEqual(jobManager.awaitCompletion, undefined);
+        assert.notEqual(jobManager.allSettled, undefined);
+        assert.notEqual(jobManager.removeJob, undefined);
+        assert.notEqual(jobManager.shutdown, undefined);
+        assert.notEqual(jobManager.inlineJobHandler, undefined);
     });
 
     describe('Add a job', function () {
@@ -61,14 +63,14 @@ describe('Job Manager', function () {
                     data: 'test data',
                     offloaded: false
                 });
-                should(jobManager.inlineQueue.idle()).be.false();
+                assert.equal(jobManager.inlineQueue.idle(), false);
 
                 // give time to execute the job
                 await delay(1);
 
-                should(jobManager.inlineQueue.idle()).be.true();
-                should(spy.called).be.true();
-                should(spy.args[0][0]).equal('test data');
+                assert.equal(jobManager.inlineQueue.idle(), true);
+                assert.equal(spy.called, true);
+                assert.equal(spy.args[0][0], 'test data');
             });
 
             it('handles failed job gracefully', async function () {
@@ -82,21 +84,36 @@ describe('Job Manager', function () {
                     data: 'test data',
                     offloaded: false
                 });
-                should(jobManager.inlineQueue.idle()).be.false();
+                assert.equal(jobManager.inlineQueue.idle(), false);
 
                 // give time to execute the job
                 await delay(1);
 
-                should(jobManager.inlineQueue.idle()).be.true();
-                should(spy.called).be.true();
-                should(spy.args[0][0]).equal('test data');
-                should(logging.error.called).be.true();
+                assert.equal(jobManager.inlineQueue.idle(), true);
+                assert.equal(spy.called, true);
+                assert.equal(spy.args[0][0], 'test data');
+                assert.equal(logging.error.called, true);
                 // a one-off job without a name should not have persistance
-                should(jobModelSpy.findOne.called).be.false();
+                assert.equal(jobModelSpy.findOne.called, false);
             });
         });
 
         describe('Offloaded jobs', function () {
+            it('accepts cron schedule when worker scheduling is stubbed', function () {
+                sandbox.stub(jobManager.bree, 'add').returns();
+                sandbox.stub(jobManager.bree, 'start').returns();
+
+                const jobPath = path.resolve(__dirname, './jobs/simple.js');
+                jobManager.addJob({
+                    at: '* * * * * *',
+                    job: jobPath,
+                    name: 'cron-job'
+                });
+
+                assert.equal(jobManager.bree.add.called, true);
+                assert.equal(jobManager.bree.start.called, true);
+            });
+
             it('fails to schedule for invalid scheduling expression', function () {
                 try {
                     jobManager.addJob({
@@ -104,7 +121,7 @@ describe('Job Manager', function () {
                         name: 'jobName'
                     });
                 } catch (err) {
-                    err.message.should.equal('Invalid schedule format');
+                    assert.equal(err.message, 'Invalid schedule format');
                 }
             });
 
@@ -115,7 +132,7 @@ describe('Job Manager', function () {
                         job: () => {}
                     });
                 } catch (err) {
-                    err.message.should.equal('Name parameter should be present if job is a function');
+                    assert.equal(err.message, 'Name parameter should be present if job is a function');
                 }
             });
 
@@ -130,18 +147,18 @@ describe('Job Manager', function () {
                     name: 'job-in-ten'
                 });
 
-                should(jobManager.bree.timeouts['job-in-ten']).type('object');
-                should(jobManager.bree.workers['job-in-ten']).type('undefined');
+                assert.equal(typeof jobManager.bree.timeouts['job-in-ten'], 'object');
+                assert.equal(typeof jobManager.bree.workers['job-in-ten'], 'undefined');
 
                 // allow to run the job and start the worker
                 await clock.nextAsync();
 
-                should(jobManager.bree.workers['job-in-ten']).type('object');
+                assert.equal(typeof jobManager.bree.workers['job-in-ten'], 'object');
 
                 const promise = new Promise((resolve, reject) => {
                     jobManager.bree.workers['job-in-ten'].on('error', reject);
                     jobManager.bree.workers['job-in-ten'].on('exit', (code) => {
-                        should(code).equal(0);
+                        assert.equal(code, 0);
                         resolve();
                     });
                 });
@@ -151,7 +168,7 @@ describe('Job Manager', function () {
 
                 await promise;
 
-                should(jobManager.bree.workers['job-in-ten']).type('undefined');
+                assert.equal(typeof jobManager.bree.workers['job-in-ten'], 'undefined');
 
                 clock.uninstall();
             });
@@ -165,24 +182,24 @@ describe('Job Manager', function () {
                     name: 'job-now'
                 });
 
-                should(jobManager.bree.timeouts['job-now']).type('object');
+                assert.equal(typeof jobManager.bree.timeouts['job-now'], 'object');
 
                 // allow scheduler to pick up the job
                 clock.tick(1);
 
-                should(jobManager.bree.workers['job-now']).type('object');
+                assert.equal(typeof jobManager.bree.workers['job-now'], 'object');
 
                 const promise = new Promise((resolve, reject) => {
                     jobManager.bree.workers['job-now'].on('error', reject);
                     jobManager.bree.workers['job-now'].on('exit', (code) => {
-                        should(code).equal(0);
+                        assert.equal(code, 0);
                         resolve();
                     });
                 });
 
                 await promise;
 
-                should(jobManager.bree.workers['job-now']).type('undefined');
+                assert.equal(typeof jobManager.bree.workers['job-now'], 'undefined');
 
                 clock.uninstall();
             });
@@ -196,31 +213,31 @@ describe('Job Manager', function () {
                     name: 'job-now'
                 });
 
-                should(jobManager.bree.timeouts['job-now']).type('object');
+                assert.equal(typeof jobManager.bree.timeouts['job-now'], 'object');
 
                 // allow scheduler to pick up the job
                 clock.tick(1);
 
-                should(jobManager.bree.workers['job-now']).type('object');
+                assert.equal(typeof jobManager.bree.workers['job-now'], 'object');
 
                 const promise = new Promise((resolve, reject) => {
                     jobManager.bree.workers['job-now'].on('error', reject);
                     jobManager.bree.workers['job-now'].on('exit', (code) => {
-                        should(code).equal(0);
+                        assert.equal(code, 0);
                         resolve();
                     });
                 });
 
                 await promise;
 
-                should(jobManager.bree.workers['job-now']).type('undefined');
+                assert.equal(typeof jobManager.bree.workers['job-now'], 'undefined');
 
-                (() => {
+                assert.throws(() => {
                     jobManager.addJob({
                         job: jobPath,
                         name: 'job-now'
                     });
-                }).should.throw('Job #1 has a duplicate job name of job-now');
+                }, /Job #1 has a duplicate job name of job-now/);
 
                 clock.uninstall();
             });
@@ -240,9 +257,9 @@ describe('Job Manager', function () {
 
                 await assert.rejects(completion, /job error/);
 
-                should(spyHandler.called).be.true();
-                should(spyHandler.args[0][0].message).equal('job error');
-                should(spyHandler.args[0][1].name).equal('will-fail');
+                assert.equal(spyHandler.called, true);
+                assert.equal(spyHandler.args[0][0].message, 'job error');
+                assert.equal(spyHandler.args[0][1].name, 'will-fail');
             });
 
             it('uses worker message handler when job sends a message', async function (){
@@ -260,9 +277,9 @@ describe('Job Manager', function () {
 
                 await completion;
 
-                should(workerMessageHandlerSpy.called).be.true();
-                should(workerMessageHandlerSpy.args[0][0].name).equal('will-send-msg');
-                should(workerMessageHandlerSpy.args[0][0].message).equal('Worker received: hello from Ghost!');
+                assert.equal(workerMessageHandlerSpy.called, true);
+                assert.equal(workerMessageHandlerSpy.args[0][0].name, 'will-send-msg');
+                assert.equal(workerMessageHandlerSpy.args[0][0].message, 'Worker received: hello from Ghost!');
             });
         });
     });
@@ -275,11 +292,34 @@ describe('Job Manager', function () {
                 });
                 throw new Error('should have thrown');
             } catch (err) {
-                should.equal(err.message, 'The name parameter is required for a one off job.');
+                assert.equal(err.message, 'The name parameter is required for a one off job.');
             }
         });
 
         describe('Inline jobs', function () {
+            it('can execute inline jobs provided as a module path', async function () {
+                jobManager.addJob({
+                    job: path.resolve(__dirname, './jobs/inline-module.js'),
+                    data: 'test data',
+                    offloaded: false
+                });
+
+                await delay(10);
+                assert.equal(jobManager.inlineQueue.idle(), true);
+            });
+
+            it('handles failing inline jobs provided as a module path', async function () {
+                const modulePath = path.resolve(__dirname, './jobs/inline-module-throws.js');
+                jobManager.addJob({
+                    job: modulePath,
+                    offloaded: false
+                });
+
+                await delay(10);
+                assert.equal(jobManager.inlineQueue.idle(), true);
+                assert.equal(logging.error.called, true);
+            });
+
             it('adds job to the queue when it is a unique one', async function () {
                 const spy = sinon.spy();
                 const JobModel = {
@@ -344,18 +384,18 @@ describe('Job Manager', function () {
                 await completion;
 
                 // tracks the job queued
-                should(JobModel.add.args[0][0].status).equal('queued');
-                should(JobModel.add.args[0][0].name).equal('successful-oneoff');
+                assert.equal(JobModel.add.args[0][0].status, 'queued');
+                assert.equal(JobModel.add.args[0][0].name, 'successful-oneoff');
 
                 // tracks the job started
-                should(JobModel.edit.args[0][0].status).equal('started');
-                should(JobModel.edit.args[0][0].started_at).not.equal(undefined);
-                should(JobModel.edit.args[0][1].id).equal('unique');
+                assert.equal(JobModel.edit.args[0][0].status, 'started');
+                assert.notEqual(JobModel.edit.args[0][0].started_at, undefined);
+                assert.equal(JobModel.edit.args[0][1].id, 'unique');
 
                 // tracks the job finish
-                should(JobModel.edit.args[1][0].status).equal('finished');
-                should(JobModel.edit.args[1][0].finished_at).not.equal(undefined);
-                should(JobModel.edit.args[1][1].id).equal('unique');
+                assert.equal(JobModel.edit.args[1][0].status, 'finished');
+                assert.notEqual(JobModel.edit.args[1][0].finished_at, undefined);
+                assert.equal(JobModel.edit.args[1][1].id, 'unique');
             });
 
             it('sets a failed state on a job', async function () {
@@ -384,13 +424,13 @@ describe('Job Manager', function () {
                 await assert.rejects(completion, /job error/);
 
                 // tracks the job start
-                should(JobModel.edit.args[0][0].status).equal('started');
-                should(JobModel.edit.args[0][0].started_at).not.equal(undefined);
-                should(JobModel.edit.args[0][1].id).equal('unique');
+                assert.equal(JobModel.edit.args[0][0].status, 'started');
+                assert.notEqual(JobModel.edit.args[0][0].started_at, undefined);
+                assert.equal(JobModel.edit.args[0][1].id, 'unique');
 
                 // tracks the job failure
-                should(JobModel.edit.args[1][0].status).equal('failed');
-                should(JobModel.edit.args[1][1].id).equal('unique');
+                assert.equal(JobModel.edit.args[1][0].status, 'failed');
+                assert.equal(JobModel.edit.args[1][1].id, 'unique');
             });
 
             it('adds job to the queue after failing', async function () {
@@ -427,7 +467,7 @@ describe('Job Manager', function () {
 
                 // give time to execute the job and fail
                 await assert.rejects(completion1, /job error/);
-                should(JobModel.edit.args[1][0].status).equal('failed');
+                assert.equal(JobModel.edit.args[1][0].status, 'failed');
 
                 // simulate process restart and "fresh" slate to add the job
                 jobManager.removeJob('failed-oneoff');
@@ -441,8 +481,8 @@ describe('Job Manager', function () {
 
                 // give time to execute the job and fail AGAIN
                 await assert.rejects(completion2, /job error/);
-                should(JobModel.edit.args[3][0].status).equal('started');
-                should(JobModel.edit.args[4][0].status).equal('failed');
+                assert.equal(JobModel.edit.args[3][0].status, 'started');
+                assert.equal(JobModel.edit.args[4][0].status, 'failed');
             });
         });
 
@@ -513,14 +553,14 @@ describe('Job Manager', function () {
                 await jobCompletion;
 
                 // tracks the job start
-                should(JobModel.edit.args[0][0].status).equal('started');
-                should(JobModel.edit.args[0][0].started_at).not.equal(undefined);
-                should(JobModel.edit.args[0][1].id).equal('unique');
+                assert.equal(JobModel.edit.args[0][0].status, 'started');
+                assert.notEqual(JobModel.edit.args[0][0].started_at, undefined);
+                assert.equal(JobModel.edit.args[0][1].id, 'unique');
 
                 // tracks the job finish
-                should(JobModel.edit.args[1][0].status).equal('finished');
-                should(JobModel.edit.args[1][0].finished_at).not.equal(undefined);
-                should(JobModel.edit.args[1][1].id).equal('unique');
+                assert.equal(JobModel.edit.args[1][0].status, 'finished');
+                assert.notEqual(JobModel.edit.args[1][0].finished_at, undefined);
+                assert.equal(JobModel.edit.args[1][1].id, 'unique');
             });
 
             it('handles a failed job', async function () {
@@ -549,23 +589,29 @@ describe('Job Manager', function () {
                 await assert.rejects(completion, /job error/);
 
                 // still calls the original error handler
-                should(spyHandler.called).be.true();
-                should(spyHandler.args[0][0].message).equal('job error');
-                should(spyHandler.args[0][1].name).equal('failed-oneoff');
+                assert.equal(spyHandler.called, true);
+                assert.equal(spyHandler.args[0][0].message, 'job error');
+                assert.equal(spyHandler.args[0][1].name, 'failed-oneoff');
 
                 // tracks the job start
-                should(JobModel.edit.args[0][0].status).equal('started');
-                should(JobModel.edit.args[0][0].started_at).not.equal(undefined);
-                should(JobModel.edit.args[0][1].id).equal('unique');
+                assert.equal(JobModel.edit.args[0][0].status, 'started');
+                assert.notEqual(JobModel.edit.args[0][0].started_at, undefined);
+                assert.equal(JobModel.edit.args[0][1].id, 'unique');
 
                 // tracks the job failure
-                should(JobModel.edit.args[1][0].status).equal('failed');
-                should(JobModel.edit.args[1][1].id).equal('unique');
+                assert.equal(JobModel.edit.args[1][0].status, 'failed');
+                assert.equal(JobModel.edit.args[1][1].id, 'unique');
             });
         });
     });
 
     describe('Job execution progress', function () {
+        it('returns false when persistence is not configured', async function () {
+            jobManager = new JobManager({config: stubConfig});
+            const executed = await jobManager.hasExecutedSuccessfully('no-repo-job');
+            assert.equal(executed, false);
+        });
+
         it('checks if job has ever been executed', async function () {
             const JobModel = {
                 findOne: sinon.stub()
@@ -594,13 +640,13 @@ describe('Job Manager', function () {
 
             jobManager = new JobManager({JobModel, config: stubConfig});
             let executed = await jobManager.hasExecutedSuccessfully('solovei');
-            should.equal(executed, false);
+            assert.equal(executed, false);
 
             executed = await jobManager.hasExecutedSuccessfully('solovei');
-            should.equal(executed, true);
+            assert.equal(executed, true);
 
             executed = await jobManager.hasExecutedSuccessfully('solovei');
-            should.equal(executed, false);
+            assert.equal(executed, false);
         });
 
         it('can wait for job completion', async function () {
@@ -635,9 +681,9 @@ describe('Job Manager', function () {
                 offloaded: false
             });
 
-            should.equal(spy.called, false);
+            assert.equal(spy.called, false);
             await jobManager.awaitOneOffCompletion('solovei');
-            should.equal(spy.called, true);
+            assert.equal(spy.called, true);
         });
     });
 
@@ -653,11 +699,11 @@ describe('Job Manager', function () {
                 job: jobPath,
                 name: 'job-in-ten'
             });
-            jobManager.bree.config.jobs[0].name.should.equal('job-in-ten');
+            assert.equal(jobManager.bree.config.jobs[0].name, 'job-in-ten');
 
             await jobManager.removeJob('job-in-ten');
 
-            should(jobManager.bree.config.jobs[0]).be.undefined;
+            assert.equal(jobManager.bree.config.jobs[0], undefined);
         });
     });
 
@@ -671,11 +717,11 @@ describe('Job Manager', function () {
                 offloaded: false
             });
 
-            should(jobManager.inlineQueue.idle()).be.false();
+            assert.equal(jobManager.inlineQueue.idle(), false);
 
             await jobManager.shutdown();
 
-            should(jobManager.inlineQueue.idle()).be.true();
+            assert.equal(jobManager.inlineQueue.idle(), true);
         });
 
         it('gracefully shuts down an interval job', async function () {
@@ -688,15 +734,92 @@ describe('Job Manager', function () {
 
             await delay(1); // let the job execution kick in
 
-            should(Object.keys(jobManager.bree.workers).length).equal(0);
-            should(Object.keys(jobManager.bree.timeouts).length).equal(0);
-            should(Object.keys(jobManager.bree.intervals).length).equal(1);
+            assert.equal(Object.keys(jobManager.bree.workers).length, 0);
+            assert.equal(Object.keys(jobManager.bree.timeouts).length, 0);
+            assert.equal(Object.keys(jobManager.bree.intervals).length, 1);
 
             await jobManager.shutdown();
 
-            should(Object.keys(jobManager.bree.intervals).length).equal(0);
+            assert.equal(Object.keys(jobManager.bree.intervals).length, 0);
         });
 
         it('gracefully shuts down the job queue worker pool');
+    });
+
+    describe('allSettled', function () {
+        it('resolves immediately when queue is idle', async function () {
+            await assert.doesNotReject(() => jobManager.allSettled());
+        });
+
+        it('resolves once queued inline job completes', async function () {
+            jobManager.addJob({
+                name: 'inline-all-settled',
+                job: async () => {
+                    await delay(10);
+                },
+                offloaded: false
+            });
+
+            await assert.doesNotReject(() => jobManager.allSettled());
+            assert.equal(jobManager.inlineQueue.idle(), true);
+        });
+    });
+
+    describe('Unit helpers', function () {
+        it('_jobMessageHandler dispatches domain events from worker messages', async function () {
+            const domainEvents = {
+                dispatchRaw: sinon.spy()
+            };
+            jobManager = new JobManager({config: stubConfig, domainEvents});
+
+            await jobManager._jobMessageHandler({
+                name: 'event-job',
+                message: {
+                    event: {
+                        type: 'my-event',
+                        data: {foo: 'bar'}
+                    }
+                }
+            });
+
+            assert.equal(domainEvents.dispatchRaw.calledOnce, true);
+            assert.deepEqual(domainEvents.dispatchRaw.args[0], ['my-event', {foo: 'bar'}]);
+        });
+
+        it('_jobErrorHandler rejects allSettled listeners', async function () {
+            sandbox.stub(jobManager.inlineQueue, 'idle').returns(false);
+            const all = jobManager.allSettled();
+
+            await jobManager._jobErrorHandler(new Error('all failed'), {name: 'no-op'});
+
+            await assert.rejects(all, /all failed/);
+        });
+
+        it('assembleBreeJob supports cron expressions', function () {
+            const job = assembleBreeJob('* * * * * *', '/tmp/job.js', {foo: 'bar'}, 'cron-job');
+            assert.equal(job.cron, '* * * * * *');
+            assert.equal(job.interval, undefined);
+            assert.equal(job.date, undefined);
+        });
+
+        it('JobsRepository delete handles model delete errors', async function () {
+            const JobModel = {
+                destroy: sinon.stub().rejects(new Error('destroy failed'))
+            };
+            const repository = new JobsRepository({JobModel});
+
+            await assert.doesNotReject(() => repository.delete('abc'));
+            assert.equal(logging.error.called, true);
+        });
+
+        it('JobsRepository delete resolves when model delete succeeds', async function () {
+            const JobModel = {
+                destroy: sinon.stub().resolves()
+            };
+            const repository = new JobsRepository({JobModel});
+
+            await assert.doesNotReject(() => repository.delete('abc'));
+            assert.equal(JobModel.destroy.calledOnce, true);
+        });
     });
 });
