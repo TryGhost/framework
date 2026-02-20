@@ -1,12 +1,123 @@
-const each = require('lodash/each');
-const upperFirst = require('lodash/upperFirst');
-const toArray = require('lodash/toArray');
-const isObject = require('lodash/isObject');
-const isEmpty = require('lodash/isEmpty');
-const includes = require('lodash/includes');
-const bunyan = require('bunyan');
-const fs = require('fs');
-const jsonStringifySafe = require('json-stringify-safe');
+import each from 'lodash/each';
+import upperFirst from 'lodash/upperFirst';
+import toArray from 'lodash/toArray';
+import isObject from 'lodash/isObject';
+import isEmpty from 'lodash/isEmpty';
+import includes from 'lodash/includes';
+import bunyan from 'bunyan';
+import fs from 'fs';
+import jsonStringifySafe from 'json-stringify-safe';
+import {parentPort} from 'worker_threads';
+import GhostPrettyStream from '@tryghost/pretty-stream';
+import Bunyan2Loggly from 'bunyan-loggly';
+import * as gelfStream from 'gelf-stream';
+import {BunyanStream as ElasticSearch} from '@tryghost/elasticsearch';
+import HttpStream from '@tryghost/http-stream';
+import RotatingFileStream from '@tryghost/bunyan-rotating-filestream';
+
+export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+
+export type TransportName = 'stdout' | 'stderr' | 'parent' | 'loggly' | 'elasticsearch' | 'gelf' | 'file' | 'http';
+
+export interface RotationOptions {
+    enabled: boolean;
+    period?: string;
+    count?: number;
+    threshold?: string;
+    gzip?: boolean;
+    totalFiles?: number;
+    rotateExisting?: boolean;
+    useLibrary?: boolean;
+}
+
+export interface LogglyConfig {
+    token?: string;
+    subdomain?: string;
+    tags?: string[];
+    match?: string;
+}
+
+export interface ElasticsearchConfig {
+    host?: string;
+    username?: string;
+    password?: string;
+    index?: string;
+    pipeline?: string;
+    level?: LogLevel;
+}
+
+export interface GelfConfig {
+    host?: string;
+    port?: number;
+    options?: Record<string, unknown>;
+}
+
+export interface HttpConfig {
+    url?: string;
+    headers?: Record<string, string>;
+    username?: string;
+    password?: string;
+    level?: LogLevel;
+}
+
+export interface GhostLoggerOptions {
+    name?: string;
+    env?: string;
+    domain?: string;
+    transports?: TransportName[];
+    level?: LogLevel;
+    logBody?: boolean;
+    mode?: string;
+    path?: string;
+    filename?: string;
+    loggly?: LogglyConfig;
+    elasticsearch?: ElasticsearchConfig;
+    gelf?: GelfConfig;
+    http?: HttpConfig;
+    rotation?: Partial<RotationOptions>;
+    useLocalTime?: boolean;
+    metadata?: Record<string, unknown>;
+}
+
+interface StreamEntry {
+    name: string;
+    log: bunyan;
+    match?: string;
+}
+
+interface RequestLike {
+    requestId?: string;
+    userId?: string;
+    url?: string;
+    method?: string;
+    originalUrl?: string;
+    params?: unknown;
+    headers?: Record<string, unknown>;
+    query?: Record<string, unknown>;
+    body?: Record<string, unknown>;
+    extra?: unknown;
+    queueDepth?: number;
+}
+
+interface ResponseLike {
+    getHeaders(): Record<string, unknown>;
+    statusCode?: number;
+    responseTime?: number;
+}
+
+interface ErrorLike {
+    id?: string;
+    code?: string;
+    errorType?: string;
+    statusCode?: number;
+    level?: string;
+    message?: string;
+    context?: unknown;
+    help?: unknown;
+    stack?: string;
+    hideStack?: boolean;
+    errorDetails?: unknown;
+}
 
 /**
  * @description Ghost's logger class.
@@ -14,6 +125,25 @@ const jsonStringifySafe = require('json-stringify-safe');
  * The logger handles any stdout/stderr logs and streams it into the configured transports.
  */
 class GhostLogger {
+    name: string;
+    env: string;
+    domain: string;
+    transports: TransportName[];
+    level: LogLevel;
+    logBody: boolean;
+    mode: string;
+    path: string;
+    filename: string;
+    loggly: LogglyConfig;
+    elasticsearch: ElasticsearchConfig;
+    gelf: GelfConfig;
+    http: HttpConfig;
+    useLocalTime: boolean;
+    metadata: Record<string, unknown>;
+    rotation: RotationOptions;
+    streams: Record<string, StreamEntry>;
+    serializers!: bunyan.Serializers;
+
     /**
      * Properties in the options bag:
      *
@@ -34,31 +164,28 @@ class GhostLogger {
      * http:            HTTP transport configuration
      * useLocalTime:    Use local time instead of UTC.
      * metadata:        Optional set of metadata to attach to each log line
-     * @param {object} options Bag of options
      */
-    constructor(options) {
-        options = options || {};
+    constructor(options: GhostLoggerOptions = {}) {
+        this.name = options.name ?? 'Log';
+        this.env = options.env ?? 'development';
+        this.domain = options.domain ?? 'localhost';
+        this.transports = options.transports ?? ['stdout'];
+        this.level = (process.env.LEVEL as LogLevel | undefined) ?? options.level ?? 'info';
+        this.logBody = options.logBody ?? false;
+        this.mode = process.env.MODE ?? options.mode ?? 'short';
+        this.path = options.path ?? process.cwd();
+        this.filename = options.filename ?? '{domain}_{env}';
+        this.loggly = options.loggly ?? {};
+        this.elasticsearch = options.elasticsearch ?? {};
+        this.gelf = options.gelf ?? {};
+        this.http = options.http ?? {};
+        this.useLocalTime = options.useLocalTime ?? false;
+        this.metadata = options.metadata ?? {};
 
-        this.name = options.name || 'Log';
-        this.env = options.env || 'development';
-        this.domain = options.domain || 'localhost';
-        this.transports = options.transports || ['stdout'];
-        this.level = process.env.LEVEL || options.level || 'info';
-        this.logBody = options.logBody || false;
-        this.mode = process.env.MODE || options.mode || 'short';
-        this.path = options.path || process.cwd();
-        this.filename = options.filename || '{domain}_{env}';
-        this.loggly = options.loggly || {};
-        this.elasticsearch = options.elasticsearch || {};
-        this.gelf = options.gelf || {};
-        this.http = options.http || {};
-        this.useLocalTime = options.useLocalTime || false;
-        this.metadata = options.metadata || {};
-
-        // CASE: stdout has to be on the first position in the transport,  because if the GhostLogger itself logs, you won't see the stdout print
+        // CASE: stdout has to be on the first position in the transport, because if the GhostLogger itself logs, you won't see the stdout print
         if (this.transports.indexOf('stdout') !== -1 && this.transports.indexOf('stdout') !== 0) {
             this.transports.splice(this.transports.indexOf('stdout'), 1);
-            this.transports = ['stdout'].concat(this.transports);
+            this.transports = (['stdout'] as TransportName[]).concat(this.transports);
         }
 
         // CASE: special env variable to enable long mode and level info
@@ -68,14 +195,15 @@ class GhostLogger {
         }
 
         // CASE: ensure we have a trailing slash
-        if (!this.path.match(/\/$|\\$/)) {
+        if (!this.path.match(/\/$|\\/)) {
             this.path = this.path + '/';
         }
 
-        this.rotation = options.rotation || {
+        this.rotation = {
             enabled: false,
             period: '1w',
-            count: 100
+            count: 100,
+            ...options.rotation
         };
 
         this.streams = {};
@@ -86,13 +214,13 @@ class GhostLogger {
         }
 
         this.transports.forEach((transport) => {
-            let transportFn = `set${upperFirst(transport)}Stream`;
+            const transportFn = `set${upperFirst(transport)}Stream` as keyof this;
 
-            if (!this[transportFn]) {
+            if (typeof this[transportFn] !== 'function') {
                 throw new Error(`${upperFirst(transport)} is an invalid transport`); // eslint-disable-line
             }
 
-            this[transportFn]();
+            (this[transportFn] as () => void)();
         });
     }
 
@@ -100,7 +228,6 @@ class GhostLogger {
      * @description Setup stdout stream.
      */
     setStdoutStream() {
-        const GhostPrettyStream = require('@tryghost/pretty-stream');
         const prettyStdOut = new GhostPrettyStream({
             mode: this.mode
         });
@@ -125,7 +252,6 @@ class GhostLogger {
      * @description Setup stderr stream.
      */
     setStderrStream() {
-        const GhostPrettyStream = require('@tryghost/pretty-stream');
         const prettyStdErr = new GhostPrettyStream({
             mode: this.mode
         });
@@ -150,12 +276,10 @@ class GhostLogger {
      * Setup stream for posting the message to a parent instance
      */
     setParentStream() {
-        const {parentPort} = require('worker_threads');
         const bunyanStream = {
             // Parent stream only supports sending a string
-            write: (bunyanObject) => {
-                const {msg} = bunyanObject;
-                parentPort.postMessage(msg);
+            write: (bunyanObject: object) => {
+                parentPort!.postMessage((bunyanObject as {msg: string}).msg);
             }
         };
 
@@ -177,11 +301,9 @@ class GhostLogger {
      * @description Setup loggly.
      */
     setLogglyStream() {
-        const Bunyan2Loggly = require('bunyan-loggly');
-
         const logglyStream = new Bunyan2Loggly({
-            token: this.loggly.token,
-            subdomain: this.loggly.subdomain,
+            token: this.loggly.token ?? '',
+            subdomain: this.loggly.subdomain ?? '',
             tags: this.loggly.tags
         });
 
@@ -204,8 +326,6 @@ class GhostLogger {
      * @description Setup ElasticSearch.
      */
     setElasticsearchStream() {
-        const ElasticSearch = require('@tryghost/elasticsearch').BunyanStream;
-
         const elasticSearchInstance = new ElasticSearch({
             node: this.elasticsearch.host,
             auth: {
@@ -229,13 +349,11 @@ class GhostLogger {
     }
 
     setHttpStream() {
-        const Http = require('@tryghost/http-stream');
-
-        const httpStream = new Http({
+        const httpStream = new HttpStream({
             url: this.http.url,
-            headers: this.http.headers || {},
-            username: this.http.username || '',
-            password: this.http.password || ''
+            headers: this.http.headers ?? {},
+            username: this.http.username ?? '',
+            password: this.http.password ?? ''
         });
 
         this.streams.http = {
@@ -256,12 +374,10 @@ class GhostLogger {
      * @description Setup gelf.
      */
     setGelfStream() {
-        const gelfStream = require('gelf-stream');
-
         const stream = gelfStream.forBunyan(
-            this.gelf.host || 'localhost',
-            this.gelf.port || 12201,
-            this.gelf.options || {}
+            this.gelf.host ?? 'localhost',
+            this.gelf.port ?? 12201,
+            this.gelf.options ?? {}
         );
 
         this.streams.gelf = {
@@ -281,22 +397,22 @@ class GhostLogger {
     /**
      * @description Sanitize domain for use in filenames.
      * Replaces all non-word characters with underscores.
-     * @param {string} domain - The domain to sanitize
-     * @returns {string} Sanitized domain safe for filenames
+     * @param domain - The domain to sanitize
+     * @returns Sanitized domain safe for filenames
      * @example
      * sanitizeDomain('http://my-domain.com') // returns 'http___my_domain_com'
      */
-    sanitizeDomain(domain) {
+    sanitizeDomain(domain: string): string {
         return domain.replace(/[^\w]/gi, '_');
     }
 
     /**
      * @description Replace placeholders in filename template.
-     * @param {string} template - Filename template with placeholders
-     * @returns {string} Filename with placeholders replaced
+     * @param template - Filename template with placeholders
+     * @returns Filename with placeholders replaced
      */
     // TODO: Expand to other placeholders?
-    replaceFilenamePlaceholders(template) {
+    replaceFilenamePlaceholders(template: string): string {
         return template
             .replace(/{env}/g, this.env)
             .replace(/{domain}/g, this.sanitizeDomain(this.domain));
@@ -320,14 +436,13 @@ class GhostLogger {
 
         if (this.rotation.enabled) {
             if (this.rotation.useLibrary) {
-                const RotatingFileStream = require('@tryghost/bunyan-rotating-filestream');
                 const rotationConfig = {
                     path: `${this.path}${baseFilename}.log`,
                     period: this.rotation.period,
                     threshold: this.rotation.threshold,
                     totalFiles: this.rotation.count,
                     gzip: this.rotation.gzip,
-                    rotateExisting: (typeof this.rotation.rotateExisting === 'undefined') ? this.rotation.rotateExisting : true
+                    rotateExisting: (typeof this.rotation.rotateExisting === 'undefined') ? true : this.rotation.rotateExisting
                 };
 
                 this.streams['rotation-errors'] = {
@@ -424,8 +539,8 @@ class GhostLogger {
      */
     setSerializers() {
         this.serializers = {
-            req: (req) => {
-                const requestLog = {
+            req: (req: RequestLike) => {
+                const requestLog: Record<string, unknown> = {
                     meta: {
                         requestId: req.requestId,
                         userId: req.userId
@@ -434,8 +549,8 @@ class GhostLogger {
                     method: req.method,
                     originalUrl: req.originalUrl,
                     params: req.params,
-                    headers: this.removeSensitiveData(req.headers),
-                    query: this.removeSensitiveData(req.query)
+                    headers: this.removeSensitiveData(req.headers ?? {}),
+                    query: this.removeSensitiveData(req.query ?? {})
                 };
 
                 if (req.extra) {
@@ -443,7 +558,7 @@ class GhostLogger {
                 }
 
                 if (this.logBody) {
-                    requestLog.body = this.removeSensitiveData(req.body);
+                    requestLog.body = this.removeSensitiveData(req.body ?? {});
                 }
 
                 if (req.queueDepth) {
@@ -452,14 +567,14 @@ class GhostLogger {
 
                 return requestLog;
             },
-            res: (res) => {
+            res: (res: ResponseLike) => {
                 return {
                     _headers: this.removeSensitiveData(res.getHeaders()),
                     statusCode: res.statusCode,
                     responseTime: res.responseTime
                 };
             },
-            err: (err) => {
+            err: (err: ErrorLike) => {
                 return {
                     id: err.id,
                     domain: this.domain,
@@ -480,16 +595,15 @@ class GhostLogger {
 
     /**
      * @description Remove sensitive data.
-     * @param {Object} obj
      */
-    removeSensitiveData(obj) {
-        let newObj = {};
+    removeSensitiveData(obj: Record<string, unknown>): Record<string, unknown> {
+        const newObj: Record<string, unknown> = {};
 
         for (const key in obj) {
             let value = obj[key];
             try {
                 if (isObject(value)) {
-                    value = this.removeSensitiveData(value);
+                    value = this.removeSensitiveData(value as Record<string, unknown>);
                 }
 
                 if (key.match(/pin|password|pass|key|authorization|bearer|cookie/gi)) {
@@ -497,7 +611,7 @@ class GhostLogger {
                 } else {
                     newObj[key] = value;
                 }
-            } catch (err) {
+            } catch {
                 newObj[key] = value;
             }
         }
@@ -515,10 +629,10 @@ class GhostLogger {
      * logging.info({}, {}) --> is one object
      * logging.error(new Error()) --> is {err: new Error()}
      */
-    log(type, args) {
-        let modifiedMessages = [];
-        let modifiedObject = {};
-        let modifiedArguments = [];
+    log(type: LogLevel, args: unknown[]) {
+        const modifiedMessages: unknown[] = [];
+        const modifiedObject: Record<string, unknown> = {};
+        const modifiedArguments: unknown[] = [];
 
         if (this.metadata) {
             for (const key in this.metadata) {
@@ -530,8 +644,8 @@ class GhostLogger {
             if (value instanceof Error) {
                 modifiedObject.err = value;
             } else if (isObject(value)) {
-                each(Object.keys(value), function (key) {
-                    modifiedObject[key] = value[key];
+                each(Object.keys(value as object), function (key) {
+                    modifiedObject[key] = (value as Record<string, unknown>)[key];
                 });
             } else {
                 modifiedMessages.push(value);
@@ -539,21 +653,21 @@ class GhostLogger {
         });
 
         if (this.useLocalTime) {
-            let currentDate = new Date();
+            const currentDate = new Date();
             currentDate.setMinutes(currentDate.getMinutes() - currentDate.getTimezoneOffset());
             modifiedObject.time = currentDate.toISOString();
         }
 
         if (!isEmpty(modifiedObject)) {
             if (modifiedObject.err) {
-                modifiedMessages.push(modifiedObject.err.message);
+                modifiedMessages.push((modifiedObject.err as Error).message);
             }
             modifiedArguments.push(modifiedObject);
         }
 
         modifiedArguments.push(...modifiedMessages);
 
-        each(this.streams, (logger) => {
+        each(this.streams, (logger: StreamEntry) => {
             // If we have both a stdout and a stderr stream, don't log errors to stdout
             // because it would result in duplicate logs
             if (type === 'error' && logger.name === 'stdout' && includes(this.transports, 'stderr')) {
@@ -581,43 +695,43 @@ class GhostLogger {
              * https://github.com/moll/json-stringify-safe
              */
             if (logger.match && type === 'error') {
-                if (new RegExp(logger.match).test(jsonStringifySafe(modifiedArguments[0].err || null).replace(/"/g, ''))) {
-                    logger.log[type](...modifiedArguments);
+                if (new RegExp(logger.match).test(jsonStringifySafe((modifiedArguments[0] as Record<string, unknown>)?.err ?? null).replace(/"/g, ''))) {
+                    (logger.log[type] as unknown as (...logArgs: unknown[]) => void)(...modifiedArguments);
                 }
             } else {
-                logger.log[type](...modifiedArguments);
+                (logger.log[type] as unknown as (...logArgs: unknown[]) => void)(...modifiedArguments);
             }
         });
     }
 
-    trace() {
-        this.log('trace', toArray(arguments));
+    trace(...args: unknown[]) {
+        this.log('trace', toArray(args));
     }
 
-    debug() {
-        this.log('debug', toArray(arguments));
+    debug(...args: unknown[]) {
+        this.log('debug', toArray(args));
     }
 
-    info() {
-        this.log('info', toArray(arguments));
+    info(...args: unknown[]) {
+        this.log('info', toArray(args));
     }
 
-    warn() {
-        this.log('warn', toArray(arguments));
+    warn(...args: unknown[]) {
+        this.log('warn', toArray(args));
     }
 
-    error() {
-        this.log('error', toArray(arguments));
+    error(...args: unknown[]) {
+        this.log('error', toArray(args));
     }
 
-    fatal() {
-        this.log('fatal', toArray(arguments));
+    fatal(...args: unknown[]) {
+        this.log('fatal', toArray(args));
     }
 
     /**
      * @description Creates a child of the logger with some properties bound for every log message
      */
-    child(boundProperties) {
+    child(boundProperties: Record<string, unknown>): GhostLogger {
         const result = new GhostLogger({
             name: this.name,
             env: this.env,
@@ -628,7 +742,7 @@ class GhostLogger {
             mode: this.mode
         });
 
-        result.streams = Object.keys(this.streams).reduce((acc, id) => {
+        result.streams = Object.keys(this.streams).reduce<Record<string, StreamEntry>>((acc, id) => {
             acc[id] = {
                 name: this.streams[id].name,
                 log: this.streams[id].log.child(boundProperties)
@@ -640,4 +754,4 @@ class GhostLogger {
     }
 }
 
-module.exports = GhostLogger;
+export default GhostLogger;
