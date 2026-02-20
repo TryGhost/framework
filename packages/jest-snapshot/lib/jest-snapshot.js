@@ -8,7 +8,7 @@ function matchSnapshotAssertion(properties) {
     const result = snapshotManager.match(this.obj, properties);
 
     this.params.message = result.message();
-    this.assert(result.pass.should.eql(true));
+    this.assert(result.pass === true);
 }
 
 const mochaHooks = {
