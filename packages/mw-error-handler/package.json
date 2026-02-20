@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/mw-error-handler",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "author": "Ghost Foundation",
   "license": "MIT",
   "main": "index.js",

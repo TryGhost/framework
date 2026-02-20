@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/nodemailer",
-  "version": "0.3.49",
+  "version": "0.3.50",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",

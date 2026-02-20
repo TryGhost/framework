@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/jest-snapshot",
-  "version": "0.5.19",
+  "version": "0.5.20",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
