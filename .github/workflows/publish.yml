@@ -13,10 +13,6 @@ on:
         required: false
         type: boolean
         default: true
-      package-name:
-        description: 'Optional single package to publish (e.g. @tryghost/zip)'
-        required: false
-        type: string
 
 jobs:
   publish:
@@ -37,7 +33,6 @@ jobs:
       IS_SHIPPING: true
       NPM_CONFIG_PROVENANCE: true
       NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org'
-      PACKAGE_FILTER: ${{ github.event.inputs['package-name'] || '' }}
 
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
