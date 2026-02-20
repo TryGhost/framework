@@ -27,11 +27,11 @@
     "ship:ci": "IS_SHIPPING=true bash ./scripts/publish-packages.sh"
   },
   "devDependencies": {
-    "@nx/js": "22.0.4",
+    "@nx/js": "22.5.2",
     "eslint": "8.57.0",
     "eslint-plugin-ghost": "3.4.4",
     "mocha": "11.7.5",
-    "nx": "22.0.4",
+    "nx": "22.5.2",
     "sinon": "21.0.1",
     "ts-node": "10.9.2"
   }
