@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-pagination",
-  "version": "0.1.54",
+  "version": "0.1.55",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",

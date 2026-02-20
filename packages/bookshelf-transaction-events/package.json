@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-transaction-events",
-  "version": "0.2.21",
+  "version": "0.2.22",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
