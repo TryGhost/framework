@@ -1,70 +1,78 @@
-const testUtils = require('./utils');
-const rewire = require('rewire');
+const assert = require('assert/strict');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
 
-let ghostVersionUtils;
-let version;
+const modulePath = require.resolve('../lib/version');
 
-const beforeEachIt = function beforeEachIt() {
-    testUtils.mockNonExistentModule(/package\.json/, {version: version});
-    ghostVersionUtils = rewire('../lib/version');
+const loadVersionModuleFor = function loadVersionModuleFor(version) {
+    const previousCwd = process.cwd();
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'version-test-'));
+
+    try {
+        fs.writeFileSync(path.join(tempDir, 'package.json'), JSON.stringify({version}));
+        process.chdir(tempDir);
+        delete require.cache[modulePath];
+        return require('../lib/version');
+    } finally {
+        process.chdir(previousCwd);
+        fs.rmSync(tempDir, {recursive: true, force: true});
+        delete require.cache[modulePath];
+    }
 };
 
 describe('Version', function () {
-    afterEach(function () {
-        testUtils.unmockNonExistentModule(/package\.json/);
-    });
-
     it('default', function () {
-        version = '1.10.0';
-        beforeEachIt();
+        const version = '1.10.0';
+        const ghostVersionUtils = loadVersionModuleFor(version);
 
-        ghostVersionUtils.full.should.eql(version);
-        ghostVersionUtils.original.should.eql(version);
-        ghostVersionUtils.safe.should.eql('1.10');
+        assert.equal(ghostVersionUtils.full, version);
+        assert.equal(ghostVersionUtils.original, version);
+        assert.equal(ghostVersionUtils.safe, '1.10');
     });
 
     it('pre-release', function () {
-        version = '1.11.1-beta';
-        beforeEachIt();
+        const version = '1.11.1-beta';
+        const ghostVersionUtils = loadVersionModuleFor(version);
 
-        ghostVersionUtils.full.should.eql(version);
-        ghostVersionUtils.original.should.eql(version);
-        ghostVersionUtils.safe.should.eql('1.11');
+        assert.equal(ghostVersionUtils.full, version);
+        assert.equal(ghostVersionUtils.original, version);
+        assert.equal(ghostVersionUtils.safe, '1.11');
     });
 
     it('pre-release .1', function () {
-        version = '1.11.1-alpha.1';
-        beforeEachIt();
+        const version = '1.11.1-alpha.1';
+        const ghostVersionUtils = loadVersionModuleFor(version);
 
-        ghostVersionUtils.full.should.eql(version);
-        ghostVersionUtils.original.should.eql(version);
-        ghostVersionUtils.safe.should.eql('1.11');
+        assert.equal(ghostVersionUtils.full, version);
+        assert.equal(ghostVersionUtils.original, version);
+        assert.equal(ghostVersionUtils.safe, '1.11');
     });
 
     it('build', function () {
-        version = '1.11.1+build';
-        beforeEachIt();
+        const version = '1.11.1+build';
+        const ghostVersionUtils = loadVersionModuleFor(version);
 
-        ghostVersionUtils.full.should.eql('1.11.1');
-        ghostVersionUtils.original.should.eql(version);
-        ghostVersionUtils.safe.should.eql('1.11');
+        assert.equal(ghostVersionUtils.full, '1.11.1');
+        assert.equal(ghostVersionUtils.original, version);
+        assert.equal(ghostVersionUtils.safe, '1.11');
     });
 
     it('mixed', function () {
-        version = '1.11.1-pre+build.1';
-        beforeEachIt();
+        const version = '1.11.1-pre+build.1';
+        const ghostVersionUtils = loadVersionModuleFor(version);
 
-        ghostVersionUtils.full.should.eql('1.11.1-pre');
-        ghostVersionUtils.original.should.eql(version);
-        ghostVersionUtils.safe.should.eql('1.11');
+        assert.equal(ghostVersionUtils.full, '1.11.1-pre');
+        assert.equal(ghostVersionUtils.original, version);
+        assert.equal(ghostVersionUtils.safe, '1.11');
     });
 
     it('mixed 1', function () {
-        version = '1.11.1-beta.12+build.2';
-        beforeEachIt();
+        const version = '1.11.1-beta.12+build.2';
+        const ghostVersionUtils = loadVersionModuleFor(version);
 
-        ghostVersionUtils.full.should.eql('1.11.1-beta.12');
-        ghostVersionUtils.original.should.eql(version);
-        ghostVersionUtils.safe.should.eql('1.11');
+        assert.equal(ghostVersionUtils.full, '1.11.1-beta.12');
+        assert.equal(ghostVersionUtils.original, version);
+        assert.equal(ghostVersionUtils.safe, '1.11');
     });
 });
