@@ -3875,10 +3875,10 @@
     "@tryghost/nql-lang" "^0.6.4"
     mingo "^2.2.2"
 
-"@tryghost/string@0.2.15":
-  version "0.2.15"
-  resolved "https://registry.yarnpkg.com/@tryghost/string/-/string-0.2.15.tgz#5cbe2cd9b6eacfe5a3ab867ff82ecbdb030e803e"
-  integrity sha512-SEWkwpKV/bkszbnYWlfeFlHR/E91AW81HGmpMJG6oP+FLy8m+JPbXCBlYyGO60R4gRa5JawnIY5NORYjfzWLBQ==
+"@tryghost/string@0.2.21":
+  version "0.2.21"
+  resolved "https://registry.yarnpkg.com/@tryghost/string/-/string-0.2.21.tgz#7294e3fb9dad595b6e180f8bbe75c33845dc45de"
+  integrity sha512-ILG3h+I432rlgD46tHrugkxEnJ8mh73JxKco4B/uIlBDv5evZjq9psIXt595ZA0Q8DuKMQKZUeVZYV9GBLA1eQ==
   dependencies:
     unidecode "^0.1.8"
 
