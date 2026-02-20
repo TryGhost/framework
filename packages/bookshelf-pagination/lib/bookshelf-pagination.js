@@ -284,3 +284,4 @@ const pagination = function pagination(bookshelf) {
  * @api public
  */
 module.exports = pagination;
+module.exports.paginationUtils = paginationUtils;

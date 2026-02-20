@@ -1,305 +1,284 @@
 const assert = require('node:assert/strict');
-const sinon = require('sinon');
-const rewire = require('rewire');
-const pagination = rewire('../lib/bookshelf-pagination');
+const errors = require('@tryghost/errors');
+const paginationPlugin = require('../lib/bookshelf-pagination');
 
-describe('pagination', function () {
-    let paginationUtils;
+function createBookshelf({countRows, fetchResult, selectError, fetchError} = {}) {
+    const modelState = {
+        queryCalls: [],
+        rawCalls: [],
+        fetchAllArgs: null
+    };
 
-    afterEach(function () {
-        sinon.restore();
-    });
+    const qb = {
+        orderByRaw(sql, bindings) {
+            modelState.orderByRaw = {sql, bindings};
+        }
+    };
 
-    describe('paginationUtils', function () {
-        before(function () {
-            paginationUtils = pagination.__get__('paginationUtils');
+    const countQuery = {
+        clone() {
+            modelState.countCloned = true;
+            return countQuery;
+        },
+        transacting(trx) {
+            modelState.transacting = trx;
+            return countQuery;
+        },
+        clear(part) {
+            modelState.cleared = part;
+            return countQuery;
+        },
+        select(raw) {
+            modelState.selectRaw = raw;
+            if (selectError) {
+                return Promise.reject(selectError);
+            }
+            return Promise.resolve(countRows || [{aggregate: 1}]);
+        }
+    };
+
+    function ModelCtor() {}
+    ModelCtor.prototype.tableName = 'posts';
+    ModelCtor.prototype.idAttribute = 'id';
+    ModelCtor.prototype.query = function (method, ...args) {
+        if (arguments.length === 0) {
+            return countQuery;
+        }
+
+        if (typeof method === 'function') {
+            method(qb);
+            return this;
+        }
+
+        modelState.queryCalls.push([method, ...args]);
+        return this;
+    };
+    ModelCtor.prototype.fetchAll = function (options) {
+        modelState.fetchAllArgs = options;
+        if (fetchError) {
+            return Promise.reject(fetchError);
+        }
+        return Promise.resolve(fetchResult || [{id: 1}]);
+    };
+
+    const bookshelf = {
+        Model: ModelCtor,
+        knex: {
+            raw(sql) {
+                modelState.rawCalls.push(sql);
+                return sql;
+            }
+        }
+    };
+
+    paginationPlugin(bookshelf);
+    return {bookshelf, modelState};
+}
+
+describe('@tryghost/bookshelf-pagination', function () {
+    it('internal parseOptions handles bad and all limits', function () {
+        assert.deepEqual(paginationPlugin.paginationUtils.parseOptions({limit: 'bad', page: 'bad'}), {
+            limit: 15,
+            page: 1
         });
 
-        describe('formatResponse', function () {
-            let formatResponse;
-
-            before(function () {
-                formatResponse = paginationUtils.formatResponse;
-            });
-
-            it('returns correct pagination object for single page', function () {
-                assert.deepEqual(formatResponse(5, {limit: 10, page: 1}), {
-                    limit: 10,
-                    next: null,
-                    page: 1,
-                    pages: 1,
-                    prev: null,
-                    total: 5
-                });
-            });
-
-            it('returns correct pagination object for first page of many', function () {
-                assert.deepEqual(formatResponse(44, {limit: 5, page: 1}), {
-                    limit: 5,
-                    next: 2,
-                    page: 1,
-                    pages: 9,
-                    prev: null,
-                    total: 44
-                });
-            });
-
-            it('returns correct pagination object for middle page of many', function () {
-                assert.deepEqual(formatResponse(44, {limit: 5, page: 9}), {
-                    limit: 5,
-                    next: null,
-                    page: 9,
-                    pages: 9,
-                    prev: 8,
-                    total: 44
-                });
-            });
-
-            it('returns correct pagination object for last page of many', function () {
-                assert.deepEqual(formatResponse(44, {limit: 5, page: 3}), {
-                    limit: 5,
-                    next: 4,
-                    page: 3,
-                    pages: 9,
-                    prev: 2,
-                    total: 44
-                });
-            });
-
-            it('returns correct pagination object when page not set', function () {
-                assert.deepEqual(formatResponse(5, {limit: 10}), {
-                    limit: 10,
-                    next: null,
-                    page: 1,
-                    pages: 1,
-                    prev: null,
-                    total: 5
-                });
-            });
-
-            it('returns correct pagination object for limit all', function () {
-                assert.deepEqual(formatResponse(5, {limit: 'all'}), {
-                    limit: 'all',
-                    next: null,
-                    page: 1,
-                    pages: 1,
-                    prev: null,
-                    total: 5
-                });
-            });
-        });
-
-        describe('parseOptions', function () {
-            let parseOptions;
-
-            before(function () {
-                parseOptions = paginationUtils.parseOptions;
-            });
-
-            it('uses defaults if no options are passed', function () {
-                assert.deepEqual(parseOptions(), {
-                    limit: 15,
-                    page: 1
-                });
-            });
-
-            it('accepts numbers for limit and page', function () {
-                assert.deepEqual(parseOptions({
-                    limit: 10,
-                    page: 2
-                }), {
-                    limit: 10,
-                    page: 2
-                });
-            });
-
-            it('uses defaults if bad options are passed', function () {
-                assert.deepEqual(parseOptions({
-                    limit: 'thelma',
-                    page: 'louise'
-                }), {
-                    limit: 15,
-                    page: 1
-                });
-            });
-
-            it('permits all for limit', function () {
-                assert.deepEqual(parseOptions({
-                    limit: 'all'
-                }), {
-                    limit: 'all',
-                    page: 1
-                });
-            });
-        });
-
-        describe('addLimitAndOffset', function () {
-            let addLimitAndOffset;
-            const collection = {};
-
-            before(function () {
-                addLimitAndOffset = paginationUtils.addLimitAndOffset;
-            });
-
-            beforeEach(function () {
-                collection.query = sinon.stub().returns(collection);
-            });
-
-            it('adds query options if limit is set', function () {
-                addLimitAndOffset(collection, {limit: 5, page: 1});
-
-                assert.equal(collection.query.calledTwice, true);
-                assert.equal(collection.query.firstCall.calledWith('limit', 5), true);
-                assert.equal(collection.query.secondCall.calledWith('offset', 0), true);
-            });
-
-            it('does not add query options if limit is not set', function () {
-                addLimitAndOffset(collection, {page: 1});
-
-                assert.equal(collection.query.called, false);
-            });
+        assert.deepEqual(paginationPlugin.paginationUtils.parseOptions({limit: 'all'}), {
+            limit: 'all',
+            page: 1
         });
     });
 
-    describe('fetchPage', function () {
-        let model;
-        let bookshelf;
-        let knex;
-        let mockQuery;
+    it('internal formatResponse defaults page when missing', function () {
+        assert.deepEqual(paginationPlugin.paginationUtils.formatResponse(0, {limit: 15}), {
+            page: 1,
+            limit: 15,
+            pages: 1,
+            total: 0,
+            next: null,
+            prev: null
+        });
+    });
 
-        before(function () {
-            paginationUtils = pagination.__get__('paginationUtils');
+    it('exports plugin from index', function () {
+        assert.equal(typeof require('../index'), 'function');
+    });
+
+    it('adds fetchPage to Model prototype', function () {
+        const {bookshelf} = createBookshelf();
+        assert.equal(typeof bookshelf.Model.prototype.fetchPage, 'function');
+    });
+
+    it('applies defaults and returns pagination metadata', async function () {
+        const {bookshelf, modelState} = createBookshelf({countRows: [{aggregate: 44}]});
+        const model = new bookshelf.Model();
+
+        const result = await model.fetchPage();
+
+        assert.deepEqual(modelState.queryCalls.slice(0, 2), [
+            ['limit', 15],
+            ['offset', 0]
+        ]);
+        assert.deepEqual(result.pagination, {
+            page: 1,
+            limit: 15,
+            pages: 3,
+            total: 44,
+            next: 2,
+            prev: null
+        });
+    });
+
+    it('supports order, orderRaw, groups and eagerLoad relation handling', async function () {
+        const {bookshelf, modelState} = createBookshelf({countRows: [{aggregate: 44}]});
+        const model = new bookshelf.Model();
+
+        await model.fetchPage({
+            page: 3,
+            limit: 5,
+            order: {
+                'count.posts': 'DESC',
+                'authors.name': 'ASC'
+            },
+            orderRaw: 'FIELD(status, ?, ?) DESC',
+            orderRawBindings: ['published', 'draft'],
+            eagerLoad: ['tiers.name'],
+            groups: ['posts.id']
         });
 
-        beforeEach(function () {
-            paginationUtils.parseOptions = sinon.stub();
-            paginationUtils.addLimitAndOffset = sinon.stub();
-            paginationUtils.formatResponse = sinon.stub().returns({});
+        assert.equal(modelState.queryCalls.some(call => call[0] === 'orderBy' && call[1] === 'count__posts' && call[2] === 'DESC'), true);
+        assert.equal(modelState.queryCalls.some(call => call[0] === 'orderBy' && call[1] === 'authors.name' && call[2] === 'ASC'), true);
+        assert.equal(modelState.queryCalls.some(call => call[0] === 'groupBy' && call[1] === 'posts.id'), true);
+        assert.deepEqual(modelState.orderByRaw, {
+            sql: 'FIELD(status, ?, ?) DESC',
+            bindings: ['published', 'draft']
+        });
+        assert.deepEqual(model.eagerLoad.sort(), ['authors', 'tiers'].sort());
+    });
 
-            mockQuery = {
-                clone: sinon.stub(),
-                select: sinon.stub(),
-                toQuery: sinon.stub(),
-                clear: sinon.stub()
-            };
-            mockQuery.clone.returns(mockQuery);
-            mockQuery.select.returns(Promise.resolve([{aggregate: 1}]));
+    it('supports limit=all without count query', async function () {
+        const fetchResult = [{id: 1}, {id: 2}, {id: 3}, {id: 4}, {id: 5}];
+        const {bookshelf, modelState} = createBookshelf({fetchResult});
+        const model = new bookshelf.Model();
 
-            model = function ModelCtor() {};
-            model.prototype.fetchAll = sinon.stub().returns(Promise.resolve({}));
-            model.prototype.query = sinon.stub().returns(mockQuery);
+        const result = await model.fetchPage({limit: 'all'});
 
-            knex = {raw: sinon.stub().returns(Promise.resolve())};
-            bookshelf = {Model: model, knex: knex};
+        assert.equal(modelState.countCloned, undefined);
+        assert.equal(modelState.queryCalls.some(call => call[0] === 'limit'), false);
+        assert.deepEqual(result.pagination, {
+            page: 1,
+            limit: 'all',
+            pages: 1,
+            total: 5,
+            next: null,
+            prev: null
+        });
+    });
 
-            pagination(bookshelf);
+    it('supports useBasicCount and transacting', async function () {
+        const {bookshelf, modelState} = createBookshelf({countRows: [{aggregate: 1}]});
+        const model = new bookshelf.Model();
+
+        await model.fetchPage({
+            page: 2,
+            limit: 10,
+            useBasicCount: true,
+            transacting: 'trx'
         });
 
-        it('extends Model with fetchPage', function () {
-            assert.equal(typeof bookshelf.Model.prototype.fetchPage, 'function');
+        assert.equal(modelState.transacting, 'trx');
+        assert.equal(modelState.rawCalls[0], 'count(*) as aggregate');
+    });
+
+    it('uses distinct count query by default', async function () {
+        const {bookshelf, modelState} = createBookshelf({countRows: [{aggregate: 1}]});
+        const model = new bookshelf.Model();
+
+        await model.fetchPage({page: 2, limit: 10});
+
+        assert.equal(modelState.rawCalls[0], 'count(distinct posts.id) as aggregate');
+    });
+
+    it('falls back to zero total when aggregate row is missing', async function () {
+        const {bookshelf} = createBookshelf({countRows: []});
+        const model = new bookshelf.Model();
+
+        const result = await model.fetchPage({page: 1, limit: 10});
+        assert.equal(result.pagination.total, 0);
+        assert.equal(result.pagination.pages, 1);
+    });
+
+    it('sets only prev for last page pagination metadata', async function () {
+        const {bookshelf} = createBookshelf({countRows: [{aggregate: 10}]});
+        const model = new bookshelf.Model();
+
+        const result = await model.fetchPage({page: 2, limit: 5});
+        assert.deepEqual(result.pagination, {
+            page: 2,
+            limit: 5,
+            pages: 2,
+            total: 10,
+            next: null,
+            prev: 1
         });
+    });
 
-        it('calls all paginationUtils and methods', async function () {
-            paginationUtils.parseOptions.returns({});
-
-            await bookshelf.Model.prototype.fetchPage();
-
-            sinon.assert.callOrder(
-                paginationUtils.parseOptions,
-                model.prototype.query,
-                mockQuery.clone,
-                mockQuery.select,
-                paginationUtils.addLimitAndOffset,
-                model.prototype.fetchAll,
-                paginationUtils.formatResponse
-            );
-
-            assert.equal(paginationUtils.parseOptions.calledOnceWithExactly(undefined), true);
-            assert.equal(paginationUtils.addLimitAndOffset.calledOnce, true);
-            assert.equal(paginationUtils.formatResponse.calledOnce, true);
-            assert.equal(model.prototype.query.calledOnceWithExactly(), true);
-            assert.equal(mockQuery.clone.calledOnceWithExactly(), true);
-            assert.equal(mockQuery.select.calledOnce, true);
-            assert.equal(model.prototype.fetchAll.calledOnceWithExactly({}), true);
+    it('wraps offset/limit DB errors as NotFoundError', async function () {
+        const {bookshelf} = createBookshelf({
+            fetchError: {errno: 20}
         });
+        const model = new bookshelf.Model();
 
-        it('calls methods when order is set', async function () {
-            const orderOptions = {order: {id: 'DESC'}};
-            paginationUtils.parseOptions.returns(orderOptions);
-
-            await bookshelf.Model.prototype.fetchPage(orderOptions);
-
-            assert.equal(model.prototype.query.calledTwice, true);
-            assert.equal(model.prototype.query.secondCall.calledWith('orderBy', 'id', 'DESC'), true);
-            assert.equal(model.prototype.fetchAll.calledOnceWithExactly(orderOptions), true);
+        await assert.rejects(async () => {
+            await model.fetchPage({page: 1, limit: 10});
+        }, (err) => {
+            assert.equal(err instanceof errors.NotFoundError, true);
+            assert.equal(err.message, 'Page not found');
+            return true;
         });
+    });
 
-        it('calls methods when group by is set', async function () {
-            const groupOptions = {groups: ['posts.id']};
-            paginationUtils.parseOptions.returns(groupOptions);
-
-            await bookshelf.Model.prototype.fetchPage(groupOptions);
-
-            assert.equal(model.prototype.query.calledTwice, true);
-            assert.equal(model.prototype.query.secondCall.calledWith('groupBy', 'posts.id'), true);
-            assert.equal(model.prototype.fetchAll.calledOnceWithExactly(groupOptions), true);
+    it('wraps SQL syntax errors as BadRequestError', async function () {
+        const {bookshelf} = createBookshelf({
+            selectError: {errno: 1054}
         });
+        const model = new bookshelf.Model();
 
-        it('calls orderByRaw when orderRaw is set', async function () {
-            const mockQb = {orderByRaw: sinon.stub()};
-            model.prototype.query.callsFake(function (arg) {
-                if (typeof arg === 'function') {
-                    arg(mockQb);
-                }
-                return mockQuery;
-            });
-
-            const orderRawOptions = {orderRaw: 'CASE WHEN slug = ? THEN ? END ASC'};
-            paginationUtils.parseOptions.returns(orderRawOptions);
-
-            await bookshelf.Model.prototype.fetchPage(orderRawOptions);
-            assert.equal(mockQb.orderByRaw.calledOnceWithExactly('CASE WHEN slug = ? THEN ? END ASC', undefined), true);
+        await assert.rejects(async () => {
+            await model.fetchPage({page: 1, limit: 10});
+        }, (err) => {
+            assert.equal(err instanceof errors.BadRequestError, true);
+            assert.equal(err.message, 'Could not understand request.');
+            return true;
         });
+    });
 
-        it('passes orderRawBindings to orderByRaw when provided', async function () {
-            const mockQb = {orderByRaw: sinon.stub()};
-            model.prototype.query.callsFake(function (arg) {
-                if (typeof arg === 'function') {
-                    arg(mockQb);
-                }
-                return mockQuery;
-            });
-
-            const orderRawOptions = {
-                orderRaw: 'CASE WHEN slug = ? THEN ? END ASC',
-                orderRawBindings: ['my-slug', 0]
-            };
-            paginationUtils.parseOptions.returns(orderRawOptions);
-
-            await bookshelf.Model.prototype.fetchPage(orderRawOptions);
-            assert.equal(mockQb.orderByRaw.calledOnceWithExactly(
-                'CASE WHEN slug = ? THEN ? END ASC',
-                ['my-slug', 0]
-            ), true);
+    it('rethrows unknown errors unchanged', async function () {
+        const rootError = new Error('boom');
+        const {bookshelf} = createBookshelf({
+            selectError: rootError
         });
+        const model = new bookshelf.Model();
 
-        it('returns expected response', async function () {
-            paginationUtils.parseOptions.returns({});
-            const result = await bookshelf.Model.prototype.fetchPage();
-
-            assert.ok(Object.prototype.hasOwnProperty.call(result, 'collection'));
-            assert.ok(Object.prototype.hasOwnProperty.call(result, 'pagination'));
-            assert.equal(typeof result.collection, 'object');
-            assert.equal(typeof result.pagination, 'object');
+        await assert.rejects(async () => {
+            await model.fetchPage({page: 1, limit: 10});
+        }, (err) => {
+            assert.equal(err, rootError);
+            return true;
         });
+    });
 
-        it('returns expected response when aggregate is empty', async function () {
-            mockQuery.select.returns(Promise.resolve([]));
-            paginationUtils.parseOptions.returns({});
+    it('rethrows unknown fetch errors unchanged', async function () {
+        const fetchError = new Error('fetch failed');
+        const {bookshelf} = createBookshelf({
+            fetchError
+        });
+        const model = new bookshelf.Model();
 
-            const result = await bookshelf.Model.prototype.fetchPage();
-            assert.ok(Object.prototype.hasOwnProperty.call(result, 'collection'));
-            assert.ok(Object.prototype.hasOwnProperty.call(result, 'pagination'));
+        await assert.rejects(async () => {
+            await model.fetchPage({page: 1, limit: 10});
+        }, (err) => {
+            assert.equal(err, fetchError);
+            return true;
         });
     });
 });
