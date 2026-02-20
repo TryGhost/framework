@@ -1,10 +1,10 @@
-// Switch these lines once there are useful utils
-// const testUtils = require('./utils');
-require('./utils');
-
+const assert = require('assert/strict');
 const path = require('path');
 const fs = require('fs-extra');
 const {hashElement} = require('folder-hash');
+const archiver = require('archiver');
+const EventEmitter = require('events');
+const Module = require('module');
 
 // Mimic how we expect this to be required
 const {compress, extract} = require('../');
@@ -42,26 +42,56 @@ describe('Compress and Extract should be opposite functions', function () {
                 return compress(symlinkPath, zipDestination);
             })
             .then((res) => {
-                res.should.be.an.Object().with.properties('path', 'size');
-                res.path.should.eql(zipDestination);
-                res.size.should.be.below(619618);
+                assert.equal(typeof res, 'object');
+                assert.equal(res.path, zipDestination);
+                assert.equal(res.size < 619618, true);
 
                 return extract(zipDestination, unzipDestination);
             })
             .then((res) => {
-                res.should.be.an.Object().with.properties('path');
-                res.path.should.eql(unzipDestination);
+                assert.equal(typeof res, 'object');
+                assert.equal(res.path, unzipDestination);
 
                 return hashElement(unzipDestination);
             })
             .then((extractedHash) => {
-                originalHash.children.toString().should.eql(extractedHash.children.toString());
+                assert.equal(originalHash.children.toString(), extractedHash.children.toString());
 
                 done();
             })
             .catch((err) => {
                 return done(err);
             });
+    });
+
+    it('rejects when archiver emits an async error event', async function () {
+        const originalLoad = Module._load;
+        Module._load = function (request, parent, isMain) {
+            if (request === 'archiver') {
+                return {
+                    create() {
+                        const fake = new EventEmitter();
+                        fake.glob = function () {};
+                        fake.pipe = function () {};
+                        fake.finalize = function () {
+                            setTimeout(() => fake.emit('error', new Error('archive failed')), 0);
+                        };
+                        return fake;
+                    }
+                };
+            }
+
+            return originalLoad(request, parent, isMain);
+        };
+
+        try {
+            await assert.rejects(
+                () => compress(themeFolder, zipDestination),
+                /archive failed/
+            );
+        } finally {
+            Module._load = originalLoad;
+        }
     });
 });
 
@@ -98,8 +128,8 @@ describe('Extract zip', function () {
 
         await extract(zipDestination, unzipDestination);
 
-        fs.existsSync(unzipDestination).should.be.true();
-        fs.existsSync(path.join(unzipDestination, 'package.json')).should.be.true();
+        assert.equal(fs.existsSync(unzipDestination), true);
+        assert.equal(fs.existsSync(path.join(unzipDestination, 'package.json')), true);
     });
 
     it('throws if the zip contains a filename with 254 or more bytes', async function () {
@@ -109,6 +139,40 @@ describe('Extract zip', function () {
         fs.writeFileSync(longFilePath, 'test content');
 
         await compress(themeFolder, zipDestination);
-        await extract(zipDestination, unzipDestination).should.be.rejectedWith('File names in the zip folder must be shorter than 254 characters.');
+        await assert.rejects(
+            () => extract(zipDestination, unzipDestination),
+            /File names in the zip folder must be shorter than 254 characters\./
+        );
+    });
+
+    it('throws when the zip contains symlink entries', async function () {
+        await new Promise((resolve, reject) => {
+            const output = fs.createWriteStream(zipDestination);
+            const archive = archiver('zip');
+
+            output.on('close', resolve);
+            archive.on('error', reject);
+            archive.pipe(output);
+            archive.symlink('themes/test-target', 'symlink-entry');
+            archive.finalize();
+        });
+
+        await assert.rejects(
+            () => extract(zipDestination, unzipDestination),
+            /Symlinks are not allowed in the zip folder\./
+        );
+    });
+
+    it('forwards custom onEntry callback', async function () {
+        await compress(themeFolder, zipDestination);
+
+        let called = false;
+        await extract(zipDestination, unzipDestination, {
+            onEntry: () => {
+                called = true;
+            }
+        });
+
+        assert.equal(called, true);
     });
 });
