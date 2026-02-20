@@ -1,3 +1,4 @@
+const assert = require('node:assert/strict');
 const sinon = require('sinon');
 const rewire = require('rewire');
 const pagination = rewire('../lib/bookshelf-pagination');
@@ -22,7 +23,7 @@ describe('pagination', function () {
             });
 
             it('returns correct pagination object for single page', function () {
-                formatResponse(5, {limit: 10, page: 1}).should.eql({
+                assert.deepEqual(formatResponse(5, {limit: 10, page: 1}), {
                     limit: 10,
                     next: null,
                     page: 1,
@@ -33,7 +34,7 @@ describe('pagination', function () {
             });
 
             it('returns correct pagination object for first page of many', function () {
-                formatResponse(44, {limit: 5, page: 1}).should.eql({
+                assert.deepEqual(formatResponse(44, {limit: 5, page: 1}), {
                     limit: 5,
                     next: 2,
                     page: 1,
@@ -44,7 +45,7 @@ describe('pagination', function () {
             });
 
             it('returns correct pagination object for middle page of many', function () {
-                formatResponse(44, {limit: 5, page: 9}).should.eql({
+                assert.deepEqual(formatResponse(44, {limit: 5, page: 9}), {
                     limit: 5,
                     next: null,
                     page: 9,
@@ -55,7 +56,7 @@ describe('pagination', function () {
             });
 
             it('returns correct pagination object for last page of many', function () {
-                formatResponse(44, {limit: 5, page: 3}).should.eql({
+                assert.deepEqual(formatResponse(44, {limit: 5, page: 3}), {
                     limit: 5,
                     next: 4,
                     page: 3,
@@ -66,7 +67,7 @@ describe('pagination', function () {
             });
 
             it('returns correct pagination object when page not set', function () {
-                formatResponse(5, {limit: 10}).should.eql({
+                assert.deepEqual(formatResponse(5, {limit: 10}), {
                     limit: 10,
                     next: null,
                     page: 1,
@@ -77,7 +78,7 @@ describe('pagination', function () {
             });
 
             it('returns correct pagination object for limit all', function () {
-                formatResponse(5, {limit: 'all'}).should.eql({
+                assert.deepEqual(formatResponse(5, {limit: 'all'}), {
                     limit: 'all',
                     next: null,
                     page: 1,
@@ -95,37 +96,37 @@ describe('pagination', function () {
                 parseOptions = paginationUtils.parseOptions;
             });
 
-            it('should use defaults if no options are passed', function () {
-                parseOptions().should.eql({
+            it('uses defaults if no options are passed', function () {
+                assert.deepEqual(parseOptions(), {
                     limit: 15,
                     page: 1
                 });
             });
 
-            it('should accept numbers for limit and page', function () {
-                parseOptions({
+            it('accepts numbers for limit and page', function () {
+                assert.deepEqual(parseOptions({
                     limit: 10,
                     page: 2
-                }).should.eql({
+                }), {
                     limit: 10,
                     page: 2
                 });
             });
 
-            it('should use defaults if bad options are passed', function () {
-                parseOptions({
+            it('uses defaults if bad options are passed', function () {
+                assert.deepEqual(parseOptions({
                     limit: 'thelma',
                     page: 'louise'
-                }).should.eql({
+                }), {
                     limit: 15,
                     page: 1
                 });
             });
 
-            it('should permit all for limit', function () {
-                parseOptions({
+            it('permits all for limit', function () {
+                assert.deepEqual(parseOptions({
                     limit: 'all'
-                }).should.eql({
+                }), {
                     limit: 'all',
                     page: 1
                 });
@@ -144,18 +145,18 @@ describe('pagination', function () {
                 collection.query = sinon.stub().returns(collection);
             });
 
-            it('should add query options if limit is set', function () {
+            it('adds query options if limit is set', function () {
                 addLimitAndOffset(collection, {limit: 5, page: 1});
 
-                collection.query.calledTwice.should.be.true();
-                collection.query.firstCall.calledWith('limit', 5).should.be.true();
-                collection.query.secondCall.calledWith('offset', 0).should.be.true();
+                assert.equal(collection.query.calledTwice, true);
+                assert.equal(collection.query.firstCall.calledWith('limit', 5), true);
+                assert.equal(collection.query.secondCall.calledWith('offset', 0), true);
             });
 
-            it('should not add query options if limit is not set', function () {
+            it('does not add query options if limit is not set', function () {
                 addLimitAndOffset(collection, {page: 1});
 
-                collection.query.called.should.be.false();
+                assert.equal(collection.query.called, false);
             });
         });
     });
@@ -171,12 +172,10 @@ describe('pagination', function () {
         });
 
         beforeEach(function () {
-            // Stub paginationUtils
             paginationUtils.parseOptions = sinon.stub();
             paginationUtils.addLimitAndOffset = sinon.stub();
             paginationUtils.formatResponse = sinon.stub().returns({});
 
-            // Mock out bookshelf model
             mockQuery = {
                 clone: sinon.stub(),
                 select: sinon.stub(),
@@ -186,140 +185,67 @@ describe('pagination', function () {
             mockQuery.clone.returns(mockQuery);
             mockQuery.select.returns(Promise.resolve([{aggregate: 1}]));
 
-            model = function () {
-            };
-
+            model = function ModelCtor() {};
             model.prototype.fetchAll = sinon.stub().returns(Promise.resolve({}));
-            model.prototype.query = sinon.stub();
-            model.prototype.query.returns(mockQuery);
+            model.prototype.query = sinon.stub().returns(mockQuery);
 
             knex = {raw: sinon.stub().returns(Promise.resolve())};
-
             bookshelf = {Model: model, knex: knex};
 
             pagination(bookshelf);
         });
 
         it('extends Model with fetchPage', function () {
-            bookshelf.Model.prototype.should.have.ownProperty('fetchPage');
-            bookshelf.Model.prototype.fetchPage.should.be.a.Function();
+            assert.equal(typeof bookshelf.Model.prototype.fetchPage, 'function');
         });
 
-        it('calls all paginationUtils and methods', function (done) {
+        it('calls all paginationUtils and methods', async function () {
             paginationUtils.parseOptions.returns({});
 
-            bookshelf.Model.prototype.fetchPage().then(function () {
-                sinon.assert.callOrder(
-                    paginationUtils.parseOptions,
-                    model.prototype.query,
-                    mockQuery.clone,
-                    mockQuery.select,
-                    paginationUtils.addLimitAndOffset,
-                    model.prototype.fetchAll,
-                    paginationUtils.formatResponse
-                );
+            await bookshelf.Model.prototype.fetchPage();
 
-                paginationUtils.parseOptions.calledOnce.should.be.true();
-                paginationUtils.parseOptions.calledWith(undefined).should.be.true();
+            sinon.assert.callOrder(
+                paginationUtils.parseOptions,
+                model.prototype.query,
+                mockQuery.clone,
+                mockQuery.select,
+                paginationUtils.addLimitAndOffset,
+                model.prototype.fetchAll,
+                paginationUtils.formatResponse
+            );
 
-                paginationUtils.addLimitAndOffset.calledOnce.should.be.true();
-                paginationUtils.formatResponse.calledOnce.should.be.true();
-
-                model.prototype.query.calledOnce.should.be.true();
-                model.prototype.query.firstCall.calledWith().should.be.true();
-
-                mockQuery.clone.calledOnce.should.be.true();
-                mockQuery.clone.firstCall.calledWith().should.be.true();
-
-                mockQuery.select.calledOnce.should.be.true();
-                mockQuery.select.calledWith().should.be.true();
-
-                model.prototype.fetchAll.calledOnce.should.be.true();
-                model.prototype.fetchAll.calledWith({}).should.be.true();
-
-                done();
-            }).catch(done);
+            assert.equal(paginationUtils.parseOptions.calledOnceWithExactly(undefined), true);
+            assert.equal(paginationUtils.addLimitAndOffset.calledOnce, true);
+            assert.equal(paginationUtils.formatResponse.calledOnce, true);
+            assert.equal(model.prototype.query.calledOnceWithExactly(), true);
+            assert.equal(mockQuery.clone.calledOnceWithExactly(), true);
+            assert.equal(mockQuery.select.calledOnce, true);
+            assert.equal(model.prototype.fetchAll.calledOnceWithExactly({}), true);
         });
 
-        it('calls all paginationUtils and methods when order set', function (done) {
+        it('calls methods when order is set', async function () {
             const orderOptions = {order: {id: 'DESC'}};
             paginationUtils.parseOptions.returns(orderOptions);
 
-            bookshelf.Model.prototype.fetchPage(orderOptions).then(function () {
-                sinon.assert.callOrder(
-                    paginationUtils.parseOptions,
-                    model.prototype.query,
-                    mockQuery.clone,
-                    mockQuery.select,
-                    paginationUtils.addLimitAndOffset,
-                    model.prototype.query,
-                    model.prototype.fetchAll,
-                    paginationUtils.formatResponse
-                );
+            await bookshelf.Model.prototype.fetchPage(orderOptions);
 
-                paginationUtils.parseOptions.calledOnce.should.be.true();
-                paginationUtils.parseOptions.calledWith(orderOptions).should.be.true();
-
-                paginationUtils.addLimitAndOffset.calledOnce.should.be.true();
-                paginationUtils.formatResponse.calledOnce.should.be.true();
-
-                model.prototype.query.calledTwice.should.be.true();
-                model.prototype.query.firstCall.calledWith().should.be.true();
-                model.prototype.query.secondCall.calledWith('orderBy', 'id', 'DESC').should.be.true();
-
-                mockQuery.clone.calledOnce.should.be.true();
-                mockQuery.clone.firstCall.calledWith().should.be.true();
-
-                mockQuery.select.calledOnce.should.be.true();
-                mockQuery.select.calledWith().should.be.true();
-
-                model.prototype.fetchAll.calledOnce.should.be.true();
-                model.prototype.fetchAll.calledWith(orderOptions).should.be.true();
-
-                done();
-            }).catch(done);
+            assert.equal(model.prototype.query.calledTwice, true);
+            assert.equal(model.prototype.query.secondCall.calledWith('orderBy', 'id', 'DESC'), true);
+            assert.equal(model.prototype.fetchAll.calledOnceWithExactly(orderOptions), true);
         });
 
-        it('calls all paginationUtils and methods when group by set', function (done) {
+        it('calls methods when group by is set', async function () {
             const groupOptions = {groups: ['posts.id']};
             paginationUtils.parseOptions.returns(groupOptions);
 
-            bookshelf.Model.prototype.fetchPage(groupOptions).then(function () {
-                sinon.assert.callOrder(
-                    paginationUtils.parseOptions,
-                    model.prototype.query,
-                    mockQuery.clone,
-                    mockQuery.select,
-                    paginationUtils.addLimitAndOffset,
-                    model.prototype.query,
-                    model.prototype.fetchAll,
-                    paginationUtils.formatResponse
-                );
+            await bookshelf.Model.prototype.fetchPage(groupOptions);
 
-                paginationUtils.parseOptions.calledOnce.should.be.true();
-                paginationUtils.parseOptions.calledWith(groupOptions).should.be.true();
-
-                paginationUtils.addLimitAndOffset.calledOnce.should.be.true();
-                paginationUtils.formatResponse.calledOnce.should.be.true();
-
-                model.prototype.query.calledTwice.should.be.true();
-                model.prototype.query.firstCall.calledWith().should.be.true();
-                model.prototype.query.secondCall.calledWith('groupBy', 'posts.id').should.be.true();
-
-                mockQuery.clone.calledOnce.should.be.true();
-                mockQuery.clone.firstCall.calledWith().should.be.true();
-
-                mockQuery.select.calledOnce.should.be.true();
-                mockQuery.select.calledWith().should.be.true();
-
-                model.prototype.fetchAll.calledOnce.should.be.true();
-                model.prototype.fetchAll.calledWith(groupOptions).should.be.true();
-
-                done();
-            }).catch(done);
+            assert.equal(model.prototype.query.calledTwice, true);
+            assert.equal(model.prototype.query.secondCall.calledWith('groupBy', 'posts.id'), true);
+            assert.equal(model.prototype.fetchAll.calledOnceWithExactly(groupOptions), true);
         });
 
-        it('calls orderByRaw when orderRaw is set', function (done) {
+        it('calls orderByRaw when orderRaw is set', async function () {
             const mockQb = {orderByRaw: sinon.stub()};
             model.prototype.query.callsFake(function (arg) {
                 if (typeof arg === 'function') {
@@ -331,15 +257,11 @@ describe('pagination', function () {
             const orderRawOptions = {orderRaw: 'CASE WHEN slug = ? THEN ? END ASC'};
             paginationUtils.parseOptions.returns(orderRawOptions);
 
-            bookshelf.Model.prototype.fetchPage(orderRawOptions).then(function () {
-                mockQb.orderByRaw.calledOnce.should.be.true();
-                mockQb.orderByRaw.calledWith('CASE WHEN slug = ? THEN ? END ASC', undefined).should.be.true();
-
-                done();
-            }).catch(done);
+            await bookshelf.Model.prototype.fetchPage(orderRawOptions);
+            assert.equal(mockQb.orderByRaw.calledOnceWithExactly('CASE WHEN slug = ? THEN ? END ASC', undefined), true);
         });
 
-        it('passes orderRawBindings to orderByRaw when provided', function (done) {
+        it('passes orderRawBindings to orderByRaw when provided', async function () {
             const mockQb = {orderByRaw: sinon.stub()};
             model.prototype.query.callsFake(function (arg) {
                 if (typeof arg === 'function') {
@@ -354,42 +276,30 @@ describe('pagination', function () {
             };
             paginationUtils.parseOptions.returns(orderRawOptions);
 
-            bookshelf.Model.prototype.fetchPage(orderRawOptions).then(function () {
-                mockQb.orderByRaw.calledOnce.should.be.true();
-                mockQb.orderByRaw.calledWith(
-                    'CASE WHEN slug = ? THEN ? END ASC',
-                    ['my-slug', 0]
-                ).should.be.true();
-
-                done();
-            }).catch(done);
+            await bookshelf.Model.prototype.fetchPage(orderRawOptions);
+            assert.equal(mockQb.orderByRaw.calledOnceWithExactly(
+                'CASE WHEN slug = ? THEN ? END ASC',
+                ['my-slug', 0]
+            ), true);
         });
 
-        it('returns expected response', function (done) {
+        it('returns expected response', async function () {
             paginationUtils.parseOptions.returns({});
-            bookshelf.Model.prototype.fetchPage().then(function (result) {
-                result.should.have.ownProperty('collection');
-                result.should.have.ownProperty('pagination');
-                result.collection.should.be.an.Object();
-                result.pagination.should.be.an.Object();
+            const result = await bookshelf.Model.prototype.fetchPage();
 
-                done();
-            });
+            assert.ok(Object.prototype.hasOwnProperty.call(result, 'collection'));
+            assert.ok(Object.prototype.hasOwnProperty.call(result, 'pagination'));
+            assert.equal(typeof result.collection, 'object');
+            assert.equal(typeof result.pagination, 'object');
         });
 
-        it('returns expected response even when aggregate is empty', function (done) {
-            // override aggregate response
+        it('returns expected response when aggregate is empty', async function () {
             mockQuery.select.returns(Promise.resolve([]));
             paginationUtils.parseOptions.returns({});
 
-            bookshelf.Model.prototype.fetchPage().then(function (result) {
-                result.should.have.ownProperty('collection');
-                result.should.have.ownProperty('pagination');
-                result.collection.should.be.an.Object();
-                result.pagination.should.be.an.Object();
-
-                done();
-            });
+            const result = await bookshelf.Model.prototype.fetchPage();
+            assert.ok(Object.prototype.hasOwnProperty.call(result, 'collection'));
+            assert.ok(Object.prototype.hasOwnProperty.call(result, 'pagination'));
         });
     });
 });
