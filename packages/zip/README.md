@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/zip`
 
 
+## Purpose
+
+Zip compression and extraction utilities with safety checks for symlinks and unsafe filenames.
+
 ## Usage
 
 ```

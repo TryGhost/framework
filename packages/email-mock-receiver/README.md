@@ -10,6 +10,10 @@ or
 
 `yarn add @tryghost/email-mock-receiver`
 
+## Purpose
+
+Test helper that captures outbound email payloads for assertions in automated tests.
+
 ## Usage
 
 

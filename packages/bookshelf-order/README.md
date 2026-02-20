@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/bookshelf-order`
 
 
+## Purpose
+
+Bookshelf plugin that adds standardized ordering helpers to model queries.
+
 ## Usage
 
 

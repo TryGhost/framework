@@ -1,5 +1,10 @@
 # Vhost Middleware
 
+## Purpose
+
+Virtual-host Express middleware (forked from `vhost`) with Ghost-specific trust-proxy behavior.
+
+
 Forked from https://github.com/expressjs/vhost/ which appears abandoned.
 
 ## API

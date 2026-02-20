@@ -13,6 +13,10 @@ or
 `yarn add @tryghost/database-info`
 
 
+## Purpose
+
+Utility for detecting database driver, engine family, and version from a Knex connection.
+
 ## Usage
 
 

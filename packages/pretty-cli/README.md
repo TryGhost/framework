@@ -8,6 +8,10 @@ Either: `npm install @tryghost/pretty-cli --save`
 
 Or: `yarn add @tryghost/pretty-cli`
 
+## Purpose
+
+Styled CLI output helpers and UI primitives for consistent Ghost command-line tooling.
+
 ## Usage
 
 E.g. `const prettyCLI = require('@tryghost/pretty-cli');`

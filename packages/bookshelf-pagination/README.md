@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/bookshelf-pagination`
 
 
+## Purpose
+
+Bookshelf plugin that adds pagination behavior and metadata to model collection queries.
+
 ## Usage
 
 

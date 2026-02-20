@@ -11,6 +11,10 @@ or
 `yarn add @tryghost/http-stream`
 
 
+## Purpose
+
+HTTP response streaming helper used for piping remote/local resources through Ghost responses.
+
 ## Usage
 
 

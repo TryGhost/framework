@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/root-utils`
 
 
+## Purpose
+
+Utilities for resolving and working with the effective process root across Ghost packages.
+
 ## Usage
 
 

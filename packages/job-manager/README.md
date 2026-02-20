@@ -2,6 +2,10 @@
 
 A manager for background jobs in Ghost, supporting one-off tasks and recurring jobs.
 
+## Purpose
+
+Background job orchestration for Ghost, supporting one-off and recurring jobs in-process or offloaded workers.
+
 ## Table of Contents
 - [Quick Start](#quick-start)
 - [Job Types](#job-types)

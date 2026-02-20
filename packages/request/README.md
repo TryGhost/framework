@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/request`
 
 
+## Purpose
+
+HTTP request abstraction used by Ghost for outbound calls, error handling, and response normalization.
+
 ## Usage
 
 

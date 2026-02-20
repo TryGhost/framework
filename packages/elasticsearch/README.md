@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/elasticsearch`
 
 
+## Purpose
+
+Elasticsearch client wrapper plus Bunyan stream integration used by Ghost logging/metrics flows.
+
 ## Usage
 
 

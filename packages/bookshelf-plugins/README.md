@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/bookshelf-plugins`
 
 
+## Purpose
+
+Convenience package that composes and exposes Ghost's Bookshelf plugin set in one place.
+
 ## Usage
 
 

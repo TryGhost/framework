@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/promise`
 
 
+## Purpose
+
+Small async utility module with `pipeline`, `sequence`, and `pool` helpers for Promise workflows.
+
 ## Usage
 
 

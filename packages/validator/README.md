@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/validator`
 
 
+## Purpose
+
+Ghost validation utilities built on validator.js, including custom validators and structured validation errors.
+
 ## Usage
 
 

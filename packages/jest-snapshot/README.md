@@ -11,6 +11,10 @@ or
 `yarn add @tryghost/jest-snapshot`
 
 
+## Purpose
+
+Snapshot assertion utilities and state management for Jest-style snapshots in non-Jest test suites.
+
 ## Usage
 
 

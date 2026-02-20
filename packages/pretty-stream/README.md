@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/pretty-stream`
 
 
+## Purpose
+
+Pretty-print stream formatter used to render structured logs in human-readable form.
+
 ## Usage
 
 Used by `@tryghost/logging` and `@tryghost/metrics`.

@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/bookshelf-filter`
 
 
+## Purpose
+
+Bookshelf plugin that parses and applies NQL filter expressions with support for defaults, overrides, and relation mappings.
+
 ## Usage
 
 

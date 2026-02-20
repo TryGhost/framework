@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/logging`
 
 
+## Purpose
+
+Ghost logging layer that configures logger instances, transports, and structured log formatting.
+
 ## Usage
 
 

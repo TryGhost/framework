@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/version`
 
 
+## Purpose
+
+Version helpers that expose normalized Ghost version variants (`safe`, `full`, `original`).
+
 ## Usage
 
 
