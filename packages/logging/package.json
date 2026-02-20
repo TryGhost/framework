@@ -8,26 +8,40 @@
   },
   "author": "Ghost Foundation",
   "license": "MIT",
-  "main": "index.js",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "source": "src/index.ts",
   "scripts": {
-    "dev": "echo \"Implement me!\"",
-    "test": "NODE_ENV=testing c8 --all --reporter text --reporter cobertura mocha './test/**/*.test.js'",
-    "lint": "eslint . --ext .js --cache",
+    "dev": "tsc --watch --preserveWatchOutput",
+    "build": "tsc",
+    "prepare": "NODE_ENV=production yarn build",
+    "pretest": "NODE_ENV=production yarn build",
+    "test": "TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' NODE_ENV=testing c8 --all --reporter text --reporter cobertura mocha -r ts-node/register './test/**/*.test.ts'",
+    "test:types": "tsc --noEmit",
+    "lint": "eslint . --ext .ts --cache",
     "posttest": "yarn lint"
   },
   "files": [
-    "index.js",
-    "lib"
+    "build",
+    "src"
   ],
   "publishConfig": {
     "access": "public"
   },
   "devDependencies": {
     "@tryghost/errors": "1.0.0",
+    "@types/bunyan": "^1.8.11",
+    "@types/json-stringify-safe": "^5.0.3",
+    "@types/lodash": "^4.17.23",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^25.3.0",
+    "@types/should": "^13.0.0",
     "c8": "10.1.3",
     "mocha": "11.7.5",
     "should": "13.2.3",
-    "sinon": "21.0.1"
+    "sinon": "21.0.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@tryghost/bunyan-rotating-filestream": "^0.0.7",
