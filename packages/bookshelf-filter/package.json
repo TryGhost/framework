@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-filter",
-  "version": "0.5.27",
+  "version": "0.5.28",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
