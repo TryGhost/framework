@@ -1,4 +1,4 @@
-require('should');
+const assert = require('assert/strict');
 const sinon = require('sinon');
 
 const requestPath = require.resolve('@tryghost/request');
@@ -33,7 +33,7 @@ describe('HttpStream', function () {
         it('return false when string passed', async function () {
             const stream = new HttpStream(testConfig);
             const res = await stream.write('this shouldnt work');
-            res.should.eql(false);
+            assert.equal(res, false);
             sinon.assert.notCalled(requestStub);
         });
 
@@ -52,7 +52,7 @@ describe('HttpStream', function () {
                 method: 'POST',
                 json: body
             });
-            res.should.eql(expectedRes);
+            assert.deepEqual(res, expectedRes);
         });
 
         it('return false when request fails', async function () {
@@ -61,7 +61,7 @@ describe('HttpStream', function () {
             const stream = new HttpStream(testConfig);
             const res = await stream.write({this: 'should fail'});
 
-            res.should.eql(false);
+            assert.equal(res, false);
         });
     });
 });
