@@ -1,4 +1,4 @@
-const chalk = require('chalk');
+const {default: chalk} = require('chalk');
 const log = (...args) => console.log(...args); // eslint-disable-line no-console
 
 module.exports.log = log;

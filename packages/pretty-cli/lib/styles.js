@@ -1,4 +1,4 @@
-const chalk = require('chalk');
+const {default: chalk} = require('chalk');
 
 module.exports = {
     // Usage: script [options] etc
