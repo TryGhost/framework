@@ -32,6 +32,8 @@ jobs:
       CI: true
       IS_SHIPPING: true
       NPM_CONFIG_PROVENANCE: true
+      NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org'
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
@@ -40,6 +42,7 @@ jobs:
         with:
           node-version: 22
           registry-url: 'https://registry.npmjs.org'
+          always-auth: true
           cache: yarn
 
       - name: Install dependencies
