@@ -23,7 +23,8 @@
     "ship:patch": "yarn ship patch",
     "ship:minor": "yarn ship minor",
     "ship:major": "yarn ship major",
-    "ship:ci": "IS_SHIPPING=true nx release publish --outputStyle=static"
+    "ship:first-release": "yarn ship patch --first-release",
+    "ship:ci": "IS_SHIPPING=true bash ./scripts/publish-packages.sh"
   },
   "devDependencies": {
     "@nx/js": "22.0.4",

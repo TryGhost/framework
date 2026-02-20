@@ -40,7 +40,10 @@ To add a new package to the repo:
    - for initial Nx bootstrap in long-unreleased repos: `yarn ship:first-release`
 2. this runs tests, versions packages, and creates/pushes release commit + tags
    - creates the version commit and pushes tags to `main`
-3. CI automatically publishes the updated packages to npm via `.github/workflows/publish.yml`
+3. CI automatically publishes packages via `.github/workflows/publish.yml`:
+   - authenticates to npm using `NPM_TOKEN`
+   - checks each `packages/*` package version against npm
+   - runs `npm publish` only for versions that are not already published
 
 
 # Copyright & License 
