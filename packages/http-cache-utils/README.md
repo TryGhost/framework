@@ -10,6 +10,10 @@ or
 
 `yarn add @tryghost/http-cache-utils`
 
+## Purpose
+
+Utilities for cache-control logic, including user-specific response detection and cache directive helpers.
+
 ## Usage
 
 

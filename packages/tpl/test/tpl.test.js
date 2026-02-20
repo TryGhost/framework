@@ -1,6 +1,4 @@
-// Switch these lines once there are useful utils
-// const testUtils = require('./utils');
-require('./utils');
+const assert = require('assert/strict');
 const tpl = require('../');
 
 describe('tpl', function () {
@@ -8,7 +6,7 @@ describe('tpl', function () {
         const string = 'My template';
         const result = tpl(string);
 
-        result.should.eql('My template');
+        assert.equal(result, 'My template');
     });
 
     it('Can handle a string with data', function () {
@@ -17,7 +15,7 @@ describe('tpl', function () {
 
         let result = tpl(string, data);
 
-        result.should.eql('Go visit https://example.com');
+        assert.equal(result, 'Go visit https://example.com');
     });
 
     it('Can mix interpolation handlebars in the same message', function () {
@@ -27,7 +25,7 @@ describe('tpl', function () {
         };
 
         let result = tpl(string, data);
-        result.should.eql('{{#get}} helper took 500ms to complete');
+        assert.equal(result, '{{#get}} helper took 500ms to complete');
     });
 
     it('Can mix interpolation with handlebars-block helpers without escaping', function () {
@@ -39,7 +37,7 @@ describe('tpl', function () {
         };
 
         let result = tpl(string, data);
-        result.should.eql('{{#get}} helper took 500ms to complete');
+        assert.equal(result, '{{#get}} helper took 500ms to complete');
     });
 
     it('ignores 3 braces', function () {
@@ -49,7 +47,7 @@ describe('tpl', function () {
             totalMs: '500'
         };
         let result = tpl(string, data);
-        result.should.eql('The {{{helperName}}} helper is not available.');
+        assert.equal(result, 'The {{{helperName}}} helper is not available.');
     });
 
     it('has a simple bare minimum escaping needed', function () {
@@ -59,7 +57,7 @@ describe('tpl', function () {
             totalMs: '500'
         };
         let result = tpl(string, data);
-        result.should.eql('The {{get}} helper is not available.');
+        assert.equal(result, 'The {{get}} helper is not available.');
     });
 
     it('Can handle escaped left braces', function () {
@@ -69,7 +67,7 @@ describe('tpl', function () {
             totalMs: '500'
         };
         let result = tpl(string, data);
-        result.should.eql('The {{get}} helper is not available.');
+        assert.equal(result, 'The {{get}} helper is not available.');
     });
 
     it('Can handle escaped right braces as well', function () {
@@ -79,7 +77,7 @@ describe('tpl', function () {
             totalMs: '500'
         };
         let result = tpl(string, data);
-        result.should.eql('The {{get}} helper is not available.');
+        assert.equal(result, 'The {{get}} helper is not available.');
     });
 
     it('Returns a sensible error if data is missing', function () {
@@ -91,6 +89,6 @@ describe('tpl', function () {
         let resultFn = () => {
             tpl(string, data);
         };
-        resultFn.should.throw('helperName is not defined');
+        assert.throws(resultFn, /helperName is not defined/);
     });
 });

@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/mw-vhost",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "author": "Ghost Foundation",
   "license": "MIT",
   "main": "index.js",
@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "echo \"Implement me!\"",
-    "test:unit": "NODE_ENV=testing c8 --all --reporter text --reporter cobertura -- mocha --reporter dot './test/**/*.test.js'",
+    "test:unit": "NODE_ENV=testing c8 --all --check-coverage --100 --reporter text --reporter cobertura -- mocha --reporter dot './test/**/*.test.js'",
     "test": "yarn test:unit",
     "lint:code": "eslint *.js lib/ --ext .js --cache",
     "lint": "yarn lint:code && yarn lint:test",

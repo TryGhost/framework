@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-custom-query",
-  "version": "0.1.31",
+  "version": "0.1.33",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -11,7 +11,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "echo \"Implement me!\"",
-    "test": "NODE_ENV=testing mocha './test/**/*.test.js'",
+    "test": "NODE_ENV=testing c8 --all --reporter text --reporter cobertura --check-coverage --100 -- mocha './test/**/*.test.js'",
     "lint": "eslint . --ext .js --cache",
     "posttest": "yarn lint"
   },
@@ -23,8 +23,8 @@
     "access": "public"
   },
   "devDependencies": {
+    "c8": "8.0.1",
     "mocha": "11.7.5",
-    "should": "13.2.3",
     "sinon": "21.0.1"
   }
 }

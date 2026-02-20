@@ -1,7 +1,4 @@
-// Switch these lines once there are useful utils
-// const testUtils = require('./utils');
-require('./utils');
-const should = require('should');
+const assert = require('assert/strict');
 const nock = require('nock');
 
 const request = require('../lib/request');
@@ -15,7 +12,7 @@ describe('Request', function () {
             .reply(200, 'Response body');
 
         return request(url, {}).then(function ({req}) {
-            req.headers['user-agent'].should.match(/Ghost\/[0-9]+\.[0-9]+\s/);
+            assert.match(req.headers['user-agent'], /Ghost\/[0-9]+\.[0-9]+\s/);
         });
     });
 
@@ -27,7 +24,7 @@ describe('Request', function () {
             .reply(200, 'Response body');
 
         return request(url).then(function () {
-            requestMock.isDone().should.be.true();
+            assert.equal(requestMock.isDone(), true);
         });
     });
 
@@ -49,14 +46,14 @@ describe('Request', function () {
             .reply(200, 'Response body');
 
         return request(url, options).then(function (res) {
-            requestMock.isDone().should.be.true();
-            should.exist(res);
-            should.exist(res.body);
-            res.body.should.be.equal(expectedResponse.body);
-            should.exist(res.url);
-            res.statusCode.should.be.equal(expectedResponse.statusCode);
-            should.exist(res.statusCode);
-            res.url.should.be.equal(expectedResponse.url);
+            assert.equal(requestMock.isDone(), true);
+            assert.notEqual(res, undefined);
+            assert.notEqual(res.body, undefined);
+            assert.equal(res.body, expectedResponse.body);
+            assert.notEqual(res.url, undefined);
+            assert.equal(res.statusCode, expectedResponse.statusCode);
+            assert.notEqual(res.statusCode, undefined);
+            assert.equal(res.url, expectedResponse.url);
         });
     });
 
@@ -85,15 +82,15 @@ describe('Request', function () {
             .reply(200, 'Redirected response');
 
         return request(url, options).then(function (res) {
-            requestMock.isDone().should.be.true();
-            secondRequestMock.isDone().should.be.true();
-            should.exist(res);
-            should.exist(res.body);
-            res.body.should.be.equal(expectedResponse.body);
-            should.exist(res.url);
-            res.statusCode.should.be.equal(expectedResponse.statusCode);
-            should.exist(res.statusCode);
-            res.url.should.be.equal(expectedResponse.url);
+            assert.equal(requestMock.isDone(), true);
+            assert.equal(secondRequestMock.isDone(), true);
+            assert.notEqual(res, undefined);
+            assert.notEqual(res.body, undefined);
+            assert.equal(res.body, expectedResponse.body);
+            assert.notEqual(res.url, undefined);
+            assert.equal(res.statusCode, expectedResponse.statusCode);
+            assert.notEqual(res.statusCode, undefined);
+            assert.equal(res.url, expectedResponse.url);
         });
     });
 
@@ -108,8 +105,8 @@ describe('Request', function () {
         return request(url, options).then(() => {
             throw new Error('Request should have rejected with invalid url message');
         }, (err) => {
-            should.exist(err);
-            err.message.should.be.equal('URL empty or invalid.');
+            assert.notEqual(err, undefined);
+            assert.equal(err.message, 'URL empty or invalid.');
         });
     });
 
@@ -124,8 +121,8 @@ describe('Request', function () {
         return request(url, options).then(() => {
             throw new Error('Request should have rejected with invalid url message');
         }, (err) => {
-            should.exist(err);
-            err.message.should.be.equal('URL empty or invalid.');
+            assert.notEqual(err, undefined);
+            assert.equal(err.message, 'URL empty or invalid.');
         });
     });
 
@@ -144,9 +141,9 @@ describe('Request', function () {
         return request(url, options).then(() => {
             throw new Error('Request should have errored');
         }, (err) => {
-            requestMock.isDone().should.be.true();
-            should.exist(err);
-            err.statusMessage.should.be.equal('Not Found');
+            assert.equal(requestMock.isDone(), true);
+            assert.notEqual(err, undefined);
+            assert.equal(err.statusMessage, 'Not Found');
         });
     });
 
@@ -171,11 +168,11 @@ describe('Request', function () {
         return request(url, options).then(() => {
             throw new Error('Request should have errored with an awful error');
         }, (err) => {
-            requestMock.isDone().should.be.true();
-            should.exist(err);
-            err.statusMessage.should.be.equal('Internal Server Error');
-            err.body.should.match(/something awful happened/);
-            err.body.should.match(/AWFUL_ERROR/);
+            assert.equal(requestMock.isDone(), true);
+            assert.notEqual(err, undefined);
+            assert.equal(err.statusMessage, 'Internal Server Error');
+            assert.match(err.body, /something awful happened/);
+            assert.match(err.body, /AWFUL_ERROR/);
         });
     });
 
@@ -201,8 +198,54 @@ describe('Request', function () {
         return request(url, options).then(() => {
             throw new Error('Should have timed out');
         }, (err) => {
-            err.code.should.be.equal('ETIMEDOUT');
+            assert.equal(err.code, 'ETIMEDOUT');
+        });
+    });
+
+    it('[success] defaults to POST when body is provided without method', function () {
+        const url = 'http://some-website.com/post-endpoint/';
+        const requestMock = nock('http://some-website.com')
+            .post('/post-endpoint/', 'hello')
+            .reply(200, 'ok');
+
+        return request(url, {body: 'hello'}).then(function (res) {
+            assert.equal(requestMock.isDone(), true);
+            assert.equal(res.statusCode, 200);
+        });
+    });
+
+    it('[success] defaults to POST when json is provided without method', function () {
+        const url = 'http://some-website.com/json-endpoint/';
+        const payload = {hello: 'world'};
+        const requestMock = nock('http://some-website.com')
+            .post('/json-endpoint/', payload)
+            .reply(200, 'ok');
+
+        return request(url, {json: payload}).then(function (res) {
+            assert.equal(requestMock.isDone(), true);
+            assert.equal(res.statusCode, 200);
+        });
+    });
+
+    it('[failure] adds request options and response fields onto thrown error', function () {
+        const url = 'http://some-website.com/forbidden/';
+        const requestMock = nock('http://some-website.com')
+            .get('/forbidden/')
+            .reply(403, 'forbidden');
+
+        return request(url, {
+            headers: {
+                'x-test': 'yes'
+            }
+        }).then(() => {
+            throw new Error('Should have failed');
+        }, (err) => {
+            assert.equal(requestMock.isDone(), true);
+            assert.notEqual(err.method, undefined);
+            assert.notEqual(err.url, undefined);
+            assert.equal(err.statusCode, 403);
+            assert.equal(err.body, 'forbidden');
+            assert.notEqual(err.response, undefined);
         });
     });
 });
-

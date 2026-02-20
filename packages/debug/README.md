@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/debug`
 
 
+## Purpose
+
+Ghost wrapper around the `debug` logger with shared namespacing conventions.
+
 ## Usage
 
 

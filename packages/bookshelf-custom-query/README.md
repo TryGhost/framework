@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/bookshelf-custom-query`
 
 
+## Purpose
+
+Bookshelf plugin that adds reusable `customQuery` hooks to models for centralized query-builder customization.
+
 ## Usage
 
 

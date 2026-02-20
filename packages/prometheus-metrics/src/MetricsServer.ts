@@ -9,31 +9,49 @@ type ServerConfig = {
     port: number;
 };
 
+type CreateApp = () => express.Application;
+type CreateStoppableServer = (
+    server: ReturnType<express.Application['listen']>,
+    grace?: number
+) => stoppable.StoppableServer;
+
 export class MetricsServer {
     private serverConfig: ServerConfig;
     private handler: express.Handler;
     private app: express.Application | null;
     private httpServer: stoppable.StoppableServer | null;
     private isShuttingDown: boolean;
+    private createApp: CreateApp;
+    private createStoppableServer: CreateStoppableServer;
 
-    constructor({serverConfig, handler}: {serverConfig: ServerConfig, handler: express.Handler}) {
-        // initialize local variables
+    constructor({
+        serverConfig,
+        handler,
+        createApp,
+        createStoppableServer
+    }: {
+        serverConfig: ServerConfig;
+        handler: express.Handler;
+        createApp?: CreateApp;
+        createStoppableServer?: CreateStoppableServer;
+    }) {
         this.serverConfig = serverConfig;
         this.handler = handler;
         this.app = null;
         this.httpServer = null;
         this.isShuttingDown = false;
+        this.createApp = createApp ?? express;
+        this.createStoppableServer = createStoppableServer ?? stoppable;
     }
 
     async start() {
-        // start the server
         debug('Starting metrics server');
-        this.app = express();
+        this.app = this.createApp();
         this.app.get('/metrics', this.handler);
         const httpServer = this.app.listen(this.serverConfig.port, this.serverConfig.host, () => {
             debug(`Metrics server listening at ${this.serverConfig.host}:${this.serverConfig.port}`);
         });
-        this.httpServer = stoppable(httpServer, 0);
+        this.httpServer = this.createStoppableServer(httpServer, 0);
 
         process.on('SIGINT', () => this.shutdown());
         process.on('SIGTERM', () => this.shutdown());
@@ -41,7 +59,6 @@ export class MetricsServer {
     }
 
     async stop() {
-        // stop the server
         debug('Stopping metrics server');
         if (this.httpServer && this.httpServer.listening) {
             await this.httpServer.stop();

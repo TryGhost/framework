@@ -1,0 +1,72 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/*/package.json'
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: 'Preview what would be published without actually publishing'
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+
+    # Run for ship/version commits or manual dispatch.
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, 'Published new versions')
+
+    permissions:
+      id-token: write
+      contents: read
+
+    env:
+      FORCE_COLOR: 1
+      NODE_OPTIONS: '--max_old_space_size=8192'
+      CI: true
+      IS_SHIPPING: true
+      NPM_CONFIG_PROVENANCE: true
+      NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org'
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: yarn --frozen-lockfile --prefer-offline
+
+      - name: Build releasable packages
+        run: yarn nx run-many -t build
+
+      # npm 11+ is required for npm Trusted Publishing (OIDC).
+      - name: Install npm 11
+        run: npm install -g npm@11
+
+      - name: Configure npm registry
+        run: |
+          cat > "$HOME/.npmrc" <<EOF
+          registry=https://registry.npmjs.org/
+          @tryghost:registry=https://registry.npmjs.org/
+          EOF
+          npm config get registry
+          npm config get @tryghost:registry
+
+      - name: Publish to npm
+        run: yarn ship:ci ${{ (github.event.inputs['dry-run'] == 'true' && '--dry-run') || '' }}
+
+      - uses: tryghost/actions/actions/slack-build@main
+        if: failure()
+        with:
+          status: ${{ job.status }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

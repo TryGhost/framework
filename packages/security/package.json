@@ -1,6 +1,7 @@
 {
   "name": "@tryghost/security",
-  "version": "1.0.2",
+  "version": "1.0.4",
+  "description": "Security primitives for token generation, password hashing, and safe identifiers",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -14,7 +15,7 @@
   },
   "scripts": {
     "dev": "echo \"Implement me!\"",
-    "test:unit": "NODE_ENV=testing c8 --all --reporter text --reporter cobertura -- mocha --reporter dot './test/**/*.test.js'",
+    "test:unit": "NODE_ENV=testing c8 --all --check-coverage --100 --reporter text --reporter cobertura -- mocha --reporter dot './test/**/*.test.js'",
     "test": "yarn test:unit",
     "lint:code": "eslint *.js lib/ --ext .js --cache",
     "lint": "yarn lint:code && yarn lint:test",
@@ -27,12 +28,11 @@
   "devDependencies": {
     "c8": "8.0.1",
     "mocha": "11.7.5",
-    "should": "13.2.3",
     "sinon": "21.0.1",
     "uuid": "9.0.1"
   },
   "dependencies": {
-    "@tryghost/string": "0.2.15",
+    "@tryghost/string": "0.2.21",
     "bcryptjs": "2.4.3"
   }
 }

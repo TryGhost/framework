@@ -1,5 +1,5 @@
+const assert = require('assert/strict');
 const sinon = require('sinon');
-const should = require('should');
 const sandbox = sinon.createSandbox();
 
 const {Client} = require('@elastic/elasticsearch');
@@ -27,29 +27,26 @@ describe('ElasticSearch', function () {
     it('Processes client configuration', function () {
         const es = new ElasticSearch(testClientConfig);
 
-        should.exist(es.client);
-        should.exist(es.client.index);
+        assert.ok(es.client);
+        assert.equal(typeof es.client.index, 'function');
     });
 
     it('Processes index configuration', async function () {
-        sandbox.stub(Client.prototype, 'index').callsFake((data) => {
-            should.exist(data.body);
-            should.deepEqual(data.body, testBody);
-            should.exist(data.index);
-            should.equal(data.index, indexConfig.index);
-            should.exist(data.pipeline);
-            should.equal(data.pipeline, indexConfig.pipeline);
-        });
-
         const testBody = {
             message: 'Test data!'
         };
 
-        const es = new ElasticSearch(testClientConfig);
+        const indexStub = sandbox.stub(Client.prototype, 'index').callsFake((data) => {
+            assert.ok(data.body);
+            assert.deepEqual(data.body, testBody);
+            assert.equal(data.index, indexConfig.index);
+            assert.equal(data.pipeline, indexConfig.pipeline);
+        });
 
+        const es = new ElasticSearch(testClientConfig);
         await es.index(testBody, indexConfig);
 
-        Client.prototype.index.called.should.eql(true);
+        assert.equal(indexStub.called, true);
     });
 
     it('Calls index on valid events', async function () {
@@ -57,10 +54,10 @@ describe('ElasticSearch', function () {
         const indexStub = sandbox.stub(Client.prototype, 'index');
 
         await es.index({
-            message: 'test!s'
+            message: 'test'
         }, indexConfig);
 
-        indexStub.callCount.should.equal(1);
+        assert.equal(indexStub.callCount, 1);
     });
 
     it('Does not index invalid events', async function () {
@@ -69,19 +66,29 @@ describe('ElasticSearch', function () {
 
         await es.index('not an object', indexConfig);
 
-        indexStub.callCount.should.equal(0);
+        assert.equal(indexStub.callCount, 0);
     });
 
     it('Uses index config as a string', async function () {
         const es = new ElasticSearch(testClientConfig);
-        sandbox.stub(Client.prototype, 'index').callsFake((data) => {
-            should.exist(data.index);
-            should.equal(data.index, indexConfig.index);
+        const indexStub = sandbox.stub(Client.prototype, 'index').callsFake((data) => {
+            assert.equal(data.index, indexConfig.index);
         });
 
         await es.index({
             message: 'Test data'
         }, indexConfig.index);
+
+        assert.equal(indexStub.callCount, 1);
+    });
+
+    it('Catches index failures without throwing', async function () {
+        const es = new ElasticSearch(testClientConfig);
+        sandbox.stub(Client.prototype, 'index').rejects(new Error('boom'));
+
+        await assert.doesNotReject(async () => {
+            await es.index({message: 'Test data'}, indexConfig);
+        });
     });
 });
 
@@ -90,14 +97,19 @@ describe('ElasticSearch Bunyan', function () {
         sandbox.restore();
     });
 
-    it('Can index using the Bunyan API', async function () {
+    it('Can index using the Bunyan API', function () {
         const es = new ElasticSearchBunyan(testClientConfig, indexConfig.index, indexConfig.pipeline);
-        sandbox.stub(es.client.client.helpers, 'bulk').callsFake((data) => {
-            should.equal(data.pipeline, indexConfig.pipeline);
+
+        const bulkStub = sandbox.stub(es.client.client.helpers, 'bulk').callsFake((data) => {
+            assert.equal(data.pipeline, indexConfig.pipeline);
+            assert.deepEqual(data.onDocument(), {
+                create: {_index: indexConfig.index}
+            });
         });
 
         const stream = es.getStream();
-
         stream.write(JSON.stringify({message: 'Test data'}));
+
+        assert.equal(bulkStub.callCount, 1);
     });
 });

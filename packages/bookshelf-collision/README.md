@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/bookshelf-collision`
 
 
+## Purpose
+
+Bookshelf plugin that detects stale updates and throws an update-collision error when client and server versions diverge.
+
 ## Usage
 
 

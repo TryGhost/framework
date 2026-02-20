@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/config`
 
 
+## Purpose
+
+Configuration loader built on `nconf` that merges env vars, argv, defaults, and environment config files from the process root.
+
 ## Usage
 
 

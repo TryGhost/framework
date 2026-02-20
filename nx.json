@@ -1,0 +1,22 @@
+{
+    "$schema": "./node_modules/nx/schemas/nx-schema.json",
+    "targetDefaults": {
+        "build": {
+            "dependsOn": ["^build"],
+            "cache": true
+        },
+        "lint": {
+            "cache": true
+        },
+        "test": {
+            "cache": true
+        }
+    },
+    "release": {
+        "projects": ["packages/*"],
+        "projectsRelationship": "independent",
+        "changelog": {
+            "workspaceChangelog": false
+        }
+    }
+}

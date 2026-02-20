@@ -1,7 +1,6 @@
-require('./utils');
+const assert = require('assert/strict');
 const {promisify} = require('util');
 const {pool} = require('../');
-const assert = require('assert/strict');
 
 describe('Promise pool', function () {
     it('preserves order', function () {
@@ -16,7 +15,7 @@ describe('Promise pool', function () {
         ];
         return pool(tasks, 3)
             .then(function (result) {
-                result.should.eql(['hello','hi']);
+                assert.deepEqual(result, ['hello', 'hi']);
             });
     });
 
@@ -31,7 +30,7 @@ describe('Promise pool', function () {
         ];
         return pool(tasks, 3)
             .then(function (result) {
-                result.should.eql(['hello','hi']);
+                assert.deepEqual(result, ['hello', 'hi']);
             });
     });
 
@@ -58,9 +57,9 @@ describe('Promise pool', function () {
             }
         ];
 
-        pool(tasks, 100)
+        return pool(tasks, 100)
             .then(function (result) {
-                result.should.eql(['hi','hello']);
+                assert.deepEqual(result, ['hi', 'hello']);
             });
     });
 });

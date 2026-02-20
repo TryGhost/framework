@@ -8,10 +8,10 @@
 
 ## Develop
 
-This is a mono repository, managed with [lerna](https://lerna.js.org).
+This is a mono repository, managed with [Nx](https://nx.dev).
 
 1. `git clone` this repo & `cd` into it as usual
-2. `yarn setup` is mapped to `lerna bootstrap`
+2. run `yarn setup` from the top-level:
    - installs all external dependencies
    - links all internal dependencies
 
@@ -33,9 +33,17 @@ To add a new package to the repo:
 
 ## Publish
 
-- `yarn ship` is an alias for `lerna publish`
-    - Publishes all packages which have changed
-    - Also updates any packages which depend on changed packages
+1. run one of the release commands in the top-level `framework` directory:
+   - `yarn ship:patch`
+   - `yarn ship:minor`
+   - `yarn ship:major`
+   - for initial Nx bootstrap in long-unreleased repos: `yarn ship:first-release`
+2. this runs tests, versions packages, and creates/pushes release commit + tags
+   - creates the version commit and pushes tags to `main`
+3. CI automatically publishes packages via `.github/workflows/publish.yml`:
+   - authenticates to npm using `NPM_TOKEN`
+   - checks each `packages/*` package version against npm
+   - runs `npm publish` only for versions that are not already published
 
 
 # Copyright & License 

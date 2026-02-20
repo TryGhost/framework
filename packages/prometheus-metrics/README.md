@@ -3,6 +3,10 @@
 A standalone server for exporting prometheus metrics from Ghost
 
 
+## Purpose
+
+Prometheus metrics integration for exposing Ghost runtime counters, gauges, and histograms.
+
 ## Usage
 
 

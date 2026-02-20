@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/server`
 
 
+## Purpose
+
+HTTP server lifecycle helpers for starting/stopping servers and handling listen errors consistently.
+
 ## Usage
 
 

@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/tpl`
 
 
+## Purpose
+
+String templating helper for replacing `{token}` placeholders with runtime values.
+
 ## Usage
 
 ```

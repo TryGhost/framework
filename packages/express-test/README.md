@@ -11,6 +11,10 @@ or
 `yarn add @tryghost/express-test`
 
 
+## Purpose
+
+High-level Express testing agent with chainable request/assertion APIs and snapshot helpers.
+
 ## Usage
 
 ```

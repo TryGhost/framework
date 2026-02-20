@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/bookshelf-transaction-events`
 
 
+## Purpose
+
+Bookshelf plugin that emits lifecycle events scoped to database transaction boundaries.
+
 ## Usage
 
 

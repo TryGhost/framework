@@ -1,15 +1,11 @@
 const sinon = require('sinon');
-const should = require('should');
+const assert = require('assert/strict');
 const sandbox = sinon.createSandbox();
 
 const logging = require('@tryghost/logging');
 const EventEmitter = require('events');
 const http = require('http');
 const process = require('process');
-
-// Switch these lines once there are useful utils
-// const testUtils = require('./utils');
-require('./utils');
 
 const server = require('../lib/server');
 
@@ -27,7 +23,7 @@ describe('Server Utils', function () {
         sandbox.stub(http, 'createServer').callsFake(function () {
             return {
                 listen: function (port) {
-                    should.equal(port, testPort);
+                    assert.equal(port, testPort);
                     done();
                 }
             };
@@ -44,7 +40,7 @@ describe('Server Utils', function () {
         sandbox.stub(http, 'createServer').callsFake(function () {
             return {
                 listen: function (port) {
-                    should.equal(port, testPipe);
+                    assert.equal(port, testPipe);
                     done();
                 }
             };
@@ -61,7 +57,7 @@ describe('Server Utils', function () {
         sandbox.stub(http, 'createServer').callsFake(function () {
             return {
                 listen: function (port) {
-                    should.equal(port, false);
+                    assert.equal(port, false);
                     done();
                 }
             };
@@ -76,7 +72,7 @@ describe('Server Utils', function () {
         const testAddress = 'hello';
 
         sandbox.stub(logging, 'info').callsFake(function (message) { 
-            message.should.startWith(`Listening on pipe ${testAddress}`);
+            assert.equal(message.startsWith(`Listening on pipe ${testAddress}`), true);
             done();
         });
 
@@ -110,7 +106,7 @@ describe('Server Utils', function () {
         });
 
         sandbox.stub(logging, 'error').callsFake(function (message) { 
-            message.should.startWith(`Port ${testPort} requires elevated privileges`);
+            assert.equal(message.startsWith(`Port ${testPort} requires elevated privileges`), true);
             done();
         });
 
@@ -144,7 +140,7 @@ describe('Server Utils', function () {
         });
 
         sandbox.stub(logging, 'error').callsFake(function (message) { 
-            message.should.startWith(`Port ${testPort} is already in use`);
+            assert.equal(message.startsWith(`Port ${testPort} is already in use`), true);
             done();
         });
 
@@ -171,6 +167,35 @@ describe('Server Utils', function () {
         }, testPort);
     });
 
+    it('Emits pipe-specific error message when bound to a named pipe', function (done) {
+        const testPipe = 'server-pipe';
+
+        sandbox.stub(process, 'exit').callsFake(function () {});
+        sandbox.stub(logging, 'error').callsFake(function (message) {
+            assert.equal(message.startsWith(`Pipe ${testPipe} requires elevated privileges`), true);
+            done();
+        });
+
+        sandbox.stub(http, 'createServer').callsFake(function () {
+            class Server extends EventEmitter {
+                listen() {
+                    setTimeout(() => {
+                        this.emit('error', {
+                            code: 'EACCES',
+                            syscall: 'listen'
+                        });
+                    }, 0);
+                }
+            }
+
+            return new Server();
+        });
+
+        server.start({
+            set: () => {}
+        }, testPipe);
+    });
+
     it('Stops server without throwing', function () {
         sandbox.stub(http, 'createServer').callsFake(function () {
             class Server extends EventEmitter {
@@ -190,6 +215,82 @@ describe('Server Utils', function () {
             set: () => {}
         }, 180);
 
-        should.doesNotThrow(server.stop);
+        assert.doesNotThrow(server.stop);
+    });
+
+    it('Emits listening event with numeric port', function (done) {
+        const testPort = 191;
+
+        sandbox.stub(logging, 'info').callsFake(function (message) {
+            assert.equal(message.startsWith(`Listening on port ${testPort}`), true);
+            done();
+        });
+
+        sandbox.stub(http, 'createServer').callsFake(function () {
+            class Server extends EventEmitter {
+                listen() {
+                    setTimeout(() => {
+                        this.emit('listening');
+                    }, 0);
+                }
+                address() {
+                    return {port: testPort};
+                }
+            }
+
+            return new Server();
+        });
+
+        server.start({
+            set: () => {}
+        }, testPort);
+    });
+
+    it('Throws unknown listen errors', function (done) {
+        sandbox.stub(http, 'createServer').callsFake(function () {
+            class Server extends EventEmitter {
+                listen() {
+                    setTimeout(() => {
+                        assert.throws(() => {
+                            this.emit('error', {
+                                code: 'EOTHER',
+                                syscall: 'listen'
+                            });
+                        });
+                        done();
+                    }, 0);
+                }
+            }
+
+            return new Server();
+        });
+
+        server.start({
+            set: () => {}
+        }, 180);
+    });
+
+    it('Throws errors not originating from listen syscall', function (done) {
+        sandbox.stub(http, 'createServer').callsFake(function () {
+            class Server extends EventEmitter {
+                listen() {
+                    setTimeout(() => {
+                        assert.throws(() => {
+                            this.emit('error', {
+                                code: 'EACCES',
+                                syscall: 'not-listen'
+                            });
+                        });
+                        done();
+                    }, 0);
+                }
+            }
+
+            return new Server();
+        });
+
+        server.start({
+            set: () => {}
+        }, 180);
     });
 });

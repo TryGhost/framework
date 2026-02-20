@@ -27,6 +27,10 @@ Provides pre-configured transport options for common transport services.
 
 Other Nodemailer transports are not supported.
 
+## Purpose
+
+Factory for creating Nodemailer transports across SMTP, SES, Mailgun, Sendmail, and test/stub transports.
+
 ## Develop
 
 This is a mono repository, managed with [lerna](https://lernajs.io/).

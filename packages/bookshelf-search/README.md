@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/bookshelf-search`
 
 
+## Purpose
+
+Bookshelf plugin that adds search query helpers for text-based filtering across model fields.
+
 ## Usage
 
 

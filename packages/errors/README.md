@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/errors`
 
 
+## Purpose
+
+Shared Ghost error classes and utilities for typed errors, context propagation, and safe stack formatting.
+
 ## Usage
 
 

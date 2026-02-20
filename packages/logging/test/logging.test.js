@@ -4,7 +4,7 @@ const GhostLogger = require('../lib/GhostLogger');
 const includes = require('lodash/includes');
 const errors = require('@tryghost/errors');
 const sinon = require('sinon');
-const should = require('should');
+const assert = require('assert/strict');
 const Bunyan2Loggly = require('bunyan-loggly');
 const GelfStream = require('gelf-stream').GelfStream;
 const ElasticSearch = require('@tryghost/elasticsearch').BunyanStream;
@@ -23,14 +23,14 @@ describe('Logging config', function () {
 
         const ghostLogger = require('../index');
 
-        ghostLogger.name.should.eql(loggerName);
+        assert.equal(ghostLogger.name, loggerName);
 
         fs.unlinkSync('loggingrc.js');
     });
 
     it('Works without loggingrc.js', function () {
         const ghostLogger = require('../index');
-        should.doesNotThrow(() => {
+        assert.doesNotThrow(() => {
             ghostLogger.info('Checking logging works');
         });
     });
@@ -41,18 +41,43 @@ describe('Logging', function () {
         sandbox.restore();
     });
 
+    it('throws for an invalid transport', function () {
+        assert.throws(() => {
+            new GhostLogger({transports: ['nope']});
+        }, /Nope is an invalid transport/);
+    });
+
+    it('moves stdout to the first transport position', function () {
+        const ghostLogger = new GhostLogger({
+            transports: ['stderr', 'stdout']
+        });
+
+        assert.equal(ghostLogger.transports[0], 'stdout');
+    });
+
+    it('respects LOIN env override for level and mode', function () {
+        process.env.LOIN = '1';
+        try {
+            const ghostLogger = new GhostLogger({transports: []});
+            assert.equal(ghostLogger.level, 'info');
+            assert.equal(ghostLogger.mode, 'long');
+        } finally {
+            delete process.env.LOIN;
+        }
+    });
+
     // in Bunyan 1.8.3 they have changed this behaviour
     // they are trying to find the err.message attribute and forward this as msg property
     // our PrettyStream implementation can't handle this case
     it('ensure stdout write properties', function (done) {
         sandbox.stub(PrettyStream.prototype, 'write').callsFake(function (data) {
-            should.exist(data.req);
-            should.exist(data.req.headers);
-            should.not.exist(data.req.body);
-            should.exist(data.res);
-            should.exist(data.err);
-            data.name.should.eql('testLogging');
-            data.msg.should.eql('message');
+            assert.notEqual(data.req, null);
+            assert.notEqual(data.req.headers, null);
+            assert.equal(data.req.body, undefined);
+            assert.notEqual(data.res, null);
+            assert.notEqual(data.err, null);
+            assert.equal(data.name, 'testLogging');
+            assert.equal(data.msg, 'message');
             done();
         });
 
@@ -62,9 +87,9 @@ describe('Logging', function () {
 
     it('ensure stdout write properties with custom message', function (done) {
         sandbox.stub(PrettyStream.prototype, 'write').callsFake(function (data) {
-            should.exist(data);
-            data.name.should.eql('Log');
-            data.msg.should.eql('A handled error! Original message');
+            assert.notEqual(data, null);
+            assert.equal(data.name, 'Log');
+            assert.equal(data.msg, 'A handled error! Original message');
             done();
         });
 
@@ -74,10 +99,10 @@ describe('Logging', function () {
 
     it('ensure stdout write properties with object', function (done) {
         sandbox.stub(PrettyStream.prototype, 'write').callsFake(function (data) {
-            should.exist(data.err);
-            data.test.should.eql(2);
-            data.name.should.eql('Log');
-            data.msg.should.eql('Got an error from 3rd party service X! Resource could not be found.');
+            assert.notEqual(data.err, null);
+            assert.equal(data.test, 2);
+            assert.equal(data.name, 'Log');
+            assert.equal(data.msg, 'Got an error from 3rd party service X! Resource could not be found.');
             done();
         });
 
@@ -87,8 +112,8 @@ describe('Logging', function () {
 
     it('ensure stdout write metadata properties', function (done) {
         sandbox.stub(PrettyStream.prototype, 'write').callsFake(function (data) {
-            data.version.should.eql(2);
-            data.msg.should.eql('Message to be logged!');
+            assert.equal(data.version, 2);
+            assert.equal(data.msg, 'Message to be logged!');
             done();
         });
 
@@ -98,9 +123,9 @@ describe('Logging', function () {
 
     it('ensure stdout write properties with util.format', function (done) {
         sandbox.stub(PrettyStream.prototype, 'write').callsFake(function (data) {
-            should.exist(data);
-            data.name.should.eql('Log');
-            data.msg.should.eql('Message with format');
+            assert.notEqual(data, null);
+            assert.equal(data.name, 'Log');
+            assert.equal(data.msg, 'Message with format');
             done();
         });
 
@@ -111,13 +136,13 @@ describe('Logging', function () {
 
     it('redact sensitive data with request body', function (done) {
         sandbox.stub(PrettyStream.prototype, 'write').callsFake(function (data) {
-            should.exist(data.req.body.password);
-            data.req.body.password.should.eql('**REDACTED**');
-            should.exist(data.req.body.data.attributes.pin);
-            data.req.body.data.attributes.pin.should.eql('**REDACTED**');
-            should.exist(data.req.body.data.attributes.test);
-            should.exist(data.err);
-            should.exist(data.err.errorDetails);
+            assert.notEqual(data.req.body.password, null);
+            assert.equal(data.req.body.password, '**REDACTED**');
+            assert.notEqual(data.req.body.data.attributes.pin, null);
+            assert.equal(data.req.body.data.attributes.pin, '**REDACTED**');
+            assert.notEqual(data.req.body.data.attributes.test, null);
+            assert.notEqual(data.err, null);
+            assert.notEqual(data.err.errorDetails, null);
             done();
         });
 
@@ -146,7 +171,7 @@ describe('Logging', function () {
 
     it('gelf writes a log message', function (done) {
         sandbox.stub(GelfStream.prototype, '_write').callsFake(function (data) {
-            should.exist(data.err);
+            assert.notEqual(data.err, null);
             done();
         });
 
@@ -159,7 +184,16 @@ describe('Logging', function () {
         });
 
         ghostLogger.error(new errors.NotFoundError());
-        GelfStream.prototype._write.called.should.eql(true);
+        assert.equal(GelfStream.prototype._write.called, true);
+    });
+
+    it('gelf uses default host and port when not provided', function () {
+        const ghostLogger = new GhostLogger({
+            transports: ['gelf'],
+            gelf: {}
+        });
+
+        assert.notEqual(ghostLogger.streams.gelf, undefined);
     });
 
     it('gelf does not write a log message', function () {
@@ -175,12 +209,12 @@ describe('Logging', function () {
         });
 
         ghostLogger.info('testing');
-        GelfStream.prototype._write.called.should.eql(false);
+        assert.equal(GelfStream.prototype._write.called, false);
     });
 
     it('loggly does only stream certain errors', function (done) {
         sandbox.stub(Bunyan2Loggly.prototype, 'write').callsFake(function (data) {
-            should.exist(data.err);
+            assert.notEqual(data.err, null);
             done();
         });
 
@@ -194,7 +228,7 @@ describe('Logging', function () {
         });
 
         ghostLogger.error(new errors.InternalServerError());
-        Bunyan2Loggly.prototype.write.called.should.eql(true);
+        assert.equal(Bunyan2Loggly.prototype.write.called, true);
     });
 
     it('loggly does not stream non-critical errors when matching critical', function () {
@@ -210,7 +244,7 @@ describe('Logging', function () {
         });
 
         ghostLogger.error(new errors.NotFoundError());
-        Bunyan2Loggly.prototype.write.called.should.eql(false);
+        assert.equal(Bunyan2Loggly.prototype.write.called, false);
     });
 
     it('loggly does not stream errors that do not match regex', function () {
@@ -226,7 +260,7 @@ describe('Logging', function () {
         });
 
         ghostLogger.error(new errors.NotFoundError());
-        Bunyan2Loggly.prototype.write.called.should.eql(false);
+        assert.equal(Bunyan2Loggly.prototype.write.called, false);
     });
 
     it('loggly does not stream errors when not nested correctly', function () {
@@ -242,7 +276,7 @@ describe('Logging', function () {
         });
 
         ghostLogger.error(new errors.NoPermissionError());
-        Bunyan2Loggly.prototype.write.called.should.eql(false);
+        assert.equal(Bunyan2Loggly.prototype.write.called, false);
     });
 
     it('loggly does stream errors that match regex', function () {
@@ -258,12 +292,12 @@ describe('Logging', function () {
         });
 
         ghostLogger.error(new errors.InternalServerError());
-        Bunyan2Loggly.prototype.write.called.should.eql(true);
+        assert.equal(Bunyan2Loggly.prototype.write.called, true);
     });
 
     it('loggly does stream errors that match normal level', function (done) {
         sandbox.stub(Bunyan2Loggly.prototype, 'write').callsFake(function (data) {
-            should.exist(data.err);
+            assert.notEqual(data.err, null);
             done();
         });
 
@@ -277,12 +311,28 @@ describe('Logging', function () {
         });
 
         ghostLogger.error(new errors.NotFoundError());
-        Bunyan2Loggly.prototype.write.called.should.eql(true);
+        assert.equal(Bunyan2Loggly.prototype.write.called, true);
+    });
+
+    it('loggly match can evaluate with null err payload', function () {
+        sandbox.stub(Bunyan2Loggly.prototype, 'write').callsFake(function () {});
+
+        const ghostLogger = new GhostLogger({
+            transports: ['loggly'],
+            loggly: {
+                token: 'invalid',
+                subdomain: 'invalid',
+                match: '^null$'
+            }
+        });
+
+        ghostLogger.error('plain error message');
+        assert.equal(Bunyan2Loggly.prototype.write.called, true);
     });
 
     it('loggly does stream errors that match an one of multiple match statements', function (done) {
         sandbox.stub(Bunyan2Loggly.prototype, 'write').callsFake(function (data) {
-            should.exist(data.err);
+            assert.notEqual(data.err, null);
             done();
         });
 
@@ -296,14 +346,14 @@ describe('Logging', function () {
         });
 
         ghostLogger.error(new errors.NotFoundError());
-        Bunyan2Loggly.prototype.write.called.should.eql(true);
+        assert.equal(Bunyan2Loggly.prototype.write.called, true);
     });
 
     it('loggly does stream errors that match status code: full example', function (done) {
         sandbox.stub(Bunyan2Loggly.prototype, 'write').callsFake(function (data) {
-            should.exist(data.err);
-            should.exist(data.req);
-            should.exist(data.res);
+            assert.notEqual(data.err, null);
+            assert.notEqual(data.req, null);
+            assert.notEqual(data.res, null);
             done();
         });
 
@@ -321,12 +371,12 @@ describe('Logging', function () {
             req: {body: {password: '12345678', data: {attributes: {pin: '1234', test: 'ja'}}}},
             res: {getHeaders: () => ({})}
         });
-        Bunyan2Loggly.prototype.write.called.should.eql(true);
+        assert.equal(Bunyan2Loggly.prototype.write.called, true);
     });
 
     it('loggly does only stream certain errors: match is not defined -> log everything', function (done) {
         sandbox.stub(Bunyan2Loggly.prototype, 'write').callsFake(function (data) {
-            should.exist(data.err);
+            assert.notEqual(data.err, null);
             done();
         });
 
@@ -339,7 +389,7 @@ describe('Logging', function () {
         });
 
         ghostLogger.error(new errors.NotFoundError());
-        Bunyan2Loggly.prototype.write.called.should.eql(true);
+        assert.equal(Bunyan2Loggly.prototype.write.called, true);
     });
 
     it('elasticsearch should make a stream', function () {
@@ -352,16 +402,16 @@ describe('Logging', function () {
         }, 'index', 'pipeline');
 
         const stream = es.getStream();
-        stream.write.should.instanceOf(Function);
+        assert.equal(typeof stream.write, 'function');
     });
 
     it('elasticsearch should receive a single object', async function () {
         sandbox.stub(ElasticSearch.prototype, 'getStream').returns({
             write: function (jsonData) {
-                arguments.length.should.eql(1);
+                assert.equal(arguments.length, 1);
                 const data = JSON.parse(jsonData);
-                data.msg.should.eql('hello 1');
-                data.prop.should.eql('prop val');
+                assert.equal(data.msg, 'hello 1');
+                assert.equal(data.prop, 'prop val');
             }
         });
 
@@ -382,7 +432,7 @@ describe('Logging', function () {
 
     it('http writes a log message', function (done) {
         sandbox.stub(HttpStream.prototype, 'write').callsFake(function (data) {
-            should.exist(data.err);
+            assert.notEqual(data.err, null);
             done();
         });
 
@@ -394,7 +444,7 @@ describe('Logging', function () {
         });
 
         ghostLogger.error(new errors.NotFoundError());
-        HttpStream.prototype.write.called.should.eql(true);
+        assert.equal(HttpStream.prototype.write.called, true);
     });
 
     it('http does not write an info log in error mode', function () {
@@ -409,7 +459,7 @@ describe('Logging', function () {
         });
 
         ghostLogger.info('testing');
-        HttpStream.prototype.write.called.should.eql(false);
+        assert.equal(HttpStream.prototype.write.called, false);
     });
 
     it('http can write errors in info mode', function () {
@@ -424,7 +474,7 @@ describe('Logging', function () {
         });
 
         ghostLogger.error('testing');
-        HttpStream.prototype.write.called.should.eql(true);
+        assert.equal(HttpStream.prototype.write.called, true);
     });
 
     it('automatically adds stdout to transports if stderr transport is configured and stdout isn\'t', function () {
@@ -432,8 +482,8 @@ describe('Logging', function () {
             transports: ['stderr']
         });
 
-        should.equal(includes(ghostLogger.transports, 'stderr'), true, 'stderr transport should exist');
-        should.equal(includes(ghostLogger.transports, 'stdout'), true, 'stdout transport should exist');
+        assert.equal(includes(ghostLogger.transports, 'stderr'), true, 'stderr transport should exist');
+        assert.equal(includes(ghostLogger.transports, 'stdout'), true, 'stdout transport should exist');
     });
 
     it('logs errors only to stderr if both stdout and stderr transports are defined', function () {
@@ -445,14 +495,14 @@ describe('Logging', function () {
         });
 
         ghostLogger.error('some error');
-        stderr.calledOnce.should.be.true();
-        stdout.called.should.be.false('stdout should not be written to');
+        assert.equal(stderr.calledOnce, true);
+        assert.equal(stdout.called, false, 'stdout should not be written to');
     });
 
     it('logs to parent port when in a worker thread', function (done) {
         const worker = new Worker('./test/fixtures/worker.js');
         worker.on('message', (data) => {
-            data.should.eql('Hello!');
+            assert.equal(data, 'Hello!');
             done();
         });
     });
@@ -460,19 +510,19 @@ describe('Logging', function () {
     describe('filename computation', function () {
         it('sanitizeDomain should replace non-word characters with underscores', function () {
             var ghostLogger = new GhostLogger();
-            ghostLogger.sanitizeDomain('http://my-domain.com').should.eql('http___my_domain_com');
-            ghostLogger.sanitizeDomain('localhost').should.eql('localhost');
-            ghostLogger.sanitizeDomain('example.com:8080').should.eql('example_com_8080');
+            assert.equal(ghostLogger.sanitizeDomain('http://my-domain.com'), 'http___my_domain_com');
+            assert.equal(ghostLogger.sanitizeDomain('localhost'), 'localhost');
+            assert.equal(ghostLogger.sanitizeDomain('example.com:8080'), 'example_com_8080');
         });
 
         it('replaceFilenamePlaceholders should replace {env} placeholder', function () {
             var ghostLogger = new GhostLogger({env: 'production'});
-            ghostLogger.replaceFilenamePlaceholders('{env}').should.eql('production');
+            assert.equal(ghostLogger.replaceFilenamePlaceholders('{env}'), 'production');
         });
 
         it('replaceFilenamePlaceholders should replace {domain} placeholder', function () {
             var ghostLogger = new GhostLogger({domain: 'http://example.com'});
-            ghostLogger.replaceFilenamePlaceholders('{domain}').should.eql('http___example_com');
+            assert.equal(ghostLogger.replaceFilenamePlaceholders('{domain}'), 'http___example_com');
         });
 
         it('replaceFilenamePlaceholders should replace both {env} and {domain} placeholders', function () {
@@ -480,8 +530,8 @@ describe('Logging', function () {
                 domain: 'http://example.com',
                 env: 'staging'
             });
-            ghostLogger.replaceFilenamePlaceholders('{domain}-{env}').should.eql('http___example_com-staging');
-            ghostLogger.replaceFilenamePlaceholders('{env}.{domain}').should.eql('staging.http___example_com');
+            assert.equal(ghostLogger.replaceFilenamePlaceholders('{domain}-{env}'), 'http___example_com-staging');
+            assert.equal(ghostLogger.replaceFilenamePlaceholders('{env}.{domain}'), 'staging.http___example_com');
         });
 
         it('logger should return default format when no filename option provided', function () {
@@ -489,7 +539,7 @@ describe('Logging', function () {
                 domain: 'http://example.com',
                 env: 'production'
             });
-            ghostLogger.filename.should.eql('{domain}_{env}');
+            assert.equal(ghostLogger.filename, '{domain}_{env}');
         });
 
         it('logger should use filename template when provided', function () {
@@ -498,7 +548,7 @@ describe('Logging', function () {
                 env: 'production',
                 filename: '{env}'
             });
-            ghostLogger.filename.should.eql('{env}');
+            assert.equal(ghostLogger.filename, '{env}');
         });
 
         it('file stream should use custom filename template', function () {
@@ -534,12 +584,97 @@ describe('Logging', function () {
 
             // Give it a moment to write
             setTimeout(function () {
-                fs.existsSync(tempDir + 'production.log').should.eql(true);
-                fs.existsSync(tempDir + 'production.error.log').should.eql(true);
+                assert.equal(fs.existsSync(tempDir + 'production.log'), true);
+                assert.equal(fs.existsSync(tempDir + 'production.error.log'), true);
 
                 // Cleanup
                 rimraf(tempDir);
             }, 100);
+        });
+
+        it('file stream supports built-in rotating-file transport config', function () {
+            const tempDir = './test-logs-rotation-built-in/';
+            if (!fs.existsSync(tempDir)) {
+                fs.mkdirSync(tempDir, {recursive: true});
+            }
+
+            const ghostLogger = new GhostLogger({
+                domain: 'test.com',
+                env: 'production',
+                transports: ['file'],
+                path: tempDir,
+                rotation: {
+                    enabled: true,
+                    useLibrary: false,
+                    period: '1d',
+                    count: 2
+                }
+            });
+
+            assert.notEqual(ghostLogger.streams['rotation-errors'], undefined);
+            assert.notEqual(ghostLogger.streams['rotation-all'], undefined);
+        });
+
+        it('file stream supports external rotating file library config', function () {
+            const tempDir = './test-logs-rotation-library/';
+            if (!fs.existsSync(tempDir)) {
+                fs.mkdirSync(tempDir, {recursive: true});
+            }
+
+            const ghostLogger = new GhostLogger({
+                domain: 'test.com',
+                env: 'production',
+                transports: ['file'],
+                path: tempDir,
+                rotation: {
+                    enabled: true,
+                    useLibrary: true,
+                    period: '1d',
+                    threshold: '10m',
+                    count: 2,
+                    gzip: true,
+                    rotateExisting: false
+                }
+            });
+
+            assert.notEqual(ghostLogger.streams['rotation-errors'], undefined);
+            assert.notEqual(ghostLogger.streams['rotation-all'], undefined);
+        });
+
+        it('file stream rotation library handles missing rotateExisting option', function () {
+            const tempDir = './test-logs-rotation-library-default/';
+            if (!fs.existsSync(tempDir)) {
+                fs.mkdirSync(tempDir, {recursive: true});
+            }
+
+            const ghostLogger = new GhostLogger({
+                domain: 'test.com',
+                env: 'production',
+                transports: ['file'],
+                path: tempDir,
+                rotation: {
+                    enabled: true,
+                    useLibrary: true,
+                    period: '1d',
+                    threshold: '10m',
+                    count: 2,
+                    gzip: true
+                }
+            });
+
+            assert.notEqual(ghostLogger.streams['rotation-errors'], undefined);
+            assert.notEqual(ghostLogger.streams['rotation-all'], undefined);
+        });
+
+        it('file stream exits early when target directory does not exist', function () {
+            const badPath = './test-logs-missing-dir/';
+            const ghostLogger = new GhostLogger({
+                transports: ['file'],
+                path: badPath
+            });
+
+            assert.equal(ghostLogger.streams['file-errors'], undefined);
+            assert.equal(ghostLogger.streams['file-all'], undefined);
         });
     });
 
@@ -548,19 +683,19 @@ describe('Logging', function () {
             const err = new errors.NotFoundError();
 
             sandbox.stub(Bunyan2Loggly.prototype, 'write').callsFake(function (data) {
-                should.exist(data.err);
-                data.err.id.should.eql(err.id);
-                data.err.domain.should.eql('localhost');
-                should.equal(data.err.code, null);
-                data.err.name.should.eql(err.errorType);
-                should.equal(data.err.statusCode, err.statusCode);
-                data.err.level.should.eql(err.level);
-                data.err.message.should.eql(err.message);
-                should.equal(data.err.context, undefined);
-                should.equal(data.err.help, undefined);
-                should.exist(data.err.stack);
-                should.equal(data.err.hideStack, undefined);
-                should.equal(data.err.errorDetails, undefined);
+                assert.notEqual(data.err, null);
+                assert.equal(data.err.id, err.id);
+                assert.equal(data.err.domain, 'localhost');
+                assert.equal(data.err.code, null);
+                assert.equal(data.err.name, err.errorType);
+                assert.equal(data.err.statusCode, err.statusCode);
+                assert.equal(data.err.level, err.level);
+                assert.equal(data.err.message, err.message);
+                assert.equal(data.err.context, undefined);
+                assert.equal(data.err.help, undefined);
+                assert.notEqual(data.err.stack, null);
+                assert.equal(data.err.hideStack, undefined);
+                assert.equal(data.err.errorDetails, undefined);
                 done();
             });
 
@@ -575,15 +710,15 @@ describe('Logging', function () {
                 err
             });
 
-            Bunyan2Loggly.prototype.write.called.should.eql(true);
+            assert.equal(Bunyan2Loggly.prototype.write.called, true);
         });
 
         it('stringifies meta properties', function (done) {
             sandbox.stub(Bunyan2Loggly.prototype, 'write').callsFake(function (data) {
-                should.exist(data.err);
-                data.err.context.should.eql('{"a":"b"}');
-                data.err.errorDetails.should.eql('{"c":"d"}');
-                data.err.help.should.eql('{"b":"a"}');
+                assert.notEqual(data.err, null);
+                assert.equal(data.err.context, '{"a":"b"}');
+                assert.equal(data.err.errorDetails, '{"c":"d"}');
+                assert.equal(data.err.help, '{"b":"a"}');
                 done();
             });
 
@@ -608,7 +743,104 @@ describe('Logging', function () {
                 })
             });
 
-            Bunyan2Loggly.prototype.write.called.should.eql(true);
+            assert.equal(Bunyan2Loggly.prototype.write.called, true);
+        });
+
+        it('serializes req extra and queueDepth fields when present', function () {
+            const ghostLogger = new GhostLogger();
+            const req = {
+                requestId: 'req-1',
+                userId: 'user-1',
+                url: '/x',
+                method: 'GET',
+                originalUrl: '/x?y=1',
+                params: {},
+                headers: {},
+                query: {},
+                extra: {feature: 'on'},
+                queueDepth: 7
+            };
+
+            const serialized = ghostLogger.serializers.req(req);
+            assert.deepEqual(serialized.extra, {feature: 'on'});
+            assert.equal(serialized.queueDepth, 7);
+        });
+
+        it('removeSensitiveData falls back to original value when recursive sanitization throws', function () {
+            const ghostLogger = new GhostLogger();
+            const nested = {};
+            Object.defineProperty(nested, 'boom', {
+                enumerable: true,
+                get() {
+                    throw new Error('boom');
+                }
+            });
+
+            const data = ghostLogger.removeSensitiveData({nested});
+            assert.equal(data.nested, nested);
+        });
+    });
+
+    describe('logger internals', function () {
+        it('adds local timestamp when useLocalTime is enabled', function () {
+            const ghostLogger = new GhostLogger({
+                transports: [],
+                useLocalTime: true
+            });
+            const info = sinon.spy();
+
+            ghostLogger.streams = {
+                stdout: {
+                    name: 'stdout',
+                    log: {info}
+                }
+            };
+
+            ghostLogger.log('info', ['hello']);
+
+            assert.equal(info.calledOnce, true);
+            assert.notEqual(info.args[0][0].time, undefined);
+        });
+
+        it('trace/debug/fatal delegate to log()', function () {
+            const ghostLogger = new GhostLogger({transports: []});
+            const logSpy = sinon.spy(ghostLogger, 'log');
+
+            ghostLogger.trace('t');
+            ghostLogger.debug('d');
+            ghostLogger.fatal('f');
+
+            assert.equal(logSpy.args[0][0], 'trace');
+            assert.equal(logSpy.args[1][0], 'debug');
+            assert.equal(logSpy.args[2][0], 'fatal');
+        });
+
+        it('child creates stream children with bound properties', function () {
+            const ghostLogger = new GhostLogger({transports: []});
+            const childA = sinon.stub().returns({id: 'a'});
+            const childB = sinon.stub().returns({id: 'b'});
+
+            ghostLogger.streams = {
+                one: {
+                    name: 'one',
+                    log: {child: childA}
+                },
+                two: {
+                    name: 'two',
+                    log: {child: childB}
+                }
+            };
+
+            const child = ghostLogger.child({requestId: 'abc'});
+
+            assert.equal(childA.calledOnce, true);
+            assert.equal(childB.calledOnce, true);
+            assert.deepEqual(childA.args[0][0], {requestId: 'abc'});
+            assert.deepEqual(childB.args[0][0], {requestId: 'abc'});
+            assert.equal(child.streams.one.name, 'one');
+            assert.equal(child.streams.two.name, 'two');
+            assert.deepEqual(child.streams.one.log, {id: 'a'});
+            assert.deepEqual(child.streams.two.log, {id: 'b'});
         });
     });
 });

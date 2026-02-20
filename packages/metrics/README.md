@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/metrics`
 
 
+## Purpose
+
+Ghost metrics facade for collecting and emitting operational metrics across services.
+
 ## Usage
 
 

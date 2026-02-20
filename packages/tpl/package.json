@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/tpl",
-  "version": "0.1.36",
+  "version": "0.1.38",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -25,7 +25,6 @@
   "devDependencies": {
     "c8": "10.1.3",
     "mocha": "11.7.5",
-    "should": "13.2.3",
     "sinon": "21.0.1"
   },
   "dependencies": {

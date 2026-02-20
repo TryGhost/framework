@@ -1,4 +1,4 @@
-require('./utils');
+const assert = require('assert/strict');
 const sinon = require('sinon');
 const {sequence} = require('../');
 
@@ -21,7 +21,7 @@ describe('Unit: lib/promise/sequence', function () {
         ];
         return sequence(tasks)
             .then(function (result) {
-                result.should.eql(['hello','from', 'chio']);
+                assert.deepEqual(result, ['hello', 'from', 'chio']);
             });
     });
 });

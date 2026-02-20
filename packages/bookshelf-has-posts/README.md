@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/bookshelf-has-posts`
 
 
+## Purpose
+
+Bookshelf plugin that restricts model queries to records associated with published posts.
+
 ## Usage
 
 

@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/bookshelf-include-count`
 
 
+## Purpose
+
+Bookshelf plugin that augments fetch results with relation counts requested through `withRelated`.
+
 ## Usage
 
 

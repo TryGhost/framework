@@ -1,4 +1,4 @@
-require('./utils');
+const assert = require('assert/strict');
 const sinon = require('sinon');
 
 // Stuff we are testing
@@ -18,19 +18,19 @@ describe('Pipeline', function () {
 
     it('should execute tasks in order', function () {
         return pipeline([createTask('b'), createTask('c'), createTask('d')], 'a').then(function (result) {
-            result.should.eql('abcd');
+            assert.equal(result, 'abcd');
         });
     });
 
     it('should resolve to initial args when no tasks supplied', function () {
         return pipeline([], 'a', 'b').then(function (result) {
-            result.should.eql(['a', 'b']);
+            assert.deepEqual(result, ['a', 'b']);
         });
     });
 
     it('should resolve to empty array when no tasks and no args supplied', function () {
         return pipeline([]).then(function (result) {
-            result.should.eql([]);
+            assert.deepEqual(result, []);
         });
     });
 
@@ -39,8 +39,8 @@ describe('Pipeline', function () {
         const tasks = [sinon.spy()];
 
         return pipeline(tasks, 1, 2, 3).then(function () {
-            tasks[0].calledOnce.should.be.true();
-            tasks[0].firstCall.args.should.eql(expected);
+            assert.equal(tasks[0].calledOnce, true);
+            assert.deepEqual(tasks[0].firstCall.args, expected);
         });
     });
 
@@ -49,8 +49,8 @@ describe('Pipeline', function () {
         const tasks = [sinon.spy()];
 
         return pipeline(tasks, Promise.resolve(1), Promise.resolve(2), Promise.resolve(3)).then(function () {
-            tasks[0].calledOnce.should.be.true();
-            tasks[0].firstCall.args.should.eql(expected);
+            assert.equal(tasks[0].calledOnce, true);
+            assert.deepEqual(tasks[0].firstCall.args, expected);
         });
     });
 
@@ -64,13 +64,13 @@ describe('Pipeline', function () {
         ];
 
         return pipeline(tasks, 1, 2, 3).then(function (result) {
-            result.should.eql(6);
-            tasks[0].calledOnce.should.be.true();
-            tasks[0].firstCall.args.should.eql(expected);
-            tasks[1].calledOnce.should.be.true();
-            tasks[1].firstCall.calledWith(4).should.be.true();
-            tasks[2].calledOnce.should.be.true();
-            tasks[2].firstCall.calledWith(5).should.be.true();
+            assert.equal(result, 6);
+            assert.equal(tasks[0].calledOnce, true);
+            assert.deepEqual(tasks[0].firstCall.args, expected);
+            assert.equal(tasks[1].calledOnce, true);
+            assert.equal(tasks[1].firstCall.calledWith(4), true);
+            assert.equal(tasks[2].calledOnce, true);
+            assert.equal(tasks[2].firstCall.calledWith(5), true);
         });
     });
 
@@ -84,13 +84,13 @@ describe('Pipeline', function () {
         ];
 
         return pipeline(tasks, Promise.resolve(1), Promise.resolve(2), Promise.resolve(3)).then(function (result) {
-            result.should.eql(6);
-            tasks[0].calledOnce.should.be.true();
-            tasks[0].firstCall.args.should.eql(expected);
-            tasks[1].calledOnce.should.be.true();
-            tasks[1].firstCall.calledWith(4).should.be.true();
-            tasks[2].calledOnce.should.be.true();
-            tasks[2].firstCall.calledWith(5).should.be.true();
+            assert.equal(result, 6);
+            assert.equal(tasks[0].calledOnce, true);
+            assert.deepEqual(tasks[0].firstCall.args, expected);
+            assert.equal(tasks[1].calledOnce, true);
+            assert.equal(tasks[1].firstCall.calledWith(4), true);
+            assert.equal(tasks[2].calledOnce, true);
+            assert.equal(tasks[2].firstCall.calledWith(5), true);
         });
     });
 });

@@ -16,7 +16,8 @@ describe('Prometheus Client', function () {
         sinon.restore();
         logger = {
             info: sinon.stub(),
-            error: sinon.stub()
+            error: sinon.stub(),
+            debug: sinon.stub()
         };
     });
 
@@ -77,6 +78,19 @@ describe('Prometheus Client', function () {
     });
 
     describe('pushMetrics', function () {
+        it('should use the default job name when one is not configured', async function () {
+            const pushAddStub = sinon.stub().resolves();
+            instance = new PrometheusClient({pushgateway: {enabled: true}}, logger);
+            instance.gateway = {
+                pushAdd: pushAddStub
+            } as unknown as Pushgateway<RegistryContentType>;
+
+            await instance.pushMetrics();
+
+            assert.ok(pushAddStub.calledWith({jobName: 'ghost'}));
+            assert.ok(logger.debug.called);
+        });
+
         it('should push metrics to the pushgateway', async function () {
             const scope = nock('http://localhost:9091')
                 .persist()

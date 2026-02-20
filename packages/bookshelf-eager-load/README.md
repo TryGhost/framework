@@ -9,6 +9,10 @@ or
 `yarn add @tryghost/bookshelf-eager-load`
 
 
+## Purpose
+
+Bookshelf plugin that applies relation joins during fetch/fetchAll for eager-loading and relation-based ordering use cases.
+
 ## Usage
 
 

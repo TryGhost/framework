@@ -11,6 +11,10 @@ or
 `yarn add @tryghost/webhook-mock-receiver`
 
 
+## Purpose
+
+Test utility for mocking webhook endpoints and asserting captured payload/header snapshots.
+
 ## Usage
 
 
