@@ -35,7 +35,7 @@
     "@tryghost/pretty-stream": "^0.2.1",
     "@tryghost/root-utils": "^0.3.34",
     "bunyan": "^1.8.15",
-    "bunyan-loggly": "^1.4.2",
+    "bunyan-loggly": "^2.0.0",
     "fs-extra": "^11.0.0",
     "gelf-stream": "^1.1.1",
     "json-stringify-safe": "^5.0.1",
