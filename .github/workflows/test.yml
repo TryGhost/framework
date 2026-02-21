@@ -5,8 +5,37 @@ on:
     branches:
       - main
       - 'renovate/*'
+
 jobs:
   test:
-    uses: tryghost/actions/.github/workflows/test.yml@main
-    secrets:
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [22, 24]
+    env:
+      FORCE_COLOR: 1
+    name: Node ${{ matrix.node }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        env:
+          FORCE_COLOR: 0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+
+      - run: yarn --prefer-offline --frozen-lockfile
+      - run: yarn test
+
+      - uses: codecov/codecov-action@v3
+
+      - uses: tryghost/actions/actions/slack-build@main
+        if: failure() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          status: ${{ job.status }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
