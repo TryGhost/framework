@@ -499,12 +499,24 @@ describe('Logging', function () {
         assert.equal(stdout.called, false, 'stdout should not be written to');
     });
 
-    it('logs to parent port when in a worker thread', function (done) {
+    it('logs to parent port when in a worker thread', async function () {
         const worker = new Worker('./test/fixtures/worker.js');
-        worker.on('message', (data) => {
+
+        try {
+            const data = await new Promise((resolve, reject) => {
+                worker.once('message', resolve);
+                worker.once('error', reject);
+                worker.once('exit', (code) => {
+                    if (code !== 0) {
+                        reject(new Error(`Worker exited with code ${code}`));
+                    }
+                });
+            });
+
             assert.equal(data, 'Hello!');
-            done();
-        });
+        } finally {
+            await worker.terminate();
+        }
     });
 
     describe('filename computation', function () {
