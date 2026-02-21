@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-eager-load",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -28,7 +28,7 @@
     "sinon": "21.0.1"
   },
   "dependencies": {
-    "@tryghost/debug": "^1.2.0",
+    "@tryghost/debug": "^1.2.1",
     "lodash": "^4.17.21"
   }
 }

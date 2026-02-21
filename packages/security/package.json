@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/security",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Security primitives for token generation, password hashing, and safe identifiers",
   "repository": {
     "type": "git",

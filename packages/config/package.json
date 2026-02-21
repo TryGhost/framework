@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/config",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -27,7 +27,7 @@
     "mocha": "11.7.5"
   },
   "dependencies": {
-    "@tryghost/root-utils": "^1.2.0",
+    "@tryghost/root-utils": "^1.2.1",
     "nconf": "^0.13.0"
   }
 }
