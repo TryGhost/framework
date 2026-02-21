@@ -49,10 +49,9 @@ describe('Webhook Mock Receiver', function () {
             webhookMockReceiver.mock(webhookURL);
 
             await got.post(webhookURL, {
-                body: {
+                json: {
                     avocado: 'toast'
-                },
-                json: true
+                }
             });
 
             assert.deepEqual(webhookMockReceiver.body, {
@@ -67,7 +66,6 @@ describe('Webhook Mock Receiver', function () {
         it('resets the default state of the mock receiver', async function () {
             webhookMockReceiver.mock(webhookURL);
             await got.post(webhookURL, {
-                avocado: 'toast',
                 headers: {
                     hey: 'ho'
                 }
@@ -90,10 +88,9 @@ describe('Webhook Mock Receiver', function () {
             // shoot a request with a delay simulating request completion delay
             setTimeout(() => {
                 got.post(webhookURL, {
-                    body: {
+                    json: {
                         avocado: 'toast'
-                    },
-                    json: true
+                    }
                 });
             }, (10 + 1));
 
@@ -109,10 +106,9 @@ describe('Webhook Mock Receiver', function () {
         it('checks the request payload', async function () {
             webhookMockReceiver.mock(webhookURL);
             await got.post(webhookURL, {
-                body: {
+                json: {
                     avocado: 'toast'
-                },
-                json: true
+                }
             });
 
             webhookMockReceiver.matchBodySnapshot();
@@ -137,10 +133,9 @@ describe('Webhook Mock Receiver', function () {
             // 10 is the delay that's used now to recheck for completed request
             setTimeout(() => {
                 got.post(webhookURL, {
-                    body: {
+                    json: {
                         avocado: 'toast'
-                    },
-                    json: true
+                    }
                 });
             }, (10 + 1));
 
@@ -171,8 +166,8 @@ describe('Webhook Mock Receiver', function () {
             assert.deepEqual(Object.keys(snapshotManager.assertSnapshot.args[0][0]), ['headers']);
             const headers = snapshotManager.assertSnapshot.args[0][0].headers;
             assert.equal(headers.foo, 'bar');
-            assert.equal(headers['accept-encoding'], 'gzip, deflate');
-            assert.match(headers['user-agent'], /^got\//);
+            assert.equal(headers['accept-encoding'], 'gzip, deflate, br');
+            assert.match(headers['user-agent'], /^got/);
 
             assert.deepEqual(snapshotManager.assertSnapshot.args[0][1].field, 'headers');
             assert.deepEqual(snapshotManager.assertSnapshot.args[0][1].type, 'header');
