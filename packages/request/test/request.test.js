@@ -11,8 +11,8 @@ describe('Request', function () {
             .get('/endpoint/')
             .reply(200, 'Response body');
 
-        return request(url, {}).then(function ({req}) {
-            assert.match(req.headers['user-agent'], /Ghost\/[0-9]+\.[0-9]+\s/);
+        return request(url, {}).then(function (res) {
+            assert.match(res.request.options.headers['user-agent'], /Ghost\/[0-9]+\.[0-9]+\s/);
         });
     });
 
