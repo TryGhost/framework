@@ -17,6 +17,7 @@
     "presetup": "yarn",
     "setup": "yarn",
     "test": "nx run-many -t test --parallel=10 --outputStyle=dynamic",
+    "test:ci": "nx run-many -t test --outputStyle=dynamic",
     "lint": "nx run-many -t lint --outputStyle=dynamic",
     "preship": "git diff --quiet && git diff --cached --quiet || (echo 'Error: working tree must be clean before shipping' && exit 1) && yarn test",
     "ship": "nx release version --git-push --git-remote ${GHOST_UPSTREAM:-origin}",
