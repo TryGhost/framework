@@ -16,8 +16,11 @@
         "projects": ["packages/*"],
         "projectsRelationship": "independent",
         "version": {
-            "generatorOptions": {
-                "updateDependents": "auto"
+            "preserveMatchingDependencyRanges": false,
+            "git": {
+                "commit": true,
+                "tag": true,
+                "commitMessage": "Published new versions"
             }
         },
         "changelog": {

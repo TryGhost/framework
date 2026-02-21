@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/metrics",
-  "version": "1.0.43",
+  "version": "2.0.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -29,9 +29,9 @@
     "sinon": "21.0.1"
   },
   "dependencies": {
-    "@tryghost/elasticsearch": "^3.0.25",
-    "@tryghost/pretty-stream": "^0.2.1",
-    "@tryghost/root-utils": "^0.3.34",
+    "@tryghost/elasticsearch": "^4.0.0",
+    "@tryghost/pretty-stream": "^1.0.0",
+    "@tryghost/root-utils": "^1.0.0",
     "json-stringify-safe": "^5.0.1"
   }
 }
