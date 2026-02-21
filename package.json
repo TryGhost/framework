@@ -19,12 +19,11 @@
     "test": "nx run-many -t test --outputStyle=dynamic",
     "lint": "nx run-many -t lint --outputStyle=dynamic",
     "preship": "yarn test",
-    "ship": "nx release version --git-commit --git-tag --git-push --git-remote ${GHOST_UPSTREAM:-origin} --git-commit-message \"Published new versions\"",
+    "ship": "nx release --git-commit --git-tag --git-push --git-remote ${GHOST_UPSTREAM:-origin} --git-commit-message \"Published new versions\"",
     "ship:patch": "yarn ship patch",
     "ship:minor": "yarn ship minor",
     "ship:major": "yarn ship major",
-    "ship:first-release": "yarn ship patch --first-release",
-    "ship:ci": "IS_SHIPPING=true bash ./scripts/publish-packages.sh"
+    "ship:first-release": "yarn ship patch --first-release"
   },
   "devDependencies": {
     "@nx/js": "22.5.2",

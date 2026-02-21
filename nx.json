@@ -15,8 +15,16 @@
     "release": {
         "projects": ["packages/*"],
         "projectsRelationship": "independent",
+        "version": {
+            "generatorOptions": {
+                "updateDependents": "auto"
+            }
+        },
         "changelog": {
             "workspaceChangelog": false
+        },
+        "publish": {
+            "registry": "https://registry.npmjs.org"
         }
     }
 }
