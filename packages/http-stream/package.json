@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/http-stream",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -31,7 +31,7 @@
     "sinon": "21.0.1"
   },
   "dependencies": {
-    "@tryghost/errors": "^2.0.0",
-    "@tryghost/request": "^2.0.0"
+    "@tryghost/errors": "^2.1.0",
+    "@tryghost/request": "^2.1.0"
   }
 }

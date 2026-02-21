@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-include-count",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -28,7 +28,7 @@
     "sinon": "21.0.1"
   },
   "dependencies": {
-    "@tryghost/debug": "^1.0.0",
+    "@tryghost/debug": "^1.1.0",
     "lodash": "^4.17.21"
   }
 }
