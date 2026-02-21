@@ -206,7 +206,7 @@ class JobManager {
      * @prop {Object} [GhostJob.data] - data to be passed into the job
      * @prop {Boolean} [GhostJob.offloaded] - creates an "offloaded" job running in a worker thread by default. If set to "false" runs an "inline" job on the same event loop
      */
-    addJob({name, at, job, data, offloaded = true}) {
+    async addJob({name, at, job, data, offloaded = true}) {
         if (offloaded) {
             logging.info('Adding offloaded job to the inline job queue');
             let schedule;
@@ -242,7 +242,7 @@ class JobManager {
             }
 
             const breeJob = assembleBreeJob(at, job, data, name);
-            this.bree.add(breeJob);
+            await this.bree.add(breeJob);
             return this.bree.start(name);
         } else {
             logging.info(`Adding one-off job to inlineQueue with current length = ${this.inlineQueue.length()} called '${name || 'anonymous'}'`);
