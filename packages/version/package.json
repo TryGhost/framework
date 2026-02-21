@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/version",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -28,7 +28,7 @@
     "sinon": "21.0.1"
   },
   "dependencies": {
-    "@tryghost/root-utils": "^1.1.0",
+    "@tryghost/root-utils": "^1.2.0",
     "semver": "^7.3.5"
   }
 }

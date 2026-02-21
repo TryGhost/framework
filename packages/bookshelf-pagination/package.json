@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-pagination",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -28,8 +28,8 @@
     "sinon": "21.0.1"
   },
   "dependencies": {
-    "@tryghost/errors": "^2.1.0",
-    "@tryghost/tpl": "^1.1.0",
+    "@tryghost/errors": "^2.2.0",
+    "@tryghost/tpl": "^1.2.0",
     "lodash": "^4.17.21"
   }
 }

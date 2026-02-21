@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-filter",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -28,9 +28,9 @@
     "sinon": "21.0.1"
   },
   "dependencies": {
-    "@tryghost/debug": "^1.1.0",
-    "@tryghost/errors": "^2.1.0",
+    "@tryghost/debug": "^1.2.0",
+    "@tryghost/errors": "^2.2.0",
     "@tryghost/nql": "0.12.10",
-    "@tryghost/tpl": "^1.1.0"
+    "@tryghost/tpl": "^1.2.0"
   }
 }
