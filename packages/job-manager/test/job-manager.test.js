@@ -99,12 +99,12 @@ describe('Job Manager', function () {
         });
 
         describe('Offloaded jobs', function () {
-            it('accepts cron schedule when worker scheduling is stubbed', function () {
-                sandbox.stub(jobManager.bree, 'add').returns();
-                sandbox.stub(jobManager.bree, 'start').returns();
+            it('accepts cron schedule when worker scheduling is stubbed', async function () {
+                sandbox.stub(jobManager.bree, 'add').resolves();
+                sandbox.stub(jobManager.bree, 'start').resolves();
 
                 const jobPath = path.resolve(__dirname, './jobs/simple.js');
-                jobManager.addJob({
+                await jobManager.addJob({
                     at: '* * * * * *',
                     job: jobPath,
                     name: 'cron-job'
@@ -141,105 +141,107 @@ describe('Job Manager', function () {
                 const jobPath = path.resolve(__dirname, './jobs/simple.js');
 
                 const clock = FakeTimers.install({now: Date.now()});
-                jobManager.addJob({
-                    at: timeInTenSeconds,
-                    job: jobPath,
-                    name: 'job-in-ten'
-                });
-
-                assert.equal(typeof jobManager.bree.timeouts['job-in-ten'], 'object');
-                assert.equal(typeof jobManager.bree.workers['job-in-ten'], 'undefined');
-
-                // allow to run the job and start the worker
-                await clock.nextAsync();
-
-                assert.equal(typeof jobManager.bree.workers['job-in-ten'], 'object');
-
-                const promise = new Promise((resolve, reject) => {
-                    jobManager.bree.workers['job-in-ten'].on('error', reject);
-                    jobManager.bree.workers['job-in-ten'].on('exit', (code) => {
-                        assert.equal(code, 0);
-                        resolve();
+                try {
+                    await jobManager.addJob({
+                        at: timeInTenSeconds,
+                        job: jobPath,
+                        name: 'job-in-ten'
                     });
-                });
 
-                // allow job to finish execution and exit
-                clock.next();
+                    assert.equal(jobManager.bree.timeouts.has('job-in-ten'), true);
+                    assert.equal(jobManager.bree.workers.has('job-in-ten'), false);
 
-                await promise;
+                    // allow to run the job and start the worker
+                    await clock.nextAsync();
 
-                assert.equal(typeof jobManager.bree.workers['job-in-ten'], 'undefined');
+                    assert.equal(jobManager.bree.workers.has('job-in-ten'), true);
 
-                clock.uninstall();
+                    const promise = new Promise((resolve, reject) => {
+                        jobManager.bree.workers.get('job-in-ten').on('error', reject);
+                        jobManager.bree.workers.get('job-in-ten').on('exit', (code) => {
+                            assert.equal(code, 0);
+                            resolve();
+                        });
+                    });
+
+                    // allow job to finish execution and exit
+                    clock.next();
+
+                    await promise;
+
+                    assert.equal(jobManager.bree.workers.has('job-in-ten'), false);
+                } finally {
+                    clock.uninstall();
+                }
             });
 
             it('schedules a job to run immediately', async function () {
                 const clock = FakeTimers.install({now: Date.now()});
-
-                const jobPath = path.resolve(__dirname, './jobs/simple.js');
-                jobManager.addJob({
-                    job: jobPath,
-                    name: 'job-now'
-                });
-
-                assert.equal(typeof jobManager.bree.timeouts['job-now'], 'object');
-
-                // allow scheduler to pick up the job
-                clock.tick(1);
-
-                assert.equal(typeof jobManager.bree.workers['job-now'], 'object');
-
-                const promise = new Promise((resolve, reject) => {
-                    jobManager.bree.workers['job-now'].on('error', reject);
-                    jobManager.bree.workers['job-now'].on('exit', (code) => {
-                        assert.equal(code, 0);
-                        resolve();
+                try {
+                    const jobPath = path.resolve(__dirname, './jobs/simple.js');
+                    await jobManager.addJob({
+                        job: jobPath,
+                        name: 'job-now'
                     });
-                });
 
-                await promise;
+                    assert.equal(jobManager.bree.timeouts.has('job-now'), true);
 
-                assert.equal(typeof jobManager.bree.workers['job-now'], 'undefined');
+                    // allow scheduler to pick up the job
+                    await clock.tickAsync(1);
 
-                clock.uninstall();
+                    assert.equal(jobManager.bree.workers.has('job-now'), true);
+
+                    const promise = new Promise((resolve, reject) => {
+                        jobManager.bree.workers.get('job-now').on('error', reject);
+                        jobManager.bree.workers.get('job-now').on('exit', (code) => {
+                            assert.equal(code, 0);
+                            resolve();
+                        });
+                    });
+
+                    await promise;
+
+                    assert.equal(jobManager.bree.workers.has('job-now'), false);
+                } finally {
+                    clock.uninstall();
+                }
             });
 
             it('fails to schedule a job with the same name to run immediately one after another', async function () {
                 const clock = FakeTimers.install({now: Date.now()});
-
-                const jobPath = path.resolve(__dirname, './jobs/simple.js');
-                jobManager.addJob({
-                    job: jobPath,
-                    name: 'job-now'
-                });
-
-                assert.equal(typeof jobManager.bree.timeouts['job-now'], 'object');
-
-                // allow scheduler to pick up the job
-                clock.tick(1);
-
-                assert.equal(typeof jobManager.bree.workers['job-now'], 'object');
-
-                const promise = new Promise((resolve, reject) => {
-                    jobManager.bree.workers['job-now'].on('error', reject);
-                    jobManager.bree.workers['job-now'].on('exit', (code) => {
-                        assert.equal(code, 0);
-                        resolve();
-                    });
-                });
-
-                await promise;
-
-                assert.equal(typeof jobManager.bree.workers['job-now'], 'undefined');
-
-                assert.throws(() => {
-                    jobManager.addJob({
+                try {
+                    const jobPath = path.resolve(__dirname, './jobs/simple.js');
+                    await jobManager.addJob({
                         job: jobPath,
                         name: 'job-now'
                     });
-                }, /Job #1 has a duplicate job name of job-now/);
 
-                clock.uninstall();
+                    assert.equal(jobManager.bree.timeouts.has('job-now'), true);
+
+                    // allow scheduler to pick up the job
+                    await clock.tickAsync(1);
+
+                    assert.equal(jobManager.bree.workers.has('job-now'), true);
+
+                    const promise = new Promise((resolve, reject) => {
+                        jobManager.bree.workers.get('job-now').on('error', reject);
+                        jobManager.bree.workers.get('job-now').on('exit', (code) => {
+                            assert.equal(code, 0);
+                            resolve();
+                        });
+                    });
+
+                    await promise;
+
+                    assert.equal(jobManager.bree.workers.has('job-now'), false);
+
+                    await assert.rejects(() => jobManager.addJob({
+                        job: jobPath,
+                        name: 'job-now'
+                    }), /Job #1 has a duplicate job name of job-now/);
+                } finally {
+                    clock.uninstall();
+                }
             });
 
             it('uses custom error handler when job fails', async function (){
@@ -250,7 +252,7 @@ describe('Job Manager', function () {
                 jobManager = new JobManager({errorHandler: spyHandler, config: stubConfig});
                 const completion = jobManager.awaitCompletion('will-fail');
 
-                jobManager.addJob({
+                await jobManager.addJob({
                     job,
                     name: 'will-fail'
                 });
@@ -267,13 +269,13 @@ describe('Job Manager', function () {
                 jobManager = new JobManager({workerMessageHandler: workerMessageHandlerSpy, config: stubConfig});
                 const completion = jobManager.awaitCompletion('will-send-msg');
 
-                jobManager.addJob({
+                await jobManager.addJob({
                     job: path.resolve(__dirname, './jobs/message.js'),
                     name: 'will-send-msg'
                 });
-                jobManager.bree.run('will-send-msg');
+                await jobManager.bree.run('will-send-msg');
                 await delay(100);
-                jobManager.bree.workers['will-send-msg'].postMessage('hello from Ghost!');
+                jobManager.bree.workers.get('will-send-msg').postMessage('hello from Ghost!');
 
                 await completion;
 
@@ -547,7 +549,7 @@ describe('Job Manager', function () {
                 // allow job to get picked up and executed
                 await delay(100);
 
-                jobManager.bree.workers['successful-oneoff'].postMessage('be done!');
+                jobManager.bree.workers.get('successful-oneoff').postMessage('be done!');
 
                 // allow the message to be passed around
                 await jobCompletion;
@@ -694,7 +696,7 @@ describe('Job Manager', function () {
             const timeInTenSeconds = new Date(Date.now() + 10);
             const jobPath = path.resolve(__dirname, './jobs/simple.js');
 
-            jobManager.addJob({
+            await jobManager.addJob({
                 at: timeInTenSeconds,
                 job: jobPath,
                 name: 'job-in-ten'
@@ -727,20 +729,20 @@ describe('Job Manager', function () {
         it('gracefully shuts down an interval job', async function () {
             jobManager = new JobManager({config: stubConfig});
 
-            jobManager.addJob({
+            await jobManager.addJob({
                 at: 'every 5 seconds',
                 job: path.resolve(__dirname, './jobs/graceful.js')
             });
 
             await delay(1); // let the job execution kick in
 
-            assert.equal(Object.keys(jobManager.bree.workers).length, 0);
-            assert.equal(Object.keys(jobManager.bree.timeouts).length, 0);
-            assert.equal(Object.keys(jobManager.bree.intervals).length, 1);
+            assert.equal(jobManager.bree.workers.size, 0);
+            assert.equal(jobManager.bree.timeouts.size, 0);
+            assert.equal(jobManager.bree.intervals.size, 1);
 
             await jobManager.shutdown();
 
-            assert.equal(Object.keys(jobManager.bree.intervals).length, 0);
+            assert.equal(jobManager.bree.intervals.size, 0);
         });
 
         it('gracefully shuts down the job queue worker pool');
