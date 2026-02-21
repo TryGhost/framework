@@ -62,7 +62,7 @@ jobs:
           npm config get @tryghost:registry
 
       - name: Publish to npm
-        run: yarn ship:ci ${{ (github.event.inputs['dry-run'] == 'true' && '--dry-run') || '' }}
+        run: npx nx release publish ${{ (github.event.inputs['dry-run'] == 'true' && '--dry-run') || '' }}
 
       - uses: tryghost/actions/actions/slack-build@main
         if: failure()
