@@ -1,9 +1,9 @@
 {
   "extends": [
-    "@tryghost:quietJS"
+    "github>tryghost/renovate-config"
   ],
+  "assignees": ["9larsons"],
   "ignoreDeps": [
-    "@elastic/elasticsearch",
     "moment-timezone",
     "validator"
   ]
