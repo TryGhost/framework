@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@nx/js": "22.5.2",
-    "eslint": "8.57.0",
+    "eslint": "8.57.1",
     "eslint-plugin-ghost": "3.4.4",
     "mocha": "11.7.5",
     "nx": "22.5.2",
