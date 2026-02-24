@@ -3880,7 +3880,7 @@
   dependencies:
     defer-to-connect "^2.0.0"
 
-"@tryghost/bunyan-rotating-filestream@^0.0.7":
+"@tryghost/bunyan-rotating-filestream@0.0.7":
   version "0.0.7"
   resolved "https://registry.yarnpkg.com/@tryghost/bunyan-rotating-filestream/-/bunyan-rotating-filestream-0.0.7.tgz#3957de91e4e9b58999f0bbe19242080543dcfc4a"
   integrity sha512-dswM+dxG8J7WpVoSjzAdoWXqqB5Dg0C2T7Zh6eoUvl5hkA8yWWJi/fS4jNXlHF700lWQ0g8/t+leJ7SGSWd+aw==
