@@ -32,6 +32,6 @@
     "@tryghost/elasticsearch": "^4.2.1",
     "@tryghost/pretty-stream": "^1.2.1",
     "@tryghost/root-utils": "^1.2.1",
-    "json-stringify-safe": "^5.0.1"
+    "json-stringify-safe": "5.0.1"
   }
 }

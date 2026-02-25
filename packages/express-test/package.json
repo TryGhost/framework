@@ -27,14 +27,14 @@
     "express": "5.2.1",
     "express-session": "1.19.0",
     "mocha": "11.7.5",
-    "multer": "^2.0.0",
+    "multer": "2.0.2",
     "sinon": "21.0.1"
   },
   "dependencies": {
     "@tryghost/jest-snapshot": "^1.2.1",
-    "cookiejar": "^2.1.3",
-    "form-data": "^4.0.2",
-    "mime-types": "^3.0.1",
-    "reqresnext": "^1.7.0"
+    "cookiejar": "2.1.4",
+    "form-data": "4.0.5",
+    "mime-types": "3.0.2",
+    "reqresnext": "1.7.0"
   }
 }
