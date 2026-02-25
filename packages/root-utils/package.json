@@ -28,7 +28,7 @@
     "sinon": "21.0.1"
   },
   "dependencies": {
-    "caller": "^1.0.1",
-    "find-root": "^1.1.0"
+    "caller": "1.1.0",
+    "find-root": "1.1.0"
   }
 }

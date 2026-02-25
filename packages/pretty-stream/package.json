@@ -28,8 +28,8 @@
     "sinon": "21.0.1"
   },
   "dependencies": {
-    "date-format": "^4.0.14",
-    "lodash": "^4.17.21",
-    "prettyjson": "^1.2.5"
+    "date-format": "4.0.14",
+    "lodash": "4.17.23",
+    "prettyjson": "1.2.5"
   }
 }
