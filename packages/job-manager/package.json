@@ -33,7 +33,7 @@
     "@tryghost/errors": "^2.2.1",
     "@tryghost/logging": "^3.2.1",
     "bree": "9.2.9",
-    "cron-validate": "1.4.5",
+    "cron-validate": "1.5.3",
     "fastq": "1.20.1",
     "p-wait-for": "3.2.0",
     "workerpool": "10.0.1"
