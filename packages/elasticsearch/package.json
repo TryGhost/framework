@@ -28,7 +28,7 @@
     "sinon": "21.0.1"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "8.19.1",
+    "@elastic/elasticsearch": "9.3.2",
     "@tryghost/debug": "^1.2.1",
     "split2": "4.2.0"
   }
