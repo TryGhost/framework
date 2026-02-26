@@ -1,4 +1,3 @@
-const assert = require('assert/strict');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -25,8 +24,9 @@ function loadRootUtilsWithMocks(mocks) {
 
 describe('getCallerRoot', function () {
     it('Gets the root directory of the caller', function () {
-        // mocha calls the test function calls getCallerRoot
-        assert.equal(getCallerRoot().endsWith('mocha'), true);
+        const callerRoot = getCallerRoot();
+        expect(typeof callerRoot).toBe('string');
+        expect(fs.existsSync(path.join(callerRoot, 'package.json'))).toBe(true);
     });
 
     it('returns undefined when caller root cannot be resolved', function () {
@@ -37,24 +37,28 @@ describe('getCallerRoot', function () {
             }
         });
 
-        assert.equal(mockedModule.getCallerRoot(), undefined);
+        expect(mockedModule.getCallerRoot()).toBeUndefined();
     });
 });
 
 describe('getProcessRoot', function () {
     it('Gets the `current` root directory of the process', function () {
-        fs.mkdirSync('current');
-        fs.closeSync(fs.openSync(path.join('current', 'package.json'), 'w'));
+        const currentDirectory = path.join(process.cwd(), 'current');
+        const packageJSONPath = path.join(currentDirectory, 'package.json');
 
-        // `current` directory contains a package.json, and is picked over `root-utils`
-        assert.equal(getProcessRoot().endsWith('current'), true);
+        fs.mkdirSync(currentDirectory);
+        fs.closeSync(fs.openSync(packageJSONPath, 'w'));
 
-        fs.unlinkSync(path.join('current', 'package.json'));
-        fs.rmdirSync('current');
+        try {
+            expect(getProcessRoot()).toBe(currentDirectory);
+        } finally {
+            fs.unlinkSync(packageJSONPath);
+            fs.rmdirSync(currentDirectory);
+        }
     });
 
     it('Gets the root when no `current` directory exists', function () {
-        assert.equal(getProcessRoot().endsWith('root-utils'), true);
+        expect(getProcessRoot()).toBe(path.join(__dirname, '..'));
     });
 
     it('ignores `current` when it exists but is not a directory', function () {
@@ -62,7 +66,7 @@ describe('getProcessRoot', function () {
         fs.writeFileSync(currentPath, 'not a directory');
 
         try {
-            assert.equal(getProcessRoot().endsWith('root-utils'), true);
+            expect(getProcessRoot().endsWith('root-utils')).toBe(true);
         } finally {
             fs.unlinkSync(currentPath);
         }
@@ -74,7 +78,7 @@ describe('getProcessRoot', function () {
 
         try {
             process.chdir(tempDir);
-            assert.equal(getProcessRoot(), undefined);
+            expect(getProcessRoot()).toBeUndefined();
         } finally {
             process.chdir(previousCwd);
             fs.rmdirSync(tempDir);
