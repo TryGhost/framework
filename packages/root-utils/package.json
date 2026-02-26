@@ -11,7 +11,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "echo \"Implement me!\"",
-    "test": "NODE_ENV=testing c8 --all --check-coverage --100 --reporter text --reporter cobertura mocha './test/**/*.test.js'",
+    "test": "vitest run --globals --coverage",
     "lint": "eslint . --ext .js --cache",
     "posttest": "yarn lint"
   },
@@ -23,12 +23,12 @@
     "access": "public"
   },
   "devDependencies": {
-    "c8": "11.0.0",
-    "mocha": "11.7.5",
-    "sinon": "21.0.1"
+    "@vitest/coverage-v8": "3.2.4",
+    "@vitest/eslint-plugin": "1.6.9",
+    "vitest": "3.2.4"
   },
   "dependencies": {
-    "caller": "1.1.0",
-    "find-root": "1.1.0"
+    "caller": "^1.0.1",
+    "find-root": "^1.1.0"
   }
 }

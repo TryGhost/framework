@@ -1,5 +1,8 @@
 module.exports = {
-    plugins: ['ghost'],
+    plugins: ['ghost', '@vitest'],
+    env: {
+        '@vitest/env': true
+    },
     extends: [
         'plugin:ghost/test'
     ]
