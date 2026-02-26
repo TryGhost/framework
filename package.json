@@ -14,6 +14,7 @@
   ],
   "scripts": {
     "dev": "echo \"Implement me!\"",
+    "main": "git checkout main && git pull && yarn",
     "presetup": "yarn",
     "setup": "yarn",
     "test": "nx run-many -t test --parallel=10 --outputStyle=dynamic-legacy",
