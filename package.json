@@ -16,7 +16,7 @@
     "dev": "echo \"Implement me!\"",
     "presetup": "yarn",
     "setup": "yarn",
-    "test": "nx run-many -t test --parallel=10 --outputStyle=dynamic",
+    "test": "nx run-many -t test --parallel=10 --outputStyle=dynamic-legacy",
     "test:ci": "nx run-many -t test --outputStyle=dynamic",
     "lint": "nx run-many -t lint --outputStyle=dynamic",
     "preship": "git diff --quiet && git diff --cached --quiet || (echo 'Error: working tree must be clean before shipping' && exit 1) && yarn test",
@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@nx/js": "22.5.2",
-    "eslint": "10.0.1",
+    "eslint": "8.57.1",
     "eslint-plugin-ghost": "3.4.4",
     "mocha": "11.7.5",
     "nx": "22.5.2",
