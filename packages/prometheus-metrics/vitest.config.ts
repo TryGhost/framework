@@ -1,5 +1,7 @@
 import {defineConfig} from 'vitest/config';
 
+// Override: TypeScript package with source in src/, not lib/.
+// Coverage must be scoped to src/ to measure the right files.
 export default defineConfig({
     test: {
         globals: true,
