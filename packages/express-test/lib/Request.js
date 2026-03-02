@@ -1,8 +1,19 @@
-const {default: reqresnext} = require('reqresnext');
+const http = require('http');
+const {Writable, Readable} = require('stream');
+const express = require('express');
 const {CookieAccessInfo} = require('cookiejar');
 const {parse} = require('url');
 const {isJSON, attachFile} = require('./utils');
-const {Readable} = require('stream');
+
+class MockSocket extends Writable {
+    constructor() {
+        super();
+        this.remoteAddress = '127.0.0.1';
+    }
+    _write(chunk, encoding, callback) {
+        callback();
+    }
+}
 
 class RequestOptions {
     constructor({method, url, headers, body} = {}) {
@@ -70,11 +81,8 @@ class Request {
     stream(readableStream) {
         this.reqOptions.body = undefined;
 
-        // reqresnext doesn't support streaming, which we need for file uploads. So we need to add some new methods.
-        // ExpressRequest inherits from http.IncomingMessage which inherits from stream.Readable
-        // It is that stream that is eventually read by middlewares and converted as JSON, as text, as form data etc.
-        // Currently the Express middlewares (and multer for file uploads) use the pipe method and/or the event listeners, so we don't need to override other methods
-        // If we need other methods, we only need to map them to the readable stream.
+        // Override stream methods on the request to delegate to the provided readable stream.
+        // Express middlewares (and multer for file uploads) use pipe/event listeners to consume the body.
         this.reqOptions.methodOverrides = {
             pipe: (destination) => {
                 readableStream.pipe(destination);
@@ -143,10 +151,64 @@ class Request {
     _getReqRes() {
         const {app, reqOptions} = this;
 
-        const {req, res} = reqresnext({...reqOptions, app}, {app});
+        // Create proper Node.js req/res objects using built-in http module.
+        // MockSocket provides a writable stream so that res.end() properly emits 'finish'.
+        const socket = new MockSocket();
+        const hasStreamOverrides = !!this.reqOptions.methodOverrides;
 
-        if (this.reqOptions.methodOverrides) {
-            // Copies all properties from original to copy, including getters and setters
+        // When streaming body data, the socket must appear readable so that
+        // body-parser's on-finished check doesn't skip the request as "already finished".
+        if (hasStreamOverrides) {
+            Object.defineProperty(socket, 'readable', {value: true});
+        }
+
+        const req = new http.IncomingMessage(socket);
+        req.method = reqOptions.method;
+        req.url = reqOptions.url;
+        req.headers = {};
+        for (const key of Object.keys(reqOptions.headers)) {
+            req.headers[key.toLowerCase()] = reqOptions.headers[key];
+        }
+        req.headers.host = req.headers.host || 'localhost';
+        req.body = reqOptions.body;
+        req.app = app;
+
+        // When body is pre-parsed (e.g. JSON object), mark it so body-parser skips parsing
+        if (reqOptions.body !== undefined) {
+            req._body = true;
+        }
+
+        const res = new http.ServerResponse(req);
+        res.assignSocket(socket);
+
+        // Apply Express prototypes so res.send(), res.json(), etc. are available
+        Object.setPrototypeOf(req, express.request);
+        Object.setPrototypeOf(res, express.response);
+
+        res.req = req;
+        req.res = res;
+        res.app = app;
+
+        // Track written body data for _buildResponse.
+        // Express calls res.write() then res.end() separately, so we must capture both.
+        let bodyChunks = [];
+        const originalWrite = res.write.bind(res);
+        res.write = function (chunk, encoding, cb) {
+            if (chunk !== null && chunk !== undefined) {
+                bodyChunks.push(Buffer.from(chunk, encoding));
+            }
+            return originalWrite(chunk, encoding, cb);
+        };
+        const originalEnd = res.end.bind(res);
+        res.end = function (chunk, encoding, cb) {
+            if (chunk !== null && chunk !== undefined) {
+                bodyChunks.push(Buffer.from(chunk, encoding));
+            }
+            res.body = Buffer.concat(bodyChunks);
+            return originalEnd(chunk, encoding, cb);
+        };
+
+        if (hasStreamOverrides) {
             const props = Object.keys(this.reqOptions.methodOverrides);
             for (const prop of props) {
                 const descriptor = Object.getOwnPropertyDescriptor(this.reqOptions.methodOverrides, prop);
