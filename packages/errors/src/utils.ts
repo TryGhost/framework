@@ -1,9 +1,32 @@
-import deepCopy from '@stdlib/utils-copy';
 import {GhostError} from './GhostError';
 import * as errors from './errors';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyObject = Record<string, any>
+
+// structuredClone doesn't preserve custom properties on Error subclasses
+// (see https://github.com/ungap/structured-clone/issues/12)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function deepCloneValue(value: any): any {
+    if (value === null || typeof value !== 'object') {
+        return value;
+    }
+    if (value instanceof Error) {
+        const clone = Object.create(Object.getPrototypeOf(value));
+        for (const key of Object.getOwnPropertyNames(value)) {
+            clone[key] = deepCloneValue((value as AnyObject)[key]);
+        }
+        return clone;
+    }
+    if (Array.isArray(value)) {
+        return value.map(deepCloneValue);
+    }
+    const clone: AnyObject = {};
+    for (const key of Object.keys(value)) {
+        clone[key] = deepCloneValue(value[key]);
+    }
+    return clone;
+}
 
 const errorsWithBase: Record<string, typeof GhostError> = {...errors, GhostError};
 
@@ -205,11 +228,7 @@ export function prepareStackForUser(error: Error): Error {
         stackbits.splice(1, 0, `${error.context}`);
     }
 
-    // @NOTE: would be a good idea to swap out the cloning implementation with native
-    //        `structuredClone` one once we use Node v17 or higher. Before making an
-    //        upgrade make sure structuredClone does a full copy of all properties
-    //        present on a custom error (see issue: https://github.com/ungap/structured-clone/issues/12)
-    const errorClone = deepCopy(error);
+    const errorClone = deepCloneValue(error);
     errorClone.stack = stackbits.join('\n');
     return errorClone;
 };

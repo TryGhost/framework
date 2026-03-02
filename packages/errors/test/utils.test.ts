@@ -38,6 +38,20 @@ describe('Error Utils', function () {
             assert.notEqual(processedError.message, originalError.message);
         });
 
+        it('deep clones array values in errorDetails', function () {
+            const items = [{id: 1}, {id: 2}];
+            const ghostError = new errors.ValidationError({
+                message: 'mistakes were made',
+                errorDetails: items
+            });
+
+            const processedError = utils.prepareStackForUser(ghostError);
+
+            assert.deepEqual(processedError.errorDetails, items);
+            items[0].id = 999;
+            assert.equal(processedError.errorDetails[0].id, 1);
+        });
+
         it('Preserves the stack trace', function () {
             const errorCreatingFunction = () => {
                 return new Error('Original error');
