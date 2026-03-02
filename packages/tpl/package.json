@@ -1,6 +1,7 @@
 {
   "name": "@tryghost/tpl",
   "version": "2.0.0",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -8,23 +9,33 @@
   },
   "author": "Ghost Foundation",
   "license": "MIT",
-  "main": "index.js",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "default": "./build/index.js"
+    }
+  },
   "scripts": {
     "dev": "echo \"Implement me!\"",
-    "test": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
-    "lint": "eslint . --ext .js --cache",
+    "build": "tsc",
+    "prepare": "tsc",
+    "test:types": "tsc --noEmit",
+    "test": "yarn test:types && vitest run --config ../../vitest.config.ts",
+    "lint": "eslint src/ --ext .ts --cache",
     "posttest": "yarn lint"
   },
   "files": [
-    "index.js",
-    "lib"
+    "build"
   ],
   "publishConfig": {
     "access": "public"
   },
   "devDependencies": {
-    "mocha": "11.7.5",
-    "sinon": "21.0.1"
+    "lodash": "4.17.23",
+    "sinon": "21.0.1",
+    "typescript": "5.9.3"
   },
   "dependencies": {
     "lodash.template": "4.5.0"
