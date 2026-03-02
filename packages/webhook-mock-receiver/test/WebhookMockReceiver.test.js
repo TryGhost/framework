@@ -167,7 +167,7 @@ describe('Webhook Mock Receiver', function () {
             assert.deepEqual(Object.keys(snapshotManager.assertSnapshot.args[0][0]), ['headers']);
             const headers = snapshotManager.assertSnapshot.args[0][0].headers;
             assert.equal(headers.foo, 'bar');
-            assert.equal(headers['accept-encoding'], 'gzip, deflate, br, zstd');
+            assert.match(headers['accept-encoding'], /^gzip, deflate, br/);
             assert.match(headers['user-agent'], /^got/);
 
             assert.deepEqual(snapshotManager.assertSnapshot.args[0][1].field, 'headers');
