@@ -32,7 +32,7 @@
     "uuid": "13.0.0"
   },
   "dependencies": {
-    "@tryghost/string": "0.2.21",
+    "@tryghost/string": "0.3.1",
     "bcryptjs": "3.0.3"
   }
 }
