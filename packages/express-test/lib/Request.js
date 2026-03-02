@@ -91,8 +91,14 @@ class Request {
             get readable() {
                 return readableStream.readable;
             },
+            get readableEnded() {
+                return readableStream.readableEnded;
+            },
             pause: () => {
                 readableStream.pause();
+            },
+            resume: () => {
+                readableStream.resume();
             },
             read: () => {
                 return readableStream.read(...arguments);
