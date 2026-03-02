@@ -21,7 +21,7 @@
     "build:cjs": "esbuild src/*.ts --target=es2020 --outdir=cjs --format=cjs",
     "build:es": "esbuild src/*.ts --target=es2020 --outdir=es --format=esm",
     "build:types": "tsc --emitDeclarationOnly --declaration --declarationMap --outDir types",
-    "test": "TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' NODE_ENV=testing c8 --check-coverage --100 --all -n src --reporter text --reporter cobertura  mocha -r ts-node/register './test/**/*.test.ts'",
+    "test": "NODE_ENV=testing vitest run --coverage",
     "lint": "eslint . --ext .js --cache",
     "posttest": "yarn lint"
   },
@@ -36,8 +36,6 @@
   },
   "devDependencies": {
     "@types/lodash": "4.17.24",
-    "@types/mocha": "10.0.10",
-    "c8": "11.0.0",
     "esbuild": "0.27.3",
     "lodash": "4.17.23",
     "mocha": "11.7.5",

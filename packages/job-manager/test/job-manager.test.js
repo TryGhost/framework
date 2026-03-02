@@ -114,26 +114,18 @@ describe('Job Manager', function () {
                 assert.equal(jobManager.bree.start.called, true);
             });
 
-            it('fails to schedule for invalid scheduling expression', function () {
-                try {
-                    jobManager.addJob({
-                        at: 'invalid expression',
-                        name: 'jobName'
-                    });
-                } catch (err) {
-                    assert.equal(err.message, 'Invalid schedule format');
-                }
+            it('fails to schedule for invalid scheduling expression', async function () {
+                await assert.rejects(() => jobManager.addJob({
+                    at: 'invalid expression',
+                    name: 'jobName'
+                }), {message: 'Invalid schedule format'});
             });
 
-            it('fails to schedule for no job name', function () {
-                try {
-                    jobManager.addJob({
-                        at: 'invalid expression',
-                        job: () => {}
-                    });
-                } catch (err) {
-                    assert.equal(err.message, 'Name parameter should be present if job is a function');
-                }
+            it('fails to schedule for no job name', async function () {
+                await assert.rejects(() => jobManager.addJob({
+                    at: 'invalid expression',
+                    job: () => {}
+                }), {message: 'Name parameter should be present if job is a function'});
             });
 
             it('schedules a job using date format', async function () {

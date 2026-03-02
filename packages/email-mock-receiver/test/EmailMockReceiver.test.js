@@ -7,7 +7,7 @@ describe('Email mock receiver', function () {
     let snapshotManager;
     let emailMockReceiver;
 
-    before(function () {
+    beforeAll(function () {
         snapshotManager = {
             assertSnapshot: sinon.spy()
         };
