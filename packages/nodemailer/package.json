@@ -30,7 +30,7 @@
   "dependencies": {
     "@aws-sdk/client-sesv2": "3.999.0",
     "@tryghost/errors": "^2.2.1",
-    "nodemailer": "^7.0.0",
+    "nodemailer": "7.0.13",
     "nodemailer-direct-transport": "3.3.2",
     "nodemailer-mailgun-transport": "2.1.5",
     "nodemailer-stub-transport": "1.1.0"
