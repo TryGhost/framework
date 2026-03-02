@@ -61,7 +61,7 @@ describe('Metrics Server', function () {
         await metricsServer.stop();
     });
 
-    after(async function () {
+    afterAll(async function () {
         await metricsServer.shutdown();
     });
 

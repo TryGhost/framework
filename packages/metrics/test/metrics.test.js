@@ -8,6 +8,17 @@ const {getProcessRoot} = require('@tryghost/root-utils');
 const GhostMetrics = require('../lib/GhostMetrics');
 const sandbox = sinon.createSandbox();
 
+// Vitest sets process.env.MODE to 'test' which interferes with GhostMetrics mode detection
+const originalMode = process.env.MODE;
+beforeEach(function () {
+    delete process.env.MODE;
+});
+afterEach(function () {
+    if (originalMode !== undefined) {
+        process.env.MODE = originalMode;
+    }
+});
+
 const loggingConfigPath = path.join(getProcessRoot(), 'loggingrc');
 
 describe('Metrics config', function () {
@@ -51,25 +62,27 @@ describe('Logging', function () {
         sandbox.restore();
     });
 
-    it('stdout transport works', function (done) {
+    it('stdout transport works', async function () {
         const name = 'test-metric';
         const value = 101;
 
-        sandbox.stub(PrettyStream.prototype, 'write').callsFake(function (data) {
-            assert.notEqual(data.msg, undefined);
-            assert.equal(data.msg, `Metric ${name}: ${JSON.stringify(value)}`);
-            done();
-        });
+        await new Promise((resolve) => {
+            sandbox.stub(PrettyStream.prototype, 'write').callsFake(function (data) {
+                assert.notEqual(data.msg, undefined);
+                assert.equal(data.msg, `Metric ${name}: ${JSON.stringify(value)}`);
+                resolve();
+            });
 
-        const ghostMetrics = new GhostMetrics({
-            metrics: {
-                transports: ['stdout']
-            }
+            const ghostMetrics = new GhostMetrics({
+                metrics: {
+                    transports: ['stdout']
+                }
+            });
+            ghostMetrics.metric(name, value);
         });
-        ghostMetrics.metric(name, value);
     });
 
-    it('elasticsearch transport works', function (done) {
+    it('elasticsearch transport works', async function () {
         const name = 'test-metric';
         const value = 101;
 
@@ -88,17 +101,19 @@ describe('Logging', function () {
             }
         });
 
-        sandbox.stub(ElasticSearch.prototype, 'index').callsFake(function (data, index) {
-            assert.notEqual(data.metadata, undefined);
-            assert.equal(data.metadata.id, ghostMetrics.metadata.id);
-            assert.equal(data.value, value);
+        await new Promise((resolve) => {
+            sandbox.stub(ElasticSearch.prototype, 'index').callsFake(function (data, index) {
+                assert.notEqual(data.metadata, undefined);
+                assert.equal(data.metadata.id, ghostMetrics.metadata.id);
+                assert.equal(data.value, value);
 
-            // ElasticSearch shipper prefixes metric names to avoid polluting index namespace
-            assert.equal(index, 'metrics-' + name);
-            done();
+                // ElasticSearch shipper prefixes metric names to avoid polluting index namespace
+                assert.equal(index, 'metrics-' + name);
+                resolve();
+            });
+
+            ghostMetrics.metric(name, value);
         });
-
-        ghostMetrics.metric(name, value);
     });
 
     it('throws for invalid transport', function () {

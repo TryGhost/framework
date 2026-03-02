@@ -40,7 +40,7 @@ async function getExtendedAPIAgent() {
 }
 
 describe('Example App', function () {
-    before(async function () {
+    beforeAll(async function () {
         agent = await getAgent();
     });
 
@@ -65,7 +65,7 @@ describe('Example App', function () {
     });
 
     describe('API Agent with authentication in two steps', function () {
-        before(async function () {
+        beforeAll(async function () {
             agent = await getAPIAgent();
         });
 
@@ -114,7 +114,7 @@ describe('Example App', function () {
     });
 
     describe('API Agent with login function', function () {
-        before(async function () {
+        beforeAll(async function () {
             agent = await getExtendedAPIAgent();
             await agent.login();
         });
@@ -130,7 +130,7 @@ describe('Example App', function () {
     });
 
     describe('Cookie clearing functionality', function () {
-        before(async function () {
+        beforeAll(async function () {
             agent = await getAPIAgent();
         });
 
@@ -179,7 +179,7 @@ describe('Example App', function () {
     });
 
     describe('Set & Expect', function () {
-        before(async function () {
+        beforeAll(async function () {
             agent = await getAgent();
         });
 

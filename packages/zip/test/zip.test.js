@@ -18,7 +18,7 @@ describe('Compress and Extract should be opposite functions', function () {
         fs.rmSync(unzipDestination, {recursive: true, force: true});
     };
 
-    before(function () {
+    beforeAll(function () {
         symlinkPath = path.join(__dirname, 'fixtures', 'theme-symlink');
         themeFolder = path.join(__dirname, 'fixtures', 'test-theme');
         zipDestination = path.join(__dirname, 'fixtures', 'test-theme.zip');
@@ -27,41 +27,26 @@ describe('Compress and Extract should be opposite functions', function () {
         cleanUp();
     });
 
-    after(function () {
+    afterAll(function () {
         cleanUp();
     });
 
-    it('ensure symlinks work', function (done) {
+    it('ensure symlinks work', async function () {
         fs.symlinkSync(themeFolder, symlinkPath);
 
-        let originalHash;
+        const originalHash = await hashElement(symlinkPath);
 
-        hashElement(symlinkPath)
-            .then((_originalHash) => {
-                originalHash = _originalHash;
-                return compress(symlinkPath, zipDestination);
-            })
-            .then((res) => {
-                assert.equal(typeof res, 'object');
-                assert.equal(res.path, zipDestination);
-                assert.equal(res.size < 619618, true);
+        const compressRes = await compress(symlinkPath, zipDestination);
+        assert.equal(typeof compressRes, 'object');
+        assert.equal(compressRes.path, zipDestination);
+        assert.equal(compressRes.size < 619618, true);
 
-                return extract(zipDestination, unzipDestination);
-            })
-            .then((res) => {
-                assert.equal(typeof res, 'object');
-                assert.equal(res.path, unzipDestination);
+        const extractRes = await extract(zipDestination, unzipDestination);
+        assert.equal(typeof extractRes, 'object');
+        assert.equal(extractRes.path, unzipDestination);
 
-                return hashElement(unzipDestination);
-            })
-            .then((extractedHash) => {
-                assert.equal(originalHash.children.toString(), extractedHash.children.toString());
-
-                done();
-            })
-            .catch((err) => {
-                return done(err);
-            });
+        const extractedHash = await hashElement(unzipDestination);
+        assert.equal(originalHash.children.toString(), extractedHash.children.toString());
     });
 
     it('rejects when archiver emits an async error event', async function () {
@@ -98,7 +83,7 @@ describe('Compress and Extract should be opposite functions', function () {
 describe('Extract zip', function () {
     let themeFolder, zipDestination, unzipDestination, symLinkPath, longFilePath;
 
-    before(function () {
+    beforeAll(function () {
         themeFolder = path.join(__dirname, 'fixtures', 'test-theme');
         zipDestination = path.join(__dirname, 'fixtures', 'test-theme.zip');
         unzipDestination = path.join(__dirname, 'fixtures', 'test-theme-unzipped');

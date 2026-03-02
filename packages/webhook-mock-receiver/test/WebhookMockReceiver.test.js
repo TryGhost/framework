@@ -9,7 +9,7 @@ describe('Webhook Mock Receiver', function () {
     let got;
     const webhookURL = 'https://test-webhook-receiver.com/webhook';
 
-    before(async function () {
+    beforeAll(async function () {
         got = (await import('got')).default;
         snapshotManager = {
             assertSnapshot: sinon.spy()

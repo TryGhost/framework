@@ -235,26 +235,32 @@ describe('Request', function () {
             sinon.assert.calledOnceWithMatch(jar.setCookies, 'xyz');
         });
 
-        it('_doRequest', async function (done) {
-            const fn = (req, res) => {
-                // This is how reqresnext works
-                res.emit('finish');
-            };
-            const jar = {};
-            const opts = new RequestOptions();
-            const request = new Request(fn, jar, opts);
+        it('_doRequest', async function () {
+            await new Promise((resolve, reject) => {
+                const fn = (req, res) => {
+                    // This is how reqresnext works
+                    res.emit('finish');
+                };
+                const jar = {};
+                const opts = new RequestOptions();
+                const request = new Request(fn, jar, opts);
 
-            // Stub cookies, we'll test this behaviour later
-            const {saveCookiesStub, restoreCookiesStub} = stubCookies(request);
+                // Stub cookies, we'll test this behaviour later
+                const {saveCookiesStub, restoreCookiesStub} = stubCookies(request);
 
-            request._doRequest((error, response) => {
-                assert.equal(error, null);
-                assert.equal(response.statusCode, 200);
+                request._doRequest((error, response) => {
+                    if (error) {
+                        reject(error);
+                        return;
+                    }
+                    assert.equal(error, null);
+                    assert.equal(response.statusCode, 200);
 
-                sinon.assert.calledOnce(saveCookiesStub);
-                sinon.assert.calledOnce(restoreCookiesStub);
+                    sinon.assert.calledOnce(saveCookiesStub);
+                    sinon.assert.calledOnce(restoreCookiesStub);
 
-                done();
+                    resolve();
+                });
             });
         });
 
