@@ -1,4 +1,6 @@
-const cronValidate = require('cron-validate');
+const cronValidateModule = require('cron-validate');
+/* c8 ignore next 1 */
+const cronValidate = cronValidateModule.default || cronValidateModule;
 
 /**
  * Checks if expression follows supported crontab format

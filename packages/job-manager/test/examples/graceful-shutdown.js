@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 
-const pWaitFor = require('p-wait-for');
 const path = require('path');
 const setTimeoutPromise = require('util').promisify(setTimeout);
 const JobManager = require('../../lib/job-manager');
@@ -29,6 +28,7 @@ async function shutdown(signal) {
 
     await setTimeoutPromise(100); // allow job to get scheduled
 
+    const {default: pWaitFor} = await import('p-wait-for');
     await pWaitFor(() => (Object.keys(jobManager.bree.workers).length === 0) && (Object.keys(jobManager.bree.intervals).length === 0));
 
     process.exit(0);

@@ -14,9 +14,10 @@
   ],
   "scripts": {
     "dev": "echo \"Implement me!\"",
+    "main": "git checkout main && git pull && yarn",
     "presetup": "yarn",
     "setup": "yarn",
-    "test": "nx run-many -t test --parallel=10 --outputStyle=dynamic",
+    "test": "nx run-many -t test --parallel=10 --outputStyle=dynamic-legacy",
     "test:ci": "nx run-many -t test --outputStyle=dynamic",
     "lint": "nx run-many -t lint --outputStyle=dynamic",
     "preship": "git diff --quiet && git diff --cached --quiet || (echo 'Error: working tree must be clean before shipping' && exit 1) && yarn test",
@@ -27,11 +28,11 @@
     "ship:first-release": "yarn ship patch --first-release"
   },
   "devDependencies": {
-    "@nx/js": "22.5.2",
+    "@nx/js": "22.5.3",
     "eslint": "8.57.1",
     "eslint-plugin-ghost": "3.4.4",
     "mocha": "11.7.5",
-    "nx": "22.5.2",
+    "nx": "22.5.3",
     "sinon": "21.0.1",
     "ts-node": "10.9.2"
   }

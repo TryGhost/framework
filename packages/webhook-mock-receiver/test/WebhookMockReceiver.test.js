@@ -1,5 +1,4 @@
 const assert = require('assert/strict');
-const got = require('got');
 const sinon = require('sinon');
 
 const WebhookMockReceiver = require('../');
@@ -7,9 +6,11 @@ const WebhookMockReceiver = require('../');
 describe('Webhook Mock Receiver', function () {
     let snapshotManager;
     let webhookMockReceiver;
+    let got;
     const webhookURL = 'https://test-webhook-receiver.com/webhook';
 
-    before(function () {
+    before(async function () {
+        got = (await import('got')).default;
         snapshotManager = {
             assertSnapshot: sinon.spy()
         };
@@ -166,7 +167,7 @@ describe('Webhook Mock Receiver', function () {
             assert.deepEqual(Object.keys(snapshotManager.assertSnapshot.args[0][0]), ['headers']);
             const headers = snapshotManager.assertSnapshot.args[0][0].headers;
             assert.equal(headers.foo, 'bar');
-            assert.equal(headers['accept-encoding'], 'gzip, deflate, br');
+            assert.match(headers['accept-encoding'], /^gzip, deflate, br/);
             assert.match(headers['user-agent'], /^got/);
 
             assert.deepEqual(snapshotManager.assertSnapshot.args[0][1].field, 'headers');

@@ -39,7 +39,7 @@ describe('Lib: Security - String', function () {
 
         it('should replace all of the foreign chars in ascii', function () {
             const result = security.string.safe('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ');
-            assert.equal(result, 'aaaaaaaeceeeeiiiidnoooooxouuuuuthssaaaaaaaeceeeeiiiidnooooo-ouuuuythy');
+            assert.equal(result, 'aaaaaaaeceeeeiiiidnoooooxouuuuythssaaaaaaaeceeeeiiiidnooooo-ouuuuythy');
         });
 
         it('should remove special characters at the beginning of a string', function () {

@@ -1,5 +1,4 @@
 const path = require('path');
-const pWaitFor = require('p-wait-for');
 const addSeconds = require('date-fns/addSeconds');
 const JobManager = require('../../lib/job-manager');
 
@@ -23,6 +22,7 @@ const isJobQueueEmpty = (bree) => {
         name: 'one-off-scheduled-job'
     });
 
+    const {default: pWaitFor} = await import('p-wait-for');
     await pWaitFor(() => (isJobQueueEmpty(jobManager.bree)));
 
     process.exit(0);
