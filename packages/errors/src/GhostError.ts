@@ -1,4 +1,4 @@
-import {v1 as uuidv1} from 'uuid';
+import {randomUUID} from 'crypto';
 import {wrapStack} from './wrap-stack';
 
 export interface GhostErrorOptions {
@@ -42,7 +42,7 @@ export class GhostError extends Error {
         this.errorType = 'InternalServerError';
         this.level = 'normal';
         this.message = 'The server has encountered an error.';
-        this.id = uuidv1();
+        this.id = randomUUID();
 
         /**
          * custom overrides
