@@ -1,15 +1,10 @@
-import {defineConfig} from 'vitest/config';
+import {defineConfig, mergeConfig} from 'vitest/config';
+import rootConfig from '../../vitest.config';
 
 // Override: coverage was never enforced under Mocha.
-export default defineConfig({
+export default mergeConfig(rootConfig, defineConfig({
     test: {
-        globals: true,
-        environment: 'node',
-        include: ['test/**/*.test.{js,ts}'],
         coverage: {
-            provider: 'v8',
-            all: true,
-            reporter: ['text', 'cobertura'],
             thresholds: {
                 lines: 0,
                 functions: 0,
@@ -18,4 +13,4 @@ export default defineConfig({
             }
         }
     }
-});
+}));
