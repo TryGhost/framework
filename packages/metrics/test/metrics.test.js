@@ -16,6 +16,8 @@ beforeEach(function () {
 afterEach(function () {
     if (originalMode !== undefined) {
         process.env.MODE = originalMode;
+    } else {
+        delete process.env.MODE;
     }
 });
 

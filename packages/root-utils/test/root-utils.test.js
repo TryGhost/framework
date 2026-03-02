@@ -15,12 +15,13 @@ function loadRootUtilsWithMocks(mocks) {
         return originalLoad(request, parent, isMain);
     };
 
-    delete require.cache[rootUtilsModulePath];
-    const loaded = require('../lib/root-utils');
-
-    Module._load = originalLoad;
-    delete require.cache[rootUtilsModulePath];
-    return loaded;
+    try {
+        delete require.cache[rootUtilsModulePath];
+        return require('../lib/root-utils');
+    } finally {
+        Module._load = originalLoad;
+        delete require.cache[rootUtilsModulePath];
+    }
 }
 
 describe('getCallerRoot', function () {
