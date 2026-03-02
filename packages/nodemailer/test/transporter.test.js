@@ -1,6 +1,6 @@
 const assert = require('assert/strict');
 const sinon = require('sinon');
-const aws = require('@aws-sdk/client-ses');
+const aws = require('@aws-sdk/client-sesv2');
 const nodemailer = require('../');
 const sandbox = sinon.createSandbox();
 
@@ -42,7 +42,7 @@ describe('Transporter', function () {
     });
 
     it('can create an SES transporter with region parsed from ServiceUrl and aws-style credentials', function () {
-        const sesStub = sandbox.stub(aws, 'SES').callsFake(function SES(options) {
+        const sesStub = sandbox.stub(aws, 'SESv2Client').callsFake(function SESv2Client(options) {
             this.options = options;
         });
 
@@ -58,7 +58,7 @@ describe('Transporter', function () {
     });
 
     it('can create an SES transporter with explicit region and modern credentials', function () {
-        const sesStub = sandbox.stub(aws, 'SES').callsFake(function SES(options) {
+        const sesStub = sandbox.stub(aws, 'SESv2Client').callsFake(function SESv2Client(options) {
             this.options = options;
         });
 
