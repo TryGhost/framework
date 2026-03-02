@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/elasticsearch",
-  "version": "4.2.1",
+  "version": "5.0.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "@elastic/elasticsearch": "9.3.2",
-    "@tryghost/debug": "^1.2.1",
+    "@tryghost/debug": "^2.0.0",
     "split2": "4.2.0"
   }
 }

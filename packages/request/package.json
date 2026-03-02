@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/request",
-  "version": "2.2.1",
+  "version": "3.0.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -30,9 +30,9 @@
     "sinon": "21.0.1"
   },
   "dependencies": {
-    "@tryghost/errors": "^2.2.1",
-    "@tryghost/validator": "^1.2.1",
-    "@tryghost/version": "^1.2.1",
+    "@tryghost/errors": "^3.0.0",
+    "@tryghost/validator": "^2.0.0",
+    "@tryghost/version": "^2.0.0",
     "cacheable-lookup": "7.0.0",
     "got": "14.6.6",
     "lodash": "4.17.23"
