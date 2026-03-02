@@ -52,7 +52,7 @@ module.exports = function (transport, options = {}) {
         transportOptions.sendmail = true;
         break;
     case 'ses':
-        const aws = require('@aws-sdk/client-ses');
+        const {SESv2Client, SendRawEmailCommand} = require('@aws-sdk/client-sesv2');
 
         const pattern = /(.*)email(.*)\.(.*).amazonaws.com/i;
         const result = pattern.exec(options.ServiceUrl);
@@ -62,14 +62,13 @@ module.exports = function (transport, options = {}) {
         const secretAccessKey = options.secretAccessKey || options.AWSSecretKey;
         const credentials = (accessKeyId && secretAccessKey) ? {accessKeyId, secretAccessKey} : undefined;
 
-        const ses = new aws.SES({
-            apiVersion: '2010-12-01',
+        const sesClient = new SESv2Client({
             region,
             credentials
         });
 
         transportOptions = {
-            SES: {ses, aws}
+            SES: {sesClient, SendRawEmailCommand}
         };
 
         break;
