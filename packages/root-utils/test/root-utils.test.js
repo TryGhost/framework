@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const Module = require('module');
-const {getCallerRoot, getProcessRoot} = require('../index');
+const {getProcessRoot} = require('../index');
 const rootUtilsModulePath = require.resolve('../lib/root-utils');
 
 function loadRootUtilsWithMocks(mocks) {
@@ -25,8 +25,15 @@ function loadRootUtilsWithMocks(mocks) {
 
 describe('getCallerRoot', function () {
     it('Gets the root directory of the caller', function () {
-        // mocha calls the test function calls getCallerRoot
-        assert.equal(getCallerRoot().endsWith('mocha'), true);
+        const mockedModule = loadRootUtilsWithMocks({
+            caller: () => __filename,
+            'find-root': require('find-root')
+        });
+
+        const callerRoot = mockedModule.getCallerRoot();
+        assert.ok(callerRoot, 'caller root should be defined');
+        assert.ok(typeof callerRoot === 'string', 'caller root should be a string');
+        assert.equal(callerRoot.endsWith('root-utils'), true);
     });
 
     it('returns undefined when caller root cannot be resolved', function () {

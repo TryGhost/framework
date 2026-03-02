@@ -99,9 +99,8 @@ describe('Snapshot Manager', function () {
         outputPath = snapshotManager._resolveSnapshotFilePath(inputPath);
         assert.equal(outputPath, '/full/path/to/tests/unit/__snapshots__/foo.js.snap');
 
-        // Real example mocha context
-        const {test} = this;
-        inputPath = test.file;
+        // Real example using current test file path
+        inputPath = __filename;
         outputPath = snapshotManager._resolveSnapshotFilePath(inputPath);
         assert.match(outputPath, /\/packages\/jest-snapshot\/test\/__snapshots__\/SnapshotManager\.test\.js\.snap/);
     });
