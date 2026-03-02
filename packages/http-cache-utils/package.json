@@ -11,7 +11,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "echo \"Implement me!\"",
-    "test:unit": "NODE_ENV=testing vitest run --coverage",
+    "test:unit": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
     "test": "yarn test:unit",
     "lint:code": "eslint *.js lib/ --ext .js --cache",
     "lint": "yarn lint:code && yarn lint:test",
