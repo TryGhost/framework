@@ -4,7 +4,6 @@ const setTimeoutPromise = util.promisify(setTimeout);
 const fastq = require('fastq');
 const later = require('@breejs/later');
 const Bree = require('bree');
-const pWaitFor = require('p-wait-for');
 const {UnhandledJobError, IncorrectUsageError} = require('@tryghost/errors');
 const logging = require('@tryghost/logging');
 const isCronExpression = require('./is-cron-expression');
@@ -407,7 +406,7 @@ class JobManager {
     }
 
     /**
-     * @param {import('p-wait-for').Options} [options]
+     * @param {object} [options]
      */
     async shutdown(options) {
         await this.bree.stop();
@@ -418,6 +417,7 @@ class JobManager {
 
         logging.warn('Waiting for busy job in inline job queue');
 
+        const {default: pWaitFor} = await import('p-wait-for');
         await pWaitFor(() => this.inlineQueue.idle() === true, options);
 
         logging.warn('Inline job queue finished');

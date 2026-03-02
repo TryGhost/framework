@@ -1,8 +1,6 @@
 const {AssertionError} = require('assert');
 const {URL} = require('url');
 const nock = require('nock');
-const pWaitFor = require('p-wait-for');
-
 class WebhookMockReceiver {
     constructor({snapshotManager}) {
         this.body;
@@ -19,6 +17,7 @@ class WebhookMockReceiver {
 
     async receivedRequest() {
         // @NOTE: figure out a better waiting mechanism here, don't allow it to hang forever
+        const {default: pWaitFor} = await import('p-wait-for');
         await pWaitFor(() => this._receiver.isDone());
     }
 
