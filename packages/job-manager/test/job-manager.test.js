@@ -1,7 +1,7 @@
 const assert = require('assert/strict');
 const path = require('path');
 const sinon = require('sinon');
-const delay = require('delay');
+const {setTimeout: delay} = require('timers/promises');
 const FakeTimers = require('@sinonjs/fake-timers');
 const logging = require('@tryghost/logging');
 
