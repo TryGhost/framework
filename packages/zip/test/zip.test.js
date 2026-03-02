@@ -1,6 +1,6 @@
 const assert = require('assert/strict');
 const path = require('path');
-const fs = require('fs-extra');
+const fs = require('fs');
 const {hashElement} = require('folder-hash');
 const archiver = require('archiver');
 const EventEmitter = require('events');
@@ -13,9 +13,9 @@ describe('Compress and Extract should be opposite functions', function () {
     let symlinkPath, themeFolder, zipDestination, unzipDestination;
 
     const cleanUp = () => {
-        fs.removeSync(symlinkPath);
-        fs.removeSync(zipDestination);
-        fs.removeSync(unzipDestination);
+        fs.rmSync(symlinkPath, {recursive: true, force: true});
+        fs.rmSync(zipDestination, {recursive: true, force: true});
+        fs.rmSync(unzipDestination, {recursive: true, force: true});
     };
 
     before(function () {
@@ -107,19 +107,19 @@ describe('Extract zip', function () {
 
     afterEach(function () {
         if (fs.existsSync(zipDestination)) {
-            fs.removeSync(zipDestination);
+            fs.rmSync(zipDestination, {recursive: true, force: true});
         }
 
         if (fs.existsSync(unzipDestination)) {
-            fs.removeSync(unzipDestination);
+            fs.rmSync(unzipDestination, {recursive: true, force: true});
         }
 
         if (fs.existsSync(symLinkPath)) {
-            fs.removeSync(symLinkPath);
+            fs.rmSync(symLinkPath, {recursive: true, force: true});
         }
 
         if (fs.existsSync(longFilePath)) {
-            fs.removeSync(longFilePath);
+            fs.rmSync(longFilePath, {recursive: true, force: true});
         }
     });
 
