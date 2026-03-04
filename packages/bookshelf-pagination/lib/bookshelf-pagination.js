@@ -191,7 +191,11 @@ const pagination = function pagination(bookshelf) {
 
                 countQuery.clear('select');
                 //skipping distinct for simple queries, where we know that the result set will always be unique, as distinct adds a lot of latency
-                if (options.useBasicCount) {
+                // Detect JOINs via compiled SQL (public Knex API) rather than internal _statements.
+                // Validated against Knex 2.4.2 and 3.1.0 — toSQL().sql includes the join keyword
+                // for all join types (leftJoin, rightJoin, innerJoin, crossJoin, joinRaw, etc.)
+                const hasJoins = /\bjoin\b/i.test(countQuery.toSQL().sql);
+                if (options.useBasicCount || (options.useSmartCount && !hasJoins)) {
                     countPromise = countQuery.select(
                         bookshelf.knex.raw('count(*) as aggregate')
                     );
