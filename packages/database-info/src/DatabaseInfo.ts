@@ -1,0 +1,126 @@
+import type {Knex} from 'knex';
+
+interface DatabaseDetails {
+    driver: string;
+    database: string;
+    engine: string;
+    version: string;
+}
+
+interface KnexClient {
+    config: {
+        client: string;
+    };
+    driver: {
+        VERSION: string;
+    };
+}
+
+interface DatabaseConfig {
+    client: string;
+}
+
+export default class DatabaseInfo {
+    private _knex: Knex;
+    private _client: KnexClient;
+    private _driver: string;
+    private _databaseDetails: DatabaseDetails;
+
+    constructor(knex: Knex) {
+        this._knex = knex;
+        this._client = this._knex.client as unknown as KnexClient;
+        this._driver = this._client.config.client;
+
+        this._databaseDetails = {
+            // The underlying driver that `knex` uses
+            // ie. `sqlite3`, `mysql` or `mysql2`
+            driver: this._driver,
+
+            // A capitalized version of the specific database used
+            database: 'unknown',
+
+            // A slugified version of the `database`
+            engine: 'unknown',
+
+            // The version of the database used
+            version: 'unknown'
+        };
+    }
+
+    async init(): Promise<DatabaseDetails> {
+        switch (this._driver) {
+        case 'sqlite3':
+            this._databaseDetails.database = 'SQLite';
+            this._databaseDetails.engine = 'sqlite3';
+            this._databaseDetails.version = this._client.driver.VERSION;
+            break;
+        case 'mysql':
+        case 'mysql2':
+            try {
+                const version = await this._knex.raw('SELECT version() as version;') as [[{ version: string }]];
+                const mysqlVersion = version[0][0].version;
+
+                if (mysqlVersion.includes('MariaDB')) {
+                    this._databaseDetails.database = 'MariaDB';
+                    this._databaseDetails.engine = 'mariadb';
+                    this._databaseDetails.version = mysqlVersion.split('-')[0];
+                } else {
+                    this._databaseDetails.database = 'MySQL';
+
+                    if (mysqlVersion.startsWith('5')) {
+                        this._databaseDetails.engine = 'mysql5';
+                    } else if (mysqlVersion.startsWith('8')) {
+                        this._databaseDetails.engine = 'mysql8';
+                    } else {
+                        this._databaseDetails.engine = 'mysql';
+                    }
+
+                    this._databaseDetails.version = mysqlVersion;
+                }
+            } catch (err) {
+                return this._databaseDetails;
+            }
+            break;
+        default:
+            // This driver isn't supported so we should just leave the return
+            // object alone with the "unknown" strings
+            break;
+        }
+
+        return this._databaseDetails;
+    }
+
+    getDriver(): string {
+        return this._databaseDetails.driver;
+    }
+
+    getDatabase(): string {
+        return this._databaseDetails.database;
+    }
+
+    getEngine(): string {
+        return this._databaseDetails.engine;
+    }
+
+    getVersion(): string {
+        return this._databaseDetails.version;
+    }
+
+    static isSQLite(knex: Knex): boolean {
+        const driver = (knex.client as unknown as KnexClient).config.client;
+        return ['sqlite3', 'better-sqlite3'].includes(driver);
+    }
+
+    static isSQLiteConfig(config: DatabaseConfig): boolean {
+        return ['sqlite3', 'better-sqlite3'].includes(config.client);
+    }
+
+    static isMySQL(knex: Knex): boolean {
+        const driver = (knex.client as unknown as KnexClient).config.client;
+        return ['mysql', 'mysql2'].includes(driver);
+    }
+
+    static isMySQLConfig(config: DatabaseConfig): boolean {
+        return ['mysql', 'mysql2'].includes(config.client);
+    }
+}

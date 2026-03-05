@@ -8,24 +8,32 @@
   },
   "author": "Ghost Foundation",
   "license": "MIT",
-  "main": "index.js",
+  "type": "module",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "default": "./build/index.js"
+    }
+  },
   "scripts": {
     "dev": "echo \"Implement me!\"",
-    "test:unit": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
-    "test": "yarn test:unit",
-    "lint:code": "eslint *.js lib/ --ext .js --cache",
-    "lint": "yarn lint:code && yarn lint:test",
-    "lint:test": "eslint -c test/.eslintrc.js test/ --ext .js --cache"
+    "build": "tsc",
+    "prepare": "tsc",
+    "test:types": "tsc --noEmit",
+    "test:unit": "vitest run --config ../../vitest.config.ts",
+    "test": "yarn test:types && yarn test:unit",
+    "lint": "eslint src/ --ext .ts --cache"
   },
   "files": [
-    "index.js",
-    "lib"
+    "build"
   ],
   "publishConfig": {
     "access": "public"
   },
   "devDependencies": {
-    "mocha": "11.7.5",
-    "sinon": "21.0.1"
+    "sinon": "21.0.1",
+    "typescript": "5.9.3"
   }
 }
