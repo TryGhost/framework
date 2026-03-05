@@ -26,7 +26,7 @@
     "express": "5.2.1",
     "express-session": "1.19.0",
     "mocha": "11.7.5",
-    "multer": "2.1.0",
+    "multer": "2.1.1",
     "sinon": "21.0.1"
   },
   "peerDependencies": {
