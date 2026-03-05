@@ -20,7 +20,7 @@
     "lib"
   ],
   "devDependencies": {
-    "@sinonjs/fake-timers": "15.1.0",
+    "@sinonjs/fake-timers": "15.1.1",
     "date-fns": "4.1.0",
     "mocha": "11.7.5",
     "rewire": "9.0.1",
