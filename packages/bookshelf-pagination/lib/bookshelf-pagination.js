@@ -14,6 +14,48 @@ const messages = {
 let defaults;
 let paginationUtils;
 
+const JOIN_KEYWORD_REGEX = /\bjoin\b/i;
+const FROM_CLAUSE_REGEX = /\bfrom\b([\s\S]*?)(?:\bwhere\b|\bgroup\s+by\b|\border\s+by\b|\blimit\b|\boffset\b|$)/i;
+
+function getCompiledSql(queryBuilder) {
+    const compiledQuery = queryBuilder.toSQL();
+
+    if (Array.isArray(compiledQuery)) {
+        return compiledQuery
+            .map((query) => {
+                return query && query.sql ? query.sql : '';
+            })
+            .join(' ');
+    }
+
+    return compiledQuery && compiledQuery.sql ? compiledQuery.sql : '';
+}
+
+function extractFromClause(sql) {
+    const fromClauseMatch = sql.match(FROM_CLAUSE_REGEX);
+
+    return fromClauseMatch ? fromClauseMatch[1] : '';
+}
+
+function hasJoinKeyword(sql) {
+    return JOIN_KEYWORD_REGEX.test(sql);
+}
+
+function hasCommaSeparatedFromSources(sql) {
+    return extractFromClause(sql).includes(',');
+}
+
+// Smart count only uses count(*) for single-table queries.
+// This check flags multi-table sources in two forms:
+// 1) explicit JOIN keywords (join, left join, join raw, etc.)
+// 2) old-style comma-separated FROM lists (eg `from posts, tags`)
+// Both can duplicate base rows, so fetchPage should use count(distinct id).
+function hasMultiTableSource(queryBuilder) {
+    const sql = getCompiledSql(queryBuilder);
+
+    return hasJoinKeyword(sql) || hasCommaSeparatedFromSources(sql);
+}
+
 /**
  * ### Default pagination values
  * These are overridden via `options` passed to each function
@@ -190,12 +232,9 @@ const pagination = function pagination(bookshelf) {
                 }
 
                 countQuery.clear('select');
-                //skipping distinct for simple queries, where we know that the result set will always be unique, as distinct adds a lot of latency
-                // Detect JOINs via compiled SQL (public Knex API) rather than internal _statements.
-                // Validated against Knex 2.4.2 and 3.1.0 — toSQL().sql includes the join keyword
-                // for all join types (leftJoin, rightJoin, innerJoin, crossJoin, joinRaw, etc.)
-                const hasJoins = /\bjoin\b/i.test(countQuery.toSQL().sql);
-                if (options.useBasicCount || (options.useSmartCount && !hasJoins)) {
+                // Skipping distinct for simple queries where we know result rows are unique.
+                const queryHasMultiTableSource = hasMultiTableSource(countQuery);
+                if (options.useBasicCount || (options.useSmartCount && !queryHasMultiTableSource)) {
                     countPromise = countQuery.select(
                         bookshelf.knex.raw('count(*) as aggregate')
                     );
