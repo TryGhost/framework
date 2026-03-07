@@ -24,7 +24,7 @@
     "date-fns": "4.1.0",
     "mocha": "11.7.5",
     "rewire": "9.0.1",
-    "sinon": "21.0.1"
+    "sinon": "21.0.2"
   },
   "dependencies": {
     "@breejs/later": "4.2.0",

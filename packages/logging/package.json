@@ -25,7 +25,7 @@
   "devDependencies": {
     "@tryghost/errors": "1.0.0",
     "mocha": "11.7.5",
-    "sinon": "21.0.1"
+    "sinon": "21.0.2"
   },
   "dependencies": {
     "@tryghost/bunyan-rotating-filestream": "0.0.7",
