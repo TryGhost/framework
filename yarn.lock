@@ -1418,10 +1418,10 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
-"@elastic/elasticsearch@9.3.2":
-  version "9.3.2"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-9.3.2.tgz#81a2a09577145de1acf94b42ba0d6d341b558182"
-  integrity sha512-Td9+dajSx5KebnNgsxDxTDWSDL4bUILPiUGAFKiaCWRI0uSgmfOGrlFA8IUZDurjPpSy06o5cIBrVcPs37zHaQ==
+"@elastic/elasticsearch@9.3.3":
+  version "9.3.3"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-9.3.3.tgz#09e727b69f22572d93aaa2d8c7bbc2b4d2ad0b42"
+  integrity sha512-vs0X0B6ZWIpNw7wBzwg55qrHhP6naSk3AgdND2gojklQo8yFbCn0dEyyUiPhLMnss0Ljgo5x68YsAlwEYLnrng==
   dependencies:
     "@elastic/transport" "^9.3.3"
     apache-arrow "18.x - 21.x"
