@@ -25,7 +25,7 @@
   "devDependencies": {
     "folder-hash": "4.1.1",
     "mocha": "11.7.5",
-    "sinon": "21.0.1"
+    "sinon": "21.0.2"
   },
   "dependencies": {
     "@tryghost/errors": "^3.0.0",
