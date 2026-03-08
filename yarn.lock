@@ -5138,13 +5138,13 @@ flatted@^3.2.9:
   resolved "https://registry.yarnpkg.com/flatted/-/flatted-3.3.4.tgz#0986e681008f0f13f58e18656c47967682db5ff6"
   integrity sha512-3+mMldrTAPdta5kjX2G2J7iX4zxtnwpdA8Tr2ZSjkyPSanvbZAcy6flmtnXbEybHrDcU9641lxrMfFuUxVz9vA==
 
-folder-hash@4.1.1:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/folder-hash/-/folder-hash-4.1.1.tgz#c054437d83c26455b12c4a4c8586b1f080c6e644"
-  integrity sha512-1ZSlKJSbET3XpglnEXC9g+QF4QRZhqHIjpFfa4pAMfO4tu/XYPafpeHEX6zOFS2EolOIXr0lPh1eSjmdWItX2w==
+folder-hash@4.1.2:
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/folder-hash/-/folder-hash-4.1.2.tgz#815bad05d375e29630163466463a7ce66201c87c"
+  integrity sha512-rjdiHw3ShVonhMZZXvD/I28boUkbJFT/RBsg5MbQQd8e61PhevIwFwmL218/AscBEsW/blH4BC4A+kFeIqHVfw==
   dependencies:
     debug "4.4.0"
-    minimatch "7.4.6"
+    minimatch "7.4.9"
 
 follow-redirects@^1.15.11:
   version "1.15.11"
@@ -6392,12 +6392,12 @@ minimatch@10.2.4, minimatch@^10.2.2:
   dependencies:
     brace-expansion "^1.1.7"
 
-minimatch@7.4.6:
-  version "7.4.6"
-  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-7.4.6.tgz#845d6f254d8f4a5e4fd6baf44d5f10c8448365fb"
-  integrity sha512-sBz8G/YjVniEz6lKPNpKxXwazJe4c19fEfV2GDMX6AjFz+MX9uDWIZW8XreVhkFW3fkIdTv/gxWr/Kks5FFAVw==
+minimatch@7.4.9:
+  version "7.4.9"
+  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-7.4.9.tgz#ef35412b1b36261b78ef1b2f0db29b759bbcaf5d"
+  integrity sha512-Brg/fp/iAVDOQoHxkuN5bEYhyQlZhxddI78yWsCbeEwTHXQjlNLtiJDUsp1GIptVqMI7/gkJMz4vVAc01mpoBw==
   dependencies:
-    brace-expansion "^2.0.1"
+    brace-expansion "^2.0.2"
 
 minimatch@^5.0.1, minimatch@^5.1.0:
   version "5.1.9"
