@@ -26,7 +26,5 @@
     "mocha": "11.7.5",
     "sinon": "21.0.2"
   },
-  "dependencies": {
-    "lodash.template": "4.5.0"
-  }
+  "dependencies": {}
 }
