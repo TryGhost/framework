@@ -76,7 +76,7 @@ describe('Transporter', function () {
 
     it('can create a Direct transporter', function () {
         const transporter = nodemailer('direct', {});
-        assert.equal(transporter.transporter.name, 'SMTP (direct)');
+        assert.equal(transporter.transporter.name, 'SMTP');
     });
 
     it('can create a Stub transporter', function () {
