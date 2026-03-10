@@ -22,9 +22,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "devDependencies": {
-    "mocha": "11.7.5"
-  },
   "dependencies": {
     "@tryghost/root-utils": "^2.0.0",
     "nconf": "0.13.0"
