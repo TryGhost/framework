@@ -73,8 +73,7 @@ module.exports = function (transport, options = {}) {
 
         break;
     case 'direct':
-        const directTransport = require('nodemailer-direct-transport');
-        transportOptions = directTransport(options);
+        transportOptions = Object.assign({direct: true}, options);
         break;
     case 'stub':
         const stubTransport = require('nodemailer-stub-transport');
