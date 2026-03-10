@@ -22,9 +22,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "devDependencies": {
-    "mocha": "11.7.5"
-  },
   "dependencies": {
     "@tryghost/errors": "^3.0.0",
     "@tryghost/tpl": "^2.0.0",
