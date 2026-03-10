@@ -24,7 +24,6 @@
   },
   "devDependencies": {
     "folder-hash": "4.1.2",
-    "mocha": "11.7.5",
     "sinon": "21.0.2"
   },
   "dependencies": {
