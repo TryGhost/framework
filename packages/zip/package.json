@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/zip",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -27,7 +27,7 @@
     "sinon": "21.0.2"
   },
   "dependencies": {
-    "@tryghost/errors": "^3.0.0",
+    "@tryghost/errors": "^3.0.1",
     "archiver": "7.0.1",
     "extract-zip": "2.0.1"
   }

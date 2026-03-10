@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/mw-error-handler",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Express middleware utilities for normalizing and rendering Ghost API errors",
   "author": "Ghost Foundation",
   "license": "MIT",
@@ -24,10 +24,10 @@
     "sinon": "21.0.2"
   },
   "dependencies": {
-    "@tryghost/debug": "^2.0.0",
-    "@tryghost/errors": "^3.0.0",
-    "@tryghost/http-cache-utils": "^2.0.0",
-    "@tryghost/tpl": "^2.0.0",
+    "@tryghost/debug": "^2.0.1",
+    "@tryghost/errors": "^3.0.1",
+    "@tryghost/http-cache-utils": "^2.0.1",
+    "@tryghost/tpl": "^2.0.1",
     "lodash": "4.17.23",
     "semver": "7.7.4"
   },
