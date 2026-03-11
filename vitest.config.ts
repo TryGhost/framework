@@ -8,6 +8,7 @@ export default defineConfig({
         coverage: {
             provider: 'v8',
             all: true,
+            exclude: ['**/src/**', '**/build/**', '**/test/**', '**/.eslintrc.js'],
             reporter: ['text', 'cobertura'],
             thresholds: {
                 lines: 90,

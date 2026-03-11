@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/mw-vhost",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "author": "Ghost Foundation",
   "license": "MIT",
   "main": "index.js",
@@ -20,7 +20,6 @@
     "lib"
   ],
   "devDependencies": {
-    "mocha": "11.7.5",
     "supertest": "7.2.2"
   },
   "repository": {

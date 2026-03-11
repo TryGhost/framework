@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/http-stream",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -26,11 +26,10 @@
   },
   "devDependencies": {
     "express": "5.2.1",
-    "mocha": "11.7.5",
-    "sinon": "21.0.1"
+    "sinon": "21.0.2"
   },
   "dependencies": {
-    "@tryghost/errors": "^3.0.0",
-    "@tryghost/request": "^3.0.0"
+    "@tryghost/errors": "^3.0.1",
+    "@tryghost/request": "^3.0.1"
   }
 }

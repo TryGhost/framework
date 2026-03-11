@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/nodemailer",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -23,14 +23,12 @@
     "access": "public"
   },
   "devDependencies": {
-    "mocha": "11.7.5",
-    "sinon": "21.0.1"
+    "sinon": "21.0.2"
   },
   "dependencies": {
-    "@aws-sdk/client-sesv2": "3.1000.0",
-    "@tryghost/errors": "^3.0.0",
+    "@aws-sdk/client-sesv2": "3.1004.0",
+    "@tryghost/errors": "^3.0.1",
     "nodemailer": "8.0.1",
-    "nodemailer-direct-transport": "3.3.2",
     "nodemailer-mailgun-transport": "2.1.5",
     "nodemailer-stub-transport": "1.1.0"
   }

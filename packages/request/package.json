@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/request",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -23,15 +23,14 @@
     "access": "public"
   },
   "devDependencies": {
-    "mocha": "11.7.5",
     "nock": "14.0.11",
     "rewire": "9.0.1",
-    "sinon": "21.0.1"
+    "sinon": "21.0.2"
   },
   "dependencies": {
-    "@tryghost/errors": "^3.0.0",
-    "@tryghost/validator": "^2.0.0",
-    "@tryghost/version": "^2.0.0",
+    "@tryghost/errors": "^3.0.1",
+    "@tryghost/validator": "^2.0.1",
+    "@tryghost/version": "^2.0.1",
     "cacheable-lookup": "7.0.0",
     "got": "14.6.6",
     "lodash": "4.17.23"

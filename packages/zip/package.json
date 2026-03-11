@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/zip",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -23,12 +23,11 @@
     "access": "public"
   },
   "devDependencies": {
-    "folder-hash": "4.1.1",
-    "mocha": "11.7.5",
-    "sinon": "21.0.1"
+    "folder-hash": "4.1.2",
+    "sinon": "21.0.2"
   },
   "dependencies": {
-    "@tryghost/errors": "^3.0.0",
+    "@tryghost/errors": "^3.0.1",
     "archiver": "7.0.1",
     "extract-zip": "2.0.1"
   }

@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/security",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Security primitives for token generation, password hashing, and safe identifiers",
   "repository": {
     "type": "git",
@@ -26,8 +26,7 @@
     "lib"
   ],
   "devDependencies": {
-    "mocha": "11.7.5",
-    "sinon": "21.0.1",
+    "sinon": "21.0.2",
     "uuid": "13.0.0"
   },
   "dependencies": {

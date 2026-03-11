@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/job-manager",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "author": "Ghost Foundation",
   "license": "MIT",
   "publishConfig": {
@@ -20,16 +20,15 @@
     "lib"
   ],
   "devDependencies": {
-    "@sinonjs/fake-timers": "15.1.0",
+    "@sinonjs/fake-timers": "15.1.1",
     "date-fns": "4.1.0",
-    "mocha": "11.7.5",
     "rewire": "9.0.1",
-    "sinon": "21.0.1"
+    "sinon": "21.0.2"
   },
   "dependencies": {
     "@breejs/later": "4.2.0",
-    "@tryghost/errors": "^3.0.0",
-    "@tryghost/logging": "^4.0.0",
+    "@tryghost/errors": "^3.0.1",
+    "@tryghost/logging": "^4.0.1",
     "bree": "9.2.9",
     "cron-validate": "1.5.3",
     "fastq": "1.20.1",

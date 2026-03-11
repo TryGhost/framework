@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/debug",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -22,11 +22,8 @@
   "publishConfig": {
     "access": "public"
   },
-  "devDependencies": {
-    "mocha": "11.7.5"
-  },
   "dependencies": {
-    "@tryghost/root-utils": "^2.0.0",
+    "@tryghost/root-utils": "^2.0.1",
     "debug": "4.4.3"
   }
 }
