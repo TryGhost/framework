@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/pretty-cli",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "A mini-module to style a sywac instance in a standard way",
   "repository": {
     "type": "git",
