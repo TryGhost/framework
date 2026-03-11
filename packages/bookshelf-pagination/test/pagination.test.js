@@ -16,6 +16,7 @@ function createBookshelf({countRows, fetchResult, selectError, fetchError} = {})
     };
 
     const countQuery = {
+        _sql: 'select * from `posts`',
         clone() {
             modelState.countCloned = true;
             return countQuery;
@@ -34,6 +35,9 @@ function createBookshelf({countRows, fetchResult, selectError, fetchError} = {})
                 return Promise.reject(selectError);
             }
             return Promise.resolve(countRows || [{aggregate: 1}]);
+        },
+        toSQL() {
+            return {sql: countQuery._sql};
         }
     };
 
@@ -194,6 +198,78 @@ describe('@tryghost/bookshelf-pagination', function () {
         const model = new bookshelf.Model();
 
         await model.fetchPage({page: 2, limit: 10});
+
+        assert.equal(modelState.rawCalls[0], 'count(distinct posts.id) as aggregate');
+    });
+
+    it('useSmartCount uses count(*) when no JOINs present', async function () {
+        const {bookshelf, modelState} = createBookshelf({countRows: [{aggregate: 1}]});
+        const model = new bookshelf.Model();
+
+        await model.fetchPage({page: 1, limit: 10, useSmartCount: true});
+
+        assert.equal(modelState.rawCalls[0], 'count(*) as aggregate');
+    });
+
+    it('useSmartCount uses count(*) when SQL has commas outside FROM', async function () {
+        const {bookshelf, modelState} = createBookshelf({countRows: [{aggregate: 1}]});
+        const model = new bookshelf.Model();
+
+        // Simulate a typical single-table query with multiple selected columns
+        const originalQuery = model.query;
+        model.query = function () {
+            const qb = originalQuery.apply(this, arguments);
+            if (arguments.length === 0) {
+                qb._sql = 'select `posts`.`id`, `posts`.`title` from `posts` where `posts`.`status` = ?';
+            }
+            return qb;
+        };
+
+        await model.fetchPage({page: 1, limit: 10, useSmartCount: true});
+
+        assert.equal(modelState.rawCalls[0], 'count(*) as aggregate');
+    });
+
+    for (const [joinType, sql] of [
+        ['leftJoin', 'select * from `posts` left join `tags` on `posts`.`id` = `tags`.`post_id`'],
+        ['rightJoin', 'select * from `posts` right join `tags` on `posts`.`id` = `tags`.`post_id`'],
+        ['innerJoin', 'select * from `posts` inner join `tags` on `posts`.`id` = `tags`.`post_id`'],
+        ['joinRaw', 'select * from `posts` LEFT JOIN tags ON posts.id = tags.post_id']
+    ]) {
+        it(`useSmartCount uses distinct count when ${joinType} is present`, async function () {
+            const {bookshelf, modelState} = createBookshelf({countRows: [{aggregate: 1}]});
+            const model = new bookshelf.Model();
+
+            // Simulate a JOIN in the compiled SQL
+            const originalQuery = model.query;
+            model.query = function () {
+                const qb = originalQuery.apply(this, arguments);
+                if (arguments.length === 0) {
+                    qb._sql = sql;
+                }
+                return qb;
+            };
+
+            await model.fetchPage({page: 1, limit: 10, useSmartCount: true});
+
+            assert.equal(modelState.rawCalls[0], 'count(distinct posts.id) as aggregate');
+        });
+    }
+
+    it('useSmartCount uses distinct count when comma-separated FROM sources are present', async function () {
+        const {bookshelf, modelState} = createBookshelf({countRows: [{aggregate: 1}]});
+        const model = new bookshelf.Model();
+
+        const originalQuery = model.query;
+        model.query = function () {
+            const qb = originalQuery.apply(this, arguments);
+            if (arguments.length === 0) {
+                qb._sql = 'select * from `posts`, `tags` where `posts`.`id` = `tags`.`post_id`';
+            }
+            return qb;
+        };
+
+        await model.fetchPage({page: 1, limit: 10, useSmartCount: true});
 
         assert.equal(modelState.rawCalls[0], 'count(distinct posts.id) as aggregate');
     });
