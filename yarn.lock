@@ -6373,10 +6373,10 @@ nodemailer-stub-transport@1.1.0:
   resolved "https://registry.yarnpkg.com/nodemailer-stub-transport/-/nodemailer-stub-transport-1.1.0.tgz#11421d2d66b4ee6f405354f914c1f4641eb24b0d"
   integrity sha512-4fwl2f+647IIyuNuf6wuEMqK4oEU9FMJSYme8kPckVSr1rXIXcmI6BNcIWO+1cAK8XeexYKxYoFztam0jAwjkA==
 
-nodemailer@8.0.1:
-  version "8.0.1"
-  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-8.0.1.tgz#225842a5e3a06c4ee39adfdf784acd9e00bea9c2"
-  integrity sha512-5kcldIXmaEjZcHR6F28IKGSgpmZHaF1IXLWFTG+Xh3S+Cce4MiakLtWY+PlBU69fLbRa8HlaGIrC/QolUpHkhg==
+nodemailer@8.0.2:
+  version "8.0.2"
+  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-8.0.2.tgz#70a6f031314a33bac7147eb9c378cdaa35fb619b"
+  integrity sha512-zbj002pZAIkWQFxyAaqoxvn+zoIwRnS40hgjqTXudKOOJkiFFgBeNqjgD3/YCR12sZnrghWYBY+yP1ZucdDRpw==
 
 normalize-package-data@^2.5.0:
   version "2.5.0"
