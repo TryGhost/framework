@@ -78,9 +78,40 @@ describe('@tryghost/bookshelf-has-posts', function () {
         assert.equal(callbackResult, subqueryBuilder);
         assert.equal(subqueryBuilder.distinct.calledOnceWithExactly('posts_tags.tag_id'), true);
         assert.equal(subqueryBuilder.from.calledOnceWithExactly('posts_tags'), true);
-        assert.equal(subqueryBuilder.whereRaw.calledOnceWithExactly('posts_tags.tag_id = tags.id'), true);
         assert.equal(subqueryBuilder.join.calledOnceWithExactly('posts', 'posts.id', 'posts_tags.post_id'), true);
         assert.equal(subqueryBuilder.andWhere.calledOnceWithExactly('posts.status', '=', 'published'), true);
+    });
+
+    it('addHasPostsWhere does not use a correlated subquery', function () {
+        const whereIn = sinon.stub();
+        const qb = {whereIn};
+        const tableName = 'tags';
+        const config = {
+            joinTable: 'posts_tags',
+            joinTo: 'tag_id'
+        };
+
+        const whereFn = plugin.addHasPostsWhere(tableName, config);
+        whereFn(qb);
+
+        const subqueryBuilder = {
+            distinct: sinon.stub().returnsThis(),
+            select: sinon.stub().returnsThis(),
+            from: sinon.stub().returnsThis(),
+            whereRaw: sinon.stub().returnsThis(),
+            join: sinon.stub().returnsThis(),
+            andWhere: sinon.stub().returnsThis(),
+            toSQL: sinon.stub().returns({sql: 'select *'})
+        };
+
+        whereIn.firstCall.args[1].call(subqueryBuilder);
+
+        // The subquery must NOT contain a whereRaw that correlates back to the outer query.
+        // A correlated whereRaw (e.g. `posts_tags.tag_id = tags.id`) forces MySQL to
+        // re-evaluate the subquery for every row in the outer table, causing excessive
+        // row scanning on sites with many tags/authors.
+        assert.equal(subqueryBuilder.whereRaw.called, false,
+            'subquery should not use whereRaw — correlated subqueries cause O(n²) row scanning');
     });
 
     it('fetch applies has-posts query when configured', function () {

@@ -11,7 +11,6 @@ const addHasPostsWhere = (tableName, config) => {
                 .distinct(`${config.joinTable}.${config.joinTo}`)
                 .select()
                 .from(config.joinTable)
-                .whereRaw(`${config.joinTable}.${config.joinTo} = ${comparisonField}`)
                 .join('posts', 'posts.id', `${config.joinTable}.post_id`)
                 .andWhere('posts.status', '=', 'published');
 
