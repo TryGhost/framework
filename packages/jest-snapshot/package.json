@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/jest-snapshot",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -28,7 +28,7 @@
   "dependencies": {
     "@jest/expect": "30.3.0",
     "@jest/expect-utils": "30.3.0",
-    "@tryghost/errors": "^3.0.2",
+    "@tryghost/errors": "^3.0.3",
     "jest-snapshot": "30.3.0"
   }
 }

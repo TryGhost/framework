@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-plugins",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
@@ -26,15 +26,15 @@
     "sinon": "21.0.2"
   },
   "dependencies": {
-    "@tryghost/bookshelf-collision": "^2.0.2",
-    "@tryghost/bookshelf-custom-query": "^2.0.2",
-    "@tryghost/bookshelf-eager-load": "^2.0.2",
-    "@tryghost/bookshelf-filter": "^2.0.2",
-    "@tryghost/bookshelf-has-posts": "^2.0.2",
-    "@tryghost/bookshelf-include-count": "^2.0.2",
-    "@tryghost/bookshelf-order": "^2.0.2",
-    "@tryghost/bookshelf-pagination": "^2.0.2",
-    "@tryghost/bookshelf-search": "^2.0.2",
-    "@tryghost/bookshelf-transaction-events": "^2.0.2"
+    "@tryghost/bookshelf-collision": "^2.0.3",
+    "@tryghost/bookshelf-custom-query": "^2.0.3",
+    "@tryghost/bookshelf-eager-load": "^2.0.3",
+    "@tryghost/bookshelf-filter": "^2.0.3",
+    "@tryghost/bookshelf-has-posts": "^2.1.0",
+    "@tryghost/bookshelf-include-count": "^2.0.3",
+    "@tryghost/bookshelf-order": "^2.0.3",
+    "@tryghost/bookshelf-pagination": "^2.0.3",
+    "@tryghost/bookshelf-search": "^2.0.3",
+    "@tryghost/bookshelf-transaction-events": "^2.0.3"
   }
 }
