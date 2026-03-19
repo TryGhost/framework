@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "got": "14.6.6",
-    "sinon": "21.0.2"
+    "sinon": "21.0.3"
   },
   "dependencies": {
     "p-wait-for": "6.0.0"

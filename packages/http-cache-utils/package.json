@@ -25,6 +25,6 @@
     "access": "public"
   },
   "devDependencies": {
-    "sinon": "21.0.2"
+    "sinon": "21.0.3"
   }
 }

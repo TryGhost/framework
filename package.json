@@ -33,7 +33,7 @@
     "eslint": "8.57.1",
     "eslint-plugin-ghost": "3.5.0",
     "nx": "22.5.4",
-    "sinon": "21.0.2",
+    "sinon": "21.0.3",
     "ts-node": "10.9.2",
     "vitest": "3.2.4"
   },
