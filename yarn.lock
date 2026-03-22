@@ -48,25 +48,25 @@
     "@smithy/util-utf8" "^2.0.0"
     tslib "^2.6.2"
 
-"@aws-sdk/client-sesv2@3.1012.0":
-  version "3.1012.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-sesv2/-/client-sesv2-3.1012.0.tgz#cde1fb78bf78cf1286f5466bfed4ac4f929972ab"
-  integrity sha512-Z7NP5g9CHbmcfRkW7GR/eKEHmg7UBAiBYREH2Sw5Ud/HoIdJswKTQzsky+k2f/4/GVyM7Df4XPtnBm6EelNFpw==
+"@aws-sdk/client-sesv2@3.1013.0":
+  version "3.1013.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-sesv2/-/client-sesv2-3.1013.0.tgz#f9bc395226cb6f4e2ff555c9fe4a8d5d17be428c"
+  integrity sha512-h/61K1JAULpWlkkFmoZaGz0dSOhaSmG66yBd5KsyGee6D6+T0mM4e0tlgBgXfeI216ktmvQ6RDmkafi95suCkg==
   dependencies:
     "@aws-crypto/sha256-browser" "5.2.0"
     "@aws-crypto/sha256-js" "5.2.0"
-    "@aws-sdk/core" "^3.973.21"
-    "@aws-sdk/credential-provider-node" "^3.972.22"
+    "@aws-sdk/core" "^3.973.22"
+    "@aws-sdk/credential-provider-node" "^3.972.23"
     "@aws-sdk/middleware-host-header" "^3.972.8"
     "@aws-sdk/middleware-logger" "^3.972.8"
     "@aws-sdk/middleware-recursion-detection" "^3.972.8"
-    "@aws-sdk/middleware-user-agent" "^3.972.22"
+    "@aws-sdk/middleware-user-agent" "^3.972.23"
     "@aws-sdk/region-config-resolver" "^3.972.8"
-    "@aws-sdk/signature-v4-multi-region" "^3.996.9"
+    "@aws-sdk/signature-v4-multi-region" "^3.996.10"
     "@aws-sdk/types" "^3.973.6"
     "@aws-sdk/util-endpoints" "^3.996.5"
     "@aws-sdk/util-user-agent-browser" "^3.972.8"
-    "@aws-sdk/util-user-agent-node" "^3.973.8"
+    "@aws-sdk/util-user-agent-node" "^3.973.9"
     "@smithy/config-resolver" "^4.4.11"
     "@smithy/core" "^3.23.12"
     "@smithy/fetch-http-handler" "^5.3.15"
@@ -94,7 +94,7 @@
     "@smithy/util-utf8" "^4.2.2"
     tslib "^2.6.2"
 
-"@aws-sdk/core@^3.973.21", "@aws-sdk/core@^3.973.23":
+"@aws-sdk/core@^3.973.22", "@aws-sdk/core@^3.973.23":
   version "3.973.23"
   resolved "https://registry.yarnpkg.com/@aws-sdk/core/-/core-3.973.23.tgz#76c6d4c94dd21ed298769a75e30ab0af8120af01"
   integrity sha512-aoJncvD1XvloZ9JLnKqTRL9dBy+Szkryoag9VT+V1TqsuUgIxV9cnBVM/hrDi2vE8bDqLiDR8nirdRcCdtJu0w==
@@ -174,7 +174,7 @@
     "@smithy/types" "^4.13.1"
     tslib "^2.6.2"
 
-"@aws-sdk/credential-provider-node@^3.972.22":
+"@aws-sdk/credential-provider-node@^3.972.23":
   version "3.972.24"
   resolved "https://registry.yarnpkg.com/@aws-sdk/credential-provider-node/-/credential-provider-node-3.972.24.tgz#3d7dfa3c7cad207411e9d6e0fddc1fd8d87a498d"
   integrity sha512-9Jwi7aps3AfUicJyF5udYadPypPpCwUZ6BSKr/QjRbVCpRVS1wc+1Q6AEZ/qz8J4JraeRd247pSzyMQSIHVebw==
@@ -281,7 +281,7 @@
     "@smithy/util-utf8" "^4.2.2"
     tslib "^2.6.2"
 
-"@aws-sdk/middleware-user-agent@^3.972.22", "@aws-sdk/middleware-user-agent@^3.972.24":
+"@aws-sdk/middleware-user-agent@^3.972.23", "@aws-sdk/middleware-user-agent@^3.972.24":
   version "3.972.24"
   resolved "https://registry.yarnpkg.com/@aws-sdk/middleware-user-agent/-/middleware-user-agent-3.972.24.tgz#a82a80aeca0ff0d0aab94a8925fd934557c37da5"
   integrity sha512-dLTWy6IfAMhNiSEvMr07g/qZ54be6pLqlxVblbF6AzafmmGAzMMj8qMoY9B4+YgT+gY9IcuxZslNh03L6PyMCQ==
@@ -350,7 +350,7 @@
     "@smithy/types" "^4.13.1"
     tslib "^2.6.2"
 
-"@aws-sdk/signature-v4-multi-region@^3.996.9":
+"@aws-sdk/signature-v4-multi-region@^3.996.10":
   version "3.996.11"
   resolved "https://registry.yarnpkg.com/@aws-sdk/signature-v4-multi-region/-/signature-v4-multi-region-3.996.11.tgz#5a23055f41ee2f1191f06eb18bfd20906b9412cf"
   integrity sha512-SKgZY7x6AloLUXO20FJGnkKJ3a6CXzNDt6PYs2yqoPzgU0xKWcUoGGJGEBTsfM5eihKW42lbwp+sXzACLbSsaA==
@@ -418,7 +418,7 @@
     bowser "^2.11.0"
     tslib "^2.6.2"
 
-"@aws-sdk/util-user-agent-node@^3.973.10", "@aws-sdk/util-user-agent-node@^3.973.8":
+"@aws-sdk/util-user-agent-node@^3.973.10", "@aws-sdk/util-user-agent-node@^3.973.9":
   version "3.973.10"
   resolved "https://registry.yarnpkg.com/@aws-sdk/util-user-agent-node/-/util-user-agent-node-3.973.10.tgz#19ee724466b7b78b0bdab6ac2252de36873b468a"
   integrity sha512-E99zeTscCc+pTMfsvnfi6foPpKmdD1cZfOC7/P8UUrjsoQdg9VEWPRD+xdFduKnfPXwcvby58AlO9jwwF6U96g==
