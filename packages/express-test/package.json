@@ -12,8 +12,9 @@
   "scripts": {
     "dev": "echo \"Implement me!\"",
     "test": "NODE_ENV=testing vitest run --coverage",
-    "lint": "eslint . --ext .js --cache",
-    "posttest": "yarn lint"
+    "lint": "oxlint -c ../../.oxlintrc.json . && yarn lint:eslint",
+    "posttest": "yarn lint",
+    "lint:eslint": "eslint . --ext .js --cache"
   },
   "files": [
     "index.js",

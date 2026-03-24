@@ -1,0 +1,29 @@
+{
+  "plugins": ["node", "typescript"],
+  "rules": {
+    "eqeqeq": ["error", "always"],
+    "no-plusplus": ["error", {"allowForLoopAfterthoughts": true}],
+    "no-eval": "error",
+    "no-useless-call": "error",
+    "no-console": "error",
+    "no-shadow": "error",
+    "array-callback-return": "error",
+    "no-constructor-return": "error",
+    "no-promise-executor-return": "error",
+    "dot-notation": "error",
+    "no-var": "warn",
+    "no-unused-vars": "off",
+    "no-unused-expressions": "off",
+    "no-unused-private-class-members": "off",
+    "unicorn/no-thenable": "off"
+  },
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/build/**",
+    "**/coverage/**",
+    "**/cjs/**",
+    "**/es/**",
+    "**/types/**",
+    "**/test/fixtures/**"
+  ]
+}
