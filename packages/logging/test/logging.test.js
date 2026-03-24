@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const PrettyStream = require('@tryghost/pretty-stream');
 const GhostLogger = require('../lib/GhostLogger');
 const includes = require('lodash/includes');
@@ -11,6 +12,20 @@ const ElasticSearch = require('@tryghost/elasticsearch').BunyanStream;
 const HttpStream = require('@tryghost/http-stream');
 const sandbox = sinon.createSandbox();
 const {Worker} = require('worker_threads');
+const testArtifactsRoot = path.resolve(__dirname, 'artifacts', 'logs');
+
+function prepareTestLogDir(name) {
+    const dir = path.join(testArtifactsRoot, name);
+
+    fs.rmSync(dir, {recursive: true, force: true});
+    fs.mkdirSync(dir, {recursive: true});
+
+    return dir;
+}
+
+function getTestLogDir(name) {
+    return path.join(testArtifactsRoot, name);
+}
 
 describe('Logging config', function () {
     it('Reads file called loggingrc.js', function () {
@@ -589,26 +604,8 @@ describe('Logging', function () {
             assert.equal(ghostLogger.filename, '{env}');
         });
 
-        it('file stream should use custom filename template', function () {
-            const tempDir = './test-logs/';
-            const rimraf = function (dir) {
-                if (fs.existsSync(dir)) {
-                    fs.readdirSync(dir).forEach(function (file) {
-                        const curPath = dir + '/' + file;
-                        if (fs.lstatSync(curPath).isDirectory()) {
-                            rimraf(curPath);
-                        } else {
-                            fs.unlinkSync(curPath);
-                        }
-                    });
-                    fs.rmdirSync(dir);
-                }
-            };
-
-            // Create temp directory
-            if (!fs.existsSync(tempDir)) {
-                fs.mkdirSync(tempDir, {recursive: true});
-            }
+        it('file stream should use custom filename template', async function () {
+            const tempDir = prepareTestLogDir('custom-filename');
 
             var ghostLogger = new GhostLogger({
                 domain: 'test.com',
@@ -621,20 +618,18 @@ describe('Logging', function () {
             ghostLogger.info('Test log message');
 
             // Give it a moment to write
-            setTimeout(function () {
-                assert.equal(fs.existsSync(tempDir + 'production.log'), true);
-                assert.equal(fs.existsSync(tempDir + 'production.error.log'), true);
+            await new Promise((resolve) => {
+                setTimeout(resolve, 100);
+            });
 
-                // Cleanup
-                rimraf(tempDir);
-            }, 100);
+            assert.equal(fs.existsSync(path.join(tempDir, 'production.log')), true);
+            assert.equal(fs.existsSync(path.join(tempDir, 'production.error.log')), true);
+
+            fs.rmSync(tempDir, {recursive: true, force: true});
         });
 
         it('file stream supports built-in rotating-file transport config', function () {
-            const tempDir = './test-logs-rotation-built-in/';
-            if (!fs.existsSync(tempDir)) {
-                fs.mkdirSync(tempDir, {recursive: true});
-            }
+            const tempDir = prepareTestLogDir('rotation-built-in');
 
             const ghostLogger = new GhostLogger({
                 domain: 'test.com',
@@ -654,10 +649,7 @@ describe('Logging', function () {
         });
 
         it('file stream supports external rotating file library config', function () {
-            const tempDir = './test-logs-rotation-library/';
-            if (!fs.existsSync(tempDir)) {
-                fs.mkdirSync(tempDir, {recursive: true});
-            }
+            const tempDir = prepareTestLogDir('rotation-library');
 
             const ghostLogger = new GhostLogger({
                 domain: 'test.com',
@@ -680,10 +672,7 @@ describe('Logging', function () {
         });
 
         it('file stream rotation library handles missing rotateExisting option', function () {
-            const tempDir = './test-logs-rotation-library-default/';
-            if (!fs.existsSync(tempDir)) {
-                fs.mkdirSync(tempDir, {recursive: true});
-            }
+            const tempDir = prepareTestLogDir('rotation-library-default');
 
             const ghostLogger = new GhostLogger({
                 domain: 'test.com',
@@ -705,7 +694,8 @@ describe('Logging', function () {
         });
 
         it('file stream exits early when target directory does not exist', function () {
-            const badPath = './test-logs-missing-dir/';
+            const badPath = getTestLogDir('missing-dir');
+            fs.rmSync(badPath, {recursive: true, force: true});
             const ghostLogger = new GhostLogger({
                 transports: ['file'],
                 path: badPath
