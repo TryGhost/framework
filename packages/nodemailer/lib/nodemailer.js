@@ -1,5 +1,3 @@
-/* eslint-disable no-case-declarations */
-
 const errors = require("@tryghost/errors");
 const nodemailer = require("nodemailer");
 const tpl = require("@tryghost/tpl");

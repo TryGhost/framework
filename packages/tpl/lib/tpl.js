@@ -23,7 +23,7 @@ module.exports = (string, data) => {
     processedString = processedString.replace(interpolate, (_match, key) => {
         const trimmed = key.trim();
         if (!(trimmed in data)) {
-            // eslint-disable-next-line ghost/ghost-custom/ghost-error-usage
+            // lint-custom-disable-next-line ghost-error-usage
             throw new ReferenceError(`${trimmed} is not defined`);
         }
         return data[trimmed];

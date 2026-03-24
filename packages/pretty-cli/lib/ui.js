@@ -1,5 +1,6 @@
+/* oxlint-disable no-console */
 const { default: chalk } = require("chalk");
-const log = (...args) => console.log(...args); // eslint-disable-line no-console
+const log = (...args) => console.log(...args);
 
 module.exports.log = log;
 

@@ -9,7 +9,6 @@ export interface GhostErrorOptions {
     context?: string;
     help?: string;
     errorType?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     errorDetails?: any;
     code?: string;
     property?: string;
@@ -25,7 +24,6 @@ export class GhostError extends Error {
     id: string;
     context?: string;
     help?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     errorDetails: any;
     code: string | null;
     property: string | null;
@@ -66,9 +64,7 @@ export class GhostError extends Error {
         if (options.err) {
             // CASE: Support err as string (it happens that third party libs return a string instead of an error instance)
             if (typeof options.err === "string") {
-                /* eslint-disable no-restricted-syntax */
                 options.err = new Error(options.err);
-                /* eslint-enable no-restricted-syntax */
             }
 
             Object.getOwnPropertyNames(options.err).forEach((property) => {
@@ -80,7 +76,6 @@ export class GhostError extends Error {
 
                 // CASE: `code` should put options as priority over err
                 if (property === "code") {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     this[property] = this[property] || (options.err as any)[property];
                     return;
                 }
@@ -90,7 +85,6 @@ export class GhostError extends Error {
                     return;
                 }
 
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 (this as any)[property] = (options.err as any)[property] || (this as any)[property];
             });
         }

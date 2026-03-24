@@ -1,6 +1,5 @@
 const assertString = require("./util/assert-string");
 
-/* eslint-disable prefer-rest-params */
 module.exports = function isByteLength(str, options) {
     assertString(str);
     let min;

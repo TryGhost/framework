@@ -89,7 +89,8 @@ class GhostLogger {
             let transportFn = `set${upperFirst(transport)}Stream`;
 
             if (!this[transportFn]) {
-                throw new Error(`${upperFirst(transport)} is an invalid transport`); // eslint-disable-line
+                // lint-custom-disable-next-line no-native-error
+                throw new Error(`${upperFirst(transport)} is an invalid transport`);
             }
 
             this[transportFn]();

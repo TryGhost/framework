@@ -8,8 +8,6 @@ Forked from https://github.com/expressjs/vhost/ which appears abandoned.
 
 ## API
 
-<!-- eslint-disable no-unused-vars -->
-
 ```js
 var vhost = require("vhost");
 ```

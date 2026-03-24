@@ -1,5 +1,4 @@
-/* eslint-disable no-console */
-
+/* oxlint-disable no-console */
 const path = require("path");
 const setTimeoutPromise = require("util").promisify(setTimeout);
 const JobManager = require("../../lib/job-manager");

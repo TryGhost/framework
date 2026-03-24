@@ -1,6 +1,4 @@
 // This a fork of expressjs/vhost with trust proxy support
-/* eslint-disable */
-
 /*!
  * vhost
  * Copyright(c) 2014 Jonathan Ong
@@ -39,21 +37,24 @@ var ESCAPE_REPLACE = "\\$1";
 
 function vhost(hostname, handle) {
     if (!hostname) {
+        // lint-custom-disable-next-line ghost-error-usage
         throw new TypeError("argument hostname is required");
     }
 
     if (!handle) {
+        // lint-custom-disable-next-line ghost-error-usage
         throw new TypeError("argument handle is required");
     }
 
     if (typeof handle !== "function") {
+        // lint-custom-disable-next-line ghost-error-usage
         throw new TypeError("argument handle must be a function");
     }
 
     // create regular expression for hostname
     var regexp = hostregexp(hostname);
 
-    return function vhost(req, res, next) {
+    return function vhostMiddleware(req, res, next) {
         var vhostdata = vhostof(req, regexp);
 
         if (!vhostdata) {

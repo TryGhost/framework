@@ -62,7 +62,6 @@ function colorize(colors, value) {
 }
 
 function statusCode(status) {
-    /* eslint-disable indent */
     const color =
         status >= 500
             ? "red"
@@ -73,7 +72,6 @@ function statusCode(status) {
                 : status >= 200
                   ? "green"
                   : "default"; // no color
-    /* eslint-enable indent */
 
     return colorize(color, status);
 }

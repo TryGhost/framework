@@ -7,8 +7,8 @@
 
 async function pool(tasks, maxConcurrent) {
     if (maxConcurrent < 1) {
-        // eslint-disable-next-line ghost/ghost-custom/no-native-error
-        throw new Error("Must set at least 1 concurrent workers"); // eslint-disable-line no-restricted-syntax
+        // lint-custom-disable-next-line no-native-error
+        throw new Error("Must set at least 1 concurrent workers");
     }
 
     const taskIterator = tasks.entries();

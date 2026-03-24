@@ -1,12 +1,10 @@
 import { GhostError } from "./GhostError";
 import * as errors from "./errors";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyObject = Record<string, any>;
 
 // structuredClone doesn't preserve custom properties on Error subclasses
 // (see https://github.com/ungap/structured-clone/issues/12)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function deepCloneValue(value: any): any {
     if (value === null || typeof value !== "object") {
         return value;
@@ -82,7 +80,6 @@ const _private = {
             default: "server_error",
         };
 
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { detail, code, ...properties } = _private.serialize(err);
 
         return {

@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+/* oxlint-disable no-console */
 
 const setTimeoutPromise = require("util").promisify(setTimeout);
 const { isMainThread, parentPort } = require("worker_threads");
