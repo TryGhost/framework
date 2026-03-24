@@ -27,9 +27,9 @@ To add a new package to the repo:
 
 ## Test
 
-- `yarn lint` run `oxlint` only (default lint path)
+- `yarn lint` run `oxlint` plus custom Ghost-specific lint checks
 - `yarn lint:oxlint` run `oxlint` only
-- `yarn lint:eslint` run ESLint-only compatibility checks
+- `yarn lint:custom` run custom Ghost-specific lint checks
 - `yarn format` format `js/ts/json/md` files with `oxfmt`
 - `yarn format:check` check `js/ts/json/md` formatting with `oxfmt`
 - `yarn test` run tests (many packages still run lint in `posttest`)

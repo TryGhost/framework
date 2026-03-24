@@ -20,10 +20,7 @@
     "dev": "echo \"Implement me!\"",
     "test:unit": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
     "test": "yarn test:unit",
-    "lint:code": "eslint *.js lib/ --ext .js --cache",
-    "lint": "oxlint -c ../../.oxlintrc.json .",
-    "lint:test": "eslint -c test/.eslintrc.js test/ --ext .js --cache",
-    "lint:eslint": "yarn lint:code && yarn lint:test"
+    "lint": "oxlint -c ../../.oxlintrc.json ."
   },
   "devDependencies": {
     "supertest": "7.2.2"

@@ -9,9 +9,6 @@
   "workspaces": [
     "packages/*"
   ],
-  "eslintIgnore": [
-    "**/node_modules/**"
-  ],
   "scripts": {
     "dev": "echo \"Implement me!\"",
     "main": "git checkout main && git pull && yarn",
@@ -19,23 +16,21 @@
     "setup": "yarn",
     "test": "nx run-many -t test --parallel=10 --outputStyle=dynamic-legacy",
     "test:ci": "nx run-many -t test --outputStyle=dynamic",
-    "lint": "yarn lint:oxlint",
+    "lint": "yarn lint:oxlint && yarn lint:custom",
     "preship": "git diff --quiet && git diff --cached --quiet || (echo 'Error: working tree must be clean before shipping' && exit 1) && yarn test",
     "ship": "nx release version --git-push --git-remote ${GHOST_UPSTREAM:-origin}",
     "ship:patch": "yarn ship patch",
     "ship:minor": "yarn ship minor",
     "ship:major": "yarn ship major",
     "ship:first-release": "yarn ship patch --first-release",
-    "lint:eslint": "nx run-many -t lint:eslint --outputStyle=dynamic",
     "lint:oxlint": "nx run-many -t lint --outputStyle=dynamic",
     "format": "oxfmt -c .oxfmtrc.json \"packages/**/*.{js,ts,json,md}\"",
-    "format:check": "oxfmt -c .oxfmtrc.json --check \"packages/**/*.{js,ts,json,md}\""
+    "format:check": "oxfmt -c .oxfmtrc.json --check \"packages/**/*.{js,ts,json,md}\"",
+    "lint:custom": "node scripts/lint-custom-rules.js"
   },
   "devDependencies": {
     "@nx/js": "22.6.1",
     "@vitest/coverage-v8": "3.2.4",
-    "eslint": "8.57.1",
-    "eslint-plugin-ghost": "3.5.0",
     "nx": "22.6.1",
     "oxfmt": "0.41.0",
     "oxlint": "1.56.0",

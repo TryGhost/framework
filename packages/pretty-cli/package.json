@@ -21,8 +21,7 @@
     "dev": "echo \"Implement me!\"",
     "test": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
     "lint": "oxlint -c ../../.oxlintrc.json .",
-    "posttest": "yarn lint",
-    "lint:eslint": "eslint . --ext .js --cache"
+    "posttest": "yarn lint"
   },
   "dependencies": {
     "chalk": "5.6.2",

@@ -19,11 +19,8 @@
   "scripts": {
     "dev": "echo \"Implement me!\"",
     "test": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
-    "lint:code": "eslint *.js lib/ --ext .js --cache",
     "lint": "oxlint -c ../../.oxlintrc.json .",
-    "lint:test": "eslint -c test/.eslintrc.js test/ --ext .js --cache",
-    "posttest": "yarn lint",
-    "lint:eslint": "yarn lint:code && yarn lint:test"
+    "posttest": "yarn lint"
   },
   "dependencies": {
     "p-wait-for": "6.0.0"

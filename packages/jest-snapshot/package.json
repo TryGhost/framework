@@ -20,8 +20,7 @@
     "dev": "echo \"Implement me!\"",
     "test": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
     "lint": "oxlint -c ../../.oxlintrc.json .",
-    "posttest": "yarn lint",
-    "lint:eslint": "eslint . --ext .js --cache"
+    "posttest": "yarn lint"
   },
   "dependencies": {
     "@jest/expect": "30.3.0",
