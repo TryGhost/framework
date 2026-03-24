@@ -17,14 +17,14 @@ or
 ## Usage
 
 ```js
-const express = require('express');
-const sentry = require('./sentry');
-const errorHandler = require('@tryghost/mw-error-handler');
+const express = require("express");
+const sentry = require("./sentry");
+const errorHandler = require("@tryghost/mw-error-handler");
 
 const app = express();
 
-app.get('/api/example', (req, res) => {
-    throw new Error('Boom');
+app.get("/api/example", (req, res) => {
+    throw new Error("Boom");
 });
 
 app.use(errorHandler.resourceNotFound);

@@ -1,6 +1,4 @@
 module.exports = {
-    plugins: ['ghost'],
-    extends: [
-        'plugin:ghost/ts-test'
-    ]
+    plugins: ["ghost"],
+    extends: ["plugin:ghost/ts-test"],
 };

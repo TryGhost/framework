@@ -1,4 +1,4 @@
-const crypto = require('crypto');
+const crypto = require("crypto");
 
 /*
  * Uses birthday problem estimation to calculate chance of collision
@@ -28,7 +28,7 @@ module.exports.create = (typeOrLength) => {
     if (Number.isInteger(typeOrLength)) {
         bytes = Math.ceil(typeOrLength / 2);
         length = typeOrLength;
-    } else if (typeOrLength === 'content') {
+    } else if (typeOrLength === "content") {
         bytes = 13;
         length = 26;
     } else {
@@ -36,5 +36,5 @@ module.exports.create = (typeOrLength) => {
         length = 64;
     }
 
-    return crypto.randomBytes(bytes).toString('hex').slice(0, length);
+    return crypto.randomBytes(bytes).toString("hex").slice(0, length);
 };

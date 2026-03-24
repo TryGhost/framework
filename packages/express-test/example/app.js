@@ -1,14 +1,14 @@
-const express = require('express');
-const session = require('express-session');
+const express = require("express");
+const session = require("express-session");
 
-const path = require('path');
-const fs = require('fs').promises;
-const os = require('os');
-const multer = require('multer');
-const upload = multer({dest: os.tmpdir()});
+const path = require("path");
+const fs = require("fs").promises;
+const os = require("os");
+const multer = require("multer");
+const upload = multer({ dest: os.tmpdir() });
 
 const readJSONFile = async function (name) {
-    const data = await fs.readFile(path.join(__dirname, `${name}.json`), {encoding: 'utf8'});
+    const data = await fs.readFile(path.join(__dirname, `${name}.json`), { encoding: "utf8" });
     return JSON.parse(data);
 };
 
@@ -24,21 +24,23 @@ const isLoggedIn = function (req, res, next) {
 
 app.use(express.json());
 
-app.use(session({
-    secret: 'verysecretstring',
-    name: 'testauth',
-    resave: false,
-    saveUninitialized: false
-}));
+app.use(
+    session({
+        secret: "verysecretstring",
+        name: "testauth",
+        resave: false,
+        saveUninitialized: false,
+    }),
+);
 
-app.get('/', (req, res) => {
-    return res.send('Hello World!');
+app.get("/", (req, res) => {
+    return res.send("Hello World!");
 });
 
 /** An endpoint for checking headers and body gets sent */
-app.post('/check/', (req, res) => {
-    if (req.get('x-check')) {
-        res.set('x-checked', true);
+app.post("/check/", (req, res) => {
+    if (req.get("x-check")) {
+        res.set("x-checked", true);
     }
 
     // express.json() ensures req.body is be an empty object
@@ -49,10 +51,15 @@ app.post('/check/', (req, res) => {
  * API Methods
  */
 
-app.post('/api/session/', async (req, res) => {
-    const user = await readJSONFile('user');
+app.post("/api/session/", async (req, res) => {
+    const user = await readJSONFile("user");
 
-    if (req.body.username && req.body.password && req.body.username === user.username && req.body.password === user.password) {
+    if (
+        req.body.username &&
+        req.body.password &&
+        req.body.username === user.username &&
+        req.body.password === user.password
+    ) {
         req.session.loggedIn = true;
         req.session.username = req.body.username;
 
@@ -62,25 +69,29 @@ app.post('/api/session/', async (req, res) => {
     return res.sendStatus(401);
 });
 
-app.get('/api/foo/', isLoggedIn, async (req, res) => {
-    const data = await readJSONFile('data');
+app.get("/api/foo/", isLoggedIn, async (req, res) => {
+    const data = await readJSONFile("data");
 
     return res.json(data);
 });
 
-app.post('/api/ping/', async (req, res) => {
+app.post("/api/ping/", async (req, res) => {
     return res.json(req.body);
 });
 
-app.post('/api/upload/', upload.single('image'), async (req, res) => {
+app.post("/api/upload/", upload.single("image"), async (req, res) => {
     return res.json(req.file);
 });
 
-app.post('/api/upload-multiple/', upload.fields([
-    {name: 'image', maxCount: 1},
-    {name: 'document', maxCount: 1}
-]), async (req, res) => {
-    return res.json(req.files);
-});
+app.post(
+    "/api/upload-multiple/",
+    upload.fields([
+        { name: "image", maxCount: 1 },
+        { name: "document", maxCount: 1 },
+    ]),
+    async (req, res) => {
+        return res.json(req.files);
+    },
+);
 
 module.exports = app;

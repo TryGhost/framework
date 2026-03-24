@@ -1,5 +1,5 @@
-const debug = require('@tryghost/debug')('frame');
-const _ = require('lodash');
+const debug = require("@tryghost/debug")("frame");
+const _ = require("lodash");
 
 /**
  * @description The "frame" holds all information of a request.
@@ -45,22 +45,22 @@ class Frame {
      * Based on the API ctrl implemented, this fn will pick allowed properties to either options or data.
      */
     configure(apiConfig) {
-        debug('configure');
+        debug("configure");
 
         if (apiConfig.options) {
-            if (typeof apiConfig.options === 'function') {
+            if (typeof apiConfig.options === "function") {
                 apiConfig.options = apiConfig.options(this);
             }
 
-            if (Object.prototype.hasOwnProperty.call(this.original, 'query')) {
+            if (Object.prototype.hasOwnProperty.call(this.original, "query")) {
                 Object.assign(this.options, _.pick(this.original.query, apiConfig.options));
             }
 
-            if (Object.prototype.hasOwnProperty.call(this.original, 'params')) {
+            if (Object.prototype.hasOwnProperty.call(this.original, "params")) {
                 Object.assign(this.options, _.pick(this.original.params, apiConfig.options));
             }
 
-            if (Object.prototype.hasOwnProperty.call(this.original, 'options')) {
+            if (Object.prototype.hasOwnProperty.call(this.original, "options")) {
                 Object.assign(this.options, _.pick(this.original.options, apiConfig.options));
             }
         }
@@ -71,19 +71,19 @@ class Frame {
             this.data = _.cloneDeep(this.original.body);
         } else {
             if (apiConfig.data) {
-                if (typeof apiConfig.data === 'function') {
+                if (typeof apiConfig.data === "function") {
                     apiConfig.data = apiConfig.data(this);
                 }
 
-                if (Object.prototype.hasOwnProperty.call(this.original, 'query')) {
+                if (Object.prototype.hasOwnProperty.call(this.original, "query")) {
                     Object.assign(this.data, _.pick(this.original.query, apiConfig.data));
                 }
 
-                if (Object.prototype.hasOwnProperty.call(this.original, 'params')) {
+                if (Object.prototype.hasOwnProperty.call(this.original, "params")) {
                     Object.assign(this.data, _.pick(this.original.params, apiConfig.data));
                 }
 
-                if (Object.prototype.hasOwnProperty.call(this.original, 'options')) {
+                if (Object.prototype.hasOwnProperty.call(this.original, "options")) {
                     Object.assign(this.data, _.pick(this.original.options, apiConfig.data));
                 }
             }
@@ -93,9 +93,9 @@ class Frame {
         this.file = this.original.file;
         this.files = this.original.files;
 
-        debug('original', this.original);
-        debug('options', this.options);
-        debug('data', this.data);
+        debug("original", this.original);
+        debug("options", this.options);
+        debug("data", this.data);
     }
 
     setHeader(header, value) {

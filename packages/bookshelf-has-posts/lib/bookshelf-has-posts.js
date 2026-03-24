@@ -1,18 +1,17 @@
-const _ = require('lodash');
-const _debug = require('@tryghost/debug')._base;
-const debug = _debug('ghost-query');
+const _ = require("lodash");
+const _debug = require("@tryghost/debug")._base;
+const debug = _debug("ghost-query");
 
 const addHasPostsWhere = (tableName, config) => {
     const comparisonField = `${tableName}.id`;
 
     return function (qb) {
         return qb.whereIn(comparisonField, function () {
-            const innerQb = this
-                .distinct(`${config.joinTable}.${config.joinTo}`)
+            const innerQb = this.distinct(`${config.joinTable}.${config.joinTo}`)
                 .select()
                 .from(config.joinTable)
-                .join('posts', 'posts.id', `${config.joinTable}.post_id`)
-                .andWhere('posts.status', '=', 'published');
+                .join("posts", "posts.id", `${config.joinTable}.post_id`)
+                .andWhere("posts.status", "=", "published");
 
             debug(`QUERY has posts: ${innerQb.toSQL().sql}`);
 
@@ -34,11 +33,11 @@ const hasPosts = function hasPosts(Bookshelf) {
 
         fetch: function () {
             if (this.shouldHavePosts) {
-                this.query(addHasPostsWhere(_.result(this, 'tableName'), this.shouldHavePosts));
+                this.query(addHasPostsWhere(_.result(this, "tableName"), this.shouldHavePosts));
             }
 
-            if (_debug.enabled('ghost-query')) {
-                debug('QUERY', this.query().toQuery());
+            if (_debug.enabled("ghost-query")) {
+                debug("QUERY", this.query().toQuery());
             }
 
             return modelPrototype.fetch.apply(this, arguments);
@@ -46,15 +45,15 @@ const hasPosts = function hasPosts(Bookshelf) {
 
         fetchAll: function () {
             if (this.shouldHavePosts) {
-                this.query(addHasPostsWhere(_.result(this, 'tableName'), this.shouldHavePosts));
+                this.query(addHasPostsWhere(_.result(this, "tableName"), this.shouldHavePosts));
             }
 
-            if (_debug.enabled('ghost-query')) {
-                debug('QUERY', this.query().toQuery());
+            if (_debug.enabled("ghost-query")) {
+                debug("QUERY", this.query().toQuery());
             }
 
             return modelPrototype.fetchAll.apply(this, arguments);
-        }
+        },
     });
 };
 

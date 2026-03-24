@@ -1,1 +1,1 @@
-module.exports = require('./lib/vhost');
+module.exports = require("./lib/vhost");

@@ -1,21 +1,22 @@
 // # Pagination
 //
 // Extends Bookshelf.Model with a `fetchPage` method. Handles everything to do with paginated requests.
-const _ = require('lodash');
+const _ = require("lodash");
 
-const errors = require('@tryghost/errors');
-const tpl = require('@tryghost/tpl');
+const errors = require("@tryghost/errors");
+const tpl = require("@tryghost/tpl");
 
 const messages = {
-    pageNotFound: 'Page not found',
-    couldNotUnderstandRequest: 'Could not understand request.'
+    pageNotFound: "Page not found",
+    couldNotUnderstandRequest: "Could not understand request.",
 };
 
 let defaults;
 let paginationUtils;
 
 const JOIN_KEYWORD_REGEX = /\bjoin\b/i;
-const FROM_CLAUSE_REGEX = /\bfrom\b([\s\S]*?)(?:\bwhere\b|\bgroup\s+by\b|\border\s+by\b|\blimit\b|\boffset\b|$)/i;
+const FROM_CLAUSE_REGEX =
+    /\bfrom\b([\s\S]*?)(?:\bwhere\b|\bgroup\s+by\b|\border\s+by\b|\blimit\b|\boffset\b|$)/i;
 
 function getCompiledSql(queryBuilder) {
     const compiledQuery = queryBuilder.toSQL();
@@ -23,18 +24,18 @@ function getCompiledSql(queryBuilder) {
     if (Array.isArray(compiledQuery)) {
         return compiledQuery
             .map((query) => {
-                return query && query.sql ? query.sql : '';
+                return query && query.sql ? query.sql : "";
             })
-            .join(' ');
+            .join(" ");
     }
 
-    return compiledQuery && compiledQuery.sql ? compiledQuery.sql : '';
+    return compiledQuery && compiledQuery.sql ? compiledQuery.sql : "";
 }
 
 function extractFromClause(sql) {
     const fromClauseMatch = sql.match(FROM_CLAUSE_REGEX);
 
-    return fromClauseMatch ? fromClauseMatch[1] : '';
+    return fromClauseMatch ? fromClauseMatch[1] : "";
 }
 
 function hasJoinKeyword(sql) {
@@ -42,7 +43,7 @@ function hasJoinKeyword(sql) {
 }
 
 function hasCommaSeparatedFromSources(sql) {
-    return extractFromClause(sql).includes(',');
+    return extractFromClause(sql).includes(",");
 }
 
 // Smart count only uses count(*) for single-table queries.
@@ -66,7 +67,7 @@ function hasMultiTableSource(queryBuilder) {
  */
 defaults = {
     page: 1,
-    limit: 15
+    limit: 15,
 };
 
 /**
@@ -83,7 +84,7 @@ paginationUtils = {
     parseOptions: function parseOptions(options) {
         options = _.defaults(options || {}, defaults);
 
-        if (options.limit !== 'all') {
+        if (options.limit !== "all") {
             options.limit = parseInt(options.limit, 10) || defaults.limit;
         }
 
@@ -99,9 +100,7 @@ paginationUtils = {
      */
     addLimitAndOffset: function addLimitAndOffset(model, options) {
         if (_.isNumber(options.limit)) {
-            model
-                .query('limit', options.limit)
-                .query('offset', options.limit * (options.page - 1));
+            model.query("limit", options.limit).query("offset", options.limit * (options.page - 1));
         }
     },
 
@@ -121,7 +120,7 @@ paginationUtils = {
             pages: calcPages === 0 ? 1 : calcPages,
             total: totalItems,
             next: null,
-            prev: null
+            prev: null,
         };
 
         if (pagination.pages > 1) {
@@ -144,9 +143,9 @@ paginationUtils = {
      * @param {string} propertyName property to be inspected and included in the relation
      */
     handleRelation: function handleRelation(model, propertyName) {
-        const tableName = _.result(model.constructor.prototype, 'tableName');
+        const tableName = _.result(model.constructor.prototype, "tableName");
 
-        const targetTable = propertyName.includes('.') && propertyName.split('.')[0];
+        const targetTable = propertyName.includes(".") && propertyName.split(".")[0];
 
         if (targetTable && targetTable !== tableName) {
             if (!model.eagerLoad) {
@@ -157,7 +156,7 @@ paginationUtils = {
                 model.eagerLoad.push(targetTable);
             }
         }
-    }
+    },
 };
 
 // ## Object Definitions
@@ -212,9 +211,9 @@ const pagination = function pagination(bookshelf) {
             options = paginationUtils.parseOptions(options);
 
             // Get the table name and idAttribute for this model
-            const tableName = _.result(this.constructor.prototype, 'tableName');
+            const tableName = _.result(this.constructor.prototype, "tableName");
 
-            const idAttribute = _.result(this.constructor.prototype, 'idAttribute');
+            const idAttribute = _.result(this.constructor.prototype, "idAttribute");
             const self = this;
 
             // #### Pre count clauses
@@ -224,97 +223,107 @@ const pagination = function pagination(bookshelf) {
             // Necessary due to lack of support for `count distinct` in bookshelf's count()
             // Skipped if limit='all' as we can use the length of the fetched data set
             let countPromise = Promise.resolve();
-            if (options.limit !== 'all') {
+            if (options.limit !== "all") {
                 const countQuery = this.query().clone();
 
                 if (options.transacting) {
                     countQuery.transacting(options.transacting);
                 }
 
-                countQuery.clear('select');
+                countQuery.clear("select");
                 // Skipping distinct for simple queries where we know result rows are unique.
                 const queryHasMultiTableSource = hasMultiTableSource(countQuery);
                 if (options.useBasicCount || (options.useSmartCount && !queryHasMultiTableSource)) {
-                    countPromise = countQuery.select(
-                        bookshelf.knex.raw('count(*) as aggregate')
-                    );
+                    countPromise = countQuery.select(bookshelf.knex.raw("count(*) as aggregate"));
                 } else {
                     countPromise = countQuery.select(
-                        bookshelf.knex.raw('count(distinct ' + tableName + '.' + idAttribute + ') as aggregate')
+                        bookshelf.knex.raw(
+                            "count(distinct " + tableName + "." + idAttribute + ") as aggregate",
+                        ),
                     );
                 }
             }
 
-            return countPromise.then(function (countResult) {
-                // #### Post count clauses
-                // Add any where or join clauses which need to NOT be included with the aggregate query
+            return countPromise
+                .then(function (countResult) {
+                    // #### Post count clauses
+                    // Add any where or join clauses which need to NOT be included with the aggregate query
 
-                // Setup the pagination parameters so that we return the correct items from the set
-                paginationUtils.addLimitAndOffset(self, options);
+                    // Setup the pagination parameters so that we return the correct items from the set
+                    paginationUtils.addLimitAndOffset(self, options);
 
-                // Apply ordering options if they are present
-                if (options.order && !_.isEmpty(options.order)) {
-                    _.forOwn(options.order, function (direction, property) {
-                        if (property === 'count.posts') {
-                            self.query('orderBy', 'count__posts', direction);
-                        } else {
-                            self.query('orderBy', property, direction);
+                    // Apply ordering options if they are present
+                    if (options.order && !_.isEmpty(options.order)) {
+                        _.forOwn(options.order, function (direction, property) {
+                            if (property === "count.posts") {
+                                self.query("orderBy", "count__posts", direction);
+                            } else {
+                                self.query("orderBy", property, direction);
 
-                            paginationUtils.handleRelation(self, property);
-                        }
-                    });
-                }
+                                paginationUtils.handleRelation(self, property);
+                            }
+                        });
+                    }
 
-                if (options.orderRaw) {
-                    self.query((qb) => {
-                        qb.orderByRaw(options.orderRaw, options.orderRawBindings);
-                    });
-                }
+                    if (options.orderRaw) {
+                        self.query((qb) => {
+                            qb.orderByRaw(options.orderRaw, options.orderRawBindings);
+                        });
+                    }
 
-                if (!_.isEmpty(options.eagerLoad)) {
-                    options.eagerLoad.forEach(property => paginationUtils.handleRelation(self, property));
-                }
+                    if (!_.isEmpty(options.eagerLoad)) {
+                        options.eagerLoad.forEach((property) =>
+                            paginationUtils.handleRelation(self, property),
+                        );
+                    }
 
-                if (options.groups && !_.isEmpty(options.groups)) {
-                    _.each(options.groups, function (group) {
-                        self.query('groupBy', group);
-                    });
-                }
+                    if (options.groups && !_.isEmpty(options.groups)) {
+                        _.each(options.groups, function (group) {
+                            self.query("groupBy", group);
+                        });
+                    }
 
-                // Setup the promise to do a fetch on our collection, running the specified query
-                // @TODO: ensure option handling is done using an explicit pick elsewhere
+                    // Setup the promise to do a fetch on our collection, running the specified query
+                    // @TODO: ensure option handling is done using an explicit pick elsewhere
 
-                return self.fetchAll(_.omit(options, ['page', 'limit']))
-                    .then(function (fetchResult) {
-                        if (options.limit === 'all') {
-                            countResult = [{aggregate: fetchResult.length}];
-                        }
+                    return self
+                        .fetchAll(_.omit(options, ["page", "limit"]))
+                        .then(function (fetchResult) {
+                            if (options.limit === "all") {
+                                countResult = [{ aggregate: fetchResult.length }];
+                            }
 
-                        return {
-                            collection: fetchResult,
-                            pagination: paginationUtils.formatResponse(countResult[0] ? countResult[0].aggregate : 0, options)
-                        };
-                    })
-                    .catch(function (err) {
-                        // e.g. offset/limit reached max allowed integer value
-                        if (err.errno === 20 || err.errno === 1064) {
-                            throw new errors.NotFoundError({message: tpl(messages.pageNotFound)});
-                        }
+                            return {
+                                collection: fetchResult,
+                                pagination: paginationUtils.formatResponse(
+                                    countResult[0] ? countResult[0].aggregate : 0,
+                                    options,
+                                ),
+                            };
+                        })
+                        .catch(function (err) {
+                            // e.g. offset/limit reached max allowed integer value
+                            if (err.errno === 20 || err.errno === 1064) {
+                                throw new errors.NotFoundError({
+                                    message: tpl(messages.pageNotFound),
+                                });
+                            }
 
-                        throw err;
-                    });
-            }).catch((err) => {
-                // CASE: SQL syntax is incorrect
-                if (err.errno === 1054 || err.errno === 1) {
-                    throw new errors.BadRequestError({
-                        message: tpl(messages.couldNotUnderstandRequest),
-                        err
-                    });
-                }
+                            throw err;
+                        });
+                })
+                .catch((err) => {
+                    // CASE: SQL syntax is incorrect
+                    if (err.errno === 1054 || err.errno === 1) {
+                        throw new errors.BadRequestError({
+                            message: tpl(messages.couldNotUnderstandRequest),
+                            err,
+                        });
+                    }
 
-                throw err;
-            });
-        }
+                    throw err;
+                });
+        },
     });
 };
 

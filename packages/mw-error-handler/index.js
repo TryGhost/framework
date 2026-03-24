@@ -1,1 +1,1 @@
-module.exports = require('./lib/mw-error-handler');
+module.exports = require("./lib/mw-error-handler");

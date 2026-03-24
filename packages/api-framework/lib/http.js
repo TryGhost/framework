@@ -1,8 +1,8 @@
-const url = require('url');
-const debug = require('@tryghost/debug')('http');
+const url = require("url");
+const debug = require("@tryghost/debug")("http");
 
-const Frame = require('./Frame');
-const headers = require('./headers');
+const Frame = require("./Frame");
+const headers = require("./headers");
 
 /**
  * @description HTTP wrapper.
@@ -28,11 +28,11 @@ const http = (apiImpl) => {
 
         if (req.api_key) {
             apiKey = {
-                id: req.api_key.get('id'),
-                type: req.api_key.get('type')
+                id: req.api_key.get("id"),
+                type: req.api_key.get("type"),
             };
             integration = {
-                id: req.api_key.get('integration_id')
+                id: req.api_key.get("integration_id"),
             };
         }
 
@@ -49,21 +49,21 @@ const http = (apiImpl) => {
             user: req.user,
             session: req.session,
             url: {
-                host: req.vhost ? req.vhost.host : req.get('host'),
+                host: req.vhost ? req.vhost.host : req.get("host"),
                 pathname: url.parse(req.originalUrl || req.url).pathname,
-                secure: req.secure
+                secure: req.secure,
             },
             context: {
                 api_key: apiKey,
                 user: user,
                 integration: integration,
-                member: (req.member || null)
-            }
+                member: req.member || null,
+            },
         });
 
         frame.configure({
             options: apiImpl.options,
-            data: apiImpl.data
+            data: apiImpl.data,
         });
 
         try {
@@ -72,13 +72,13 @@ const http = (apiImpl) => {
             debug(`External API request to ${frame.docName}.${frame.method}`);
 
             // CASE: api ctrl wants to handle the express response (e.g. streams)
-            if (typeof result === 'function') {
-                debug('ctrl function call');
+            if (typeof result === "function") {
+                debug("ctrl function call");
                 return result(req, res, next);
             }
 
             let statusCode = 200;
-            if (typeof apiImpl.statusCode === 'function') {
+            if (typeof apiImpl.statusCode === "function") {
                 statusCode = apiImpl.statusCode(result);
             } else if (apiImpl.statusCode) {
                 statusCode = apiImpl.statusCode;
@@ -87,26 +87,27 @@ const http = (apiImpl) => {
             res.status(statusCode);
 
             // CASE: generate headers based on the api ctrl configuration
-            const apiHeaders = await headers.get(result, apiImpl.headers, frame) || {};
+            const apiHeaders = (await headers.get(result, apiImpl.headers, frame)) || {};
             res.set(apiHeaders);
 
             const send = (format) => {
-                if (format === 'plain') {
-                    debug('plain text response');
+                if (format === "plain") {
+                    debug("plain text response");
                     return res.send(result);
                 }
 
-                debug('json response');
+                debug("json response");
                 res.json(result || {});
             };
 
             let responseFormat;
 
-            if (apiImpl.response){
-                if (typeof apiImpl.response.format === 'function') {
+            if (apiImpl.response) {
+                if (typeof apiImpl.response.format === "function") {
                     const apiResponseFormat = apiImpl.response.format();
 
-                    if (apiResponseFormat.then) { // is promise
+                    if (apiResponseFormat.then) {
+                        // is promise
                         return apiResponseFormat.then((formatName) => {
                             send(formatName);
                         });
@@ -122,7 +123,7 @@ const http = (apiImpl) => {
         } catch (err) {
             req.frameOptions = {
                 docName: frame.docName,
-                method: frame.method
+                method: frame.method,
             };
 
             next(err);

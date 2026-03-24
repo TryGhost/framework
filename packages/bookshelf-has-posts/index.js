@@ -1,1 +1,1 @@
-module.exports = require('./lib/bookshelf-has-posts');
+module.exports = require("./lib/bookshelf-has-posts");

@@ -1,28 +1,30 @@
-import assert from 'assert/strict';
+import assert from "assert/strict";
 
-import errors from '../src';
-import * as utils from '../src/utils';
+import errors from "../src";
+import * as utils from "../src/utils";
 
-describe('Error Utils', function () {
-    describe('prepareStackForUser', function () {
-        it('handles errors without stack', function () {
-            const error = new Error('no stack');
+describe("Error Utils", function () {
+    describe("prepareStackForUser", function () {
+        it("handles errors without stack", function () {
+            const error = new Error("no stack");
             error.stack = undefined;
 
             const processedError = utils.prepareStackForUser(error);
-            assert.equal(processedError.stack, 'Stack Trace:');
+            assert.equal(processedError.stack, "Stack Trace:");
         });
 
-        it('returns full error clone of nested errors', function () {
-            const originalError = new Error('I am the original one!') as Error & {custom?: string};
-            originalError.custom = 'I am custom!';
+        it("returns full error clone of nested errors", function () {
+            const originalError = new Error("I am the original one!") as Error & {
+                custom?: string;
+            };
+            originalError.custom = "I am custom!";
 
             const ghostError = new errors.ValidationError({
-                message: 'mistakes were made',
-                help: 'help yourself',
+                message: "mistakes were made",
+                help: "help yourself",
                 errorDetails: {
-                    originalError: originalError
-                }
+                    originalError: originalError,
+                },
             });
 
             const processedError = utils.prepareStackForUser(ghostError);
@@ -34,15 +36,15 @@ describe('Error Utils', function () {
             assert.equal(processedError.errorDetails.originalError.message, originalError.message);
             assert.equal(processedError.errorDetails.originalError.custom, originalError.custom);
 
-            originalError.message = 'changed';
+            originalError.message = "changed";
             assert.notEqual(processedError.message, originalError.message);
         });
 
-        it('deep clones array values in errorDetails', function () {
-            const items = [{id: 1}, {id: 2}];
+        it("deep clones array values in errorDetails", function () {
+            const items = [{ id: 1 }, { id: 2 }];
             const ghostError = new errors.ValidationError({
-                message: 'mistakes were made',
-                errorDetails: items
+                message: "mistakes were made",
+                errorDetails: items,
             });
 
             const processedError = utils.prepareStackForUser(ghostError);
@@ -52,17 +54,17 @@ describe('Error Utils', function () {
             assert.equal(processedError.errorDetails[0].id, 1);
         });
 
-        it('Preserves the stack trace', function () {
+        it("Preserves the stack trace", function () {
             const errorCreatingFunction = () => {
-                return new Error('Original error');
+                return new Error("Original error");
             };
             const originalError = errorCreatingFunction();
             const ghostError = new errors.EmailError({
-                message: 'Ghost error',
-                err: originalError
+                message: "Ghost error",
+                err: originalError,
             });
 
-            assert.equal(ghostError.stack!.includes('errorCreatingFunction'), true);
+            assert.equal(ghostError.stack!.includes("errorCreatingFunction"), true);
         });
     });
 });

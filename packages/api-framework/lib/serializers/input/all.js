@@ -1,8 +1,8 @@
-const debug = require('@tryghost/debug')('serializers:input:all');
-const _ = require('lodash');
-const utils = require('../../utils');
+const debug = require("@tryghost/debug")("serializers:input:all");
+const _ = require("lodash");
+const utils = require("../../utils");
 
-const INTERNAL_OPTIONS = ['transacting', 'forUpdate'];
+const INTERNAL_OPTIONS = ["transacting", "forUpdate"];
 
 /**
  * @description Shared serializer for all requests.
@@ -13,7 +13,7 @@ const INTERNAL_OPTIONS = ['transacting', 'forUpdate'];
  */
 module.exports = {
     all(apiConfig, frame) {
-        debug('serialize all');
+        debug("serialize all");
 
         if (frame.options.include) {
             frame.options.withRelated = utils.options.trimAndLowerCase(frame.options.include);
@@ -34,8 +34,8 @@ module.exports = {
         }
 
         if (!frame.options.context.internal) {
-            debug('omit internal options');
+            debug("omit internal options");
             frame.options = _.omit(frame.options, INTERNAL_OPTIONS);
         }
-    }
+    },
 };

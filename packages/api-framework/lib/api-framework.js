@@ -1,29 +1,29 @@
 module.exports = {
     get headers() {
-        return require('./headers');
+        return require("./headers");
     },
 
     get http() {
-        return require('./http');
+        return require("./http");
     },
 
     get Frame() {
-        return require('./Frame');
+        return require("./Frame");
     },
 
     get pipeline() {
-        return require('./pipeline');
+        return require("./pipeline");
     },
 
     get validators() {
-        return require('./validators');
+        return require("./validators");
     },
 
     get serializers() {
-        return require('./serializers');
+        return require("./serializers");
     },
 
     get utils() {
-        return require('./utils');
-    }
+        return require("./utils");
+    },
 };

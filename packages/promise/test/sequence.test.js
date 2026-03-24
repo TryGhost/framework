@@ -1,27 +1,26 @@
-const assert = require('assert/strict');
-const sinon = require('sinon');
-const {sequence} = require('../');
+const assert = require("assert/strict");
+const sinon = require("sinon");
+const { sequence } = require("../");
 
-describe('Unit: lib/promise/sequence', function () {
+describe("Unit: lib/promise/sequence", function () {
     afterEach(function () {
         sinon.restore();
     });
 
-    it('mixed tasks: promise and none promise', function () {
+    it("mixed tasks: promise and none promise", function () {
         const tasks = [
             function a() {
-                return Promise.resolve('hello');
+                return Promise.resolve("hello");
             },
             function b() {
-                return 'from';
+                return "from";
             },
             function c() {
-                return Promise.resolve('chio');
-            }
+                return Promise.resolve("chio");
+            },
         ];
-        return sequence(tasks)
-            .then(function (result) {
-                assert.deepEqual(result, ['hello', 'from', 'chio']);
-            });
+        return sequence(tasks).then(function (result) {
+            assert.deepEqual(result, ["hello", "from", "chio"]);
+        });
     });
 });

@@ -10,7 +10,6 @@ or
 
 `yarn add @tryghost/express-test`
 
-
 ## Purpose
 
 High-level Express testing agent with chainable request/assertion APIs and snapshot helpers.
@@ -25,7 +24,6 @@ const agent = new TestAgent(app, {defaults});
 For the most up-to-date and clear usage info, there's a live working example of this library in action inside `tests/example-app.test.js`.
 
 An instantiated agent can make HTTP-like calls, with a supertest-like chained API to set headers & body and to check status, headers and anything else.
-
 
 ```
 const agent = new TestAgent(app)
@@ -51,14 +49,15 @@ The agent maintains cookies across requests using a cookie jar. You can clear al
 agent.clearCookies();
 
 // Both methods support chaining
-await agent.logout().get('/protected-route');
+await agent.logout().get("/protected-route");
 ```
 
 This is an initial version for review. More docs coming if it works :)
 
-
 ### Assertion execution order
-The order of *chained* assertion execution is NOT the order they were declared in. The framework follows the priority order of the assertion types:
+
+The order of _chained_ assertion execution is NOT the order they were declared in. The framework follows the priority order of the assertion types:
+
 1. `expect`
 2. `expectHeader`
 3. `expectStatus`
@@ -72,22 +71,18 @@ The custom order is here to prioritize assertions with the most context first. T
 This is a mono repository, managed with [lerna](https://lernajs.io/).
 
 Follow the instructions for the top-level repo.
+
 1. `git clone` this repo & `cd` into it as usual
 2. Run `yarn` to install top-level dependencies.
-
 
 ## Run
 
 - `yarn dev`
 
-
 ## Test
 
 - `yarn lint` run just eslint
 - `yarn test` run lint and tests
-
-
-
 
 # Copyright & License
 

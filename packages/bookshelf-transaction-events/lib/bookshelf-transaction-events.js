@@ -12,13 +12,13 @@ module.exports = function (bookshelf) {
 
             t.commit = async function () {
                 const originalReturn = await originalCommit.apply(t, arguments);
-                t.emit('committed', true);
+                t.emit("committed", true);
                 return originalReturn;
             };
 
             t.rollback = async function () {
                 const originalReturn = await originalRollback.apply(t, arguments);
-                t.emit('committed', false);
+                t.emit("committed", false);
                 return originalReturn;
             };
 

@@ -1,13 +1,15 @@
-const path = require('path');
-const addSeconds = require('date-fns/addSeconds');
-const JobManager = require('../../lib/job-manager');
+const path = require("path");
+const addSeconds = require("date-fns/addSeconds");
+const JobManager = require("../../lib/job-manager");
 
 const jobManager = new JobManager(console);
 
 const isJobQueueEmpty = (bree) => {
-    return (Object.keys(bree.workers).length === 0)
-        && (Object.keys(bree.intervals).length === 0)
-        && (Object.keys(bree.timeouts).length === 0);
+    return (
+        Object.keys(bree.workers).length === 0 &&
+        Object.keys(bree.intervals).length === 0 &&
+        Object.keys(bree.timeouts).length === 0
+    );
 };
 
 (async () => {
@@ -15,15 +17,15 @@ const isJobQueueEmpty = (bree) => {
 
     jobManager.addJob({
         at: dateInTenSeconds,
-        job: path.resolve(__dirname, '../jobs/timed-job.js'),
+        job: path.resolve(__dirname, "../jobs/timed-job.js"),
         data: {
-            ms: 2000
+            ms: 2000,
         },
-        name: 'one-off-scheduled-job'
+        name: "one-off-scheduled-job",
     });
 
-    const {default: pWaitFor} = await import('p-wait-for');
-    await pWaitFor(() => (isJobQueueEmpty(jobManager.bree)));
+    const { default: pWaitFor } = await import("p-wait-for");
+    await pWaitFor(() => isJobQueueEmpty(jobManager.bree));
 
     process.exit(0);
 })();

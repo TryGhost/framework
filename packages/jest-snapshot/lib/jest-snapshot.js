@@ -1,9 +1,9 @@
-const {jestExpect} = require('@jest/expect');
-const SnapshotManager = require('./SnapshotManager');
+const { jestExpect } = require("@jest/expect");
+const SnapshotManager = require("./SnapshotManager");
 const snapshotManager = new SnapshotManager();
 
 function matchSnapshotAssertion(properties) {
-    this.params = {operator: 'to match a stored snapshot'};
+    this.params = { operator: "to match a stored snapshot" };
 
     const result = snapshotManager.match(this.obj, properties);
 
@@ -12,7 +12,6 @@ function matchSnapshotAssertion(properties) {
 }
 
 const mochaHooks = {
-
     /**
      * Runs before all tests
      * Resets the registry so we start with a clean slate
@@ -27,7 +26,7 @@ const mochaHooks = {
      * If we're running a retry, reset the registry for this test only
      */
     beforeEach() {
-        const {currentTest} = this;
+        const { currentTest } = this;
 
         if (currentTest.currentRetry() > 0) {
             // Reset registry for this test only
@@ -36,12 +35,12 @@ const mochaHooks = {
 
         snapshotManager.setCurrentTest({
             testPath: currentTest.file,
-            testTitle: currentTest.fullTitle()
+            testTitle: currentTest.fullTitle(),
         });
-    }
+    },
 };
 
-const {any, anything, stringMatching} = jestExpect;
+const { any, anything, stringMatching } = jestExpect;
 
 module.exports = {
     mochaHooks,
@@ -49,5 +48,5 @@ module.exports = {
     matchSnapshotAssertion,
     any,
     anything,
-    stringMatching
+    stringMatching,
 };

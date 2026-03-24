@@ -1,8 +1,8 @@
-const bcrypt = require('bcryptjs');
+const bcrypt = require("bcryptjs");
 
 let HASH_ROUNDS = 10;
 
-if (process.env.NODE_ENV?.startsWith('testing')) {
+if (process.env.NODE_ENV?.startsWith("testing")) {
     HASH_ROUNDS = 1;
 }
 

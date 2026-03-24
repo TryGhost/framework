@@ -1,18 +1,27 @@
 {
   "name": "@tryghost/errors",
   "version": "3.0.3",
+  "license": "MIT",
+  "author": "Ghost Foundation",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
     "directory": "packages/errors"
   },
-  "author": "Ghost Foundation",
-  "license": "MIT",
+  "source": "src/index.ts",
+  "files": [
+    "cjs",
+    "es",
+    "types",
+    "src"
+  ],
+  "sideEffects": false,
   "main": "cjs/index.js",
   "module": "es/index.js",
   "types": "types/index.d.ts",
-  "source": "src/index.ts",
-  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "echo \"Implement me!\"",
     "prepare": "NODE_ENV=production yarn build",
@@ -26,21 +35,12 @@
     "posttest": "yarn lint",
     "lint:eslint": "eslint . --ext .js --cache"
   },
-  "files": [
-    "cjs",
-    "es",
-    "types",
-    "src"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/lodash": "4.17.24",
     "esbuild": "0.27.3",
     "lodash": "4.17.23",
     "ts-node": "10.9.2",
     "typescript": "5.9.3"
-  },
-  "dependencies": {}
+  }
 }

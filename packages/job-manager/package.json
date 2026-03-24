@@ -1,12 +1,21 @@
 {
   "name": "@tryghost/job-manager",
   "version": "3.0.3",
-  "author": "Ghost Foundation",
   "license": "MIT",
+  "author": "Ghost Foundation",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TryGhost/framework.git",
+    "directory": "packages/job-manager"
+  },
+  "files": [
+    "index.js",
+    "lib"
+  ],
+  "main": "index.js",
   "publishConfig": {
     "access": "public"
   },
-  "main": "index.js",
   "scripts": {
     "dev": "echo \"Implement me!\"",
     "test:unit": "NODE_ENV=testing vitest run --coverage",
@@ -15,16 +24,6 @@
     "lint": "oxlint -c ../../.oxlintrc.json . && yarn lint:eslint",
     "lint:test": "eslint -c test/.eslintrc.js test/ --ext .js --cache",
     "lint:eslint": "yarn lint:code && yarn lint:test"
-  },
-  "files": [
-    "index.js",
-    "lib"
-  ],
-  "devDependencies": {
-    "@sinonjs/fake-timers": "15.1.1",
-    "date-fns": "4.1.0",
-    "rewire": "9.0.1",
-    "sinon": "21.0.3"
   },
   "dependencies": {
     "@breejs/later": "4.2.0",
@@ -36,9 +35,10 @@
     "p-wait-for": "6.0.0",
     "workerpool": "10.0.1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/TryGhost/framework.git",
-    "directory": "packages/job-manager"
+  "devDependencies": {
+    "@sinonjs/fake-timers": "15.1.1",
+    "date-fns": "4.1.0",
+    "rewire": "9.0.1",
+    "sinon": "21.0.3"
   }
 }

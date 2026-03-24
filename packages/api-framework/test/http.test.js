@@ -1,8 +1,8 @@
-const assert = require('node:assert/strict');
-const sinon = require('sinon');
-const shared = require('../');
+const assert = require("node:assert/strict");
+const sinon = require("sinon");
+const shared = require("../");
 
-describe('HTTP', function () {
+describe("HTTP", function () {
     let req;
     let res;
     let next;
@@ -13,59 +13,57 @@ describe('HTTP', function () {
         next = sinon.stub();
 
         req.body = {
-            a: 'a'
+            a: "a",
         };
         req.vhost = {
-            host: 'example.com'
+            host: "example.com",
         };
-        req.get = sinon.stub().returns('fallback.example.com');
-        req.originalUrl = '/ghost/api/content/posts/';
+        req.get = sinon.stub().returns("fallback.example.com");
+        req.originalUrl = "/ghost/api/content/posts/";
         req.secure = true;
-        req.url = 'https://example.com/ghost/api/content/',
-
-        res.status = sinon.stub();
+        ((req.url = "https://example.com/ghost/api/content/"), (res.status = sinon.stub()));
         res.json = sinon.stub();
         res.set = (headers) => {
             res.headers = headers;
         };
         res.send = sinon.stub();
 
-        sinon.stub(shared.headers, 'get').resolves();
+        sinon.stub(shared.headers, "get").resolves();
     });
 
     afterEach(function () {
         sinon.restore();
     });
 
-    it('check options', function () {
+    it("check options", function () {
         const apiImpl = sinon.stub().resolves();
         shared.http(apiImpl)(req, res, next);
 
         assert.deepEqual(Object.keys(apiImpl.args[0][0]), [
-            'original',
-            'options',
-            'data',
-            'user',
-            'file',
-            'files',
-            'apiType',
-            'docName',
-            'method',
-            'response'
+            "original",
+            "options",
+            "data",
+            "user",
+            "file",
+            "files",
+            "apiType",
+            "docName",
+            "method",
+            "response",
         ]);
 
-        assert.deepEqual(apiImpl.args[0][0].data, {a: 'a'});
+        assert.deepEqual(apiImpl.args[0][0].data, { a: "a" });
         assert.deepEqual(apiImpl.args[0][0].options, {
             context: {
                 api_key: null,
                 integration: null,
                 user: null,
-                member: null
-            }
+                member: null,
+            },
         });
     });
 
-    it('api response is fn', async function () {
+    it("api response is fn", async function () {
         await new Promise((resolve) => {
             const response = sinon.stub().callsFake(function (_req, _res, _next) {
                 assert.ok(_req);
@@ -81,9 +79,9 @@ describe('HTTP', function () {
         });
     });
 
-    it('api response is fn (data)', async function () {
+    it("api response is fn (data)", async function () {
         await new Promise((resolve) => {
-            const apiImpl = sinon.stub().resolves('data');
+            const apiImpl = sinon.stub().resolves("data");
 
             next.callsFake(resolve);
 
@@ -98,22 +96,22 @@ describe('HTTP', function () {
         });
     });
 
-    it('handles api key, user and plain text response', async function () {
+    it("handles api key, user and plain text response", async function () {
         await new Promise((resolve) => {
             req.vhost = null;
-            req.user = {id: 'user-id'};
+            req.user = { id: "user-id" };
             req.api_key = {
                 get(key) {
                     return {
-                        id: 'api-key-id',
-                        type: 'admin',
-                        integration_id: 'integration-id'
+                        id: "api-key-id",
+                        type: "admin",
+                        integration_id: "integration-id",
                     }[key];
-                }
+                },
             };
 
-            const apiImpl = sinon.stub().resolves('plain body');
-            apiImpl.response = {format: 'plain'};
+            const apiImpl = sinon.stub().resolves("plain body");
+            apiImpl.response = { format: "plain" };
             apiImpl.statusCode = 201;
 
             res.send.callsFake(() => {
@@ -122,9 +120,9 @@ describe('HTTP', function () {
                 assert.equal(res.json.called, false);
 
                 const frame = apiImpl.args[0][0];
-                assert.equal(frame.options.context.api_key.id, 'api-key-id');
-                assert.equal(frame.options.context.integration.id, 'integration-id');
-                assert.equal(frame.options.context.user, 'user-id');
+                assert.equal(frame.options.context.api_key.id, "api-key-id");
+                assert.equal(frame.options.context.integration.id, "integration-id");
+                assert.equal(frame.options.context.user, "user-id");
                 resolve();
             });
 
@@ -132,14 +130,14 @@ describe('HTTP', function () {
         });
     });
 
-    it('supports async response format and statusCode function', async function () {
+    it("supports async response format and statusCode function", async function () {
         await new Promise((resolve) => {
-            const apiImpl = sinon.stub().resolves({ok: true});
+            const apiImpl = sinon.stub().resolves({ ok: true });
             apiImpl.statusCode = sinon.stub().returns(204);
             apiImpl.response = {
                 format() {
-                    return Promise.resolve('plain');
-                }
+                    return Promise.resolve("plain");
+                },
             };
 
             res.send.callsFake(() => {
@@ -152,13 +150,13 @@ describe('HTTP', function () {
         });
     });
 
-    it('supports sync response format function', async function () {
+    it("supports sync response format function", async function () {
         await new Promise((resolve) => {
-            const apiImpl = sinon.stub().resolves('plain body');
+            const apiImpl = sinon.stub().resolves("plain body");
             apiImpl.response = {
                 format() {
-                    return 'plain';
-                }
+                    return "plain";
+                },
             };
 
             res.send.callsFake(() => {
@@ -171,16 +169,16 @@ describe('HTTP', function () {
         });
     });
 
-    it('passes errors to next with frame options', async function () {
+    it("passes errors to next with frame options", async function () {
         await new Promise((resolve) => {
-            const error = new Error('failure');
+            const error = new Error("failure");
             const apiImpl = sinon.stub().rejects(error);
 
             next.callsFake((err) => {
                 assert.equal(err, error);
                 assert.deepEqual(req.frameOptions, {
                     docName: null,
-                    method: null
+                    method: null,
                 });
                 resolve();
             });
@@ -189,15 +187,15 @@ describe('HTTP', function () {
         });
     });
 
-    it('uses req.url pathname when originalUrl is missing', async function () {
+    it("uses req.url pathname when originalUrl is missing", async function () {
         await new Promise((resolve) => {
             req.originalUrl = undefined;
-            req.url = '/ghost/api/content/posts/?include=authors';
+            req.url = "/ghost/api/content/posts/?include=authors";
 
             const apiImpl = sinon.stub().resolves({});
             res.json.callsFake(() => {
                 const frame = apiImpl.args[0][0];
-                assert.equal(frame.original.url.pathname, '/ghost/api/content/posts/');
+                assert.equal(frame.original.url.pathname, "/ghost/api/content/posts/");
                 resolve();
             });
 

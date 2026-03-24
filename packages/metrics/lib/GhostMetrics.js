@@ -1,4 +1,4 @@
-const jsonStringifySafe = require('json-stringify-safe');
+const jsonStringifySafe = require("json-stringify-safe");
 
 /**
  * @description Metric shipper class built on the loggingrc config used in Ghost projects
@@ -17,10 +17,10 @@ class GhostMetrics {
     constructor(options) {
         options = options || {};
 
-        this.domain = options.domain || 'localhost';
+        this.domain = options.domain || "localhost";
         this.elasticsearch = options.elasticsearch || {};
-        this.mode = process.env.MODE || options.mode || 'short';
-        if ('metrics' in options && typeof options.metrics === 'object') {
+        this.mode = process.env.MODE || options.mode || "short";
+        if ("metrics" in options && typeof options.metrics === "object") {
             this.transports = options.metrics.transports || [];
             this.metadata = options.metrics.metadata || {};
         } else {
@@ -30,7 +30,7 @@ class GhostMetrics {
 
         // CASE: special env variable to enable long mode and level info
         if (process.env.LOIN) {
-            this.mode = 'long';
+            this.mode = "long";
         }
 
         this.shippers = {};
@@ -50,9 +50,9 @@ class GhostMetrics {
      * @description Setup stdout stream.
      */
     setupStdoutShipper() {
-        const GhostPrettyStream = require('@tryghost/pretty-stream');
+        const GhostPrettyStream = require("@tryghost/pretty-stream");
         const prettyStdOut = new GhostPrettyStream({
-            mode: this.mode
+            mode: this.mode,
         });
 
         prettyStdOut.pipe(process.stdout);
@@ -60,7 +60,7 @@ class GhostMetrics {
         this.shippers.stdout = (name, value) => {
             prettyStdOut.write({
                 msg: `Metric ${name}: ${jsonStringifySafe(value)}`,
-                level: 30 // Magic number, log level for info
+                level: 30, // Magic number, log level for info
             });
 
             return Promise.resolve();
@@ -73,25 +73,25 @@ class GhostMetrics {
      * The name of the index is the name of the metric prefixed with "metrics-", the metric name itself should be sluggified
      */
     setupElasticsearchShipper() {
-        const ElasticSearch = require('@tryghost/elasticsearch');
+        const ElasticSearch = require("@tryghost/elasticsearch");
 
         const elasticSearch = new ElasticSearch({
             node: this.elasticsearch.host,
             auth: {
                 username: this.elasticsearch.username,
-                password: this.elasticsearch.password
+                password: this.elasticsearch.password,
             },
             requestTimeout: 5000,
-            proxy: 'proxy' in this.elasticsearch ? this.elasticsearch.proxy : null
+            proxy: "proxy" in this.elasticsearch ? this.elasticsearch.proxy : null,
         });
 
         this.shippers.elasticsearch = (name, value) => {
-            if (typeof value !== 'object') {
-                value = {value};
+            if (typeof value !== "object") {
+                value = { value };
             }
 
-            if (!('@timestamp' in value)) {
-                value['@timestamp'] = Date.now();
+            if (!("@timestamp" in value)) {
+                value["@timestamp"] = Date.now();
             }
 
             if (this.metadata) {

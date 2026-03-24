@@ -1,27 +1,27 @@
 {
   "name": "@tryghost/debug",
   "version": "2.0.3",
+  "license": "MIT",
+  "author": "Ghost Foundation",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
     "directory": "packages/debug"
   },
-  "author": "Ghost Foundation",
-  "license": "MIT",
+  "files": [
+    "index.js",
+    "lib"
+  ],
   "main": "index.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "echo \"Implement me!\"",
     "test": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
     "lint": "oxlint -c ../../.oxlintrc.json . && yarn lint:eslint",
     "posttest": "yarn lint",
     "lint:eslint": "eslint . --ext .js --cache"
-  },
-  "files": [
-    "index.js",
-    "lib"
-  ],
-  "publishConfig": {
-    "access": "public"
   },
   "dependencies": {
     "@tryghost/root-utils": "^2.0.3",

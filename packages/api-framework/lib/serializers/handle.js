@@ -1,6 +1,6 @@
-const debug = require('@tryghost/debug')('serializers:handle');
-const {sequence} = require('@tryghost/promise');
-const errors = require('@tryghost/errors');
+const debug = require("@tryghost/debug")("serializers:handle");
+const { sequence } = require("@tryghost/promise");
+const errors = require("@tryghost/errors");
 
 /**
  * @description Shared input serialization handler.
@@ -15,10 +15,10 @@ const errors = require('@tryghost/errors');
  * @param {import('@tryghost/api-framework').Frame} frame
  */
 module.exports.input = (apiConfig, apiSerializers, frame) => {
-    debug('input');
+    debug("input");
 
     const tasks = [];
-    const sharedSerializers = require('./input');
+    const sharedSerializers = require("./input");
 
     if (!apiConfig) {
         return Promise.reject(new errors.IncorrectUsageError());
@@ -93,7 +93,7 @@ const getBestMatchSerializer = function (apiSerializers, docName, method) {
  * @param {import('@tryghost/api-framework').Frame} frame
  */
 module.exports.output = (response = {}, apiConfig, apiSerializers, frame) => {
-    debug('output');
+    debug("output");
 
     const tasks = [];
 
@@ -113,8 +113,12 @@ module.exports.output = (response = {}, apiConfig, apiSerializers, frame) => {
         });
     }
 
-    const customSerializer = getBestMatchSerializer(apiSerializers, apiConfig.docName, apiConfig.method);
-    const defaultSerializer = getBestMatchSerializer(apiSerializers, 'default', apiConfig.method);
+    const customSerializer = getBestMatchSerializer(
+        apiSerializers,
+        apiConfig.docName,
+        apiConfig.method,
+    );
+    const defaultSerializer = getBestMatchSerializer(apiSerializers, "default", apiConfig.method);
 
     if (customSerializer) {
         // CASE: custom serializer exists

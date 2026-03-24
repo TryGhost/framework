@@ -1,61 +1,61 @@
-const {assert} = require('./utils');
-const path = require('path');
-const FormData = require('form-data');
+const { assert } = require("./utils");
+const path = require("path");
+const FormData = require("form-data");
 
-const {isJSON, normalizeURL, attachFile} = require('../lib/utils');
+const { isJSON, normalizeURL, attachFile } = require("../lib/utils");
 
-describe('Utils', function () {
-    it('isJSON', function () {
-        assert.equal(isJSON('application/json'), true);
-        assert.equal(isJSON('application/ld+json'), true);
-        assert.equal(isJSON('text/html'), false);
+describe("Utils", function () {
+    it("isJSON", function () {
+        assert.equal(isJSON("application/json"), true);
+        assert.equal(isJSON("application/ld+json"), true);
+        assert.equal(isJSON("text/html"), false);
     });
 
-    describe('normalizeURL', function () {
-        it('adds trailing slash in the end of URL', function () {
-            const url = normalizeURL('http://example.com');
-            assert.equal(url, 'http://example.com/');
+    describe("normalizeURL", function () {
+        it("adds trailing slash in the end of URL", function () {
+            const url = normalizeURL("http://example.com");
+            assert.equal(url, "http://example.com/");
         });
 
-        it('does NOT add trailing slash in the end of URL if it is present', function () {
-            const url = normalizeURL('http://example.com/');
-            assert.equal(url, 'http://example.com/');
+        it("does NOT add trailing slash in the end of URL if it is present", function () {
+            const url = normalizeURL("http://example.com/");
+            assert.equal(url, "http://example.com/");
         });
 
-        it('adds trailing slash in the end of URL respecting query string', function () {
-            const url = normalizeURL('http://example.com?yolo=9000');
-            assert.equal(url, 'http://example.com/?yolo=9000');
+        it("adds trailing slash in the end of URL respecting query string", function () {
+            const url = normalizeURL("http://example.com?yolo=9000");
+            assert.equal(url, "http://example.com/?yolo=9000");
         });
 
-        it('does NOT add trailing slash in the end of URL respecting query string', function () {
-            const url = normalizeURL('http://example.com/?yolo=9000');
-            assert.equal(url, 'http://example.com/?yolo=9000');
+        it("does NOT add trailing slash in the end of URL respecting query string", function () {
+            const url = normalizeURL("http://example.com/?yolo=9000");
+            assert.equal(url, "http://example.com/?yolo=9000");
         });
     });
 
-    describe('attachFile', function () {
-        it('creates FormData with file content', function () {
-            const filePath = path.join(__dirname, 'fixtures/test-file.txt');
-            const formData = attachFile('testfile', filePath);
+    describe("attachFile", function () {
+        it("creates FormData with file content", function () {
+            const filePath = path.join(__dirname, "fixtures/test-file.txt");
+            const formData = attachFile("testfile", filePath);
 
             assert.equal(formData instanceof FormData, true);
-            assert.equal(typeof formData.getHeaders, 'function');
-            assert.equal(typeof formData.getBuffer, 'function');
+            assert.equal(typeof formData.getHeaders, "function");
+            assert.equal(typeof formData.getBuffer, "function");
         });
 
-        it('sets correct filename from path', function () {
-            const filePath = path.join(__dirname, 'fixtures/test-file.txt');
-            const formData = attachFile('testfile', filePath);
+        it("sets correct filename from path", function () {
+            const filePath = path.join(__dirname, "fixtures/test-file.txt");
+            const formData = attachFile("testfile", filePath);
 
             // FormData doesn't expose a direct way to check the filename,
             // but we can verify it was created without errors
             const headers = formData.getHeaders();
-            assert.match(headers['content-type'], /^multipart\/form-data; boundary=/);
+            assert.match(headers["content-type"], /^multipart\/form-data; boundary=/);
         });
 
-        it('sets correct content type for text file', function () {
-            const filePath = path.join(__dirname, 'fixtures/test-file.txt');
-            const formData = attachFile('testfile', filePath);
+        it("sets correct content type for text file", function () {
+            const filePath = path.join(__dirname, "fixtures/test-file.txt");
+            const formData = attachFile("testfile", filePath);
 
             // Get the form data buffer to check it contains the right content type
             const buffer = formData.getBuffer();
@@ -65,9 +65,9 @@ describe('Utils', function () {
             assert.match(content, /Content-Type: text\/plain/);
         });
 
-        it('sets correct content type for PNG image', function () {
-            const filePath = path.join(__dirname, 'fixtures/ghost-favicon.png');
-            const formData = attachFile('image', filePath);
+        it("sets correct content type for PNG image", function () {
+            const filePath = path.join(__dirname, "fixtures/ghost-favicon.png");
+            const formData = attachFile("image", filePath);
 
             // Get the form data buffer to check it contains the right content type
             const buffer = formData.getBuffer();
@@ -77,14 +77,14 @@ describe('Utils', function () {
             assert.match(content, /Content-Type: image\/png/);
         });
 
-        it('uses default content type for unknown file extension', function () {
+        it("uses default content type for unknown file extension", function () {
             // Create a file with unknown extension
-            const fs = require('fs');
-            const unknownFile = path.join(__dirname, 'fixtures/test.unknown');
-            fs.writeFileSync(unknownFile, 'test content');
+            const fs = require("fs");
+            const unknownFile = path.join(__dirname, "fixtures/test.unknown");
+            fs.writeFileSync(unknownFile, "test content");
 
             try {
-                const formData = attachFile('file', unknownFile);
+                const formData = attachFile("file", unknownFile);
                 const buffer = formData.getBuffer();
                 const content = buffer.toString();
 
@@ -96,9 +96,9 @@ describe('Utils', function () {
             }
         });
 
-        it('includes the correct field name', function () {
-            const filePath = path.join(__dirname, 'fixtures/test-file.txt');
-            const formData = attachFile('myfield', filePath);
+        it("includes the correct field name", function () {
+            const filePath = path.join(__dirname, "fixtures/test-file.txt");
+            const formData = attachFile("myfield", filePath);
 
             const buffer = formData.getBuffer();
             const content = buffer.toString();
@@ -107,9 +107,9 @@ describe('Utils', function () {
             assert.match(content, /Content-Disposition: form-data; name="myfield"/);
         });
 
-        it('includes the file content', function () {
-            const filePath = path.join(__dirname, 'fixtures/test-file.txt');
-            const formData = attachFile('testfile', filePath);
+        it("includes the file content", function () {
+            const filePath = path.join(__dirname, "fixtures/test-file.txt");
+            const formData = attachFile("testfile", filePath);
 
             const buffer = formData.getBuffer();
             const content = buffer.toString();
@@ -118,15 +118,15 @@ describe('Utils', function () {
             assert.match(content, /test content for file upload/);
         });
 
-        it('can append to existing FormData', function () {
-            const filePath1 = path.join(__dirname, 'fixtures/test-file.txt');
-            const filePath2 = path.join(__dirname, 'fixtures/ghost-favicon.png');
+        it("can append to existing FormData", function () {
+            const filePath1 = path.join(__dirname, "fixtures/test-file.txt");
+            const filePath2 = path.join(__dirname, "fixtures/ghost-favicon.png");
 
             // Create FormData with first file
-            const formData = attachFile('file1', filePath1);
+            const formData = attachFile("file1", filePath1);
 
             // Append second file to same FormData
-            const updatedFormData = attachFile('file2', filePath2, formData);
+            const updatedFormData = attachFile("file2", filePath2, formData);
 
             // Should be the same instance
             assert.equal(formData, updatedFormData);
@@ -141,9 +141,9 @@ describe('Utils', function () {
             assert.match(content, /filename="ghost-favicon.png"/);
         });
 
-        it('creates new FormData when existingFormData is null', function () {
-            const filePath = path.join(__dirname, 'fixtures/test-file.txt');
-            const formData = attachFile('testfile', filePath, null);
+        it("creates new FormData when existingFormData is null", function () {
+            const filePath = path.join(__dirname, "fixtures/test-file.txt");
+            const formData = attachFile("testfile", filePath, null);
 
             assert.equal(formData instanceof FormData, true);
 

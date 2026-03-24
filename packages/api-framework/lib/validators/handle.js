@@ -1,6 +1,6 @@
-const debug = require('@tryghost/debug')('validators:handle');
-const errors = require('@tryghost/errors');
-const {sequence} = require('@tryghost/promise');
+const debug = require("@tryghost/debug")("validators:handle");
+const errors = require("@tryghost/errors");
+const { sequence } = require("@tryghost/promise");
 
 /**
  * @description Shared input validation handler.
@@ -15,10 +15,10 @@ const {sequence} = require('@tryghost/promise');
  * @param {import('@tryghost/api-framework').Frame} frame
  */
 module.exports.input = (apiConfig, apiValidators, frame) => {
-    debug('input begin');
+    debug("input begin");
 
     const tasks = [];
-    const sharedValidators = require('./input');
+    const sharedValidators = require("./input");
 
     if (!apiValidators) {
         return Promise.reject(new errors.IncorrectUsageError());
@@ -62,6 +62,6 @@ module.exports.input = (apiConfig, apiValidators, frame) => {
         }
     }
 
-    debug('input ready');
+    debug("input ready");
     return sequence(tasks);
 };

@@ -1,6 +1,6 @@
-const _ = require('lodash');
-const _debug = require('@tryghost/debug')._base;
-const debug = _debug('ghost-query');
+const _ = require("lodash");
+const _debug = require("@tryghost/debug")._base;
+const debug = _debug("ghost-query");
 
 /**
  * Enchances knex query builder with a join to relation configured in
@@ -9,7 +9,7 @@ const debug = _debug('ghost-query');
  * @param {String[]} relationsToLoad relations to be included in joins
  */
 function withEager(model, relationsToLoad) {
-    const tableName = _.result(model.constructor.prototype, 'tableName');
+    const tableName = _.result(model.constructor.prototype, "tableName");
 
     return function (qb) {
         if (!model.relationsMeta) {
@@ -18,8 +18,11 @@ function withEager(model, relationsToLoad) {
 
         for (const [key, config] of Object.entries(model.relationsMeta)) {
             if (relationsToLoad.includes(key)) {
-                const innerQb = qb
-                    .leftJoin(config.targetTableName, `${tableName}.id`, `${config.targetTableName}.${config.foreignKey}`);
+                const innerQb = qb.leftJoin(
+                    config.targetTableName,
+                    `${tableName}.id`,
+                    `${config.targetTableName}.${config.foreignKey}`,
+                );
 
                 debug(`QUERY has posts: ${innerQb.toSQL().sql}`);
             }
@@ -35,7 +38,11 @@ function load(options) {
     }
 
     if (this.eagerLoad) {
-        if (!options.columns && options.withRelated && _.intersection(this.eagerLoad, options.withRelated).length) {
+        if (
+            !options.columns &&
+            options.withRelated &&
+            _.intersection(this.eagerLoad, options.withRelated).length
+        ) {
             this.query(withEager(this, this.eagerLoad));
         }
     }
@@ -58,8 +65,8 @@ module.exports = function eagerLoadPlugin(Bookshelf) {
         fetch: function () {
             load.apply(this, arguments);
 
-            if (_debug.enabled('ghost-query')) {
-                debug('QUERY', this.query().toQuery());
+            if (_debug.enabled("ghost-query")) {
+                debug("QUERY", this.query().toQuery());
             }
 
             return modelPrototype.fetch.apply(this, arguments);
@@ -68,12 +75,12 @@ module.exports = function eagerLoadPlugin(Bookshelf) {
         fetchAll: function () {
             load.apply(this, arguments);
 
-            if (_debug.enabled('ghost-query')) {
-                debug('QUERY', this.query().toQuery());
+            if (_debug.enabled("ghost-query")) {
+                debug("QUERY", this.query().toQuery());
             }
 
             return modelPrototype.fetchAll.apply(this, arguments);
-        }
+        },
     });
 };
 

@@ -1,10 +1,10 @@
-const errors = require('@tryghost/errors');
+const errors = require("@tryghost/errors");
 
 const defaultOptions = {};
 
 function throwOnSymlinks(entry) {
     // Check if symlink
-    const mode = (entry.externalFileAttributes >> 16) & 0xFFFF;
+    const mode = (entry.externalFileAttributes >> 16) & 0xffff;
     // check if it's a symlink or dir (using stat mode constants)
     const IFMT = 61440;
     const IFLNK = 40960;
@@ -12,15 +12,15 @@ function throwOnSymlinks(entry) {
 
     if (symlink) {
         throw new errors.UnsupportedMediaTypeError({
-            message: 'Symlinks are not allowed in the zip folder.'
+            message: "Symlinks are not allowed in the zip folder.",
         });
     }
 }
 
 function throwOnLargeFilenames(entry) {
-    if (Buffer.byteLength(entry.fileName, 'utf8') >= 254) {
+    if (Buffer.byteLength(entry.fileName, "utf8") >= 254) {
         throw new errors.UnsupportedMediaTypeError({
-            message: 'File names in the zip folder must be shorter than 254 characters.'
+            message: "File names in the zip folder must be shorter than 254 characters.",
         });
     }
 }
@@ -40,7 +40,7 @@ function throwOnLargeFilenames(entry) {
 module.exports = (zipToExtract, destination, options) => {
     const opts = Object.assign({}, defaultOptions, options);
 
-    const extract = require('extract-zip');
+    const extract = require("extract-zip");
 
     opts.dir = destination;
 
@@ -54,6 +54,6 @@ module.exports = (zipToExtract, destination, options) => {
     };
 
     return extract(zipToExtract, opts).then(() => {
-        return {path: destination};
+        return { path: destination };
     });
 };

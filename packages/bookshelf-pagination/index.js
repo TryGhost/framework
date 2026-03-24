@@ -1,1 +1,1 @@
-module.exports = require('./lib/bookshelf-pagination');
+module.exports = require("./lib/bookshelf-pagination");

@@ -1,11 +1,4 @@
 {
-  "tabWidth": 4,
-  "singleQuote": true,
-  "semi": true,
-  "trailingComma": "none",
-  "quoteProps": "as-needed",
-  "bracketSpacing": false,
-  "arrowParens": "avoid",
   "ignorePatterns": [
     "**/node_modules/**",
     "**/build/**",

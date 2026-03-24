@@ -1,10 +1,8 @@
 module.exports = {
-    parser: '@typescript-eslint/parser',
-    plugins: ['ghost'],
-    extends: [
-        'plugin:ghost/test'
-    ],
+    parser: "@typescript-eslint/parser",
+    plugins: ["ghost"],
+    extends: ["plugin:ghost/test"],
     globals: {
-        afterAll: 'readonly'
-    }
+        afterAll: "readonly",
+    },
 };

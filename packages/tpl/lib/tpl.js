@@ -18,7 +18,7 @@ module.exports = (string, data) => {
     }
 
     // We replace any escaped left braces with the unicode character so we can swap it back later
-    let processedString = string.replace(/\\{/g, '\\U+007B');
+    let processedString = string.replace(/\\{/g, "\\U+007B");
     // Interpolate {key} patterns with data values
     processedString = processedString.replace(interpolate, (_match, key) => {
         const trimmed = key.trim();
@@ -29,5 +29,5 @@ module.exports = (string, data) => {
         return data[trimmed];
     });
     // Replace our swapped out left braces and any escaped right braces
-    return processedString.replace(/\\U\+007B/g, '{').replace(/\\}/g, '}');
+    return processedString.replace(/\\U\+007B/g, "{").replace(/\\}/g, "}");
 };

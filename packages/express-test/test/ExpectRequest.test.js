@@ -1,17 +1,17 @@
-const {assert, sinon, stubCookies} = require('./utils');
+const { assert, sinon, stubCookies } = require("./utils");
 
-const {ExpectRequest, RequestOptions} = require('../lib/ExpectRequest');
-const {snapshotManager} = require('@tryghost/jest-snapshot');
-const Request = require('../lib/Request');
+const { ExpectRequest, RequestOptions } = require("../lib/ExpectRequest");
+const { snapshotManager } = require("@tryghost/jest-snapshot");
+const Request = require("../lib/Request");
 
-describe('ExpectRequest', function () {
+describe("ExpectRequest", function () {
     afterEach(function () {
         sinon.restore();
     });
 
-    describe('Class functions', function () {
-        it('constructor sets app, jar and reqOptions', function () {
-            const fn = () => { };
+    describe("Class functions", function () {
+        it("constructor sets app, jar and reqOptions", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
@@ -21,10 +21,10 @@ describe('ExpectRequest', function () {
             assert.equal(request.reqOptions, opts);
         });
 
-        it('class is thenable [public api]', async function () {
+        it("class is thenable [public api]", async function () {
             const fn = (req, res) => {
                 // This is how reqresnext works
-                res.emit('finish');
+                res.emit("finish");
             };
             const jar = {};
             const opts = new RequestOptions();
@@ -37,15 +37,17 @@ describe('ExpectRequest', function () {
                 const response = await request;
                 assert.equal(response.statusCode, 200); // this is the default
             } catch (error) {
-                assert.fail(`This should not have thrown an error. Original error: ${error.message}.`);
+                assert.fail(
+                    `This should not have thrown an error. Original error: ${error.message}.`,
+                );
             }
         });
 
-        it('finalize with no assertions doesnt try to run assertions', async function () {
+        it("finalize with no assertions doesnt try to run assertions", async function () {
             await new Promise((resolve, reject) => {
                 const fn = (req, res) => {
                     // This is how reqresnext works
-                    res.emit('finish');
+                    res.emit("finish");
                 };
                 const jar = {};
                 const opts = new RequestOptions();
@@ -54,8 +56,8 @@ describe('ExpectRequest', function () {
                 stubCookies(request);
 
                 try {
-                    const superStub = sinon.stub(Request.prototype, 'finalize').callsArg(0);
-                    const assertSpy = sinon.stub(request, '_assertAll');
+                    const superStub = sinon.stub(Request.prototype, "finalize").callsArg(0);
+                    const assertSpy = sinon.stub(request, "_assertAll");
 
                     // I couldn't figure out how to stub the super.finalize call here
                     request.finalize((error) => {
@@ -75,11 +77,11 @@ describe('ExpectRequest', function () {
             });
         });
 
-        it('finalize with assertions runs assertions', async function () {
+        it("finalize with assertions runs assertions", async function () {
             await new Promise((resolve, reject) => {
                 const fn = (req, res) => {
                     // This is how reqresnext works
-                    res.emit('finish');
+                    res.emit("finish");
                 };
                 const jar = {};
                 const opts = new RequestOptions();
@@ -90,8 +92,8 @@ describe('ExpectRequest', function () {
                 stubCookies(request);
 
                 try {
-                    const superStub = sinon.stub(Request.prototype, 'finalize').callsArg(0);
-                    const assertSpy = sinon.stub(request, '_assertAll');
+                    const superStub = sinon.stub(Request.prototype, "finalize").callsArg(0);
+                    const assertSpy = sinon.stub(request, "_assertAll");
 
                     request.finalize((error) => {
                         if (error) {
@@ -110,11 +112,11 @@ describe('ExpectRequest', function () {
             });
         });
 
-        it('finalize errors correctly when super.finalize is erroring', async function () {
+        it("finalize errors correctly when super.finalize is erroring", async function () {
             await new Promise((resolve, reject) => {
                 const fn = (req, res) => {
                     // This is how reqresnext works
-                    res.emit('finish');
+                    res.emit("finish");
                 };
                 const jar = {};
                 const opts = new RequestOptions();
@@ -127,8 +129,10 @@ describe('ExpectRequest', function () {
                 const theError = new Error();
 
                 try {
-                    const superStub = sinon.stub(Request.prototype, 'finalize').callsArgWith(0, theError);
-                    const assertSpy = sinon.stub(request, '_assertAll');
+                    const superStub = sinon
+                        .stub(Request.prototype, "finalize")
+                        .callsArgWith(0, theError);
+                    const assertSpy = sinon.stub(request, "_assertAll");
 
                     request.finalize((error) => {
                         sinon.assert.calledOnce(superStub);
@@ -142,11 +146,11 @@ describe('ExpectRequest', function () {
             });
         });
 
-        it('finalize errors correctly when assertions are erroring', async function () {
+        it("finalize errors correctly when assertions are erroring", async function () {
             await new Promise((resolve, reject) => {
                 const fn = (req, res) => {
                     // This is how reqresnext works
-                    res.emit('finish');
+                    res.emit("finish");
                 };
                 const jar = {};
                 const opts = new RequestOptions();
@@ -159,8 +163,8 @@ describe('ExpectRequest', function () {
                 const theError = new Error();
 
                 try {
-                    const superStub = sinon.stub(Request.prototype, 'finalize').callsArg(0);
-                    const assertSpy = sinon.stub(request, '_assertAll').throws(theError);
+                    const superStub = sinon.stub(Request.prototype, "finalize").callsArg(0);
+                    const assertSpy = sinon.stub(request, "_assertAll").throws(theError);
 
                     request.finalize((error) => {
                         sinon.assert.calledOnce(superStub);
@@ -174,8 +178,8 @@ describe('ExpectRequest', function () {
             });
         });
 
-        it('_addAssertion adds an assertion', function () {
-            const fn = () => { };
+        it("_addAssertion adds an assertion", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
@@ -187,12 +191,12 @@ describe('ExpectRequest', function () {
 
             const added = request.assertions[0];
             assert.notEqual(request.assertions.length, 0);
-            assert.equal(added.error.message, 'Unexpected assertion error');
-            assert.equal(added.error.contextString, 'GET request on /');
+            assert.equal(added.error.message, "Unexpected assertion error");
+            assert.equal(added.error.contextString, "GET request on /");
         });
 
-        it('_assertAll calls assertion functions for each assertion', function () {
-            const fn = () => { };
+        it("_assertAll calls assertion functions for each assertion", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
@@ -201,14 +205,14 @@ describe('ExpectRequest', function () {
 
             request.assertions = [
                 {
-                    fn: fakeAssertion
+                    fn: fakeAssertion,
                 },
                 {
-                    fn: fakeAssertion
-                }
+                    fn: fakeAssertion,
+                },
             ];
 
-            const response = {foo: 'bar'};
+            const response = { foo: "bar" };
 
             request._assertAll(response);
 
@@ -217,7 +221,7 @@ describe('ExpectRequest', function () {
         });
 
         it('_assertAll calls assertion functions in order of "no type", "header" type, and "status" type', function () {
-            const fn = () => { };
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
@@ -228,19 +232,19 @@ describe('ExpectRequest', function () {
 
             request.assertions = [
                 {
-                    type: 'status',
-                    fn: statusSpy
+                    type: "status",
+                    fn: statusSpy,
                 },
                 {
-                    fn: noTypeSpy
+                    fn: noTypeSpy,
                 },
                 {
-                    type: 'header',
-                    fn: headerSpy
-                }
+                    type: "header",
+                    fn: headerSpy,
+                },
             ];
 
-            const response = {foo: 'bar'};
+            const response = { foo: "bar" };
 
             request._assertAll(response);
 
@@ -256,17 +260,17 @@ describe('ExpectRequest', function () {
             sinon.assert.callOrder(noTypeSpy, headerSpy, statusSpy);
         });
 
-        it('_assertStatus ok when status is ok', function () {
-            const fn = () => { };
+        it("_assertStatus ok when status is ok", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
 
             const error = new assert.AssertionError({});
-            error.contextString = 'foo';
+            error.contextString = "foo";
 
-            const response = {statusCode: 200};
-            const assertion = {expected: 200, error};
+            const response = { statusCode: 200 };
+            const assertion = { expected: 200, error };
 
             const assertFn = () => {
                 request._assertStatus(response, assertion);
@@ -275,17 +279,17 @@ describe('ExpectRequest', function () {
             assert.doesNotThrow(assertFn);
         });
 
-        it('_assertStatus not ok when status is not ok', function () {
-            const fn = () => { };
+        it("_assertStatus not ok when status is not ok", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
 
             const error = new assert.AssertionError({});
-            error.contextString = 'foo';
+            error.contextString = "foo";
 
-            const response = {statusCode: 404};
-            const assertion = {expected: 200, error};
+            const response = { statusCode: 404 };
+            const assertion = { expected: 200, error };
 
             const assertFn = () => {
                 request._assertStatus(response, assertion);
@@ -294,70 +298,79 @@ describe('ExpectRequest', function () {
             assert.throws(assertFn);
         });
 
-        it('_assertStatus not ok when status i not ok and shows response error when present', function () {
-            const fn = () => { };
+        it("_assertStatus not ok when status i not ok and shows response error when present", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
 
             const error = new assert.AssertionError({});
-            error.contextString = 'foo';
+            error.contextString = "foo";
 
             const response = {
                 statusCode: 404,
                 body: {
-                    errors: [{
-                        message: 'Not found'
-                    }]
-                }
+                    errors: [
+                        {
+                            message: "Not found",
+                        },
+                    ],
+                },
             };
-            const assertion = {expected: 200, error};
+            const assertion = { expected: 200, error };
 
             const assertFn = () => {
                 request._assertStatus(response, assertion);
             };
 
-            assert.throws(assertFn, {message: 'Expected statusCode 200, got statusCode 404 foo\nNot found'});
+            assert.throws(assertFn, {
+                message: "Expected statusCode 200, got statusCode 404 foo\nNot found",
+            });
         });
 
-        it('_assertStatus not ok when status i not ok and shows response context when present', function () {
-            const fn = () => { };
+        it("_assertStatus not ok when status i not ok and shows response context when present", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
 
             const error = new assert.AssertionError({});
-            error.contextString = 'foo';
+            error.contextString = "foo";
 
             const response = {
                 statusCode: 500,
                 body: {
-                    errors: [{
-                        message: 'Internal server error, cannot save member.',
-                        context: 'offer is not defined on the model.'
-                    }]
-                }
+                    errors: [
+                        {
+                            message: "Internal server error, cannot save member.",
+                            context: "offer is not defined on the model.",
+                        },
+                    ],
+                },
             };
-            const assertion = {expected: 200, error};
+            const assertion = { expected: 200, error };
 
             const assertFn = () => {
                 request._assertStatus(response, assertion);
             };
 
-            assert.throws(assertFn, {message: 'Expected statusCode 200, got statusCode 500 foo\nInternal server error, cannot save member.\noffer is not defined on the model.'});
+            assert.throws(assertFn, {
+                message:
+                    "Expected statusCode 200, got statusCode 500 foo\nInternal server error, cannot save member.\noffer is not defined on the model.",
+            });
         });
 
-        it('_assertHeader ok when header is ok', function () {
-            const fn = () => { };
+        it("_assertHeader ok when header is ok", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
 
             const error = new assert.AssertionError({});
-            error.contextString = 'foo';
+            error.contextString = "foo";
 
-            const response = {headers: {foo: 'bar'}};
-            const assertion = {expectedField: 'foo', expectedValue: 'bar', error};
+            const response = { headers: { foo: "bar" } };
+            const assertion = { expectedField: "foo", expectedValue: "bar", error };
 
             const assertFn = () => {
                 request._assertHeader(response, assertion);
@@ -366,55 +379,57 @@ describe('ExpectRequest', function () {
             assert.doesNotThrow(assertFn);
         });
 
-        it('_assertHeader not ok when header is not ok', function () {
-            const fn = () => { };
+        it("_assertHeader not ok when header is not ok", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
 
             const error = new assert.AssertionError({});
-            error.contextString = 'foo';
+            error.contextString = "foo";
 
-            const response = {headers: {foo: 'baz'}};
-            const assertion = {expectedField: 'foo', expectedValue: 'bar', error};
+            const response = { headers: { foo: "baz" } };
+            const assertion = { expectedField: "foo", expectedValue: "bar", error };
 
             const assertFn = () => {
                 request._assertHeader(response, assertion);
             };
 
-            assert.throws(assertFn, {message: 'Expected header "foo: bar", got "foo: baz" foo'});
+            assert.throws(assertFn, { message: 'Expected header "foo: bar", got "foo: baz" foo' });
         });
 
-        it('_assertHeader not ok when status is not set', function () {
-            const fn = () => { };
+        it("_assertHeader not ok when status is not set", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
 
             const error = new assert.AssertionError({});
-            error.contextString = 'foo';
+            error.contextString = "foo";
 
-            const response = {headers: {}};
-            const assertion = {expectedField: 'foo', expectedValue: 'bar', error};
+            const response = { headers: {} };
+            const assertion = { expectedField: "foo", expectedValue: "bar", error };
 
             const assertFn = () => {
                 request._assertHeader(response, assertion);
             };
 
-            assert.throws(assertFn, {message: 'Expected header "foo: bar" to exist, got headers: {} foo'});
+            assert.throws(assertFn, {
+                message: 'Expected header "foo: bar" to exist, got headers: {} foo',
+            });
         });
 
-        it('_assertHeader ok with matching regex for value', function () {
-            const fn = () => { };
+        it("_assertHeader ok with matching regex for value", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
 
             const error = new assert.AssertionError({});
-            error.contextString = 'foo';
+            error.contextString = "foo";
 
-            const response = {headers: {foo: 'baz'}};
-            const assertion = {expectedField: 'foo', expectedValue: /^ba/, error};
+            const response = { headers: { foo: "baz" } };
+            const assertion = { expectedField: "foo", expectedValue: /^ba/, error };
 
             const assertFn = () => {
                 request._assertHeader(response, assertion);
@@ -423,38 +438,40 @@ describe('ExpectRequest', function () {
             assert.doesNotThrow(assertFn);
         });
 
-        it('_assertHeader mot ok with non-matching regex for value', function () {
-            const fn = () => { };
+        it("_assertHeader mot ok with non-matching regex for value", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
 
             const error = new assert.AssertionError({});
-            error.contextString = 'foo';
+            error.contextString = "foo";
 
-            const response = {headers: {foo: 'baz'}};
-            const assertion = {expectedField: 'foo', expectedValue: /^bar/, error};
+            const response = { headers: { foo: "baz" } };
+            const assertion = { expectedField: "foo", expectedValue: /^bar/, error };
 
             const assertFn = () => {
                 request._assertHeader(response, assertion);
             };
 
-            assert.throws(assertFn, {message: 'Expected header "foo" to have value matching "/^bar/", got "baz" foo'});
+            assert.throws(assertFn, {
+                message: 'Expected header "foo" to have value matching "/^bar/", got "baz" foo',
+            });
         });
 
-        it('_assertSnapshot ok when match is a pass', function () {
-            const fn = () => { };
+        it("_assertSnapshot ok when match is a pass", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
 
             const error = new assert.AssertionError({});
-            error.contextString = 'foo';
+            error.contextString = "foo";
 
-            const response = {body: {foo: 'bar'}};
-            const assertion = {properties: {}, field: 'body', error};
+            const response = { body: { foo: "bar" } };
+            const assertion = { properties: {}, field: "body", error };
 
-            const matchStub = sinon.stub(snapshotManager, 'match').returns({pass: true});
+            const matchStub = sinon.stub(snapshotManager, "match").returns({ pass: true });
 
             const assertFn = () => {
                 request._assertSnapshot(response, assertion);
@@ -464,22 +481,22 @@ describe('ExpectRequest', function () {
 
             // Assert side effects, check that hinting works as expected
             sinon.assert.calledOnce(matchStub);
-            sinon.assert.calledOnceWithExactly(matchStub, response.body, {}, '[body]');
+            sinon.assert.calledOnceWithExactly(matchStub, response.body, {}, "[body]");
         });
 
-        it('_assertSnapshot not ok when match is not a pass', function () {
-            const fn = () => { };
+        it("_assertSnapshot not ok when match is not a pass", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
 
             const error = new assert.AssertionError({});
-            error.contextString = 'foo';
+            error.contextString = "foo";
 
-            const response = {body: {foo: 'bar'}};
-            const assertion = {properties: {}, field: 'body', error};
+            const response = { body: { foo: "bar" } };
+            const assertion = { properties: {}, field: "body", error };
 
-            sinon.stub(snapshotManager, 'match').returns({pass: false});
+            sinon.stub(snapshotManager, "match").returns({ pass: false });
 
             const assertFn = () => {
                 request._assertSnapshot(response, assertion);
@@ -488,68 +505,73 @@ describe('ExpectRequest', function () {
             assert.throws(assertFn);
         });
 
-        it('_assertSnapshot not ok when field not set', function () {
-            const fn = () => { };
+        it("_assertSnapshot not ok when field not set", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
 
             const error = new assert.AssertionError({});
-            error.contextString = 'foo';
+            error.contextString = "foo";
 
-            const response = {body: {foo: 'bar'}};
-            const assertion = {properties: {}, error};
+            const response = { body: { foo: "bar" } };
+            const assertion = { properties: {}, error };
 
-            sinon.stub(snapshotManager, 'match').returns({pass: false});
+            sinon.stub(snapshotManager, "match").returns({ pass: false });
 
             const assertFn = () => {
                 request._assertSnapshot(response, assertion);
             };
 
-            assert.throws(assertFn, {message: 'Unable to match snapshot on undefined field undefined foo'});
+            assert.throws(assertFn, {
+                message: "Unable to match snapshot on undefined field undefined foo",
+            });
         });
 
-        it('expect calls _addAssertion [public interface]', function () {
-            const fn = () => { };
+        it("expect calls _addAssertion [public interface]", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
 
-            const addSpy = sinon.stub(request, '_addAssertion');
+            const addSpy = sinon.stub(request, "_addAssertion");
 
             request.expect(fn);
 
             sinon.assert.calledOnce(addSpy);
             sinon.assert.calledOnceWithMatch(addSpy, {
                 fn: sinon.match.func, // this is the wrapped callback
-                type: 'body'
+                type: "body",
             });
         });
 
-        it('expect not ok when given something other than a function [public interface]', function () {
-            const fn = () => { };
+        it("expect not ok when given something other than a function [public interface]", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
 
-            const addSpy = sinon.stub(request, '_addAssertion');
+            const addSpy = sinon.stub(request, "_addAssertion");
 
             const assertFn = () => {
-                request.expect('foo');
+                request.expect("foo");
             };
 
-            assert.throws(assertFn, {message: 'express-test expect() requires a callback function, did you mean expectStatus or expectHeader?'});
+            assert.throws(assertFn, {
+                message:
+                    "express-test expect() requires a callback function, did you mean expectStatus or expectHeader?",
+            });
 
             sinon.assert.notCalled(addSpy);
         });
 
-        it('expectStatus calls _addAssertion [public interface]', function () {
-            const fn = () => { };
+        it("expectStatus calls _addAssertion [public interface]", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
 
-            const addSpy = sinon.stub(request, '_addAssertion');
+            const addSpy = sinon.stub(request, "_addAssertion");
 
             request.expectStatus(200);
 
@@ -557,50 +579,55 @@ describe('ExpectRequest', function () {
             sinon.assert.calledOnceWithExactly(addSpy, {
                 fn: request._assertStatus,
                 expected: 200,
-                type: 'status'
+                type: "status",
             });
         });
 
-        it('expectHeader calls _addAssertion [public interface]', function () {
-            const fn = () => { };
+        it("expectHeader calls _addAssertion [public interface]", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
 
-            const addSpy = sinon.stub(request, '_addAssertion');
+            const addSpy = sinon.stub(request, "_addAssertion");
 
-            request.expectHeader('foo', 'bar');
+            request.expectHeader("foo", "bar");
 
             sinon.assert.calledOnce(addSpy);
             sinon.assert.calledOnceWithExactly(addSpy, {
                 fn: request._assertHeader,
-                expectedField: 'foo',
-                expectedValue: 'bar',
-                type: 'header'
+                expectedField: "foo",
+                expectedValue: "bar",
+                type: "header",
             });
         });
 
-        it('matchBodySnapshot calls _addAssertion [public interface]', function () {
-            const fn = () => { };
+        it("matchBodySnapshot calls _addAssertion [public interface]", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
 
-            const addSpy = sinon.stub(request, '_addAssertion');
+            const addSpy = sinon.stub(request, "_addAssertion");
 
             request.matchBodySnapshot({});
 
             sinon.assert.calledOnce(addSpy);
-            sinon.assert.calledOnceWithExactly(addSpy, {fn: request._assertSnapshot, properties: {}, field: 'body', type: 'body'});
+            sinon.assert.calledOnceWithExactly(addSpy, {
+                fn: request._assertSnapshot,
+                properties: {},
+                field: "body",
+                type: "body",
+            });
         });
 
-        it('matchHeaderSnapshot calls _addAssertion [public interface]', function () {
-            const fn = () => { };
+        it("matchHeaderSnapshot calls _addAssertion [public interface]", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new ExpectRequest(fn, jar, opts);
 
-            const addSpy = sinon.stub(request, '_addAssertion');
+            const addSpy = sinon.stub(request, "_addAssertion");
 
             request.matchHeaderSnapshot({});
 
@@ -608,8 +635,8 @@ describe('ExpectRequest', function () {
             sinon.assert.calledOnceWithExactly(addSpy, {
                 fn: request._assertSnapshot,
                 properties: {},
-                field: 'headers',
-                type: 'header'
+                field: "headers",
+                type: "header",
             });
         });
     });

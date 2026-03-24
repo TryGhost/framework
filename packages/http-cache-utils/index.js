@@ -1,1 +1,1 @@
-module.exports = require('./lib/http-cache-utils');
+module.exports = require("./lib/http-cache-utils");

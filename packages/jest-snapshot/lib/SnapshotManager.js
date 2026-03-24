@@ -1,9 +1,9 @@
-const {SnapshotState, toMatchSnapshot, EXTENSION} = require('jest-snapshot');
-const errors = require('@tryghost/errors');
-const utils = require('@jest/expect-utils');
-const assert = require('assert');
-const path = require('path');
-const {makeMessageFromMatchMessage} = require('./utils');
+const { SnapshotState, toMatchSnapshot, EXTENSION } = require("jest-snapshot");
+const errors = require("@tryghost/errors");
+const utils = require("@jest/expect-utils");
+const assert = require("assert");
+const path = require("path");
+const { makeMessageFromMatchMessage } = require("./utils");
 
 const DOT_EXTENSION = `.${EXTENSION}`;
 
@@ -12,21 +12,20 @@ const DOT_EXTENSION = `.${EXTENSION}`;
  * @returns {string} e.g. 'all' or 'new'
  */
 function willUpdate() {
-    const updateSnapshots = (
-        process.env.SNAPSHOT_UPDATE
-        || process.env.UPDATE_SNAPSHOT
-        || process.env.SNAPSHOTS_UPDATE
-        || process.env.UPDATE_SNAPSHOTS
-    );
+    const updateSnapshots =
+        process.env.SNAPSHOT_UPDATE ||
+        process.env.UPDATE_SNAPSHOT ||
+        process.env.SNAPSHOTS_UPDATE ||
+        process.env.UPDATE_SNAPSHOTS;
 
-    return updateSnapshots ? 'all' : 'new';
+    return updateSnapshots ? "all" : "new";
 }
 
 class SnapshotManager {
     constructor() {
         this.registry = {};
         this.currentTest = {};
-        this.defaultSnapshotRoot = '__snapshots__';
+        this.defaultSnapshotRoot = "__snapshots__";
 
         // Set willUpdate once, as it  can't change whilst we are running
         this.willUpdate = willUpdate();
@@ -61,7 +60,7 @@ class SnapshotManager {
     _resolveSnapshotFilePath(testPath) {
         return path.join(
             path.join(path.dirname(testPath), this.defaultSnapshotRoot),
-            path.basename(testPath) + DOT_EXTENSION
+            path.basename(testPath) + DOT_EXTENSION,
         );
     }
 
@@ -73,18 +72,19 @@ class SnapshotManager {
     _getConfig() {
         if (!this.currentTest.testPath || !this.currentTest.testTitle) {
             throw new errors.IncorrectUsageError({
-                message: 'Unable to run snapshot tests, current test was not configured',
-                context: 'Snapshot testing requires current test filename and nameTemplate to be set for each test',
-                help: 'Did you forget to do export.mochaHooks?'
+                message: "Unable to run snapshot tests, current test was not configured",
+                context:
+                    "Snapshot testing requires current test filename and nameTemplate to be set for each test",
+                help: "Did you forget to do export.mochaHooks?",
             });
         }
 
-        const {testPath, testTitle} = this.currentTest;
+        const { testPath, testTitle } = this.currentTest;
 
         const snapshotName = this._getNameForSnapshot(testPath, testTitle);
         const snapshotPath = this._resolveSnapshotFilePath(testPath);
 
-        return {snapshotPath, snapshotName};
+        return { snapshotPath, snapshotName };
     }
 
     /**
@@ -98,7 +98,7 @@ class SnapshotManager {
      * Resets the registry for the current test only
      */
     resetRegistryForCurrentTest() {
-        const {testPath, testTitle} = this.currentTest;
+        const { testPath, testTitle } = this.currentTest;
         if (testPath in this.registry && testTitle in this.registry[testPath]) {
             delete this.registry[testPath][testTitle];
         }
@@ -122,7 +122,7 @@ class SnapshotManager {
         // Initialize the SnapshotState, it’s responsible for actually matching
         // actual snapshot with expected one and storing results
         return new SnapshotState(snapshotPath, {
-            updateSnapshot: this.willUpdate
+            updateSnapshot: this.willUpdate,
         });
     }
 
@@ -134,12 +134,12 @@ class SnapshotManager {
      * @param {{properties: Object, field: string, error: Object, hint: string}} assertion
      */
     assertSnapshot(response, assertion) {
-        const {properties, field, error} = assertion;
+        const { properties, field, error } = assertion;
 
         if (!response[field]) {
             error.message = `Unable to match snapshot on undefined field ${field} ${error.contextString}`;
             error.expected = field;
-            error.actual = 'undefined';
+            error.actual = "undefined";
             assert.notEqual(response[field], undefined, error);
         }
 
@@ -151,7 +151,7 @@ class SnapshotManager {
                 const errorMessage = `"response.${field}" is missing the expected property "${prop}"`;
                 error.message = makeMessageFromMatchMessage(match.message(), errorMessage);
                 error.expected = prop;
-                error.actual = 'undefined';
+                error.actual = "undefined";
                 error.showDiff = false; // Disable mocha's diff output as it's already present in match.message()
 
                 assert.notEqual(response[field][prop], undefined, error);
@@ -181,7 +181,7 @@ class SnapshotManager {
      * @returns {Object} result of the match
      */
     match(received, properties = {}, hint) {
-        const {snapshotPath, snapshotName} = this._getConfig();
+        const { snapshotPath, snapshotName } = this._getConfig();
 
         const snapshotState = this.getSnapshotState(snapshotPath);
 
@@ -189,7 +189,7 @@ class SnapshotManager {
             snapshotState,
             currentTestName: snapshotName,
             utils,
-            equals: utils.equals
+            equals: utils.equals,
         });
 
         // Execute the matcher

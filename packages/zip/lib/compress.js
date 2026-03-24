@@ -1,10 +1,10 @@
-const fs = require('fs');
+const fs = require("fs");
 
 const defaultOptions = {
-    type: 'zip',
-    glob: '**/*',
+    type: "zip",
+    glob: "**/*",
     dot: true,
-    ignore: ['node_modules/**']
+    ignore: ["node_modules/**"],
 };
 
 /**
@@ -24,7 +24,7 @@ const defaultOptions = {
 module.exports = (folderToZip, destination, options = {}) => {
     const opts = Object.assign({}, defaultOptions, options);
 
-    const archiver = require('archiver');
+    const archiver = require("archiver");
     const output = fs.createWriteStream(destination);
     const archive = archiver.create(opts.type);
 
@@ -35,17 +35,17 @@ module.exports = (folderToZip, destination, options = {}) => {
             folderToZip = fs.realpathSync(folderToZip);
         }
 
-        output.on('close', function () {
-            resolve({path: destination, size: archive.pointer()});
+        output.on("close", function () {
+            resolve({ path: destination, size: archive.pointer() });
         });
 
-        archive.on('error', function (err) {
+        archive.on("error", function (err) {
             reject(err);
         });
         archive.glob(opts.glob, {
             cwd: folderToZip,
             dot: opts.dot,
-            ignore: opts.ignore
+            ignore: opts.ignore,
         });
         archive.pipe(output);
         archive.finalize();

@@ -1,12 +1,12 @@
-const assert = require('assert');
-const {AssertionError} = require('assert');
+const assert = require("assert");
+const { AssertionError } = require("assert");
 
 class EmailMockReceiver {
     #sendResponse;
     #snapshotManager;
     #snapshots = [];
 
-    constructor({snapshotManager, sendResponse = 'Mail is disabled'}) {
+    constructor({ snapshotManager, sendResponse = "Mail is disabled" }) {
         this.#snapshotManager = snapshotManager;
         this.#sendResponse = sendResponse;
     }
@@ -38,7 +38,7 @@ class EmailMockReceiver {
      * @returns {EmailMockReceiver} current instance
      */
     assertSentEmailCount(count) {
-        assert.equal(this.#snapshots.length, count, 'Email count does not match');
+        assert.equal(this.#snapshots.length, count, "Email count does not match");
 
         return this;
     }
@@ -56,12 +56,12 @@ class EmailMockReceiver {
             properties: null,
             field: field,
             hint: `[${field} ${snapshotIndex + 1}]`,
-            error
+            error,
         };
 
         let text = this.#snapshots[snapshotIndex][field];
         if (replacements.length) {
-            for (const [, {pattern, replacement}] of Object.entries(replacements)) {
+            for (const [, { pattern, replacement }] of Object.entries(replacements)) {
                 text = text.replace(pattern, replacement);
             }
         }
@@ -80,7 +80,7 @@ class EmailMockReceiver {
      * @returns {EmailMockReceiver} current instance
      */
     matchHTMLSnapshot(replacements = [], snapshotIndex = 0) {
-        return this.#matchTextSnapshot(replacements, snapshotIndex, 'html');
+        return this.#matchTextSnapshot(replacements, snapshotIndex, "html");
     }
 
     /**
@@ -90,7 +90,7 @@ class EmailMockReceiver {
      * @returns {EmailMockReceiver} current instance
      */
     matchPlaintextSnapshot(replacements = [], snapshotIndex = 0) {
-        return this.#matchTextSnapshot(replacements, snapshotIndex, 'text');
+        return this.#matchTextSnapshot(replacements, snapshotIndex, "text");
     }
 
     /**
@@ -103,18 +103,21 @@ class EmailMockReceiver {
         const error = new AssertionError({});
         let assertion = {
             properties: properties,
-            field: 'metadata',
+            field: "metadata",
             hint: `[metadata ${snapshotIndex + 1}]`,
-            error
+            error,
         };
 
         const metadata = Object.assign({}, this.#snapshots[snapshotIndex]);
         delete metadata.html;
         delete metadata.text;
 
-        this.#snapshotManager.assertSnapshot({
-            metadata
-        }, assertion);
+        this.#snapshotManager.assertSnapshot(
+            {
+                metadata,
+            },
+            assertion,
+        );
 
         return this;
     }

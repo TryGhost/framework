@@ -1,8 +1,8 @@
-const {AssertionError} = require('assert');
-const {URL} = require('url');
-const nock = require('nock');
+const { AssertionError } = require("assert");
+const { URL } = require("url");
+const nock = require("nock");
 class WebhookMockReceiver {
-    constructor({snapshotManager}) {
+    constructor({ snapshotManager }) {
         this.body;
         this.headers;
         this._receiver;
@@ -11,13 +11,13 @@ class WebhookMockReceiver {
     }
 
     recordRequest(body, options) {
-        this.body = {body};
-        this.headers = {headers: options.headers};
+        this.body = { body };
+        this.headers = { headers: options.headers };
     }
 
     async receivedRequest() {
         // @NOTE: figure out a better waiting mechanism here, don't allow it to hang forever
-        const {default: pWaitFor} = await import('p-wait-for');
+        const { default: pWaitFor } = await import("p-wait-for");
         await pWaitFor(() => this._receiver.isDone());
     }
 
@@ -36,7 +36,7 @@ class WebhookMockReceiver {
                 // let the nock continue with the response
                 return true;
             })
-            .reply(200, {status: 'OK'});
+            .reply(200, { status: "OK" });
 
         return this;
     }
@@ -52,9 +52,9 @@ class WebhookMockReceiver {
         const error = new AssertionError({});
         let assertion = {
             properties: properties,
-            field: 'body',
-            type: 'body',
-            error
+            field: "body",
+            type: "body",
+            error,
         };
 
         this.snapshotManager.assertSnapshot(this.body, assertion);
@@ -66,9 +66,9 @@ class WebhookMockReceiver {
         const error = new AssertionError({});
         let assertion = {
             properties: properties,
-            field: 'headers',
-            type: 'header',
-            error
+            field: "headers",
+            type: "header",
+            error,
         };
 
         this.snapshotManager.assertSnapshot(this.headers, assertion);

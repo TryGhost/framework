@@ -1,14 +1,21 @@
 {
   "name": "@tryghost/http-cache-utils",
   "version": "2.0.3",
+  "license": "MIT",
+  "author": "Ghost Foundation",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
     "directory": "packages/http-cache-utils"
   },
-  "author": "Ghost Foundation",
-  "license": "MIT",
+  "files": [
+    "index.js",
+    "lib"
+  ],
   "main": "index.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "echo \"Implement me!\"",
     "test:unit": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
@@ -17,13 +24,6 @@
     "lint": "oxlint -c ../../.oxlintrc.json . && yarn lint:eslint",
     "lint:test": "eslint -c test/.eslintrc.js test/ --ext .js --cache",
     "lint:eslint": "yarn lint:code && yarn lint:test"
-  },
-  "files": [
-    "index.js",
-    "lib"
-  ],
-  "publishConfig": {
-    "access": "public"
   },
   "devDependencies": {
     "sinon": "21.0.3"

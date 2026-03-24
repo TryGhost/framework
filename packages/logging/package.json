@@ -1,31 +1,27 @@
 {
   "name": "@tryghost/logging",
   "version": "4.0.3",
+  "license": "MIT",
+  "author": "Ghost Foundation",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
     "directory": "packages/logging"
   },
-  "author": "Ghost Foundation",
-  "license": "MIT",
+  "files": [
+    "index.js",
+    "lib"
+  ],
   "main": "index.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "echo \"Implement me!\"",
     "test": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
     "lint": "oxlint -c ../../.oxlintrc.json . && yarn lint:eslint",
     "posttest": "yarn lint",
     "lint:eslint": "eslint . --ext .js --cache"
-  },
-  "files": [
-    "index.js",
-    "lib"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
-  "devDependencies": {
-    "@tryghost/errors": "1.0.0",
-    "sinon": "21.0.3"
   },
   "dependencies": {
     "@tryghost/bunyan-rotating-filestream": "0.0.7",
@@ -39,5 +35,9 @@
     "gelf-stream": "1.1.1",
     "json-stringify-safe": "5.0.1",
     "lodash": "4.17.23"
+  },
+  "devDependencies": {
+    "@tryghost/errors": "1.0.0",
+    "sinon": "21.0.3"
   }
 }

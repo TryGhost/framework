@@ -1,1 +1,1 @@
-module.exports = require('./lib/bookshelf-custom-query');
+module.exports = require("./lib/bookshelf-custom-query");

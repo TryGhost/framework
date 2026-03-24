@@ -1,89 +1,89 @@
-const assert = require('assert/strict');
-const tpl = require('../');
+const assert = require("assert/strict");
+const tpl = require("../");
 
-describe('tpl', function () {
-    it('Can handle a plain string', function () {
-        const string = 'My template';
+describe("tpl", function () {
+    it("Can handle a plain string", function () {
+        const string = "My template";
         const result = tpl(string);
 
-        assert.equal(result, 'My template');
+        assert.equal(result, "My template");
     });
 
-    it('Can handle a string with data', function () {
-        const string = 'Go visit {url}';
-        const data = {url: 'https://example.com'};
+    it("Can handle a string with data", function () {
+        const string = "Go visit {url}";
+        const data = { url: "https://example.com" };
 
         let result = tpl(string, data);
 
-        assert.equal(result, 'Go visit https://example.com');
+        assert.equal(result, "Go visit https://example.com");
     });
 
-    it('Can mix interpolation handlebars in the same message', function () {
-        const string = '{{#get}} helper took {totalMs}ms to complete';
+    it("Can mix interpolation handlebars in the same message", function () {
+        const string = "{{#get}} helper took {totalMs}ms to complete";
         const data = {
-            totalMs: '500'
+            totalMs: "500",
         };
 
         let result = tpl(string, data);
-        assert.equal(result, '{{#get}} helper took 500ms to complete');
+        assert.equal(result, "{{#get}} helper took 500ms to complete");
     });
 
-    it('Can mix interpolation with handlebars-block helpers without escaping', function () {
-        const string = '{{#{helperName}}} helper took {totalMs}ms to complete';
+    it("Can mix interpolation with handlebars-block helpers without escaping", function () {
+        const string = "{{#{helperName}}} helper took {totalMs}ms to complete";
 
         const data = {
-            helperName: 'get',
-            totalMs: '500'
+            helperName: "get",
+            totalMs: "500",
         };
 
         let result = tpl(string, data);
-        assert.equal(result, '{{#get}} helper took 500ms to complete');
+        assert.equal(result, "{{#get}} helper took 500ms to complete");
     });
 
-    it('ignores 3 braces', function () {
-        const string = 'The {{{helperName}}} helper is not available.';
+    it("ignores 3 braces", function () {
+        const string = "The {{{helperName}}} helper is not available.";
         const data = {
-            helperName: 'get',
-            totalMs: '500'
+            helperName: "get",
+            totalMs: "500",
         };
         let result = tpl(string, data);
-        assert.equal(result, 'The {{{helperName}}} helper is not available.');
+        assert.equal(result, "The {{{helperName}}} helper is not available.");
     });
 
-    it('has a simple bare minimum escaping needed', function () {
-        const string = 'The {\\{{helperName}}} helper is not available.';
+    it("has a simple bare minimum escaping needed", function () {
+        const string = "The {\\{{helperName}}} helper is not available.";
         const data = {
-            helperName: 'get',
-            totalMs: '500'
+            helperName: "get",
+            totalMs: "500",
         };
         let result = tpl(string, data);
-        assert.equal(result, 'The {{get}} helper is not available.');
+        assert.equal(result, "The {{get}} helper is not available.");
     });
 
-    it('Can handle escaped left braces', function () {
-        const string = 'The \\{\\{{helperName}}} helper is not available.';
+    it("Can handle escaped left braces", function () {
+        const string = "The \\{\\{{helperName}}} helper is not available.";
         const data = {
-            helperName: 'get',
-            totalMs: '500'
+            helperName: "get",
+            totalMs: "500",
         };
         let result = tpl(string, data);
-        assert.equal(result, 'The {{get}} helper is not available.');
+        assert.equal(result, "The {{get}} helper is not available.");
     });
 
-    it('Can handle escaped right braces as well', function () {
-        const string = 'The \\{\\{{helperName}\\}\\} helper is not available.';
+    it("Can handle escaped right braces as well", function () {
+        const string = "The \\{\\{{helperName}\\}\\} helper is not available.";
         const data = {
-            helperName: 'get',
-            totalMs: '500'
+            helperName: "get",
+            totalMs: "500",
         };
         let result = tpl(string, data);
-        assert.equal(result, 'The {{get}} helper is not available.');
+        assert.equal(result, "The {{get}} helper is not available.");
     });
 
-    it('Returns a sensible error if data is missing', function () {
-        const string = '{helperName} helper took {totalMs}ms to complete';
+    it("Returns a sensible error if data is missing", function () {
+        const string = "{helperName} helper took {totalMs}ms to complete";
         const data = {
-            totalMs: '500'
+            totalMs: "500",
         };
 
         let resultFn = () => {

@@ -1,250 +1,254 @@
-const errors = require('@tryghost/errors');
-const assert = require('node:assert/strict');
-const sinon = require('sinon');
-const shared = require('../../../');
+const errors = require("@tryghost/errors");
+const assert = require("node:assert/strict");
+const sinon = require("sinon");
+const shared = require("../../../");
 
-describe('validators/input/all', function () {
+describe("validators/input/all", function () {
     afterEach(function () {
         sinon.restore();
     });
 
-    describe('all', function () {
-        it('default', function () {
+    describe("all", function () {
+        it("default", function () {
             const frame = {
                 options: {
                     context: {},
-                    slug: 'slug',
-                    include: 'tags,authors',
-                    page: 2
-                }
+                    slug: "slug",
+                    include: "tags,authors",
+                    page: 2,
+                },
             };
 
             const apiConfig = {
                 options: {
                     include: {
-                        values: ['tags', 'authors'],
-                        required: true
-                    }
-                }
+                        values: ["tags", "authors"],
+                        required: true,
+                    },
+                },
             };
 
-            return shared.validators.input.all.all(apiConfig, frame)
-                .then(() => {
-                    assert.ok(frame.options.page);
-                    assert.ok(frame.options.slug);
-                    assert.ok(frame.options.include);
-                    assert.ok(frame.options.context);
-                });
+            return shared.validators.input.all.all(apiConfig, frame).then(() => {
+                assert.ok(frame.options.page);
+                assert.ok(frame.options.slug);
+                assert.ok(frame.options.include);
+                assert.ok(frame.options.context);
+            });
         });
 
-        it('should run global validations on an type that has validation defined', function () {
+        it("should run global validations on an type that has validation defined", function () {
             const frame = {
                 options: {
-                    slug: 'not a valid slug %%%%% http://'
-                }
+                    slug: "not a valid slug %%%%% http://",
+                },
             };
 
             const apiConfig = {
                 options: {
                     slug: {
-                        required: true
-                    }
-                }
+                        required: true,
+                    },
+                },
             };
 
-            return shared.validators.input.all.all(apiConfig, frame)
-                .then(() => {
-                    throw new Error('Should not resolve');
-                }, (err) => {
+            return shared.validators.input.all.all(apiConfig, frame).then(
+                () => {
+                    throw new Error("Should not resolve");
+                },
+                (err) => {
                     assert.ok(err);
-                });
+                },
+            );
         });
 
-        it('allows empty values', function () {
+        it("allows empty values", function () {
             const frame = {
                 options: {
                     context: {},
-                    formats: ''
-                }
+                    formats: "",
+                },
             };
 
             const apiConfig = {
                 options: {
-                    formats: ['format1']
-                }
+                    formats: ["format1"],
+                },
             };
 
             return shared.validators.input.all.all(apiConfig, frame);
         });
 
-        it('supports include being an array', function () {
+        it("supports include being an array", function () {
             const frame = {
                 options: {
                     context: {},
-                    slug: 'slug',
-                    include: ['tags', 'authors'],
-                    page: 2
-                }
+                    slug: "slug",
+                    include: ["tags", "authors"],
+                    page: 2,
+                },
             };
 
             const apiConfig = {
                 options: {
                     include: {
-                        values: ['tags', 'authors'],
-                        required: true
-                    }
-                }
+                        values: ["tags", "authors"],
+                        required: true,
+                    },
+                },
             };
 
-            return shared.validators.input.all.all(apiConfig, frame)
-                .then(() => {
-                    assert.ok(frame.options.page);
-                    assert.ok(frame.options.slug);
-                    assert.ok(frame.options.include);
-                    assert.ok(frame.options.context);
-                });
+            return shared.validators.input.all.all(apiConfig, frame).then(() => {
+                assert.ok(frame.options.page);
+                assert.ok(frame.options.slug);
+                assert.ok(frame.options.include);
+                assert.ok(frame.options.context);
+            });
         });
 
-        it('default include array notation', function () {
+        it("default include array notation", function () {
             const frame = {
                 options: {
                     context: {},
-                    slug: 'slug',
-                    include: 'tags,authors',
-                    page: 2
-                }
+                    slug: "slug",
+                    include: "tags,authors",
+                    page: 2,
+                },
             };
 
             const apiConfig = {
                 options: {
-                    include: ['tags', 'authors']
-                }
+                    include: ["tags", "authors"],
+                },
             };
 
-            return shared.validators.input.all.all(apiConfig, frame)
-                .then(() => {
-                    assert.ok(frame.options.page);
-                    assert.ok(frame.options.slug);
-                    assert.ok(frame.options.include);
-                    assert.ok(frame.options.context);
-                });
+            return shared.validators.input.all.all(apiConfig, frame).then(() => {
+                assert.ok(frame.options.page);
+                assert.ok(frame.options.slug);
+                assert.ok(frame.options.include);
+                assert.ok(frame.options.context);
+            });
         });
 
-        it('does not fail', function () {
+        it("does not fail", function () {
             const frame = {
                 options: {
                     context: {},
-                    include: 'tags,authors'
-                }
+                    include: "tags,authors",
+                },
             };
 
             const apiConfig = {
                 options: {
                     include: {
-                        values: ['tags']
-                    }
-                }
+                        values: ["tags"],
+                    },
+                },
             };
 
-            return shared.validators.input.all.all(apiConfig, frame)
+            return shared.validators.input.all
+                .all(apiConfig, frame)
                 .then(Promise.reject.bind(Promise))
                 .catch((err) => {
                     assert.equal(err, undefined);
                 });
         });
 
-        it('does not fail include array notation', function () {
+        it("does not fail include array notation", function () {
             const frame = {
                 options: {
                     context: {},
-                    include: 'tags,authors'
-                }
+                    include: "tags,authors",
+                },
             };
 
             const apiConfig = {
                 options: {
-                    include: ['tags']
-                }
+                    include: ["tags"],
+                },
             };
 
-            return shared.validators.input.all.all(apiConfig, frame)
+            return shared.validators.input.all
+                .all(apiConfig, frame)
                 .then(Promise.reject.bind(Promise))
                 .catch((err) => {
                     assert.equal(err, undefined);
                 });
         });
 
-        it('fails', function () {
+        it("fails", function () {
             const frame = {
                 options: {
-                    context: {}
-                }
+                    context: {},
+                },
             };
 
             const apiConfig = {
                 options: {
                     include: {
-                        required: true
-                    }
-                }
+                        required: true,
+                    },
+                },
             };
 
-            return shared.validators.input.all.all(apiConfig, frame)
+            return shared.validators.input.all
+                .all(apiConfig, frame)
                 .then(Promise.reject)
                 .catch((err) => {
                     assert.ok(err);
                 });
         });
 
-        it('invalid fields', function () {
+        it("invalid fields", function () {
             const frame = {
                 options: {
                     context: {},
-                    id: 'invalid'
-                }
+                    id: "invalid",
+                },
             };
 
             const apiConfig = {};
 
-            return shared.validators.input.all.all(apiConfig, frame)
+            return shared.validators.input.all
+                .all(apiConfig, frame)
                 .then(Promise.reject)
                 .catch((err) => {
                     assert.ok(err);
                 });
         });
 
-        it('fails on invalid allowed values for non-include fields', function () {
+        it("fails on invalid allowed values for non-include fields", function () {
             const frame = {
                 options: {
                     context: {},
-                    formats: 'mobiledoc'
-                }
+                    formats: "mobiledoc",
+                },
             };
 
             const apiConfig = {
                 options: {
-                    formats: ['html']
-                }
+                    formats: ["html"],
+                },
             };
 
-            return shared.validators.input.all.all(apiConfig, frame)
+            return shared.validators.input.all
+                .all(apiConfig, frame)
                 .then(Promise.reject)
                 .catch((err) => {
                     assert.ok(err);
-                    assert.equal(err.message, 'Validation (AllowedValues) failed for formats');
+                    assert.equal(err.message, "Validation (AllowedValues) failed for formats");
                 });
         });
     });
 
-    describe('browse', function () {
-        it('default', function () {
+    describe("browse", function () {
+        it("default", function () {
             const frame = {
                 options: {
-                    context: {}
+                    context: {},
                 },
                 data: {
-                    status: 'aus'
-                }
+                    status: "aus",
+                },
             };
 
             const apiConfig = {};
@@ -254,19 +258,20 @@ describe('validators/input/all', function () {
             assert.ok(frame.data.status);
         });
 
-        it('fails', function () {
+        it("fails", function () {
             const frame = {
                 options: {
-                    context: {}
+                    context: {},
                 },
                 data: {
-                    id: 'no-id'
-                }
+                    id: "no-id",
+                },
             };
 
             const apiConfig = {};
 
-            return shared.validators.input.all.browse(apiConfig, frame)
+            return shared.validators.input.all
+                .browse(apiConfig, frame)
                 .then(Promise.reject)
                 .catch((err) => {
                     assert.ok(err);
@@ -274,14 +279,14 @@ describe('validators/input/all', function () {
         });
     });
 
-    describe('read', function () {
-        it('default', function () {
-            sinon.stub(shared.validators.input.all, 'browse');
+    describe("read", function () {
+        it("default", function () {
+            sinon.stub(shared.validators.input.all, "browse");
 
             const frame = {
                 options: {
-                    context: {}
-                }
+                    context: {},
+                },
             };
 
             const apiConfig = {};
@@ -291,60 +296,65 @@ describe('validators/input/all', function () {
         });
     });
 
-    describe('add', function () {
-        it('fails', function () {
+    describe("add", function () {
+        it("fails", function () {
             const frame = {
-                data: {}
+                data: {},
             };
 
             const apiConfig = {
-                docName: 'docName'
+                docName: "docName",
             };
 
-            return shared.validators.input.all.add(apiConfig, frame)
+            return shared.validators.input.all
+                .add(apiConfig, frame)
                 .then(Promise.reject)
                 .catch((err) => {
                     assert.ok(err);
                 });
         });
 
-        it('fails with docName', function () {
+        it("fails with docName", function () {
             const frame = {
                 data: {
-                    docName: true
-                }
+                    docName: true,
+                },
             };
 
             const apiConfig = {
-                docName: 'docName'
+                docName: "docName",
             };
 
-            return shared.validators.input.all.add(apiConfig, frame)
+            return shared.validators.input.all
+                .add(apiConfig, frame)
                 .then(Promise.reject)
                 .catch((err) => {
                     assert.ok(err);
                 });
         });
 
-        it('fails for required field', function () {
+        it("fails for required field", function () {
             const frame = {
                 data: {
-                    docName: [{
-                        a: 'b'
-                    }]
-                }
+                    docName: [
+                        {
+                            a: "b",
+                        },
+                    ],
+                },
             };
 
             const apiConfig = {
-                docName: 'docName',
+                docName: "docName",
                 data: {
                     b: {
-                        required: true
-                    }
-                }
+                        required: true,
+                    },
+                },
             };
 
-            return shared.validators.input.all.add(apiConfig, frame)
+            return shared.validators.input.all
+                .add(apiConfig, frame)
                 .then(Promise.reject)
                 .catch((err) => {
                     assert.ok(err);
@@ -352,26 +362,29 @@ describe('validators/input/all', function () {
                 });
         });
 
-        it('fails for invalid field', function () {
+        it("fails for invalid field", function () {
             const frame = {
                 data: {
-                    docName: [{
-                        a: 'b',
-                        b: null
-                    }]
-                }
+                    docName: [
+                        {
+                            a: "b",
+                            b: null,
+                        },
+                    ],
+                },
             };
 
             const apiConfig = {
-                docName: 'docName',
+                docName: "docName",
                 data: {
                     b: {
-                        required: true
-                    }
-                }
+                        required: true,
+                    },
+                },
             };
 
-            return shared.validators.input.all.add(apiConfig, frame)
+            return shared.validators.input.all
+                .add(apiConfig, frame)
                 .then(Promise.reject)
                 .catch((err) => {
                     assert.ok(err);
@@ -379,17 +392,19 @@ describe('validators/input/all', function () {
                 });
         });
 
-        it('success', function () {
+        it("success", function () {
             const frame = {
                 data: {
-                    docName: [{
-                        a: 'b'
-                    }]
-                }
+                    docName: [
+                        {
+                            a: "b",
+                        },
+                    ],
+                },
             };
 
             const apiConfig = {
-                docName: 'docName'
+                docName: "docName",
             };
 
             const result = shared.validators.input.all.add(apiConfig, frame);
@@ -397,98 +412,109 @@ describe('validators/input/all', function () {
         });
     });
 
-    describe('edit', function () {
-        it('id mismatch', function () {
+    describe("edit", function () {
+        it("id mismatch", function () {
             const apiConfig = {
-                docName: 'users'
+                docName: "users",
             };
 
             const frame = {
                 options: {
-                    id: 'zwei'
+                    id: "zwei",
                 },
                 data: {
                     posts: [
                         {
-                            id: 'eins'
-                        }
-                    ]
-                }
+                            id: "eins",
+                        },
+                    ],
+                },
             };
 
-            return shared.validators.input.all.edit(apiConfig, frame)
+            return shared.validators.input.all
+                .edit(apiConfig, frame)
                 .then(Promise.reject)
                 .catch((err) => {
                     assert.equal(err instanceof errors.BadRequestError, true);
                 });
         });
 
-        it('returns add promise result when add fails', function () {
-            sinon.stub(shared.validators.input.all, 'add').returns(Promise.reject(new Error('add-failed')));
-            return shared.validators.input.all.edit({}, {})
+        it("returns add promise result when add fails", function () {
+            sinon
+                .stub(shared.validators.input.all, "add")
+                .returns(Promise.reject(new Error("add-failed")));
+            return shared.validators.input.all
+                .edit({}, {})
                 .then(Promise.reject)
                 .catch((err) => {
-                    assert.equal(err.message, 'add-failed');
+                    assert.equal(err.message, "add-failed");
                 });
         });
 
-        it('checks id mismatch after successful add for non posts/tags', function () {
-            sinon.stub(shared.validators.input.all, 'add').returns(undefined);
+        it("checks id mismatch after successful add for non posts/tags", function () {
+            sinon.stub(shared.validators.input.all, "add").returns(undefined);
 
-            return shared.validators.input.all.edit({
-                docName: 'users'
-            }, {
-                options: {
-                    id: 'id-1'
+            return shared.validators.input.all
+                .edit(
+                    {
+                        docName: "users",
+                    },
+                    {
+                        options: {
+                            id: "id-1",
+                        },
+                        data: {
+                            users: [{ id: "id-2" }],
+                        },
+                    },
+                )
+                .then(Promise.reject)
+                .catch((err) => {
+                    assert.equal(err instanceof errors.BadRequestError, true);
+                    assert.equal(err.message, "Invalid id provided.");
+                });
+        });
+
+        it("does not check id mismatch for posts/tags", function () {
+            sinon.stub(shared.validators.input.all, "add").returns(undefined);
+            const result = shared.validators.input.all.edit(
+                {
+                    docName: "posts",
                 },
-                data: {
-                    users: [{id: 'id-2'}]
-                }
-            })
-                .then(Promise.reject)
-                .catch((err) => {
-                    assert.equal(err instanceof errors.BadRequestError, true);
-                    assert.equal(err.message, 'Invalid id provided.');
-                });
-        });
-
-        it('does not check id mismatch for posts/tags', function () {
-            sinon.stub(shared.validators.input.all, 'add').returns(undefined);
-            const result = shared.validators.input.all.edit({
-                docName: 'posts'
-            }, {
-                options: {id: 'id-1'},
-                data: {
-                    posts: [{id: 'id-2'}]
-                }
-            });
+                {
+                    options: { id: "id-1" },
+                    data: {
+                        posts: [{ id: "id-2" }],
+                    },
+                },
+            );
             assert.equal(result, undefined);
         });
     });
 
-    describe('delegated methods', function () {
-        it('changePassword delegates to add', function () {
-            sinon.stub(shared.validators.input.all, 'add').returns('add-result');
+    describe("delegated methods", function () {
+        it("changePassword delegates to add", function () {
+            sinon.stub(shared.validators.input.all, "add").returns("add-result");
             const result = shared.validators.input.all.changePassword({}, {});
-            assert.equal(result, 'add-result');
+            assert.equal(result, "add-result");
         });
 
-        it('resetPassword delegates to add', function () {
-            sinon.stub(shared.validators.input.all, 'add').returns('add-result');
+        it("resetPassword delegates to add", function () {
+            sinon.stub(shared.validators.input.all, "add").returns("add-result");
             const result = shared.validators.input.all.resetPassword({}, {});
-            assert.equal(result, 'add-result');
+            assert.equal(result, "add-result");
         });
 
-        it('setup delegates to add', function () {
-            sinon.stub(shared.validators.input.all, 'add').returns('add-result');
+        it("setup delegates to add", function () {
+            sinon.stub(shared.validators.input.all, "add").returns("add-result");
             const result = shared.validators.input.all.setup({}, {});
-            assert.equal(result, 'add-result');
+            assert.equal(result, "add-result");
         });
 
-        it('publish delegates to browse', function () {
-            sinon.stub(shared.validators.input.all, 'browse').returns('browse-result');
+        it("publish delegates to browse", function () {
+            sinon.stub(shared.validators.input.all, "browse").returns("browse-result");
             const result = shared.validators.input.all.publish({}, {});
-            assert.equal(result, 'browse-result');
+            assert.equal(result, "browse-result");
         });
     });
 });

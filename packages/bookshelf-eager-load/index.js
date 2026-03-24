@@ -1,1 +1,1 @@
-module.exports = require('./lib/bookshelf-eager-load');
+module.exports = require("./lib/bookshelf-eager-load");

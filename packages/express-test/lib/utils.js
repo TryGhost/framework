@@ -1,7 +1,7 @@
-const fs = require('fs');
-const path = require('path');
-const mime = require('mime-types');
-const FormData = require('form-data');
+const fs = require("fs");
+const path = require("path");
+const mime = require("mime-types");
+const FormData = require("form-data");
 
 module.exports.isJSON = function isJSON(mimeType) {
     // should match /json or +json
@@ -10,9 +10,9 @@ module.exports.isJSON = function isJSON(mimeType) {
 };
 
 module.exports.normalizeURL = function normalizeURL(toNormalize) {
-    const split = toNormalize.split('?');
+    const split = toNormalize.split("?");
     const pathname = split[0];
-    let normalized = pathname + (pathname.endsWith('/') ? '' : '/');
+    let normalized = pathname + (pathname.endsWith("/") ? "" : "/");
 
     if (split.length === 2) {
         normalized += `?${split[1]}`;
@@ -25,11 +25,11 @@ module.exports.attachFile = function attachFile(name, filePath, existingFormData
     const formData = existingFormData || new FormData();
     const fileContent = fs.readFileSync(filePath);
     const filename = path.basename(filePath);
-    const contentType = mime.lookup(filePath) || 'application/octet-stream';
+    const contentType = mime.lookup(filePath) || "application/octet-stream";
 
     formData.append(name, fileContent, {
         filename,
-        contentType
+        contentType,
     });
 
     return formData;

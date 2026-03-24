@@ -13,7 +13,7 @@ _private.getRandomInt = function (min, max) {
  */
 module.exports.uid = function uid(maxLength) {
     const buf = [];
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     const charLength = chars.length;
     let i;
 
@@ -21,5 +21,5 @@ module.exports.uid = function uid(maxLength) {
         buf.push(chars[_private.getRandomInt(0, charLength - 1)]);
     }
 
-    return buf.join('');
+    return buf.join("");
 };

@@ -17,11 +17,11 @@ or
 ## Usage
 
 ```js
-const security = require('@tryghost/security');
+const security = require("@tryghost/security");
 
-const secret = security.secret.create('content');
-const hash = await security.password.hash('super-secret');
-const isMatch = await security.password.compare('super-secret', hash);
+const secret = security.secret.create("content");
+const hash = await security.password.hash("super-secret");
+const isMatch = await security.password.compare("super-secret", hash);
 ```
 
 ## API

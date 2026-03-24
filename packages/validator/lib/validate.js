@@ -1,14 +1,14 @@
-const _ = require('lodash');
-const validator = require('./validator');
+const _ = require("lodash");
+const validator = require("./validator");
 
-const tpl = require('@tryghost/tpl');
-const errors = require('@tryghost/errors');
+const tpl = require("@tryghost/tpl");
+const errors = require("@tryghost/errors");
 
 const messages = {
-    validationFailed: 'Validation ({validationName}) failed for {key}',
+    validationFailed: "Validation ({validationName}) failed for {key}",
     validationFailedTypes: {
-        isLength: 'Value in [{tableName}.{key}] exceeds maximum length of {max} characters.'
-    }
+        isLength: "Value in [{tableName}.{key}] exceeds maximum length of {max} characters.",
+    },
 };
 
 /**
@@ -53,22 +53,30 @@ function validate(value, key, validations, tableName) {
         if (validator[validationName].apply(validator, validationOptions) !== goodResult) {
             // CASE: You can define specific messages for validators e.g. isLength
             if (_.has(messages.validationFailedTypes, validationName)) {
-                message = tpl(messages.validationFailedTypes[validationName], _.merge({
-                    validationName: validationName,
-                    key: key,
-                    tableName: tableName
-                }, validationOptions[1]));
+                message = tpl(
+                    messages.validationFailedTypes[validationName],
+                    _.merge(
+                        {
+                            validationName: validationName,
+                            key: key,
+                            tableName: tableName,
+                        },
+                        validationOptions[1],
+                    ),
+                );
             } else {
                 message = tpl(messages.validationFailed, {
                     validationName: validationName,
-                    key: key
+                    key: key,
                 });
             }
 
-            validationErrors.push(new errors.ValidationError({
-                message: message,
-                context: `${tableName}.${key}`
-            }));
+            validationErrors.push(
+                new errors.ValidationError({
+                    message: message,
+                    context: `${tableName}.${key}`,
+                }),
+            );
         }
 
         validationOptions.shift();

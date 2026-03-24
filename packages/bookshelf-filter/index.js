@@ -1,1 +1,1 @@
-module.exports = require('./lib/bookshelf-filter');
+module.exports = require("./lib/bookshelf-filter");

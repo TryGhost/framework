@@ -1,1 +1,1 @@
-module.exports = require('./lib/nodemailer');
+module.exports = require("./lib/nodemailer");

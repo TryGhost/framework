@@ -1,1 +1,1 @@
-module.exports = require('./lib/jest-snapshot');
+module.exports = require("./lib/jest-snapshot");

@@ -1,5 +1,5 @@
-import {randomUUID} from 'crypto';
-import {wrapStack} from './wrap-stack';
+import { randomUUID } from "crypto";
+import { wrapStack } from "./wrap-stack";
 
 export interface GhostErrorOptions {
     message?: string;
@@ -39,9 +39,9 @@ export class GhostError extends Error {
          * defaults
          */
         this.statusCode = 500;
-        this.errorType = 'InternalServerError';
-        this.level = 'normal';
-        this.message = 'The server has encountered an error.';
+        this.errorType = "InternalServerError";
+        this.level = "normal";
+        this.message = "The server has encountered an error.";
         this.id = randomUUID();
 
         /**
@@ -65,25 +65,27 @@ export class GhostError extends Error {
         //       Nested objects are getting copied over in one piece (can be changed, but not needed right now)
         if (options.err) {
             // CASE: Support err as string (it happens that third party libs return a string instead of an error instance)
-            if (typeof options.err === 'string') {
+            if (typeof options.err === "string") {
                 /* eslint-disable no-restricted-syntax */
                 options.err = new Error(options.err);
                 /* eslint-enable no-restricted-syntax */
             }
 
             Object.getOwnPropertyNames(options.err).forEach((property) => {
-                if (['errorType', 'name', 'statusCode', 'message', 'level'].indexOf(property) !== -1) {
+                if (
+                    ["errorType", "name", "statusCode", "message", "level"].indexOf(property) !== -1
+                ) {
                     return;
                 }
 
                 // CASE: `code` should put options as priority over err
-                if (property === 'code') {
+                if (property === "code") {
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     this[property] = this[property] || (options.err as any)[property];
                     return;
                 }
 
-                if (property === 'stack' && !this.hideStack) {
+                if (property === "stack" && !this.hideStack) {
                     this[property] = wrapStack(this, options.err as Error);
                     return;
                 }

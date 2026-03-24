@@ -1,7 +1,7 @@
-const {assert, sinon, stubCookies} = require('./utils');
-const {Request, RequestOptions} = require('../lib/Request');
-const FormData = require('form-data');
-const Stream = require('stream');
+const { assert, sinon, stubCookies } = require("./utils");
+const { Request, RequestOptions } = require("../lib/Request");
+const FormData = require("form-data");
+const Stream = require("stream");
 
 const streamToBuffer = async function (stream) {
     return new Promise((resolve, reject) => {
@@ -12,14 +12,14 @@ const streamToBuffer = async function (stream) {
 
         stream.pause(); // just to test the pause method
 
-        stream.on('data', onData);
+        stream.on("data", onData);
 
-        stream.on('end', () => {
-            stream.removeListener('data', onData); // to test the removeListener method
+        stream.on("end", () => {
+            stream.removeListener("data", onData); // to test the removeListener method
             resolve(Buffer.concat(data));
         });
 
-        stream.on('error', (err) => {
+        stream.on("error", (err) => {
             reject(err);
         });
 
@@ -64,14 +64,14 @@ const createAwaitableStream = function () {
     return ws;
 };
 
-describe('Request', function () {
+describe("Request", function () {
     afterEach(function () {
         sinon.restore();
     });
 
-    describe('Class functions', function () {
-        it('constructor sets app, jar and reqOptions when reqOptions is empty', function () {
-            const fn = () => { };
+    describe("Class functions", function () {
+        it("constructor sets app, jar and reqOptions when reqOptions is empty", function () {
+            const fn = () => {};
             const jar = {};
             const opts = {};
             const request = new Request(fn, jar, opts);
@@ -80,13 +80,13 @@ describe('Request', function () {
             assert.equal(request.cookieJar, jar);
             assert.notEqual(request.reqOptions, opts);
             assert.equal(request.reqOptions instanceof RequestOptions, true);
-            assert.equal(request.reqOptions.method, 'GET');
-            assert.equal(request.reqOptions.url, '/');
+            assert.equal(request.reqOptions.method, "GET");
+            assert.equal(request.reqOptions.url, "/");
             assert.deepEqual(request.reqOptions.headers, {});
         });
 
-        it('constructor sets app, jar and reqOptions', function () {
-            const fn = () => { };
+        it("constructor sets app, jar and reqOptions", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
@@ -96,118 +96,112 @@ describe('Request', function () {
             assert.equal(request.reqOptions, opts);
         });
 
-        it('_getReqRes generates req and res correctly', function () {
-            const fn = () => { };
+        it("_getReqRes generates req and res correctly", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
-            const {req, res} = request._getReqRes();
+            const { req, res } = request._getReqRes();
             assert.deepEqual(req.app, fn);
             assert.deepEqual(res.app, fn);
             assert.deepEqual(res.req, req);
         });
 
-        it('_buildResponse handles string buffer as body', function () {
-            const fn = () => { };
+        it("_buildResponse handles string buffer as body", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
-            const response = request._buildResponse(
-                {
-                    statusCode: 999,
-                    body: Buffer.from('Hello World'),
-                    getHeaders: () => { },
-                    getHeader: () => {
-                        return 'text/html';
-                    }
-
-                }
-            );
+            const response = request._buildResponse({
+                statusCode: 999,
+                body: Buffer.from("Hello World"),
+                getHeaders: () => {},
+                getHeader: () => {
+                    return "text/html";
+                },
+            });
             assert.equal(response.statusCode, 999);
-            assert.equal(response.text, 'Hello World');
+            assert.equal(response.text, "Hello World");
         });
 
-        it('_buildResponse handles JSON buffer as body', function () {
-            const fn = () => { };
+        it("_buildResponse handles JSON buffer as body", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
-            const response = request._buildResponse(
-                {
-                    statusCode: 111,
-                    body: Buffer.from('{"hello":"world"}'),
-                    getHeaders: () => { },
-                    getHeader: () => {
-                        return 'application/json';
-                    }
-
-                }
-            );
+            const response = request._buildResponse({
+                statusCode: 111,
+                body: Buffer.from('{"hello":"world"}'),
+                getHeaders: () => {},
+                getHeader: () => {
+                    return "application/json";
+                },
+            });
             assert.equal(response.statusCode, 111);
             assert.equal(response.text, '{"hello":"world"}');
         });
 
-        it('_getCookies', function () {
-            const fn = () => { };
+        it("_getCookies", function () {
+            const fn = () => {};
             const getCookies = {
-                toValueString: sinon.stub()
+                toValueString: sinon.stub(),
             };
             const jar = {
-                getCookies: sinon.stub().returns(getCookies)
+                getCookies: sinon.stub().returns(getCookies),
             };
             const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
-            const req = {url: '/'};
+            const req = { url: "/" };
 
             request._getCookies(req);
 
             sinon.assert.calledOnce(jar.getCookies);
-            sinon.assert.calledOnceWithMatch(jar.getCookies, sinon.match({path: '/'}));
+            sinon.assert.calledOnceWithMatch(jar.getCookies, sinon.match({ path: "/" }));
             sinon.assert.calledOnce(getCookies.toValueString);
         });
 
-        it('_restoreCookies does nothing with no cookies', function () {
-            const fn = () => { };
+        it("_restoreCookies does nothing with no cookies", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
             request._getCookies = sinon.stub();
 
-            const req = {headers: {}};
+            const req = { headers: {} };
             request._restoreCookies(req);
 
             assert.equal(req.headers.cookie, undefined);
         });
 
-        it('_restoreCookies restores cookes when present', function () {
-            const fn = () => { };
+        it("_restoreCookies restores cookes when present", function () {
+            const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
-            request._getCookies = sinon.stub().returns('abc');
+            request._getCookies = sinon.stub().returns("abc");
 
-            const req = {headers: {}};
+            const req = { headers: {} };
             request._restoreCookies(req);
 
-            assert.equal(req.headers.cookie, 'abc');
+            assert.equal(req.headers.cookie, "abc");
         });
 
-        it('_saveCookies does nothing with no cookies', function () {
-            const fn = () => { };
+        it("_saveCookies does nothing with no cookies", function () {
+            const fn = () => {};
             const jar = {
-                setCookies: sinon.stub()
+                setCookies: sinon.stub(),
             };
             const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
             const res = {
-                getHeader: sinon.stub()
+                getHeader: sinon.stub(),
             };
 
             request._saveCookies(res);
@@ -216,37 +210,37 @@ describe('Request', function () {
             sinon.assert.notCalled(jar.setCookies);
         });
 
-        it('_saveCookies sets cookies on the cookiejar', function () {
-            const fn = () => { };
+        it("_saveCookies sets cookies on the cookiejar", function () {
+            const fn = () => {};
             const jar = {
-                setCookies: sinon.stub()
+                setCookies: sinon.stub(),
             };
             const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
             const res = {
-                getHeader: sinon.stub().returns('xyz')
+                getHeader: sinon.stub().returns("xyz"),
             };
 
             request._saveCookies(res);
 
             sinon.assert.calledOnce(res.getHeader);
             sinon.assert.calledOnce(jar.setCookies);
-            sinon.assert.calledOnceWithMatch(jar.setCookies, 'xyz');
+            sinon.assert.calledOnceWithMatch(jar.setCookies, "xyz");
         });
 
-        it('_doRequest', async function () {
+        it("_doRequest", async function () {
             await new Promise((resolve, reject) => {
                 const fn = (req, res) => {
                     // This is how reqresnext works
-                    res.emit('finish');
+                    res.emit("finish");
                 };
                 const jar = {};
                 const opts = new RequestOptions();
                 const request = new Request(fn, jar, opts);
 
                 // Stub cookies, we'll test this behaviour later
-                const {saveCookiesStub, restoreCookiesStub} = stubCookies(request);
+                const { saveCookiesStub, restoreCookiesStub } = stubCookies(request);
 
                 request._doRequest((error, response) => {
                     if (error) {
@@ -264,97 +258,100 @@ describe('Request', function () {
             });
         });
 
-        it('body() sets body correctly', function () {
+        it("body() sets body correctly", function () {
             const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
-            const body = {foo: 'bar'};
+            const body = { foo: "bar" };
 
             request.body(body);
 
             assert.equal(request.reqOptions.body, body);
         });
 
-        it('body() sets body correctly with FormData', async function () {
+        it("body() sets body correctly with FormData", async function () {
             const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
             const formData = new FormData();
-            formData.append('foo', 'bar');
+            formData.append("foo", "bar");
 
             request.body(formData);
 
             assert.equal(request.reqOptions.body, undefined);
-            const {req} = request._getReqRes();
-            const requestBody = (await streamToBuffer(req)).toString('utf8');
+            const { req } = request._getReqRes();
+            const requestBody = (await streamToBuffer(req)).toString("utf8");
             assert.match(requestBody, /Content-Disposition: form-data; name="foo"\r\n\r\nbar/);
-            assert.equal(req.headers['content-length'], requestBody.length);
-            assert.equal(req.headers['content-type'], 'multipart/form-data; boundary=' + formData.getBoundary());
+            assert.equal(req.headers["content-length"], requestBody.length);
+            assert.equal(
+                req.headers["content-type"],
+                "multipart/form-data; boundary=" + formData.getBoundary(),
+            );
         });
 
-        it('body() sets body correctly with string', async function () {
+        it("body() sets body correctly with string", async function () {
             const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
-            const stringData = 'hello-world';
+            const stringData = "hello-world";
             request.body(stringData);
 
             assert.equal(request.reqOptions.body, undefined);
-            const {req} = request._getReqRes();
-            const requestBody = (await streamToBuffer(req)).toString('utf8');
+            const { req } = request._getReqRes();
+            const requestBody = (await streamToBuffer(req)).toString("utf8");
             assert.equal(requestBody, stringData);
-            assert.equal(req.headers['content-length'], stringData.length);
+            assert.equal(req.headers["content-length"], stringData.length);
         });
 
-        it('body() stream can pipe to writeable stream', async function () {
+        it("body() stream can pipe to writeable stream", async function () {
             const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
-            const stringData = 'hello-world';
+            const stringData = "hello-world";
             request.body(stringData);
 
             assert.equal(request.reqOptions.body, undefined);
-            const {req} = request._getReqRes();
+            const { req } = request._getReqRes();
 
             const writeableStream = createAwaitableStream();
             req.pipe(writeableStream);
 
-            const requestBody = (await writeableStream).toString('utf8');
+            const requestBody = (await writeableStream).toString("utf8");
             assert.equal(requestBody, stringData);
-            assert.equal(req.headers['content-length'], stringData.length);
+            assert.equal(req.headers["content-length"], stringData.length);
 
             req.unpipe(writeableStream);
         });
 
-        it('header() sets body correctly', function () {
+        it("header() sets body correctly", function () {
             const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
-            request.header('foo', 'bar');
+            request.header("foo", "bar");
 
-            assert.equal(request.reqOptions.headers.foo, 'bar');
+            assert.equal(request.reqOptions.headers.foo, "bar");
         });
 
-        it('attach() sets body correctly with single file', async function () {
+        it("attach() sets body correctly with single file", async function () {
             const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
-            const path = require('path');
-            const filePath = path.join(__dirname, 'fixtures/ghost-favicon.png');
+            const path = require("path");
+            const filePath = path.join(__dirname, "fixtures/ghost-favicon.png");
 
-            request.attach('image', filePath);
+            request.attach("image", filePath);
 
             assert.equal(request._formData instanceof FormData, true);
             assert.equal(request.reqOptions.body, undefined);
@@ -366,24 +363,22 @@ describe('Request', function () {
             assert.match(content, /filename="ghost-favicon.png"/);
         });
 
-        it('attach() sets body correctly with multiple files', async function () {
+        it("attach() sets body correctly with multiple files", async function () {
             const fn = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
 
-            const path = require('path');
-            const fs = require('fs');
-            const imagePath = path.join(__dirname, 'fixtures/ghost-favicon.png');
-            const textPath = path.join(__dirname, 'fixtures/test-multi.txt');
+            const path = require("path");
+            const fs = require("fs");
+            const imagePath = path.join(__dirname, "fixtures/ghost-favicon.png");
+            const textPath = path.join(__dirname, "fixtures/test-multi.txt");
 
             // Create a test text file
-            fs.writeFileSync(textPath, 'test content');
+            fs.writeFileSync(textPath, "test content");
 
             try {
-                request
-                    .attach('image', imagePath)
-                    .attach('document', textPath);
+                request.attach("image", imagePath).attach("document", textPath);
 
                 assert.equal(request._formData instanceof FormData, true);
 
@@ -400,10 +395,10 @@ describe('Request', function () {
             }
         });
 
-        it('class is thenable [public api]', async function () {
+        it("class is thenable [public api]", async function () {
             const fn = (req, res) => {
                 // This is how reqresnext works
-                res.emit('finish');
+                res.emit("finish");
             };
             const jar = {};
             const opts = new RequestOptions();
@@ -416,13 +411,15 @@ describe('Request', function () {
                 const response = await request;
                 assert.equal(response.statusCode, 200); // this is the default
             } catch (error) {
-                assert.fail(`This should not have thrown an error. Original error: ${error.message}.`);
+                assert.fail(
+                    `This should not have thrown an error. Original error: ${error.message}.`,
+                );
             }
         });
 
-        it('express errors are handled correctly', async function () {
+        it("express errors are handled correctly", async function () {
             const fn = () => {
-                throw new Error('something went wrong');
+                throw new Error("something went wrong");
             };
             const jar = {};
             const opts = new RequestOptions();
@@ -433,22 +430,22 @@ describe('Request', function () {
 
             try {
                 await request;
-                assert.fail('Should have errored');
+                assert.fail("Should have errored");
             } catch (error) {
-                assert.equal(error.message, 'something went wrong');
+                assert.equal(error.message, "something went wrong");
             }
         });
     });
 
-    describe('Testing with Express Internals', function () {
-        it('converts body to text correctly for string', async function () {
+    describe("Testing with Express Internals", function () {
+        it("converts body to text correctly for string", async function () {
             const fn = (req, res) => {
                 // This is how express works
-                res.send('Hello World!');
-                res.emit('finish');
+                res.send("Hello World!");
+                res.emit("finish");
             };
             // Used by express internally to get etag function in .send()
-            fn.get = () => { };
+            fn.get = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
@@ -460,20 +457,22 @@ describe('Request', function () {
             try {
                 response = await request;
             } catch (error) {
-                assert.fail(`This should not have thrown an error. Original error: ${error.stack}.`);
+                assert.fail(
+                    `This should not have thrown an error. Original error: ${error.stack}.`,
+                );
             }
 
             assert.equal(response.statusCode, 200); // this is the default
-            assert.equal(response.text, 'Hello World!');
+            assert.equal(response.text, "Hello World!");
         });
 
-        it('converts body to text correctly for json', async function () {
+        it("converts body to text correctly for json", async function () {
             const fn = (req, res) => {
-                res.json({hello: 'world'});
-                res.emit('finish');
+                res.json({ hello: "world" });
+                res.emit("finish");
             };
             // Used by express internally to get etag function in .send()
-            fn.get = () => { };
+            fn.get = () => {};
             const jar = {};
             const opts = new RequestOptions();
             const request = new Request(fn, jar, opts);
@@ -484,12 +483,14 @@ describe('Request', function () {
             try {
                 response = await request;
             } catch (error) {
-                assert.fail(`This should not have thrown an error. Original error: ${error.stack}.`);
+                assert.fail(
+                    `This should not have thrown an error. Original error: ${error.stack}.`,
+                );
             }
 
             assert.equal(response.statusCode, 200); // this is the default
             assert.equal(response.text, '{"hello":"world"}');
-            assert.deepEqual(response.body, {hello: 'world'});
+            assert.deepEqual(response.body, { hello: "world" });
         });
     });
 });

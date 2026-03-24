@@ -1,6 +1,6 @@
-const _debug = require('@tryghost/debug')._base;
-const debug = _debug('ghost-query');
-const _ = require('lodash');
+const _debug = require("@tryghost/debug")._base;
+const debug = _debug("ghost-query");
+const _ = require("lodash");
 
 /**
  * @param {import('bookshelf')} Bookshelf
@@ -26,7 +26,7 @@ module.exports = function (Bookshelf) {
 
         function hasWithRelated(key) {
             for (const item of options.withRelated) {
-                if (typeof item !== 'string') {
+                if (typeof item !== "string") {
                     if (item[key] !== undefined) {
                         return true;
                     }
@@ -43,7 +43,7 @@ module.exports = function (Bookshelf) {
             // We need to keep the reference to the withRelated array and not create a new array
             // This is required to make eager relations work correctly (otherwise the updated withRelated won't get passed further)
             const newItems = options.withRelated.filter((item) => {
-                if (typeof item === 'string') {
+                if (typeof item === "string") {
                     return item !== key;
                 }
                 return item[key] === undefined;
@@ -61,10 +61,10 @@ module.exports = function (Bookshelf) {
         if (model.countRelations) {
             const countRelations = model.countRelations();
             for (const countRelation of Object.keys(countRelations)) {
-                if (hasWithRelated('count.' + countRelation)) {
+                if (hasWithRelated("count." + countRelation)) {
                     // remove post_count from withRelated
-                    removeWithRelated('count.' + countRelation);
-        
+                    removeWithRelated("count." + countRelation);
+
                     // Call the query builder
                     countRelations[countRelation](this, options);
                 }
@@ -96,12 +96,12 @@ module.exports = function (Bookshelf) {
          * E.g. when trying to load counts on replies.count.likes, we wouldn't get an opportunity to load the counts on the replies relation.
          */
         sync: function (options) {
-            if (!options.method || (options.method !== 'insert' && options.method !== 'update')) {
+            if (!options.method || (options.method !== "insert" && options.method !== "update")) {
                 this.addCounts.apply(this, arguments);
             }
 
-            if (_debug.enabled('ghost-query')) {
-                debug('QUERY', this.query().toQuery());
+            if (_debug.enabled("ghost-query")) {
+                debug("QUERY", this.query().toQuery());
             }
 
             // Call parent fetchAll
@@ -121,7 +121,7 @@ module.exports = function (Bookshelf) {
                     savedAttributes[key] = this.attributes[key];
                 }
             }
-            
+
             return modelProto.save.apply(this, arguments).then((t) => {
                 // Set savedAttributes, but keep count__ variables if they stayed inside this.attributes
                 if (savedAttributes) {
@@ -129,7 +129,7 @@ module.exports = function (Bookshelf) {
                 }
                 return t;
             });
-        }
+        },
     });
 
     Bookshelf.Model = Model;
@@ -142,13 +142,13 @@ module.exports = function (Bookshelf) {
             // For now, only apply this for eager loaded collections
             this.addCounts.apply(this, arguments);
 
-            if (_debug.enabled('ghost-query')) {
-                debug('QUERY', this.query().toQuery());
+            if (_debug.enabled("ghost-query")) {
+                debug("QUERY", this.query().toQuery());
             }
 
             // Call parent fetchAll
             return collectionProto.sync.apply(this, arguments);
-        }
+        },
     });
 
     Bookshelf.Collection = Collection;

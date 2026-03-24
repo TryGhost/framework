@@ -2,13 +2,17 @@
   "name": "@tryghost/security",
   "version": "3.0.3",
   "description": "Security primitives for token generation, password hashing, and safe identifiers",
+  "license": "MIT",
+  "author": "Ghost Foundation",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
     "directory": "packages/security"
   },
-  "author": "Ghost Foundation",
-  "license": "MIT",
+  "files": [
+    "index.js",
+    "lib"
+  ],
   "main": "index.js",
   "publishConfig": {
     "access": "public"
@@ -22,16 +26,12 @@
     "lint:test": "eslint -c test/.eslintrc.js test/ --ext .js --cache",
     "lint:eslint": "yarn lint:code && yarn lint:test"
   },
-  "files": [
-    "index.js",
-    "lib"
-  ],
-  "devDependencies": {
-    "sinon": "21.0.3",
-    "uuid": "13.0.0"
-  },
   "dependencies": {
     "@tryghost/string": "0.3.1",
     "bcryptjs": "3.0.3"
+  },
+  "devDependencies": {
+    "sinon": "21.0.3",
+    "uuid": "13.0.0"
   }
 }

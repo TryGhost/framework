@@ -1,7 +1,5 @@
 module.exports = {
-    plugins: ['ghost'],
-    extends: [
-        'plugin:ghost/node'
-    ],
-    ignorePatterns: ['**/build/**']
+    plugins: ["ghost"],
+    extends: ["plugin:ghost/node"],
+    ignorePatterns: ["**/build/**"],
 };

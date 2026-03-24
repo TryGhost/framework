@@ -1,1 +1,1 @@
-module.exports = require('./lib/bookshelf-collision');
+module.exports = require("./lib/bookshelf-collision");

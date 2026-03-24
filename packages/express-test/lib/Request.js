@@ -1,14 +1,14 @@
-const http = require('http');
-const {Writable, Readable} = require('stream');
-const express = require('express');
-const {CookieAccessInfo} = require('cookiejar');
-const {parse} = require('url');
-const {isJSON, attachFile} = require('./utils');
+const http = require("http");
+const { Writable, Readable } = require("stream");
+const express = require("express");
+const { CookieAccessInfo } = require("cookiejar");
+const { parse } = require("url");
+const { isJSON, attachFile } = require("./utils");
 
 class MockSocket extends Writable {
     constructor() {
         super();
-        this.remoteAddress = '127.0.0.1';
+        this.remoteAddress = "127.0.0.1";
     }
     _write(chunk, encoding, callback) {
         callback();
@@ -16,9 +16,9 @@ class MockSocket extends Writable {
 }
 
 class RequestOptions {
-    constructor({method, url, headers, body} = {}) {
-        this.method = method || 'GET';
-        this.url = url || '/';
+    constructor({ method, url, headers, body } = {}) {
+        this.method = method || "GET";
+        this.url = url || "/";
         this.headers = headers || {};
         this.body = body;
     }
@@ -31,7 +31,8 @@ class RequestOptions {
 class Request {
     constructor(app, cookieJar, reqOptions) {
         this.app = app;
-        this.reqOptions = reqOptions instanceof RequestOptions ? reqOptions : new RequestOptions(reqOptions);
+        this.reqOptions =
+            reqOptions instanceof RequestOptions ? reqOptions : new RequestOptions(reqOptions);
         this.cookieJar = cookieJar;
         this._formData = null; // Track FormData instance for multiple attachments
     }
@@ -49,21 +50,21 @@ class Request {
      * @returns
      */
     body(body) {
-        if (body.getBuffer && typeof body.getBuffer === 'function') {
+        if (body.getBuffer && typeof body.getBuffer === "function") {
             // body is FormData (we cannot reliably check instanceof, not working in all situations)
             const requestBuffer = body.getBuffer();
             const headers = body.getHeaders({
-                ...this.reqOptions.headers
+                ...this.reqOptions.headers,
             });
             this.reqOptions.headers = headers;
             return this.body(requestBuffer);
         }
-        if (typeof body === 'string') {
-            const buffer = Buffer.from(body, 'utf8');
+        if (typeof body === "string") {
+            const buffer = Buffer.from(body, "utf8");
             return this.body(buffer);
         }
         if (body instanceof Buffer) {
-            this.reqOptions.headers['content-length'] = body.length;
+            this.reqOptions.headers["content-length"] = body.length;
             return this.stream(Readable.from(body));
         }
 
@@ -110,7 +111,7 @@ class Request {
             },
             read: () => {
                 return readableStream.read(...arguments);
-            }
+            },
         };
         return this;
     }
@@ -149,7 +150,7 @@ class Request {
     }
 
     _getReqRes() {
-        const {app, reqOptions} = this;
+        const { app, reqOptions } = this;
 
         // Create proper Node.js req/res objects using built-in http module.
         // MockSocket provides a writable stream so that res.end() properly emits 'finish'.
@@ -159,7 +160,7 @@ class Request {
         // When streaming body data, the socket must appear readable so that
         // body-parser's on-finished check doesn't skip the request as "already finished".
         if (hasStreamOverrides) {
-            Object.defineProperty(socket, 'readable', {value: true});
+            Object.defineProperty(socket, "readable", { value: true });
         }
 
         const req = new http.IncomingMessage(socket);
@@ -169,7 +170,7 @@ class Request {
         for (const key of Object.keys(reqOptions.headers)) {
             req.headers[key.toLowerCase()] = reqOptions.headers[key];
         }
-        req.headers.host = req.headers.host || 'localhost';
+        req.headers.host = req.headers.host || "localhost";
         req.body = reqOptions.body;
         req.app = app;
 
@@ -211,34 +212,37 @@ class Request {
         if (hasStreamOverrides) {
             const props = Object.keys(this.reqOptions.methodOverrides);
             for (const prop of props) {
-                const descriptor = Object.getOwnPropertyDescriptor(this.reqOptions.methodOverrides, prop);
+                const descriptor = Object.getOwnPropertyDescriptor(
+                    this.reqOptions.methodOverrides,
+                    prop,
+                );
                 Object.defineProperty(req, prop, descriptor);
             }
         }
 
-        return {req, res};
+        return { req, res };
     }
 
     _buildResponse(res) {
         const statusCode = res.statusCode;
         const headers = Object.assign({}, res.getHeaders());
-        const text = res.body ? res.body.toString('utf8') : undefined;
+        const text = res.body ? res.body.toString("utf8") : undefined;
         let body = {};
 
-        if (isJSON(res.getHeader('Content-Type'))) {
+        if (isJSON(res.getHeader("Content-Type"))) {
             body = text && JSON.parse(text);
         }
 
-        return {statusCode, headers, text, body, response: res};
+        return { statusCode, headers, text, body, response: res };
     }
 
     _doRequest(callback) {
         try {
-            const {req, res} = this._getReqRes();
+            const { req, res } = this._getReqRes();
 
             this._restoreCookies(req);
 
-            res.on('finish', () => {
+            res.on("finish", () => {
                 const response = this._buildResponse(res);
 
                 this._saveCookies(res);
@@ -255,11 +259,7 @@ class Request {
     _getCookies(req) {
         const url = parse(req.url);
 
-        const access = new CookieAccessInfo(
-            url.hostname,
-            url.pathname,
-            url.protocol === 'https:'
-        );
+        const access = new CookieAccessInfo(url.hostname, url.pathname, url.protocol === "https:");
 
         return this.cookieJar.getCookies(access).toValueString();
     }
@@ -270,7 +270,7 @@ class Request {
     }
 
     _saveCookies(res) {
-        const cookies = res.getHeader('set-cookie');
+        const cookies = res.getHeader("set-cookie");
 
         if (cookies) {
             this.cookieJar.setCookies(cookies);

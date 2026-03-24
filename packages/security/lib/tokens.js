@@ -1,66 +1,66 @@
-const crypto = require('crypto');
+const crypto = require("crypto");
 
 module.exports.generateFromContent = function generateFromContent(options) {
     options = options || {};
 
-    const hash = crypto.createHash('sha256');
+    const hash = crypto.createHash("sha256");
     const content = options.content;
 
-    let text = '';
+    let text = "";
 
     hash.update(content);
 
-    text += [content, hash.digest('base64')].join('|');
-    return Buffer.from(text).toString('base64');
+    text += [content, hash.digest("base64")].join("|");
+    return Buffer.from(text).toString("base64");
 };
 
 module.exports.generateFromEmail = function generateFromEmail(options) {
     options = options || {};
 
-    const hash = crypto.createHash('sha256');
+    const hash = crypto.createHash("sha256");
     const expires = options.expires;
     const email = options.email;
     const secret = options.secret;
 
-    let text = '';
+    let text = "";
 
     hash.update(String(expires));
     hash.update(email.toLocaleLowerCase());
     hash.update(String(secret));
 
-    text += [expires, email, hash.digest('base64')].join('|');
-    return Buffer.from(text).toString('base64');
+    text += [expires, email, hash.digest("base64")].join("|");
+    return Buffer.from(text).toString("base64");
 };
 
 module.exports.resetToken = {
     generateHash: function generateHash(options) {
         options = options || {};
 
-        const hash = crypto.createHash('sha256');
+        const hash = crypto.createHash("sha256");
         const expires = options.expires;
         const email = options.email;
         const dbHash = options.dbHash;
         const password = options.password;
-        let text = '';
+        let text = "";
 
         hash.update(String(expires));
         hash.update(email.toLocaleLowerCase());
         hash.update(password);
         hash.update(String(dbHash));
 
-        text += [expires, email, hash.digest('base64')].join('|');
-        return Buffer.from(text).toString('base64');
+        text += [expires, email, hash.digest("base64")].join("|");
+        return Buffer.from(text).toString("base64");
     },
     extract: function extract(options) {
         options = options || {};
 
         const token = options.token;
-        const tokenText = Buffer.from(token, 'base64').toString('ascii');
+        const tokenText = Buffer.from(token, "base64").toString("ascii");
         let parts;
         let expires;
         let email;
 
-        parts = tokenText.split('|');
+        parts = tokenText.split("|");
 
         // Check if invalid structure
         if (!parts || parts.length !== 3) {
@@ -72,14 +72,14 @@ module.exports.resetToken = {
 
         return {
             expires: expires,
-            email: email
+            email: email,
         };
     },
     compare: function compare(options) {
         options = options || {};
 
         const tokenToCompare = options.token;
-        const parts = exports.resetToken.extract({token: tokenToCompare});
+        const parts = exports.resetToken.extract({ token: tokenToCompare });
         const dbHash = options.dbHash;
         const password = options.password;
         let generatedToken;
@@ -89,7 +89,7 @@ module.exports.resetToken = {
         if (isNaN(parts.expires)) {
             return {
                 correct: false,
-                reason: 'invalid_expiry'
+                reason: "invalid_expiry",
             };
         }
 
@@ -97,7 +97,7 @@ module.exports.resetToken = {
         if (parts.expires < Date.now()) {
             return {
                 correct: false,
-                reason: 'expired'
+                reason: "expired",
             };
         }
 
@@ -105,7 +105,7 @@ module.exports.resetToken = {
             email: parts.email,
             expires: parts.expires,
             dbHash: dbHash,
-            password: password
+            password: password,
         });
 
         if (tokenToCompare.length !== generatedToken.length) {
@@ -117,13 +117,13 @@ module.exports.resetToken = {
         }
 
         const result = {
-            correct: (diff === 0)
+            correct: diff === 0,
         };
 
         if (!result.correct) {
-            result.reason = 'invalid';
+            result.reason = "invalid";
         }
 
         return result;
-    }
+    },
 };

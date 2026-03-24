@@ -1,14 +1,21 @@
 {
   "name": "@tryghost/bookshelf-eager-load",
   "version": "2.0.3",
+  "license": "MIT",
+  "author": "Ghost Foundation",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
     "directory": "packages/bookshelf-eager-load"
   },
-  "author": "Ghost Foundation",
-  "license": "MIT",
+  "files": [
+    "index.js",
+    "lib"
+  ],
   "main": "index.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "echo \"Implement me!\"",
     "test": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
@@ -16,18 +23,11 @@
     "posttest": "yarn lint",
     "lint:eslint": "eslint . --ext .js --cache"
   },
-  "files": [
-    "index.js",
-    "lib"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
-  "devDependencies": {
-    "sinon": "21.0.3"
-  },
   "dependencies": {
     "@tryghost/debug": "^2.0.3",
     "lodash": "4.17.23"
+  },
+  "devDependencies": {
+    "sinon": "21.0.3"
   }
 }

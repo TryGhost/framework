@@ -1,9 +1,5 @@
 module.exports = {
-    plugins: ['ghost'],
-    extends: [
-        'plugin:ghost/node'
-    ],
-    ignorePatterns: [
-        'coverage'
-    ]
+    plugins: ["ghost"],
+    extends: ["plugin:ghost/node"],
+    ignorePatterns: ["coverage"],
 };

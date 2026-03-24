@@ -1,5 +1,5 @@
-const EventEmitter = require('events').EventEmitter;
-const logging = require('@tryghost/logging');
+const EventEmitter = require("events").EventEmitter;
+const logging = require("@tryghost/logging");
 
 /**
  * @template T
@@ -18,7 +18,7 @@ class DomainEvents {
      * @private
      * @type EventEmitter
      */
-    static ee = new EventEmitter;
+    static ee = new EventEmitter();
 
     /**
      * @template Data
@@ -33,7 +33,7 @@ class DomainEvents {
             try {
                 await handler(event);
             } catch (e) {
-                logging.error('Unhandled error in event handler for event: ' + Event.name);
+                logging.error("Unhandled error in event handler for event: " + Event.name);
                 logging.error(e);
             }
             if (this.#trackingEnabled) {
@@ -69,7 +69,7 @@ class DomainEvents {
     static #awaitQueue = [];
     static #dispatchCount = 0;
     static #processedCount = 0;
-    static #trackingEnabled = process.env.NODE_ENV?.startsWith('test');
+    static #trackingEnabled = process.env.NODE_ENV?.startsWith("test");
 
     /**
      * Waits for all the events in the queue to be dispatched and fully processed (async).
@@ -81,7 +81,7 @@ class DomainEvents {
                 resolve();
                 return;
             }
-            this.#awaitQueue.push({resolve});
+            this.#awaitQueue.push({ resolve });
         });
     }
 

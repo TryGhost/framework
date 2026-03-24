@@ -1,1 +1,1 @@
-module.exports = require('./lib/metrics');
+module.exports = require("./lib/metrics");

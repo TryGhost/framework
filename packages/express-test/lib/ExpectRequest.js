@@ -1,6 +1,6 @@
-const assert = require('assert');
-const {Request, RequestOptions} = require('./Request');
-const {snapshotManager} = require('@tryghost/jest-snapshot');
+const assert = require("assert");
+const { Request, RequestOptions } = require("./Request");
+const { snapshotManager } = require("@tryghost/jest-snapshot");
 
 /**
  * @typedef {object} ExpressTestAssertion
@@ -29,10 +29,10 @@ class ExpectRequest extends Request {
     }
 
     expect(callback) {
-        if (typeof callback !== 'function') {
+        if (typeof callback !== "function") {
             // eslint-disable-next-line ghost/ghost-custom/no-native-error
             throw new Error(
-                'express-test expect() requires a callback function, did you mean expectStatus or expectHeader?'
+                "express-test expect() requires a callback function, did you mean expectStatus or expectHeader?",
             );
         }
 
@@ -47,7 +47,7 @@ class ExpectRequest extends Request {
 
         const assertion = {
             fn: wrapperFn,
-            type: 'body'
+            type: "body",
         };
 
         this._addAssertion(assertion);
@@ -59,7 +59,7 @@ class ExpectRequest extends Request {
         const assertion = {
             fn: this._assertStatus,
             expected,
-            type: 'status'
+            type: "status",
         };
 
         this._addAssertion(assertion);
@@ -72,7 +72,7 @@ class ExpectRequest extends Request {
             fn: this._assertHeader,
             expectedField: expectedField.toLowerCase(),
             expectedValue,
-            type: 'header'
+            type: "header",
         };
 
         this._addAssertion(assertion);
@@ -84,7 +84,7 @@ class ExpectRequest extends Request {
         const assertion = {
             fn: this._assertEmptyBody,
             expected: {},
-            type: 'body'
+            type: "body",
         };
 
         this._addAssertion(assertion);
@@ -96,8 +96,8 @@ class ExpectRequest extends Request {
         let assertion = {
             fn: this._assertSnapshot,
             properties: properties,
-            field: 'body',
-            type: 'body'
+            field: "body",
+            type: "body",
         };
 
         this._addAssertion(assertion);
@@ -109,8 +109,8 @@ class ExpectRequest extends Request {
         let assertion = {
             fn: this._assertSnapshot,
             properties: properties,
-            field: 'headers',
-            type: 'header'
+            field: "headers",
+            type: "header",
         };
 
         this._addAssertion(assertion);
@@ -156,11 +156,11 @@ class ExpectRequest extends Request {
         const headerAssertions = [];
 
         for (const assertion of this.assertions) {
-            if (assertion.type === 'body') {
+            if (assertion.type === "body") {
                 assertion.fn(response, assertion);
-            } else if (assertion.type === 'status') {
+            } else if (assertion.type === "status") {
                 statusCodeAssertions.push(assertion);
-            } else if (assertion.type === 'header') {
+            } else if (assertion.type === "header") {
                 headerAssertions.push(assertion);
             } else {
                 headerAssertions.push(assertion);
@@ -183,9 +183,9 @@ class ExpectRequest extends Request {
     _addAssertion(assertion) {
         // We create the error here so that we get a useful stack trace
         let error = new assert.AssertionError({
-            message: 'Unexpected assertion error',
+            message: "Unexpected assertion error",
             expected: assertion.expected,
-            stackStartFn: this._addAssertion
+            stackStartFn: this._addAssertion,
         });
 
         error.contextString = this.reqOptions.toString();
@@ -195,11 +195,16 @@ class ExpectRequest extends Request {
     }
 
     _assertStatus(response, assertion) {
-        const {error} = assertion;
+        const { error } = assertion;
 
         error.message = `Expected statusCode ${assertion.expected}, got statusCode ${response.statusCode} ${error.contextString}`;
 
-        if (response.body && response.body.errors && response.body.errors[0] && response.body.errors[0].message) {
+        if (
+            response.body &&
+            response.body.errors &&
+            response.body.errors[0] &&
+            response.body.errors[0].message
+        ) {
             error.message += `\n${response.body.errors[0].message}`;
 
             if (response.body.errors[0].context) {
@@ -213,7 +218,7 @@ class ExpectRequest extends Request {
     }
 
     _assertHeader(response, assertion) {
-        const {expectedField, expectedValue, error} = assertion;
+        const { expectedField, expectedValue, error } = assertion;
         const actual = response.headers[expectedField];
 
         const expectedHeaderString = `${expectedField}: ${expectedValue}`;
@@ -237,7 +242,7 @@ class ExpectRequest extends Request {
     }
 
     _assertEmptyBody(response, assertion) {
-        const {error, expected} = assertion;
+        const { error, expected } = assertion;
         const actual = response.body;
 
         error.actual = actual;

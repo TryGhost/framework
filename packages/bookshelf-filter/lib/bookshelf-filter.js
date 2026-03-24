@@ -1,9 +1,9 @@
-const debug = require('@tryghost/debug')('models:plugins:filter');
-const errors = require('@tryghost/errors');
-const tpl = require('@tryghost/tpl');
+const debug = require("@tryghost/debug")("models:plugins:filter");
+const errors = require("@tryghost/errors");
+const tpl = require("@tryghost/tpl");
 
 const messages = {
-    errorParsing: 'Error parsing filter'
+    errorParsing: "Error parsing filter",
 };
 
 /**
@@ -24,7 +24,7 @@ const filter = function filter(Bookshelf) {
          * instance.
          */
         applyDefaultAndCustomFilters: function applyDefaultAndCustomFilters(options) {
-            const nql = require('@tryghost/nql');
+            const nql = require("@tryghost/nql");
 
             const expansions = [];
 
@@ -40,10 +40,10 @@ const filter = function filter(Bookshelf) {
             let relations = this.filterRelations(options) || {};
             let transformer = options.mongoTransformer;
 
-            debug('custom', custom);
-            debug('extra', extra);
-            debug('enforced', overrides);
-            debug('default', defaults);
+            debug("custom", custom);
+            debug("extra", extra);
+            debug("enforced", overrides);
+            debug("default", defaults);
 
             if (extra) {
                 if (custom) {
@@ -61,16 +61,16 @@ const filter = function filter(Bookshelf) {
                         overrides: overrides,
                         defaults: defaults,
                         transformer: transformer,
-                        cte: cte
+                        cte: cte,
                     }).querySQL(qb);
                 });
             } catch (err) {
                 throw new errors.BadRequestError({
                     message: tpl(messages.errorParsing),
-                    err
+                    err,
                 });
             }
-        }
+        },
     });
 
     Bookshelf.Model = Model;

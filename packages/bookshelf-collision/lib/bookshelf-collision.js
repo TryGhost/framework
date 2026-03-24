@@ -1,6 +1,6 @@
-const moment = require('moment-timezone');
-const _ = require('lodash');
-const errors = require('@tryghost/errors');
+const moment = require("moment-timezone");
+const _ = require("lodash");
+const errors = require("@tryghost/errors");
 
 /**
  * @param {import('bookshelf')} Bookshelf
@@ -30,9 +30,11 @@ module.exports = function (Bookshelf) {
             const self = this;
 
             // CASE: only enabled for posts table
-            if (this.tableName !== 'posts' ||
+            if (
+                this.tableName !== "posts" ||
                 !self.serverData ||
-                ((options.method !== 'update' && options.method !== 'patch') || !options.method)
+                (options.method !== "update" && options.method !== "patch") ||
+                !options.method
             ) {
                 return parentSync;
             }
@@ -49,11 +51,19 @@ module.exports = function (Bookshelf) {
             parentSync.update = async function update() {
                 const response = await originalUpdateSync.apply(this, arguments);
                 const changed = _.omit(self._changed, [
-                    'created_at', 'updated_at', 'author_id', 'id',
-                    'published_by', 'updated_by', 'html', 'plaintext'
+                    "created_at",
+                    "updated_at",
+                    "author_id",
+                    "id",
+                    "published_by",
+                    "updated_by",
+                    "html",
+                    "plaintext",
                 ]);
 
-                const clientUpdatedAt = moment(self.clientData.updated_at || self.serverData.updated_at || new Date());
+                const clientUpdatedAt = moment(
+                    self.clientData.updated_at || self.serverData.updated_at || new Date(),
+                );
                 const serverUpdatedAt = moment(self.serverData.updated_at || clientUpdatedAt);
 
                 const changedFields = Object.keys(changed);
@@ -62,14 +72,14 @@ module.exports = function (Bookshelf) {
                     if (clientUpdatedAt.diff(serverUpdatedAt) !== 0) {
                         // @NOTE: This will rollback the update. We cannot know if relations were updated before doing the update.
                         throw new errors.UpdateCollisionError({
-                            message: 'Saving failed! Someone else is editing this post.',
-                            code: 'UPDATE_COLLISION',
-                            level: 'critical',
+                            message: "Saving failed! Someone else is editing this post.",
+                            code: "UPDATE_COLLISION",
+                            level: "critical",
                             errorDetails: {
                                 changedFields,
                                 clientUpdatedAt: self.clientData.updated_at,
-                                serverUpdatedAt: self.serverData.updated_at
-                            }
+                                serverUpdatedAt: self.serverData.updated_at,
+                            },
                         });
                     }
                 }
@@ -91,7 +101,7 @@ module.exports = function (Bookshelf) {
             this.serverData = _.cloneDeep(this.attributes);
 
             return ParentModel.prototype.save.apply(this, arguments);
-        }
+        },
     });
 
     Bookshelf.Model = Model;

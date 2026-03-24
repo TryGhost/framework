@@ -1,33 +1,33 @@
-const debug = require('@tryghost/debug')('validators:input:all');
-const _ = require('lodash');
-const tpl = require('@tryghost/tpl');
-const {BadRequestError, ValidationError} = require('@tryghost/errors');
-const validator = require('@tryghost/validator');
+const debug = require("@tryghost/debug")("validators:input:all");
+const _ = require("lodash");
+const tpl = require("@tryghost/tpl");
+const { BadRequestError, ValidationError } = require("@tryghost/errors");
+const validator = require("@tryghost/validator");
 
 const messages = {
-    validationFailed: 'Validation ({validationName}) failed for {key}',
-    noRootKeyProvided: 'No root key (\'{docName}\') provided.',
-    invalidIdProvided: 'Invalid id provided.'
+    validationFailed: "Validation ({validationName}) failed for {key}",
+    noRootKeyProvided: "No root key ('{docName}') provided.",
+    invalidIdProvided: "Invalid id provided.",
 };
 
 const GLOBAL_VALIDATORS = {
-    id: {matches: /^[a-f\d]{24}$|^1$|me/i},
-    page: {matches: /^\d+$/},
-    limit: {matches: /^\d+|all$/},
-    from: {isDate: true},
-    to: {isDate: true},
-    columns: {matches: /^[\w, ]+$/},
-    order: {matches: /^[a-z0-9_,. ]+$/i},
-    uuid: {isUUID: true},
-    slug: {isSlug: true},
+    id: { matches: /^[a-f\d]{24}$|^1$|me/i },
+    page: { matches: /^\d+$/ },
+    limit: { matches: /^\d+|all$/ },
+    from: { isDate: true },
+    to: { isDate: true },
+    columns: { matches: /^[\w, ]+$/ },
+    order: { matches: /^[a-z0-9_,. ]+$/i },
+    uuid: { isUUID: true },
+    slug: { isSlug: true },
     name: {},
-    email: {isEmail: true},
+    email: { isEmail: true },
     filter: false,
     context: false,
     forUpdate: false,
     transacting: false,
     include: false,
-    formats: false
+    formats: false,
 };
 
 const validate = (config, attrs) => {
@@ -35,12 +35,14 @@ const validate = (config, attrs) => {
 
     _.each(config, (value, key) => {
         if (value.required && !attrs[key]) {
-            errors.push(new ValidationError({
-                message: tpl(messages.validationFailed, {
-                    validationName: 'FieldIsRequired',
-                    key: key
-                })
-            }));
+            errors.push(
+                new ValidationError({
+                    message: tpl(messages.validationFailed, {
+                        validationName: "FieldIsRequired",
+                        key: key,
+                    }),
+                }),
+            );
         }
     });
 
@@ -48,7 +50,7 @@ const validate = (config, attrs) => {
         debug(key, value);
 
         if (GLOBAL_VALIDATORS[key]) {
-            debug('global validation');
+            debug("global validation");
             errors = errors.concat(validator.validate(value, key, GLOBAL_VALIDATORS[key]));
         }
 
@@ -56,31 +58,35 @@ const validate = (config, attrs) => {
             const allowedValues = Array.isArray(config[key]) ? config[key] : config[key].values;
 
             if (allowedValues) {
-                debug('ctrl validation');
+                debug("ctrl validation");
 
                 // CASE: we allow e.g. `formats=`
                 if (!value || !value.length) {
                     return;
                 }
 
-                const valuesAsArray = Array.isArray(value) ? value : value.trim().toLowerCase().split(',');
+                const valuesAsArray = Array.isArray(value)
+                    ? value
+                    : value.trim().toLowerCase().split(",");
                 const unallowedValues = _.filter(valuesAsArray, (valueToFilter) => {
                     return !allowedValues.includes(valueToFilter);
                 });
 
                 if (unallowedValues.length) {
                     // CASE: we do not error for invalid includes, just silently remove
-                    if (key === 'include') {
-                        attrs.include = valuesAsArray.filter(x => allowedValues.includes(x));
+                    if (key === "include") {
+                        attrs.include = valuesAsArray.filter((x) => allowedValues.includes(x));
                         return;
                     }
 
-                    errors.push(new ValidationError({
-                        message: tpl(messages.validationFailed, {
-                            validationName: 'AllowedValues',
-                            key: key
-                        })
-                    }));
+                    errors.push(
+                        new ValidationError({
+                            message: tpl(messages.validationFailed, {
+                                validationName: "AllowedValues",
+                                key: key,
+                            }),
+                        }),
+                    );
                 }
             }
         }
@@ -95,7 +101,7 @@ module.exports = {
      * @param {import('@tryghost/api-framework').Frame} frame
      */
     all(apiConfig, frame) {
-        debug('validate all');
+        debug("validate all");
 
         let validationErrors = validate(apiConfig.options, frame.options);
 
@@ -111,7 +117,7 @@ module.exports = {
      * @param {import('@tryghost/api-framework').Frame} frame
      */
     browse(apiConfig, frame) {
-        debug('validate browse');
+        debug("validate browse");
 
         let validationErrors = [];
 
@@ -125,7 +131,7 @@ module.exports = {
     },
 
     read() {
-        debug('validate read');
+        debug("validate read");
         return this.browse(...arguments);
     },
 
@@ -134,15 +140,21 @@ module.exports = {
      * @param {import('@tryghost/api-framework').Frame} frame
      */
     add(apiConfig, frame) {
-        debug('validate add');
+        debug("validate add");
 
         // NOTE: this block should be removed completely once JSON Schema validations
         //       are introduced for all of the endpoints
-        if (!['posts', 'tags'].includes(apiConfig.docName)) {
-            if (_.isEmpty(frame.data) || _.isEmpty(frame.data[apiConfig.docName]) || _.isEmpty(frame.data[apiConfig.docName][0])) {
-                return Promise.reject(new BadRequestError({
-                    message: tpl(messages.noRootKeyProvided, {docName: apiConfig.docName})
-                }));
+        if (!["posts", "tags"].includes(apiConfig.docName)) {
+            if (
+                _.isEmpty(frame.data) ||
+                _.isEmpty(frame.data[apiConfig.docName]) ||
+                _.isEmpty(frame.data[apiConfig.docName][0])
+            ) {
+                return Promise.reject(
+                    new BadRequestError({
+                        message: tpl(messages.noRootKeyProvided, { docName: apiConfig.docName }),
+                    }),
+                );
             }
         }
 
@@ -159,21 +171,25 @@ module.exports = {
             });
 
             if (missedDataProperties.length) {
-                return Promise.reject(new ValidationError({
-                    message: tpl(messages.validationFailed, {
-                        validationName: 'FieldIsRequired',
-                        key: JSON.stringify(missedDataProperties)
-                    })
-                }));
+                return Promise.reject(
+                    new ValidationError({
+                        message: tpl(messages.validationFailed, {
+                            validationName: "FieldIsRequired",
+                            key: JSON.stringify(missedDataProperties),
+                        }),
+                    }),
+                );
             }
 
             if (nilDataProperties.length) {
-                return Promise.reject(new ValidationError({
-                    message: tpl(messages.validationFailed, {
-                        validationName: 'FieldIsInvalid',
-                        key: JSON.stringify(nilDataProperties)
-                    })
-                }));
+                return Promise.reject(
+                    new ValidationError({
+                        message: tpl(messages.validationFailed, {
+                            validationName: "FieldIsInvalid",
+                            key: JSON.stringify(nilDataProperties),
+                        }),
+                    }),
+                );
             }
         }
     },
@@ -183,7 +199,7 @@ module.exports = {
      * @param {import('@tryghost/api-framework').Frame} frame
      */
     edit(apiConfig, frame) {
-        debug('validate edit');
+        debug("validate edit");
         const result = this.add(...arguments);
 
         if (result instanceof Promise) {
@@ -194,33 +210,38 @@ module.exports = {
         //       are introduced for all of the endpoints. `id` property is currently
         //       stripped from the request body and only the one provided in `options`
         //       is used in later logic
-        if (!['posts', 'tags'].includes(apiConfig.docName)) {
-            if (frame.options.id && frame.data[apiConfig.docName][0].id
-                && frame.options.id !== frame.data[apiConfig.docName][0].id) {
-                return Promise.reject(new BadRequestError({
-                    message: tpl(messages.invalidIdProvided)
-                }));
+        if (!["posts", "tags"].includes(apiConfig.docName)) {
+            if (
+                frame.options.id &&
+                frame.data[apiConfig.docName][0].id &&
+                frame.options.id !== frame.data[apiConfig.docName][0].id
+            ) {
+                return Promise.reject(
+                    new BadRequestError({
+                        message: tpl(messages.invalidIdProvided),
+                    }),
+                );
             }
         }
     },
 
     changePassword() {
-        debug('validate changePassword');
+        debug("validate changePassword");
         return this.add(...arguments);
     },
 
     resetPassword() {
-        debug('validate resetPassword');
+        debug("validate resetPassword");
         return this.add(...arguments);
     },
 
     setup() {
-        debug('validate setup');
+        debug("validate setup");
         return this.add(...arguments);
     },
 
     publish() {
-        debug('validate schedule');
+        debug("validate schedule");
         return this.browse(...arguments);
-    }
+    },
 };

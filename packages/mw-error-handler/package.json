@@ -2,8 +2,17 @@
   "name": "@tryghost/mw-error-handler",
   "version": "3.0.3",
   "description": "Express middleware utilities for normalizing and rendering Ghost API errors",
-  "author": "Ghost Foundation",
   "license": "MIT",
+  "author": "Ghost Foundation",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TryGhost/framework.git",
+    "directory": "packages/mw-error-handler"
+  },
+  "files": [
+    "index.js",
+    "lib"
+  ],
   "main": "index.js",
   "publishConfig": {
     "access": "public"
@@ -17,13 +26,6 @@
     "lint:test": "eslint -c test/.eslintrc.js test/ --ext .js --cache",
     "lint:eslint": "yarn lint:code && yarn lint:test"
   },
-  "files": [
-    "index.js",
-    "lib"
-  ],
-  "devDependencies": {
-    "sinon": "21.0.3"
-  },
   "dependencies": {
     "@tryghost/debug": "^2.0.3",
     "@tryghost/errors": "^3.0.3",
@@ -32,9 +34,7 @@
     "lodash": "4.17.23",
     "semver": "7.7.4"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/TryGhost/framework.git",
-    "directory": "packages/mw-error-handler"
+  "devDependencies": {
+    "sinon": "21.0.3"
   }
 }

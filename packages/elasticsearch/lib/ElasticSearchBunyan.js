@@ -1,6 +1,6 @@
-const ElasticSearch = require('./ElasticSearch');
-const {PassThrough} = require('stream');
-const split = require('split2');
+const ElasticSearch = require("./ElasticSearch");
+const { PassThrough } = require("stream");
+const split = require("split2");
 
 // Create a writable stream which pipes data written into it, into the bulk helper
 
@@ -19,10 +19,10 @@ class ElasticSearchBunyan {
             datasource: stream.pipe(split()),
             onDocument() {
                 return {
-                    create: {_index: index}
+                    create: { _index: index },
                 };
             },
-            pipeline
+            pipeline,
         });
 
         return stream;

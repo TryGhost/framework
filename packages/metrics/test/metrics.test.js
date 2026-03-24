@@ -1,11 +1,11 @@
-const fs = require('fs');
-const path = require('path');
-const sinon = require('sinon');
-const assert = require('assert/strict');
-const ElasticSearch = require('@tryghost/elasticsearch');
-const PrettyStream = require('@tryghost/pretty-stream');
-const {getProcessRoot} = require('@tryghost/root-utils');
-const GhostMetrics = require('../lib/GhostMetrics');
+const fs = require("fs");
+const path = require("path");
+const sinon = require("sinon");
+const assert = require("assert/strict");
+const ElasticSearch = require("@tryghost/elasticsearch");
+const PrettyStream = require("@tryghost/pretty-stream");
+const { getProcessRoot } = require("@tryghost/root-utils");
+const GhostMetrics = require("../lib/GhostMetrics");
 const sandbox = sinon.createSandbox();
 
 // Vitest sets process.env.MODE to 'test' which interferes with GhostMetrics mode detection
@@ -21,55 +21,55 @@ afterEach(function () {
     }
 });
 
-const loggingConfigPath = path.join(getProcessRoot(), 'loggingrc');
+const loggingConfigPath = path.join(getProcessRoot(), "loggingrc");
 
-describe('Metrics config', function () {
+describe("Metrics config", function () {
     afterEach(function () {
-        delete require.cache[require.resolve('../lib/metrics')];
-        delete require.cache[require.resolve('../index')];
+        delete require.cache[require.resolve("../lib/metrics")];
+        delete require.cache[require.resolve("../index")];
         delete require.cache[loggingConfigPath];
         delete require.cache[`${loggingConfigPath}.js`];
     });
 
-    it('Reads file called loggingrc.js', function () {
-        const transports = ['stdout'];
+    it("Reads file called loggingrc.js", function () {
+        const transports = ["stdout"];
         const loggingRc = `module.exports = {
             metrics: {
-                transports: [${transports.map(t => `'${t}'`).join(', ')}]
+                transports: [${transports.map((t) => `'${t}'`).join(", ")}]
             }
         };`;
 
-        fs.writeFileSync('loggingrc.js', loggingRc);
+        fs.writeFileSync("loggingrc.js", loggingRc);
 
-        const ghostMetrics = require('../index');
+        const ghostMetrics = require("../index");
         assert.deepEqual(ghostMetrics.transports, transports);
 
-        fs.unlinkSync('loggingrc.js');
+        fs.unlinkSync("loggingrc.js");
     });
 
-    it('loads with empty config when loggingrc.js is missing', function () {
-        if (fs.existsSync('loggingrc.js')) {
-            fs.unlinkSync('loggingrc.js');
+    it("loads with empty config when loggingrc.js is missing", function () {
+        if (fs.existsSync("loggingrc.js")) {
+            fs.unlinkSync("loggingrc.js");
         }
         delete require.cache[loggingConfigPath];
         delete require.cache[`${loggingConfigPath}.js`];
 
-        const ghostMetrics = require('../lib/metrics');
+        const ghostMetrics = require("../lib/metrics");
         assert.deepEqual(ghostMetrics.transports, []);
     });
 });
 
-describe('Logging', function () {
+describe("Logging", function () {
     afterEach(function () {
         sandbox.restore();
     });
 
-    it('stdout transport works', async function () {
-        const name = 'test-metric';
+    it("stdout transport works", async function () {
+        const name = "test-metric";
         const value = 101;
 
         await new Promise((resolve) => {
-            sandbox.stub(PrettyStream.prototype, 'write').callsFake(function (data) {
+            sandbox.stub(PrettyStream.prototype, "write").callsFake(function (data) {
                 assert.notEqual(data.msg, undefined);
                 assert.equal(data.msg, `Metric ${name}: ${JSON.stringify(value)}`);
                 resolve();
@@ -77,40 +77,40 @@ describe('Logging', function () {
 
             const ghostMetrics = new GhostMetrics({
                 metrics: {
-                    transports: ['stdout']
-                }
+                    transports: ["stdout"],
+                },
             });
             ghostMetrics.metric(name, value);
         });
     });
 
-    it('elasticsearch transport works', async function () {
-        const name = 'test-metric';
+    it("elasticsearch transport works", async function () {
+        const name = "test-metric";
         const value = 101;
 
         const ghostMetrics = new GhostMetrics({
             metrics: {
-                transports: ['elasticsearch'],
+                transports: ["elasticsearch"],
                 metadata: {
-                    id: '123123'
-                }
+                    id: "123123",
+                },
             },
             elasticsearch: {
-                host: 'https://test-elasticsearch',
-                username: 'user',
-                password: 'pass',
-                level: 'info'
-            }
+                host: "https://test-elasticsearch",
+                username: "user",
+                password: "pass",
+                level: "info",
+            },
         });
 
         await new Promise((resolve) => {
-            sandbox.stub(ElasticSearch.prototype, 'index').callsFake(function (data, index) {
+            sandbox.stub(ElasticSearch.prototype, "index").callsFake(function (data, index) {
                 assert.notEqual(data.metadata, undefined);
                 assert.equal(data.metadata.id, ghostMetrics.metadata.id);
                 assert.equal(data.value, value);
 
                 // ElasticSearch shipper prefixes metric names to avoid polluting index namespace
-                assert.equal(index, 'metrics-' + name);
+                assert.equal(index, "metrics-" + name);
                 resolve();
             });
 
@@ -118,84 +118,84 @@ describe('Logging', function () {
         });
     });
 
-    it('throws for invalid transport', function () {
+    it("throws for invalid transport", function () {
         assert.throws(() => {
             new GhostMetrics({
                 metrics: {
-                    transports: ['not-a-transport']
-                }
+                    transports: ["not-a-transport"],
+                },
             });
         });
     });
 
-    it('defaults to short mode', function () {
+    it("defaults to short mode", function () {
         const ghostMetrics = new GhostMetrics({
             metrics: {
-                transports: ['stdout']
-            }
+                transports: ["stdout"],
+            },
         });
 
-        assert.equal(ghostMetrics.mode, 'short');
+        assert.equal(ghostMetrics.mode, "short");
     });
 
-    it('uses long mode when LOIN variable set', function () {
-        process.env.LOIN = 'set';
+    it("uses long mode when LOIN variable set", function () {
+        process.env.LOIN = "set";
         const ghostMetrics = new GhostMetrics({});
 
-        assert.equal(ghostMetrics.mode, 'long');
+        assert.equal(ghostMetrics.mode, "long");
         delete process.env.LOIN;
     });
 
-    it('defaults options bag and metrics transport values', function () {
+    it("defaults options bag and metrics transport values", function () {
         const noOptionsMetrics = new GhostMetrics();
         assert.deepEqual(noOptionsMetrics.transports, []);
 
-        const emptyMetricsConfig = new GhostMetrics({metrics: {}});
+        const emptyMetricsConfig = new GhostMetrics({ metrics: {} });
         assert.deepEqual(emptyMetricsConfig.transports, []);
         assert.deepEqual(emptyMetricsConfig.metadata, {});
     });
 
-    it('resolves even when transport throws', async function () {
-        const name = 'test-metric';
+    it("resolves even when transport throws", async function () {
+        const name = "test-metric";
         const value = 101;
 
         const ghostMetrics = new GhostMetrics({
             metrics: {
-                transports: ['elasticsearch'],
+                transports: ["elasticsearch"],
                 metadata: {
-                    id: '123123'
-                }
+                    id: "123123",
+                },
             },
             elasticsearch: {
-                host: 'https://test-elasticsearch',
-                username: 'user',
-                password: 'pass',
-                level: 'info'
-            }
+                host: "https://test-elasticsearch",
+                username: "user",
+                password: "pass",
+                level: "info",
+            },
         });
 
-        sandbox.stub(ElasticSearch.prototype, 'index').rejects();
+        sandbox.stub(ElasticSearch.prototype, "index").rejects();
 
         await assert.doesNotReject(() => ghostMetrics.metric(name, value));
     });
 
-    it('passes configured proxy to elasticsearch', function () {
-        const name = 'proxy-metric';
+    it("passes configured proxy to elasticsearch", function () {
+        const name = "proxy-metric";
         const value = 2;
 
         const ghostMetrics = new GhostMetrics({
             metrics: {
-                transports: ['elasticsearch']
+                transports: ["elasticsearch"],
             },
             elasticsearch: {
-                host: 'https://test-elasticsearch',
-                username: 'user',
-                password: 'pass',
-                proxy: 'https://proxy.example.com'
-            }
+                host: "https://test-elasticsearch",
+                username: "user",
+                password: "pass",
+                proxy: "https://proxy.example.com",
+            },
         });
 
-        sandbox.stub(ElasticSearch.prototype, 'index').resolves();
+        sandbox.stub(ElasticSearch.prototype, "index").resolves();
         ghostMetrics.metric(name, value);
         assert.equal(ElasticSearch.prototype.index.calledOnce, true);
     });

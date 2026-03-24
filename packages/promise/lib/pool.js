@@ -8,19 +8,19 @@
 async function pool(tasks, maxConcurrent) {
     if (maxConcurrent < 1) {
         // eslint-disable-next-line ghost/ghost-custom/no-native-error
-        throw new Error('Must set at least 1 concurrent workers'); // eslint-disable-line no-restricted-syntax
+        throw new Error("Must set at least 1 concurrent workers"); // eslint-disable-line no-restricted-syntax
     }
 
     const taskIterator = tasks.entries();
     const results = [];
 
-    const workers = Array(maxConcurrent).fill(taskIterator).map(
-        async (workerIterator) => {
+    const workers = Array(maxConcurrent)
+        .fill(taskIterator)
+        .map(async (workerIterator) => {
             for (let [index, task] of workerIterator) {
                 results[index] = await task();
             }
-        }
-    );
+        });
     await Promise.all(workers);
     return results;
 }

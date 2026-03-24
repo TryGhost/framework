@@ -9,7 +9,7 @@ const searchPlugin = function searchPlugin(Bookshelf) {
                     this.searchQuery(qb, options.search);
                 });
             }
-        }
+        },
     });
 
     Bookshelf.Model = Model;

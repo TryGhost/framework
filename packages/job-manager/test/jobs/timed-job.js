@@ -1,5 +1,5 @@
-const {isMainThread, parentPort, workerData} = require('worker_threads');
-const util = require('util');
+const { isMainThread, parentPort, workerData } = require("worker_threads");
+const util = require("util");
 const setTimeoutPromise = util.promisify(setTimeout);
 
 const passTime = async (ms) => {
@@ -15,7 +15,7 @@ if (isMainThread) {
 } else {
     (async () => {
         await passTime(workerData.ms);
-        parentPort.postMessage('done');
+        parentPort.postMessage("done");
         // alternative way to signal "finished" work (not recommended)
         // process.exit();
     })();

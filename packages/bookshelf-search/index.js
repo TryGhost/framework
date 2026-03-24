@@ -1,1 +1,1 @@
-module.exports = require('./lib/bookshelf-search');
+module.exports = require("./lib/bookshelf-search");

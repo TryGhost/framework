@@ -1,5 +1,5 @@
-const rootUtils = require('@tryghost/root-utils');
-const debug = require('debug');
+const rootUtils = require("@tryghost/root-utils");
+const debug = require("debug");
 
 /**
  * @description Create a debug instance based on your package.json alias/name.
@@ -14,7 +14,7 @@ module.exports = function initDebug(name) {
     let alias;
 
     try {
-        const pkg = require(parentPath + '/package.json');
+        const pkg = require(parentPath + "/package.json");
 
         if (pkg.alias) {
             alias = pkg.alias;
@@ -22,10 +22,10 @@ module.exports = function initDebug(name) {
             alias = pkg.name;
         }
     } catch (err) {
-        alias = 'undefined';
+        alias = "undefined";
     }
 
-    return debug(alias + ':' + name);
+    return debug(alias + ":" + name);
 };
 
 module.exports._base = debug;

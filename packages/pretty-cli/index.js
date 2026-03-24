@@ -1,1 +1,1 @@
-module.exports = require('./lib/pretty-cli');
+module.exports = require("./lib/pretty-cli");

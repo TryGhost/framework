@@ -1,12 +1,12 @@
-const assert = require('assert/strict');
+const assert = require("assert/strict");
 
-const validator = require('../');
+const validator = require("../");
 
 // Validate our customizations
-describe('Validate', function () {
-    it('should export our required functions', function () {
+describe("Validate", function () {
+    it("should export our required functions", function () {
         assert.ok(validator);
-        assert.ok(Object.prototype.hasOwnProperty.call(validator, 'validate'));
-        assert.equal(typeof validator.validate, 'function');
+        assert.ok(Object.prototype.hasOwnProperty.call(validator, "validate"));
+        assert.equal(typeof validator.validate, "function");
     });
 });

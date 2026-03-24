@@ -1,8 +1,17 @@
 {
   "name": "@tryghost/mw-vhost",
   "version": "3.0.3",
-  "author": "Ghost Foundation",
   "license": "MIT",
+  "author": "Ghost Foundation",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TryGhost/framework.git",
+    "directory": "packages/mw-vhost"
+  },
+  "files": [
+    "index.js",
+    "lib"
+  ],
   "main": "index.js",
   "publishConfig": {
     "access": "public"
@@ -16,16 +25,7 @@
     "lint:test": "eslint -c test/.eslintrc.js test/ --ext .js --cache",
     "lint:eslint": "yarn lint:code && yarn lint:test"
   },
-  "files": [
-    "index.js",
-    "lib"
-  ],
   "devDependencies": {
     "supertest": "7.2.2"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/TryGhost/framework.git",
-    "directory": "packages/mw-vhost"
   }
 }

@@ -1,12 +1,12 @@
-const url = require('url');
-const debug = require('@tryghost/debug')('headers');
-const INVALIDATE_ALL = '/*';
+const url = require("url");
+const debug = require("@tryghost/debug")("headers");
+const INVALIDATE_ALL = "/*";
 
 const cacheInvalidate = (result, options = {}) => {
     let value = options.value;
 
     return {
-        'X-Cache-Invalidate': value || INVALIDATE_ALL
+        "X-Cache-Invalidate": value || INVALIDATE_ALL,
     };
 };
 
@@ -21,13 +21,13 @@ const disposition = {
     csv(result, options = {}) {
         let value = options.value;
 
-        if (typeof options.value === 'function') {
+        if (typeof options.value === "function") {
             value = options.value();
         }
 
         return {
-            'Content-Disposition': `Attachment; filename="${value}"`,
-            'Content-Type': 'text/csv'
+            "Content-Disposition": `Attachment; filename="${value}"`,
+            "Content-Type": "text/csv",
         };
     },
 
@@ -40,9 +40,9 @@ const disposition = {
      */
     json(result, options = {}) {
         return {
-            'Content-Disposition': `Attachment; filename="${options.value}"`,
-            'Content-Type': 'application/json',
-            'Content-Length': Buffer.byteLength(JSON.stringify(result))
+            "Content-Disposition": `Attachment; filename="${options.value}"`,
+            "Content-Type": "application/json",
+            "Content-Length": Buffer.byteLength(JSON.stringify(result)),
         };
     },
 
@@ -55,9 +55,9 @@ const disposition = {
      */
     yaml(result, options = {}) {
         return {
-            'Content-Disposition': `Attachment; filename="${options.value}"`,
-            'Content-Type': 'application/yaml',
-            'Content-Length': Buffer.byteLength(JSON.stringify(result))
+            "Content-Disposition": `Attachment; filename="${options.value}"`,
+            "Content-Type": "application/yaml",
+            "Content-Length": Buffer.byteLength(JSON.stringify(result)),
         };
     },
 
@@ -79,7 +79,7 @@ const disposition = {
             .then(() => {
                 let value = options.value;
 
-                if (typeof options.value === 'function') {
+                if (typeof options.value === "function") {
                     value = options.value();
                 }
 
@@ -87,10 +87,10 @@ const disposition = {
             })
             .then((filename) => {
                 return {
-                    'Content-Disposition': `Attachment; filename="${filename}"`
+                    "Content-Disposition": `Attachment; filename="${filename}"`,
                 };
             });
-    }
+    },
 };
 
 module.exports = {
@@ -106,7 +106,10 @@ module.exports = {
         let headers = {};
 
         if (apiConfigHeaders.disposition) {
-            const dispositionHeader = await disposition[apiConfigHeaders.disposition.type](result, apiConfigHeaders.disposition);
+            const dispositionHeader = await disposition[apiConfigHeaders.disposition.type](
+                result,
+                apiConfigHeaders.disposition,
+            );
 
             if (dispositionHeader) {
                 Object.assign(headers, dispositionHeader);
@@ -114,7 +117,10 @@ module.exports = {
         }
 
         if (apiConfigHeaders.cacheInvalidate) {
-            const cacheInvalidationHeader = cacheInvalidate(result, apiConfigHeaders.cacheInvalidate);
+            const cacheInvalidationHeader = cacheInvalidate(
+                result,
+                apiConfigHeaders.cacheInvalidate,
+            );
 
             if (cacheInvalidationHeader) {
                 Object.assign(headers, cacheInvalidationHeader);
@@ -123,15 +129,19 @@ module.exports = {
 
         const locationHeaderDisabled = apiConfigHeaders?.location === false;
         const hasLocationResolver = apiConfigHeaders?.location?.resolve;
-        const hasFrameData = (frame?.method === 'add' || hasLocationResolver) && result[frame.docName]?.[0]?.id;
+        const hasFrameData =
+            (frame?.method === "add" || hasLocationResolver) && result[frame.docName]?.[0]?.id;
 
         if (!locationHeaderDisabled && hasFrameData) {
-            const protocol = (frame.original.url.secure === false) ? 'http://' : 'https://';
+            const protocol = frame.original.url.secure === false ? "http://" : "https://";
             const resourceId = result[frame.docName][0].id;
 
-            let locationURL = url.resolve(`${protocol}${frame.original.url.host}`,frame.original.url.pathname);
-            if (!locationURL.endsWith('/')) {
-                locationURL += '/';
+            let locationURL = url.resolve(
+                `${protocol}${frame.original.url.host}`,
+                frame.original.url.pathname,
+            );
+            if (!locationURL.endsWith("/")) {
+                locationURL += "/";
             }
 
             locationURL += `${resourceId}/`;
@@ -141,7 +151,7 @@ module.exports = {
             }
 
             const locationHeader = {
-                Location: locationURL
+                Location: locationURL,
             };
 
             Object.assign(headers, locationHeader);
@@ -153,5 +163,5 @@ module.exports = {
 
         debug(headers);
         return headers;
-    }
+    },
 };

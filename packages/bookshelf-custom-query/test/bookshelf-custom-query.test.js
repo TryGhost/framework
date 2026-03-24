@@ -1,8 +1,8 @@
-const assert = require('node:assert/strict');
-const sinon = require('sinon');
-const installPlugin = require('..');
+const assert = require("node:assert/strict");
+const sinon = require("sinon");
+const installPlugin = require("..");
 
-describe('@tryghost/bookshelf-custom-query', function () {
+describe("@tryghost/bookshelf-custom-query", function () {
     let Bookshelf;
     let ParentModel;
 
@@ -17,7 +17,7 @@ describe('@tryghost/bookshelf-custom-query', function () {
             return Child;
         };
 
-        Bookshelf = {Model: ParentModel};
+        Bookshelf = { Model: ParentModel };
         installPlugin(Bookshelf);
     });
 
@@ -25,27 +25,27 @@ describe('@tryghost/bookshelf-custom-query', function () {
         sinon.restore();
     });
 
-    it('exports plugin from index', function () {
-        assert.equal(typeof require('../index'), 'function');
+    it("exports plugin from index", function () {
+        assert.equal(typeof require("../index"), "function");
     });
 
-    it('replaces Bookshelf.Model with extended model', function () {
+    it("replaces Bookshelf.Model with extended model", function () {
         assert.notEqual(Bookshelf.Model, ParentModel);
     });
 
-    it('provides a default customQuery function', function () {
+    it("provides a default customQuery function", function () {
         const model = new Bookshelf.Model();
-        assert.equal(typeof model.customQuery, 'function');
+        assert.equal(typeof model.customQuery, "function");
         assert.equal(model.customQuery(), undefined);
     });
 
-    it('applyCustomQuery calls query and forwards qb/options to customQuery', function () {
+    it("applyCustomQuery calls query and forwards qb/options to customQuery", function () {
         const model = new Bookshelf.Model();
-        const qb = {where: sinon.stub()};
-        const options = {filter: 'status:published'};
+        const qb = { where: sinon.stub() };
+        const options = { filter: "status:published" };
 
         model.customQuery = sinon.stub();
-        model.query = sinon.stub().callsFake(fn => fn(qb));
+        model.query = sinon.stub().callsFake((fn) => fn(qb));
 
         model.applyCustomQuery(options);
 

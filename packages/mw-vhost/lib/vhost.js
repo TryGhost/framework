@@ -8,8 +8,7 @@
  * MIT Licensed
  */
 
-
-'use strict';
+"use strict";
 
 /**
  * Module exports.
@@ -24,10 +23,10 @@ module.exports = vhost;
  */
 
 var ASTERISK_REGEXP = /\*/g;
-var ASTERISK_REPLACE = '([^.]+)';
+var ASTERISK_REPLACE = "([^.]+)";
 var END_ANCHORED_REGEXP = /(?:^|[^\\])(?:\\\\)*\$$/;
 var ESCAPE_REGEXP = /([.+?^=!:${}()|[\]/\\])/g;
-var ESCAPE_REPLACE = '\\$1';
+var ESCAPE_REPLACE = "\\$1";
 
 /**
  * Create a vhost middleware.
@@ -40,15 +39,15 @@ var ESCAPE_REPLACE = '\\$1';
 
 function vhost(hostname, handle) {
     if (!hostname) {
-        throw new TypeError('argument hostname is required');
+        throw new TypeError("argument hostname is required");
     }
 
     if (!handle) {
-        throw new TypeError('argument handle is required');
+        throw new TypeError("argument handle is required");
     }
 
-    if (typeof handle !== 'function') {
-        throw new TypeError('argument handle must be a function');
+    if (typeof handle !== "function") {
+        throw new TypeError("argument handle must be a function");
     }
 
     // create regular expression for hostname
@@ -87,14 +86,10 @@ function hostnameof(req) {
         return;
     }
 
-    var offset = host[0] === '['
-        ? host.indexOf(']') + 1
-        : 0;
-    var index = host.indexOf(':', offset);
+    var offset = host[0] === "[" ? host.indexOf("]") + 1 : 0;
+    var index = host.indexOf(":", offset);
 
-    return index !== -1
-        ? host.substring(0, index)
-        : host;
+    return index !== -1 ? host.substring(0, index) : host;
 }
 
 /**
@@ -106,7 +101,7 @@ function hostnameof(req) {
  */
 
 function isregexp(val) {
-    return Object.prototype.toString.call(val) === '[object RegExp]';
+    return Object.prototype.toString.call(val) === "[object RegExp]";
 }
 
 /**
@@ -118,20 +113,22 @@ function isregexp(val) {
 
 function hostregexp(val) {
     var source = !isregexp(val)
-        ? String(val).replace(ESCAPE_REGEXP, ESCAPE_REPLACE).replace(ASTERISK_REGEXP, ASTERISK_REPLACE)
+        ? String(val)
+              .replace(ESCAPE_REGEXP, ESCAPE_REPLACE)
+              .replace(ASTERISK_REGEXP, ASTERISK_REPLACE)
         : val.source;
 
     // force leading anchor matching
-    if (source[0] !== '^') {
-        source = '^' + source;
+    if (source[0] !== "^") {
+        source = "^" + source;
     }
 
     // force trailing anchor matching
     if (!END_ANCHORED_REGEXP.test(source)) {
-        source += '$';
+        source += "$";
     }
 
-    return new RegExp(source, 'i');
+    return new RegExp(source, "i");
 }
 
 /**

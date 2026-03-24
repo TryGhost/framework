@@ -1,1 +1,1 @@
-module.exports = require('./lib/bookshelf-include-count');
+module.exports = require("./lib/bookshelf-include-count");

@@ -1,11 +1,11 @@
-const debug = require('@tryghost/debug')('pipeline');
-const _ = require('lodash');
-const errors = require('@tryghost/errors');
-const {sequence} = require('@tryghost/promise');
+const debug = require("@tryghost/debug")("pipeline");
+const _ = require("lodash");
+const errors = require("@tryghost/errors");
+const { sequence } = require("@tryghost/promise");
 
-const Frame = require('./Frame');
-const serializers = require('./serializers');
-const validators = require('./validators');
+const Frame = require("./Frame");
+const serializers = require("./serializers");
+const validators = require("./validators");
 
 const STAGES = {
     validation: {
@@ -24,12 +24,12 @@ const STAGES = {
          * @return {Promise}
          */
         input(apiUtils, apiConfig, apiImpl, frame) {
-            debug('stages: validation');
+            debug("stages: validation");
             const tasks = [];
 
             // CASE: do validation completely yourself
-            if (typeof apiImpl.validation === 'function') {
-                debug('validation function call');
+            if (typeof apiImpl.validation === "function") {
+                debug("validation function call");
                 return apiImpl.validation(frame);
             }
 
@@ -37,12 +37,12 @@ const STAGES = {
                 return validators.handle.input(
                     Object.assign({}, apiConfig, apiImpl.validation),
                     apiUtils.validators.input,
-                    frame
+                    frame,
                 );
             });
 
             return sequence(tasks);
-        }
+        },
     },
 
     serialisation: {
@@ -61,11 +61,11 @@ const STAGES = {
          * @return {Promise}
          */
         input(apiUtils, apiConfig, apiImpl, frame) {
-            debug('stages: input serialisation');
+            debug("stages: input serialisation");
             return serializers.handle.input(
-                Object.assign({data: apiImpl.data}, apiConfig),
+                Object.assign({ data: apiImpl.data }, apiConfig),
                 apiUtils.serializers.input,
-                frame
+                frame,
             );
         },
 
@@ -84,9 +84,14 @@ const STAGES = {
          * @return {Promise}
          */
         output(response, apiUtils, apiConfig, apiImpl, frame) {
-            debug('stages: output serialisation');
-            return serializers.handle.output(response, apiConfig, apiUtils.serializers.output, frame);
-        }
+            debug("stages: output serialisation");
+            return serializers.handle.output(
+                response,
+                apiConfig,
+                apiUtils.serializers.output,
+                frame,
+            );
+        },
     },
 
     /**
@@ -103,27 +108,27 @@ const STAGES = {
      * @return {Promise}
      */
     permissions(apiUtils, apiConfig, apiImpl, frame) {
-        debug('stages: permissions');
+        debug("stages: permissions");
         const tasks = [];
 
         // CASE: it's required to put the permission key to avoid security holes
-        if (!Object.prototype.hasOwnProperty.call(apiImpl, 'permissions')) {
+        if (!Object.prototype.hasOwnProperty.call(apiImpl, "permissions")) {
             return Promise.reject(new errors.IncorrectUsageError());
         }
 
         // CASE: handle permissions completely yourself
-        if (typeof apiImpl.permissions === 'function') {
-            debug('permissions function call');
+        if (typeof apiImpl.permissions === "function") {
+            debug("permissions function call");
             return apiImpl.permissions(frame);
         }
 
         // CASE: skip stage completely
         if (apiImpl.permissions === false) {
-            debug('disabled permissions');
+            debug("disabled permissions");
             return Promise.resolve();
         }
 
-        if (typeof apiImpl.permissions === 'object' && apiImpl.permissions.before) {
+        if (typeof apiImpl.permissions === "object" && apiImpl.permissions.before) {
             tasks.push(function beforePermissions() {
                 return apiImpl.permissions.before(frame);
             });
@@ -132,7 +137,7 @@ const STAGES = {
         tasks.push(function doPermissions() {
             return apiUtils.permissions.handle(
                 Object.assign({}, apiConfig, apiImpl.permissions),
-                frame
+                frame,
             );
         });
 
@@ -149,14 +154,14 @@ const STAGES = {
      * @return {Promise}
      */
     query(apiUtils, apiConfig, apiImpl, frame) {
-        debug('stages: query');
+        debug("stages: query");
 
         if (!apiImpl.query) {
             return Promise.reject(new errors.IncorrectUsageError());
         }
 
         return apiImpl.query(frame);
-    }
+    },
 };
 
 const controllerMap = new Map();
@@ -185,7 +190,7 @@ const pipeline = (apiController, apiUtils, apiType) => {
         return controllerMap.get(apiController);
     }
 
-    const keys = Object.keys(apiController).filter(key => key !== 'docName');
+    const keys = Object.keys(apiController).filter((key) => key !== "docName");
     const docName = apiController.docName;
 
     // CASE: api controllers are objects with configuration.
@@ -196,7 +201,7 @@ const pipeline = (apiController, apiUtils, apiType) => {
         Object.freeze(apiImpl.headers);
 
         obj[method] = async function ImplWrapper() {
-            const apiConfig = {docName, method};
+            const apiConfig = { docName, method };
             let options;
             let data;
             let frame;
@@ -215,21 +220,21 @@ const pipeline = (apiController, apiUtils, apiType) => {
                 debug(`Internal API request for ${docName}.${method}`);
                 frame = new Frame({
                     body: data,
-                    options: _.omit(options, 'context'),
-                    context: options.context || {}
+                    options: _.omit(options, "context"),
+                    context: options.context || {},
                 });
 
                 frame.configure({
                     options: apiImpl.options,
-                    data: apiImpl.data
+                    data: apiImpl.data,
                 });
             } else {
                 frame = options;
             }
 
             // CASE: api controller *can* be a single function, but it's not recommended to disable the framework.
-            if (typeof apiImpl === 'function') {
-                debug('ctrl function call');
+            if (typeof apiImpl === "function") {
+                debug("ctrl function call");
                 return apiImpl(frame);
             }
 

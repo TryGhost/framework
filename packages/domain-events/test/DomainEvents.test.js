@@ -1,7 +1,7 @@
-const DomainEvents = require('../');
-const assert = require('assert/strict');
-const sinon = require('sinon');
-const logging = require('@tryghost/logging');
+const DomainEvents = require("../");
+const assert = require("assert/strict");
+const sinon = require("sinon");
+const logging = require("@tryghost/logging");
 
 class TestEvent {
     /**
@@ -10,23 +10,24 @@ class TestEvent {
     constructor(message) {
         this.timestamp = new Date();
         this.data = {
-            message
+            message,
         };
     }
 }
 
-const sleep = ms => new Promise((resolve) => {
-    setTimeout(resolve, ms);
-});
+const sleep = (ms) =>
+    new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
 
-describe('DomainEvents', function () {
+describe("DomainEvents", function () {
     afterEach(function () {
         sinon.restore();
         DomainEvents.ee.removeAllListeners();
     });
 
-    it('Will call multiple subscribers with the event when it is dispatched', async function () {
-        const event = new TestEvent('Hello, world!');
+    it("Will call multiple subscribers with the event when it is dispatched", async function () {
+        const event = new TestEvent("Hello, world!");
 
         let events = [];
 
@@ -57,17 +58,17 @@ describe('DomainEvents', function () {
         assert.equal(events[1], event);
     });
 
-    it('Catches async errors in handlers', async function () {
-        const event = new TestEvent('Hello, world!');
+    it("Catches async errors in handlers", async function () {
+        const event = new TestEvent("Hello, world!");
 
-        const stub = sinon.stub(logging, 'error').returns();
+        const stub = sinon.stub(logging, "error").returns();
 
         /**
          * @param {TestEvent} receivedEvent
          */
         async function handler1() {
             await sleep(10);
-            throw new Error('Test error');
+            throw new Error("Test error");
         }
 
         DomainEvents.subscribe(TestEvent, handler1);
@@ -77,13 +78,13 @@ describe('DomainEvents', function () {
         assert.equal(stub.calledTwice, true);
     });
 
-    describe('allSettled', function () {
-        it('Resolves when there are no events', async function () {
+    describe("allSettled", function () {
+        it("Resolves when there are no events", async function () {
             await DomainEvents.allSettled();
             assert(true);
         });
 
-        it('Waits for all listeners', async function () {
+        it("Waits for all listeners", async function () {
             let counter = 0;
             DomainEvents.subscribe(TestEvent, async () => {
                 await sleep(20);
@@ -94,7 +95,7 @@ describe('DomainEvents', function () {
                 counter += 1;
             });
 
-            DomainEvents.dispatch(new TestEvent('Hello, world!'));
+            DomainEvents.dispatch(new TestEvent("Hello, world!"));
             await DomainEvents.allSettled();
             assert.equal(counter, 2);
         });

@@ -1,4 +1,4 @@
-const getConfig = require('./get-config');
+const getConfig = require("./get-config");
 
 let config;
 function initConfig() {

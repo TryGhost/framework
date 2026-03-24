@@ -1,1 +1,1 @@
-module.exports = require('./lib/EmailMockReceiver');
+module.exports = require("./lib/EmailMockReceiver");

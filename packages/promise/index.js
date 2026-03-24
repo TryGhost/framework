@@ -1,13 +1,13 @@
 module.exports = {
     get pipeline() {
-        return require('./lib/pipeline');
+        return require("./lib/pipeline");
     },
 
     get sequence() {
-        return require('./lib/sequence');
+        return require("./lib/sequence");
     },
 
     get pool() {
-        return require('./lib/pool');
-    }
+        return require("./lib/pool");
+    },
 };

@@ -1,4 +1,4 @@
-const _ = require('lodash');
+const _ = require("lodash");
 
 /**
  * @param {import('bookshelf')} Bookshelf
@@ -14,18 +14,18 @@ const orderPlugin = function orderPlugin(Bookshelf) {
             const eagerLoadArray = [];
 
             const orderAttributes = this.orderAttributes();
-            if (withRelated && withRelated.indexOf('count.posts') > -1) {
-                orderAttributes.push('count.posts');
+            if (withRelated && withRelated.indexOf("count.posts") > -1) {
+                orderAttributes.push("count.posts");
             }
 
             let rules = [];
             // CASE: repeat order query parameter keys are present
             if (_.isArray(orderQueryString)) {
                 orderQueryString.forEach((qs) => {
-                    rules.push(...qs.split(','));
+                    rules.push(...qs.split(","));
                 });
             } else {
-                rules = orderQueryString.split(',');
+                rules = orderQueryString.split(",");
             }
 
             _.each(rules, (rule) => {
@@ -70,10 +70,10 @@ const orderPlugin = function orderPlugin(Bookshelf) {
 
             return {
                 order,
-                orderRaw: orderRaw.join(', '),
-                eagerLoad: _.uniq(eagerLoadArray)
+                orderRaw: orderRaw.join(", "),
+                eagerLoad: _.uniq(eagerLoadArray),
             };
-        }
+        },
     });
 };
 
