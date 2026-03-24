@@ -199,4 +199,35 @@ describe('Logging', function () {
         ghostMetrics.metric(name, value);
         assert.equal(ElasticSearch.prototype.index.calledOnce, true);
     });
+
+    it('ships object values with pre-set timestamp without adding metadata when disabled', async function () {
+        const ghostMetrics = new GhostMetrics({
+            metrics: {
+                transports: ['elasticsearch']
+            },
+            elasticsearch: {
+                host: 'https://test-elasticsearch',
+                username: 'user',
+                password: 'pass'
+            }
+        });
+
+        // Force metadata check false branch for coverage.
+        ghostMetrics.metadata = null;
+
+        const payload = {
+            value: 101,
+            '@timestamp': 12345
+        };
+
+        await new Promise((resolve) => {
+            sandbox.stub(ElasticSearch.prototype, 'index').callsFake(function (data, index) {
+                assert.deepEqual(data, payload);
+                assert.equal(index, 'metrics-object-metric');
+                resolve();
+            });
+
+            ghostMetrics.metric('object-metric', payload);
+        });
+    });
 });

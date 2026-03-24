@@ -1,5 +1,7 @@
 const assert = require('assert/strict');
 const nock = require('nock');
+const sinon = require('sinon');
+const rewire = require('rewire');
 
 const request = require('../lib/request');
 
@@ -246,6 +248,22 @@ describe('Request', function () {
             assert.equal(err.statusCode, 403);
             assert.equal(err.body, 'forbidden');
             assert.notEqual(err.response, undefined);
+        });
+    });
+
+    it('[failure] rethrows plain errors when response is missing', function () {
+        const requestModule = rewire('../lib/request');
+        const plainError = new Error('plain error');
+        const gotStub = sinon.stub().rejects(plainError);
+
+        requestModule.__set__('got', gotStub);
+        requestModule.__get__('defaultOptions').dnsLookup = () => {};
+
+        return requestModule('http://some-website.com/plain-error/', {retry: {limit: 0}}).then(() => {
+            throw new Error('Should have failed');
+        }, (err) => {
+            assert.equal(gotStub.calledOnce, true);
+            assert.equal(err, plainError);
         });
     });
 });

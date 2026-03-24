@@ -464,7 +464,7 @@ describe('Job Manager', function () {
                 assert.equal(JobModel.edit.args[1][0].status, 'failed');
 
                 // simulate process restart and "fresh" slate to add the job
-                jobManager.removeJob('failed-oneoff');
+                await jobManager.removeJob('failed-oneoff').catch(() => {});
                 const completion2 = jobManager.awaitCompletion('failed-oneoff');
 
                 await jobManager.addOneOffJob({
@@ -664,7 +664,8 @@ describe('Job Manager', function () {
                         id: 'unique',
                         get: () => status
                     }),
-                add: sinon.stub().resolves()
+                add: sinon.stub().resolves(),
+                edit: sinon.stub().resolves()
             };
 
             jobManager = new JobManager({JobModel, config: stubConfig});
