@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "express": "5.2.1",
-    "sinon": "21.0.2"
+    "sinon": "21.0.3"
   },
   "dependencies": {
     "@tryghost/errors": "^3.0.3",
