@@ -27,7 +27,7 @@ To add a new package to the repo:
 
 ## Test
 
-- `yarn lint` run `oxlint` first, then existing ESLint checks
+- `yarn lint` run `oxlint` only (default lint path)
 - `yarn lint:oxlint` run `oxlint` only
 - `yarn lint:eslint` run ESLint-only compatibility checks
 - `yarn format` format `js/ts/json/md` files with `oxfmt`

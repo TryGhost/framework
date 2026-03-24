@@ -24,7 +24,7 @@
     "test": "yarn test:types && yarn test:unit",
     "test:types": "tsc --noEmit",
     "lint:code": "eslint src/ --ext .ts --cache",
-    "lint": "oxlint -c ../../.oxlintrc.json . && yarn lint:eslint",
+    "lint": "oxlint -c ../../.oxlintrc.json .",
     "lint:test": "eslint -c test/.eslintrc.js test/ --ext .ts --cache",
     "lint:eslint": "yarn lint:code && yarn lint:test"
   },
