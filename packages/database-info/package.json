@@ -23,6 +23,6 @@
     "access": "public"
   },
   "devDependencies": {
-    "knex": "3.2.4"
+    "knex": "3.2.5"
   }
 }
