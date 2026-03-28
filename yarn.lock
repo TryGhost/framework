@@ -5848,10 +5848,10 @@ keyv@^5.5.3, keyv@^5.5.5:
   dependencies:
     "@keyv/serialize" "^1.1.1"
 
-knex@3.2.5:
-  version "3.2.5"
-  resolved "https://registry.yarnpkg.com/knex/-/knex-3.2.5.tgz#af4ed3d207581829460b805f49da26882f0f11fc"
-  integrity sha512-eY21Uwq0l0bFW6/+3ARO+NPjlUmcKsd72/Od+iHVFRhY6xwRVKn/nfeBEErtSnvJRVj0d0Jc20LzNnSgRQwMlQ==
+knex@3.2.6:
+  version "3.2.6"
+  resolved "https://registry.yarnpkg.com/knex/-/knex-3.2.6.tgz#d6653ebf7961a83ae0014db1a7c56c75ce1ffa00"
+  integrity sha512-26I1Tvx0D9SOsFBF9jRWT/JdE3FPI52jAwYpXfREEtnoqgjGvAi8/ux8ktjaTC9IQcAVTCrREkOpa7lrjeAcow==
   dependencies:
     colorette "2.0.19"
     commander "^10.0.0"
