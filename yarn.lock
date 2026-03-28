@@ -48,10 +48,10 @@
     "@smithy/util-utf8" "^2.0.0"
     tslib "^2.6.2"
 
-"@aws-sdk/client-sesv2@3.1016.0":
-  version "3.1016.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-sesv2/-/client-sesv2-3.1016.0.tgz#c60f7f19ff331f34fd4ad7a932343fd397a3f3e0"
-  integrity sha512-HrcCpx7Gz7pu3hqhYy6cBAJSHIP+IIs9zZ67wsGUGKfsQlKgGUDJLqFzIthtSQGxaz7CyyJ/ilNj7FJ2jtGS0A==
+"@aws-sdk/client-sesv2@3.1017.0":
+  version "3.1017.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-sesv2/-/client-sesv2-3.1017.0.tgz#f7e2058079c386e426660c0eefe9df621d203265"
+  integrity sha512-2QV52p4F1CwcG6ce8EvdKCWMCfeMrQFjtQe6OilkH+kcmW8b6c424x/Qhd5fPqSnXllOc/9Iv2V1xcefgKTYaA==
   dependencies:
     "@aws-crypto/sha256-browser" "5.2.0"
     "@aws-crypto/sha256-js" "5.2.0"
@@ -62,7 +62,7 @@
     "@aws-sdk/middleware-recursion-detection" "^3.972.8"
     "@aws-sdk/middleware-user-agent" "^3.972.25"
     "@aws-sdk/region-config-resolver" "^3.972.9"
-    "@aws-sdk/signature-v4-multi-region" "^3.996.12"
+    "@aws-sdk/signature-v4-multi-region" "^3.996.13"
     "@aws-sdk/types" "^3.973.6"
     "@aws-sdk/util-endpoints" "^3.996.5"
     "@aws-sdk/util-user-agent-browser" "^3.972.8"
@@ -350,7 +350,7 @@
     "@smithy/types" "^4.13.1"
     tslib "^2.6.2"
 
-"@aws-sdk/signature-v4-multi-region@^3.996.12":
+"@aws-sdk/signature-v4-multi-region@^3.996.13":
   version "3.996.14"
   resolved "https://registry.yarnpkg.com/@aws-sdk/signature-v4-multi-region/-/signature-v4-multi-region-3.996.14.tgz#5ac1f558adc64a5b5569f34547a686505d9e8808"
   integrity sha512-4nZSrBr1NO+48HCM/6BRU8mnRjuHZjcpziCvLXZk5QVftwWz5Mxqbhwdz4xf7WW88buaTB8uRO2MHklSX1m0vg==
