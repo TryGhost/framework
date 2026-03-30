@@ -14,10 +14,10 @@ jobs:
       FORCE_COLOR: 1
     name: Node ${{ matrix.node }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         env:
           FORCE_COLOR: 0
         with:
@@ -27,9 +27,9 @@ jobs:
       - run: yarn --prefer-offline --frozen-lockfile
       - run: yarn test:ci
 
-      - uses: codecov/codecov-action@v5
+      - uses: codecov/codecov-action@75cd11691c0faa626561e295848008c8a7dddffe # v5
 
-      - uses: tryghost/actions/actions/slack-build@main
+      - uses: tryghost/actions/actions/slack-build@1f585cb6f5f9785da88d6c10fe7005dbc4913f0b # main
         if: failure() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           status: ${{ job.status }}
