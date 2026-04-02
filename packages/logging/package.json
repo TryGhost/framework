@@ -37,6 +37,6 @@
     "fs-extra": "11.3.4",
     "gelf-stream": "1.1.1",
     "json-stringify-safe": "5.0.1",
-    "lodash": "4.17.23"
+    "lodash": "4.18.1"
   }
 }
