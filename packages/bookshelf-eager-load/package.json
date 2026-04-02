@@ -27,6 +27,6 @@
   },
   "dependencies": {
     "@tryghost/debug": "^2.0.3",
-    "lodash": "4.17.23"
+    "lodash": "4.18.1"
   }
 }
