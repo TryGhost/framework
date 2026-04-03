@@ -26,7 +26,7 @@
     "sinon": "21.0.3"
   },
   "dependencies": {
-    "@aws-sdk/client-sesv2": "3.1020.0",
+    "@aws-sdk/client-sesv2": "3.1021.0",
     "@tryghost/errors": "^3.0.3",
     "nodemailer": "8.0.4",
     "nodemailer-mailgun-transport": "2.1.5",
