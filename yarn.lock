@@ -48,10 +48,10 @@
     "@smithy/util-utf8" "^2.0.0"
     tslib "^2.6.2"
 
-"@aws-sdk/client-sesv2@3.1021.0":
-  version "3.1021.0"
-  resolved "https://registry.yarnpkg.com/@aws-sdk/client-sesv2/-/client-sesv2-3.1021.0.tgz#8484af5f8b64df2e2a46ff403150e6c8a0cd2b15"
-  integrity sha512-MMmRWG3C1znkP7rdo2FoSK0Dj+twwXfB/Wb8PSKjTvHgnjnoS9Yz3JHTxtjyNp1hSHnO7DtcTHNtVSHOgCXQlg==
+"@aws-sdk/client-sesv2@3.1022.0":
+  version "3.1022.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-sesv2/-/client-sesv2-3.1022.0.tgz#af172449afe23a3bd31663f830ce6f51a41cf62c"
+  integrity sha512-ReNfKtBOCYA56rEqXCN+ejk6uVHjVcbXLR4wjy8yjk1jMS0Pi/JtlybN94oHA4yvwRQ9U6QaGxX2H3efKpKhBA==
   dependencies:
     "@aws-crypto/sha256-browser" "5.2.0"
     "@aws-crypto/sha256-js" "5.2.0"
