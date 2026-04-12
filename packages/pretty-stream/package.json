@@ -23,7 +23,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "sinon": "21.0.3"
+    "sinon": "21.1.0"
   },
   "dependencies": {
     "date-format": "4.0.14",

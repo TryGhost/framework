@@ -23,7 +23,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "sinon": "21.0.3"
+    "sinon": "21.1.0"
   },
   "dependencies": {
     "@jest/expect": "30.3.0",
