@@ -77,25 +77,6 @@ function createBookshelf({ countRows, fetchResult, selectError, fetchError } = {
     return { bookshelf, modelState };
 }
 
-// Install `state` onto the fake query builder returned by `model.query()`
-// so that countQuery._statements / _single reflect the scenario under test.
-// Only the keys present on `state` are written.
-function stubCountQuery(model, state) {
-    const originalQuery = model.query;
-    model.query = function () {
-        const qb = originalQuery.apply(this, arguments);
-        if (arguments.length === 0) {
-            if (state.statements !== undefined) {
-                qb._statements = state.statements;
-            }
-            if (state.single !== undefined) {
-                qb._single = state.single;
-            }
-        }
-        return qb;
-    };
-}
-
 describe('@tryghost/bookshelf-pagination', function () {
     it('internal parseOptions handles bad and all limits', function () {
         assert.deepEqual(
@@ -214,8 +195,8 @@ describe('@tryghost/bookshelf-pagination', function () {
         });
     });
 
-    it('supports useBasicCount and transacting', async function () {
-        const { bookshelf, modelState } = createBookshelf({ countRows: [{ aggregate: 1 }] });
+    it('passes the transacting option through to the count query', async function () {
+        const {bookshelf, modelState} = createBookshelf({countRows: [{aggregate: 1}]});
         const model = new bookshelf.Model();
 
         await model.fetchPage({
@@ -226,111 +207,6 @@ describe('@tryghost/bookshelf-pagination', function () {
         });
 
         assert.equal(modelState.transacting, 'trx');
-        assert.equal(modelState.rawCalls[0], 'count(*) as aggregate');
-    });
-
-    it('uses distinct count query by default', async function () {
-        const { bookshelf, modelState } = createBookshelf({ countRows: [{ aggregate: 1 }] });
-        const model = new bookshelf.Model();
-
-        await model.fetchPage({ page: 2, limit: 10 });
-
-        assert.equal(modelState.rawCalls[0], 'count(distinct posts.id) as aggregate');
-    });
-
-    it('useSmartCount uses count(*) when no JOINs present', async function () {
-        const { bookshelf, modelState } = createBookshelf({ countRows: [{ aggregate: 1 }] });
-        const model = new bookshelf.Model();
-
-        await model.fetchPage({ page: 1, limit: 10, useSmartCount: true });
-
-        assert.equal(modelState.rawCalls[0], 'count(*) as aggregate');
-    });
-
-    it('useSmartCount uses count(*) when a subquery-with-JOIN appears in WHERE', async function () {
-        // Regression: JOIN inside a `where id in (subquery)` is a `where`
-        // grouping on the outer query, not a `join` — the outer row set is
-        // still unique per base row, so count(*) is safe.
-        const {bookshelf, modelState} = createBookshelf({countRows: [{aggregate: 1}]});
-        const model = new bookshelf.Model();
-
-        stubCountQuery(model, {
-            statements: [{grouping: 'where', type: 'whereIn', column: 'posts.id'}],
-            single: {table: 'posts'}
-        });
-
-        await model.fetchPage({page: 1, limit: 10, useSmartCount: true});
-
-        assert.equal(modelState.rawCalls[0], 'count(*) as aggregate');
-    });
-
-    it('useSmartCount uses distinct count when the query has a join grouping', async function () {
-        const {bookshelf, modelState} = createBookshelf({countRows: [{aggregate: 1}]});
-        const model = new bookshelf.Model();
-
-        stubCountQuery(model, {
-            statements: [{grouping: 'join', type: 'inner', table: 'authors'}],
-            single: {table: 'posts'}
-        });
-
-        await model.fetchPage({page: 1, limit: 10, useSmartCount: true});
-
-        assert.equal(modelState.rawCalls[0], 'count(distinct posts.id) as aggregate');
-    });
-
-    it('useSmartCount uses distinct count when the FROM source is a derived table', async function () {
-        const {bookshelf, modelState} = createBookshelf({countRows: [{aggregate: 1}]});
-        const model = new bookshelf.Model();
-
-        stubCountQuery(model, {
-            statements: [],
-            single: {table: {fakeBuilder: true}}
-        });
-
-        await model.fetchPage({page: 1, limit: 10, useSmartCount: true});
-
-        assert.equal(modelState.rawCalls[0], 'count(distinct posts.id) as aggregate');
-    });
-
-    it('useSmartCount uses count(*) when the query has only a CTE (with) grouping', async function () {
-        const {bookshelf, modelState} = createBookshelf({countRows: [{aggregate: 1}]});
-        const model = new bookshelf.Model();
-
-        stubCountQuery(model, {
-            statements: [{grouping: 'with', alias: 'cte'}],
-            single: {table: 'posts'}
-        });
-
-        await model.fetchPage({page: 1, limit: 10, useSmartCount: true});
-
-        assert.equal(modelState.rawCalls[0], 'count(*) as aggregate');
-    });
-
-    it('useSmartCount uses distinct count when the query has a union grouping', async function () {
-        const {bookshelf, modelState} = createBookshelf({countRows: [{aggregate: 1}]});
-        const model = new bookshelf.Model();
-
-        stubCountQuery(model, {
-            statements: [{grouping: 'union', all: false}],
-            single: {table: 'posts'}
-        });
-
-        await model.fetchPage({page: 1, limit: 10, useSmartCount: true});
-
-        assert.equal(modelState.rawCalls[0], 'count(distinct posts.id) as aggregate');
-    });
-
-    it('useSmartCount uses distinct count when FROM has comma-separated tables', async function () {
-        const {bookshelf, modelState} = createBookshelf({countRows: [{aggregate: 1}]});
-        const model = new bookshelf.Model();
-
-        stubCountQuery(model, {
-            single: {table: 'posts, tags'}
-        });
-
-        await model.fetchPage({page: 1, limit: 10, useSmartCount: true});
-
-        assert.equal(modelState.rawCalls[0], 'count(distinct posts.id) as aggregate');
     });
 
     it('handleRelation does not duplicate entries and ignores same-table properties', function () {

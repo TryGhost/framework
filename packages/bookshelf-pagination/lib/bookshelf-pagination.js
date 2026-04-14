@@ -68,6 +68,7 @@ defaults = {
  * @api private
  */
 paginationUtils = {
+    hasMultiTableSource: hasMultiTableSource,
     /**
      * ### Parse Options
      * Take the given options and ensure they are valid pagination options, else use the defaults
