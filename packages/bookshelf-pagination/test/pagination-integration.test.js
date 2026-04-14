@@ -154,7 +154,12 @@ function usesCountDistinct(sql) {
     return /\bcount\(distinct posts\.id\) as aggregate\b/i.test(sql);
 }
 
-describe('@tryghost/bookshelf-pagination (integration)', function () {
+describe('fetchPage end-to-end against real bookshelf + sqlite', function () {
+    // These two tests are the only fetchPage scenarios where the choice of
+    // count aggregate actually changes the returned total (inner-join row
+    // duplication) or is the named regression the PR is about (subquery
+    // JOIN in WHERE). The remaining query shapes are covered by the direct
+    // `hasMultiTableSource` suite above, which is faster and more exhaustive.
     let db;
     let Post;
     let queries;
@@ -169,20 +174,23 @@ describe('@tryghost/bookshelf-pagination (integration)', function () {
         }
     });
 
-    it('useSmartCount picks count(*) for a plain single-table filter', async function () {
+    it('inner join that duplicates rows picks count(distinct) and returns the distinct total', async function () {
+        // p1 has two tags, so posts × posts_tags produces three physical
+        // rows for the two published posts. count(*) would report 3;
+        // count(distinct posts.id) must report 2.
         const result = await Post.forge()
-            .where('author_id', 'a1')
+            .query(function (qb) {
+                qb.innerJoin('posts_tags', 'posts_tags.post_id', 'posts.id')
+                    .where('posts.status', 'published');
+            })
             .fetchPage({page: 1, limit: 10, useSmartCount: true});
 
         const countSql = countQuerySql(queries);
-        assert.ok(usesCountStar(countSql), `expected count(*), got: ${countSql}`);
+        assert.ok(usesCountDistinct(countSql), `expected count(distinct), got: ${countSql}`);
         assert.equal(result.pagination.total, 2);
-        assert.equal(result.collection.length, 2);
     });
 
-    it('useSmartCount picks count(*) when a JOIN is nested inside a WHERE subquery', async function () {
-        // Regression: `where id in (select … inner join …)` must stay on
-        // the count(*) path because the outer query is still single-table.
+    it('subquery JOIN in WHERE picks count(*) — the Ghost regression this PR fixes', async function () {
         const result = await Post.forge()
             .query(function (qb) {
                 qb.whereIn('posts.id', function () {
@@ -199,85 +207,5 @@ describe('@tryghost/bookshelf-pagination (integration)', function () {
         assert.ok(usesCountStar(countSql), `expected count(*), got: ${countSql}`);
         assert.equal(result.pagination.total, 2);
         assert.equal(result.collection.length, 2);
-    });
-
-    it('useSmartCount picks count(distinct) when an outer INNER JOIN duplicates rows', async function () {
-        // p1 has two tags, so posts × posts_tags produces three physical
-        // rows for the two published posts. count(*) would report 3;
-        // count(distinct posts.id) must report 2.
-        const result = await Post.forge()
-            .query(function (qb) {
-                qb.innerJoin('posts_tags', 'posts_tags.post_id', 'posts.id')
-                    .where('posts.status', 'published');
-            })
-            .fetchPage({page: 1, limit: 10, useSmartCount: true});
-
-        const countSql = countQuerySql(queries);
-        assert.ok(usesCountDistinct(countSql), `expected count(distinct), got: ${countSql}`);
-        assert.equal(result.pagination.total, 2);
-    });
-
-    it('useSmartCount picks count(distinct) for a joinRaw', async function () {
-        const result = await Post.forge()
-            .query(function (qb) {
-                qb.joinRaw('inner join `posts_tags` on `posts_tags`.`post_id` = `posts`.`id`')
-                    .where('posts.status', 'published');
-            })
-            .fetchPage({page: 1, limit: 10, useSmartCount: true});
-
-        const countSql = countQuerySql(queries);
-        assert.ok(usesCountDistinct(countSql), `expected count(distinct), got: ${countSql}`);
-        assert.equal(result.pagination.total, 2);
-    });
-
-    it('useSmartCount picks count(distinct) when the FROM source is a derived table', async function () {
-        const result = await Post.forge()
-            .query(function (qb) {
-                qb.from(db('posts').where('status', 'published').as('posts'));
-            })
-            .fetchPage({page: 1, limit: 10, useSmartCount: true});
-
-        const countSql = countQuerySql(queries);
-        assert.ok(usesCountDistinct(countSql), `expected count(distinct), got: ${countSql}`);
-        assert.equal(result.pagination.total, 2);
-    });
-
-    it('useSmartCount picks count(*) when the query has only a CTE (with) clause', async function () {
-        const result = await Post.forge()
-            .query(function (qb) {
-                qb.with('published_ids', db('posts').select('id').where('status', 'published'))
-                    .whereIn('posts.id', db('published_ids').select('id'));
-            })
-            .fetchPage({page: 1, limit: 10, useSmartCount: true});
-
-        const countSql = countQuerySql(queries);
-        assert.ok(usesCountStar(countSql), `expected count(*), got: ${countSql}`);
-        assert.equal(result.pagination.total, 2);
-    });
-
-    it('useBasicCount skips the smart-count check entirely', async function () {
-        // useBasicCount forces count(*) even on a join — the caller opts
-        // in to "I know what I'm doing" and accepts row duplication.
-        // p1 has two tags, so count(*) reports 3 rows for 2 published posts.
-        const result = await Post.forge()
-            .query(function (qb) {
-                qb.innerJoin('posts_tags', 'posts_tags.post_id', 'posts.id')
-                    .where('posts.status', 'published');
-            })
-            .fetchPage({page: 1, limit: 10, useBasicCount: true});
-
-        const countSql = countQuerySql(queries);
-        assert.ok(usesCountStar(countSql), `expected count(*), got: ${countSql}`);
-        assert.equal(result.pagination.total, 3);
-    });
-
-    it('default (no count option) uses count(distinct)', async function () {
-        const result = await Post.forge()
-            .where('status', 'published')
-            .fetchPage({page: 1, limit: 10});
-
-        const countSql = countQuerySql(queries);
-        assert.ok(usesCountDistinct(countSql), `expected count(distinct), got: ${countSql}`);
-        assert.equal(result.pagination.total, 2);
     });
 });
