@@ -23,7 +23,7 @@
     "@sinonjs/fake-timers": "15.3.2",
     "date-fns": "4.1.0",
     "rewire": "9.0.1",
-    "sinon": "21.1.1"
+    "sinon": "21.1.2"
   },
   "dependencies": {
     "@breejs/later": "4.2.0",

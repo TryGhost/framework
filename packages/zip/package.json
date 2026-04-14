@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "folder-hash": "4.1.2",
-    "sinon": "21.1.1"
+    "sinon": "21.1.2"
   },
   "dependencies": {
     "@tryghost/errors": "^3.0.3",
