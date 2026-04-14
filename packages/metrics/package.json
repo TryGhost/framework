@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "rewire": "9.0.1",
-    "sinon": "21.1.1"
+    "sinon": "21.1.2"
   },
   "dependencies": {
     "@tryghost/elasticsearch": "^5.0.3",

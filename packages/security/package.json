@@ -26,7 +26,7 @@
     "lib"
   ],
   "devDependencies": {
-    "sinon": "21.1.1",
+    "sinon": "21.1.2",
     "uuid": "13.0.0"
   },
   "dependencies": {
