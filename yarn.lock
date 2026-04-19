@@ -8125,10 +8125,10 @@ wordwrapjs@^5.1.0:
   resolved "https://registry.yarnpkg.com/wordwrapjs/-/wordwrapjs-5.1.1.tgz#bfd1eb426f0f7eec73b7df32cf7df1f618bfb3a9"
   integrity sha512-0yweIbkINJodk27gX9LBGMzyQdBDan3s/dEAiwBOj+Mf0PPyWL6/rikalkv8EeD0E8jm4o5RXEOrFTP3NXbhJg==
 
-workerpool@10.0.1:
-  version "10.0.1"
-  resolved "https://registry.yarnpkg.com/workerpool/-/workerpool-10.0.1.tgz#9e74de7df694f8f5ad0eec2b6d42553c664f5123"
-  integrity sha512-NAnKwZJxWlj/U1cp6ZkEtPE+GQY1S6KtOS3AlCiPfPFLxV3m64giSp7g2LsNJxzYCocDT7TSl+7T0sgrDp3KoQ==
+workerpool@10.0.2:
+  version "10.0.2"
+  resolved "https://registry.yarnpkg.com/workerpool/-/workerpool-10.0.2.tgz#09e3cbf65d08296e82f7cc3df7c70fa8c6a1fd69"
+  integrity sha512-8PCeZlCwu0+8hXruze1ahYNsY+M0LOCmbmySZ9BWWqWIXP9TAXa6FZCxACTDL/0j47pFcC4xW98Gr8nAC5oymg==
 
 "wrap-ansi-cjs@npm:wrap-ansi@^7.0.0":
   version "7.0.0"
