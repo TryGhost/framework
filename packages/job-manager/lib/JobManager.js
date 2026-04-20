@@ -37,9 +37,6 @@ const ALL_STATUSES = {
 class JobManager {
     #domainEvents;
     #completionPromises = new Map();
-    #config;
-    #JobModel;
-    #events;
 
     /**
      * @param {Object} options
@@ -47,24 +44,12 @@ class JobManager {
      * @param {Function} [options.workerMessageHandler] - custom message handler coming from workers
      * @param {Object} [options.JobModel] - a model which can persist job data in the storage
      * @param {Object} [options.domainEvents] - domain events emitter
-     * @param {Object} [options.config] - config
-     * @param {Object} [options.events] - events instance (for testing)
      */
-    constructor({
-        errorHandler,
-        workerMessageHandler,
-        JobModel,
-        domainEvents,
-        config,
-        events = null,
-    }) {
+    constructor({ errorHandler, workerMessageHandler, JobModel, domainEvents }) {
         this.inlineQueue = fastq(this, worker, 3);
         this._jobMessageHandler = this._jobMessageHandler.bind(this);
         this._jobErrorHandler = this._jobErrorHandler.bind(this);
         this.#domainEvents = domainEvents;
-        this.#config = config;
-        this.#JobModel = JobModel;
-        this.#events = events;
 
         const combinedMessageHandler = workerMessageHandler
             ? ({ name, message }) => {

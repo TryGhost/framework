@@ -21,7 +21,8 @@ describe('HTTP', function () {
         req.get = sinon.stub().returns('fallback.example.com');
         req.originalUrl = '/ghost/api/content/posts/';
         req.secure = true;
-        ((req.url = 'https://example.com/ghost/api/content/'), (res.status = sinon.stub()));
+        req.url = 'https://example.com/ghost/api/content/';
+        res.status = sinon.stub();
         res.json = sinon.stub();
         res.set = (headers) => {
             res.headers = headers;

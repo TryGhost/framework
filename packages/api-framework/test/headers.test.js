@@ -130,14 +130,14 @@ describe('Headers', function () {
 
             const apiConfigHeaders = {};
             const frame = new Frame();
-            ((frame.docName = 'posts'),
-                (frame.method = 'add'),
-                (frame.original = {
-                    url: {
-                        host: 'example.com',
-                        pathname: `/api/content/posts/`,
-                    },
-                }));
+            frame.docName = 'posts';
+            frame.method = 'add';
+            frame.original = {
+                url: {
+                    host: 'example.com',
+                    pathname: `/api/content/posts/`,
+                },
+            };
 
             return shared.headers.get(apiResult, apiConfigHeaders, frame).then((result) => {
                 assert.deepEqual(result, {

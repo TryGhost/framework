@@ -287,13 +287,14 @@ describe('Example App', function () {
         });
 
         it('check status using expect chaining errors correctly', async function () {
-            (await assert.rejects(async () => {
-                return await agent.post('/check/').expectStatus(404);
-            }),
+            await assert.rejects(
+                async () => {
+                    return await agent.post('/check/').expectStatus(404);
+                },
                 {
-                    message:
-                        'Expected header "x-checked: false", got "x-checked: true" POST request on /check/',
-                });
+                    message: 'Expected statusCode 404, got statusCode 200 POST request on /check/',
+                },
+            );
         });
 
         it('check headers, status and empty body using set and expect chaining', async function () {
