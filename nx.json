@@ -36,6 +36,5 @@
     "publish": {
       "registry": "https://registry.npmjs.org"
     }
-  },
-  "analytics": true
+  }
 }
