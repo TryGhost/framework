@@ -1,29 +1,26 @@
 {
   "name": "@tryghost/nodemailer",
   "version": "2.0.3",
+  "license": "MIT",
+  "author": "Ghost Foundation",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
     "directory": "packages/nodemailer"
   },
-  "author": "Ghost Foundation",
-  "license": "MIT",
-  "main": "index.js",
-  "scripts": {
-    "dev": "echo \"Implement me!\"",
-    "test": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
-    "lint": "eslint . --ext .js --cache",
-    "posttest": "yarn lint"
-  },
   "files": [
     "index.js",
     "lib"
   ],
+  "main": "index.js",
   "publishConfig": {
     "access": "public"
   },
-  "devDependencies": {
-    "sinon": "21.1.2"
+  "scripts": {
+    "dev": "echo \"Implement me!\"",
+    "test": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
+    "lint": "oxlint -c ../../.oxlintrc.json .",
+    "posttest": "yarn lint"
   },
   "dependencies": {
     "@aws-sdk/client-sesv2": "3.1031.0",
@@ -31,5 +28,8 @@
     "nodemailer": "8.0.5",
     "nodemailer-mailgun-transport": "2.1.5",
     "nodemailer-stub-transport": "1.1.0"
+  },
+  "devDependencies": {
+    "sinon": "21.1.2"
   }
 }

@@ -1,0 +1,12 @@
+{
+    "plugins": ["node"],
+    "ignorePatterns": [
+        "**/node_modules/**",
+        "**/build/**",
+        "**/coverage/**",
+        "**/cjs/**",
+        "**/es/**",
+        "**/types/**",
+        "**/test/fixtures/**"
+    ]
+}

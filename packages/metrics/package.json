@@ -1,35 +1,35 @@
 {
   "name": "@tryghost/metrics",
   "version": "3.0.3",
+  "license": "MIT",
+  "author": "Ghost Foundation",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
     "directory": "packages/metrics"
   },
-  "author": "Ghost Foundation",
-  "license": "MIT",
-  "main": "index.js",
-  "scripts": {
-    "dev": "echo \"Implement me!\"",
-    "test": "NODE_ENV=testing vitest run --coverage",
-    "lint": "eslint . --ext .js --cache",
-    "posttest": "yarn lint"
-  },
   "files": [
     "index.js",
     "lib"
   ],
+  "main": "index.js",
   "publishConfig": {
     "access": "public"
   },
-  "devDependencies": {
-    "rewire": "9.0.1",
-    "sinon": "21.1.2"
+  "scripts": {
+    "dev": "echo \"Implement me!\"",
+    "test": "NODE_ENV=testing vitest run --coverage",
+    "lint": "oxlint -c ../../.oxlintrc.json .",
+    "posttest": "yarn lint"
   },
   "dependencies": {
     "@tryghost/elasticsearch": "^5.0.3",
     "@tryghost/pretty-stream": "^2.0.3",
     "@tryghost/root-utils": "^2.0.3",
     "json-stringify-safe": "5.0.1"
+  },
+  "devDependencies": {
+    "rewire": "9.0.1",
+    "sinon": "21.1.2"
   }
 }

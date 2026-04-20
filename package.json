@@ -9,9 +9,6 @@
   "workspaces": [
     "packages/*"
   ],
-  "eslintIgnore": [
-    "**/node_modules/**"
-  ],
   "scripts": {
     "dev": "echo \"Implement me!\"",
     "main": "git checkout main && git pull && yarn",
@@ -20,6 +17,8 @@
     "test": "nx run-many -t test --parallel=10 --outputStyle=dynamic-legacy",
     "test:ci": "nx run-many -t test --outputStyle=dynamic",
     "lint": "nx run-many -t lint --outputStyle=dynamic",
+    "format": "oxfmt -c .oxfmtrc.json \"packages/**/*.{js,ts,json,md}\"",
+    "format:check": "oxfmt -c .oxfmtrc.json --check \"packages/**/*.{js,ts,json,md}\"",
     "preship": "git diff --quiet && git diff --cached --quiet || (echo 'Error: working tree must be clean before shipping' && exit 1) && yarn test",
     "ship": "nx release version --git-push --git-remote ${GHOST_UPSTREAM:-origin}",
     "ship:patch": "yarn ship patch",
@@ -30,9 +29,9 @@
   "devDependencies": {
     "@nx/js": "22.6.5",
     "@vitest/coverage-v8": "3.2.4",
-    "eslint": "8.57.1",
-    "eslint-plugin-ghost": "3.5.0",
     "nx": "22.6.5",
+    "oxfmt": "0.45.0",
+    "oxlint": "1.60.0",
     "sinon": "21.1.2",
     "ts-node": "10.9.2",
     "vitest": "3.2.4"
