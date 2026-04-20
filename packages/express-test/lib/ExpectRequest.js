@@ -30,7 +30,6 @@ class ExpectRequest extends Request {
 
     expect(callback) {
         if (typeof callback !== 'function') {
-            // eslint-disable-next-line ghost/ghost-custom/no-native-error
             throw new Error(
                 'express-test expect() requires a callback function, did you mean expectStatus or expectHeader?',
             );

@@ -1,5 +1,5 @@
 {
-    "plugins": ["node"],
+    "plugins": ["node", "typescript"],
     "ignorePatterns": [
         "**/node_modules/**",
         "**/build/**",

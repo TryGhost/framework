@@ -1,4 +1,3 @@
-/* eslint-disable ghost/ghost-custom/no-native-error */
 const { CookieJar } = require('cookiejar');
 const ExpectRequest = require('./ExpectRequest');
 const { RequestOptions } = require('./Request');
@@ -73,15 +72,11 @@ class Agent {
     _mergeOptions(method, url, options = {}) {
         // It doesn't make sense to call this method without these properties
         if (!method) {
-            throw new Error(
-                '_mergeOptions cannot be called without a method',
-            ); /* eslint-disable-line no-restricted-syntax */
+            throw new Error('_mergeOptions cannot be called without a method');
         }
 
         if (!url) {
-            throw new Error(
-                '_mergeOptions cannot be called without a url',
-            ); /* eslint-disable-line no-restricted-syntax */
+            throw new Error('_mergeOptions cannot be called without a url');
         }
 
         // urlOptions
@@ -109,9 +104,7 @@ class Agent {
 ['get', 'post', 'put', 'patch', 'delete', 'options', 'head'].forEach((method) => {
     Agent.prototype[method] = function (url, options) {
         if (!url) {
-            throw new Error(
-                'Cannot make a request without supplying a url',
-            ); /* eslint-disable-line no-restricted-syntax */
+            throw new Error('Cannot make a request without supplying a url');
         }
         return new ExpectRequest(
             this.app,
