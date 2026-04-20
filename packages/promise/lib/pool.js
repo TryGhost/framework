@@ -14,13 +14,13 @@ async function pool(tasks, maxConcurrent) {
     const taskIterator = tasks.entries();
     const results = [];
 
-    const workers = Array(maxConcurrent).fill(taskIterator).map(
-        async (workerIterator) => {
+    const workers = Array(maxConcurrent)
+        .fill(taskIterator)
+        .map(async (workerIterator) => {
             for (let [index, task] of workerIterator) {
                 results[index] = await task();
             }
-        }
-    );
+        });
     await Promise.all(workers);
     return results;
 }

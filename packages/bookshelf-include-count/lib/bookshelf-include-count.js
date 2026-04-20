@@ -64,7 +64,7 @@ module.exports = function (Bookshelf) {
                 if (hasWithRelated('count.' + countRelation)) {
                     // remove post_count from withRelated
                     removeWithRelated('count.' + countRelation);
-        
+
                     // Call the query builder
                     countRelations[countRelation](this, options);
                 }
@@ -121,7 +121,7 @@ module.exports = function (Bookshelf) {
                     savedAttributes[key] = this.attributes[key];
                 }
             }
-            
+
             return modelProto.save.apply(this, arguments).then((t) => {
                 // Set savedAttributes, but keep count__ variables if they stayed inside this.attributes
                 if (savedAttributes) {
@@ -129,7 +129,7 @@ module.exports = function (Bookshelf) {
                 }
                 return t;
             });
-        }
+        },
     });
 
     Bookshelf.Model = Model;
@@ -148,7 +148,7 @@ module.exports = function (Bookshelf) {
 
             // Call parent fetchAll
             return collectionProto.sync.apply(this, arguments);
-        }
+        },
     });
 
     Bookshelf.Collection = Collection;

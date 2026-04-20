@@ -72,14 +72,14 @@ module.exports.resetToken = {
 
         return {
             expires: expires,
-            email: email
+            email: email,
         };
     },
     compare: function compare(options) {
         options = options || {};
 
         const tokenToCompare = options.token;
-        const parts = exports.resetToken.extract({token: tokenToCompare});
+        const parts = exports.resetToken.extract({ token: tokenToCompare });
         const dbHash = options.dbHash;
         const password = options.password;
         let generatedToken;
@@ -89,7 +89,7 @@ module.exports.resetToken = {
         if (isNaN(parts.expires)) {
             return {
                 correct: false,
-                reason: 'invalid_expiry'
+                reason: 'invalid_expiry',
             };
         }
 
@@ -97,7 +97,7 @@ module.exports.resetToken = {
         if (parts.expires < Date.now()) {
             return {
                 correct: false,
-                reason: 'expired'
+                reason: 'expired',
             };
         }
 
@@ -105,7 +105,7 @@ module.exports.resetToken = {
             email: parts.email,
             expires: parts.expires,
             dbHash: dbHash,
-            password: password
+            password: password,
         });
 
         if (tokenToCompare.length !== generatedToken.length) {
@@ -117,7 +117,7 @@ module.exports.resetToken = {
         }
 
         const result = {
-            correct: (diff === 0)
+            correct: diff === 0,
         };
 
         if (!result.correct) {
@@ -125,5 +125,5 @@ module.exports.resetToken = {
         }
 
         return result;
-    }
+    },
 };

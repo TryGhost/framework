@@ -26,13 +26,16 @@ describe('Server Utils', function () {
                     listen: function (port) {
                         assert.equal(port, testPort);
                         resolve();
-                    }
+                    },
                 };
             });
 
-            server.start({
-                set: () => {}
-            }, testPort.toString());
+            server.start(
+                {
+                    set: () => {},
+                },
+                testPort.toString(),
+            );
         });
     });
 
@@ -45,13 +48,16 @@ describe('Server Utils', function () {
                     listen: function (port) {
                         assert.equal(port, testPipe);
                         resolve();
-                    }
+                    },
                 };
             });
 
-            server.start({
-                set: () => {}
-            }, testPipe);
+            server.start(
+                {
+                    set: () => {},
+                },
+                testPipe,
+            );
         });
     });
 
@@ -64,13 +70,16 @@ describe('Server Utils', function () {
                     listen: function (port) {
                         assert.equal(port, false);
                         resolve();
-                    }
+                    },
                 };
             });
 
-            server.start({
-                set: () => {}
-            }, testPort.toString());
+            server.start(
+                {
+                    set: () => {},
+                },
+                testPort.toString(),
+            );
         });
     });
 
@@ -101,9 +110,12 @@ describe('Server Utils', function () {
                 return new Server();
             });
 
-            server.start({
-                set: () => {}
-            }, 180);
+            server.start(
+                {
+                    set: () => {},
+                },
+                180,
+            );
         });
     });
 
@@ -111,11 +123,13 @@ describe('Server Utils', function () {
         const testPort = 180;
 
         await new Promise((resolve) => {
-            sandbox.stub(process, 'exit').callsFake(function () {
-            });
+            sandbox.stub(process, 'exit').callsFake(function () {});
 
             sandbox.stub(logging, 'error').callsFake(function (message) {
-                assert.equal(message.startsWith(`Port ${testPort} requires elevated privileges`), true);
+                assert.equal(
+                    message.startsWith(`Port ${testPort} requires elevated privileges`),
+                    true,
+                );
                 resolve();
             });
 
@@ -128,7 +142,7 @@ describe('Server Utils', function () {
                         setTimeout(() => {
                             this.emit('error', {
                                 code: 'EACCES',
-                                syscall: 'listen'
+                                syscall: 'listen',
                             });
                         }, 0);
                     }
@@ -137,9 +151,12 @@ describe('Server Utils', function () {
                 return new Server();
             });
 
-            server.start({
-                set: () => {}
-            }, testPort);
+            server.start(
+                {
+                    set: () => {},
+                },
+                testPort,
+            );
         });
     });
 
@@ -147,8 +164,7 @@ describe('Server Utils', function () {
         const testPort = 180;
 
         await new Promise((resolve) => {
-            sandbox.stub(process, 'exit').callsFake(function () {
-            });
+            sandbox.stub(process, 'exit').callsFake(function () {});
 
             sandbox.stub(logging, 'error').callsFake(function (message) {
                 assert.equal(message.startsWith(`Port ${testPort} is already in use`), true);
@@ -164,7 +180,7 @@ describe('Server Utils', function () {
                         setTimeout(() => {
                             this.emit('error', {
                                 code: 'EADDRINUSE',
-                                syscall: 'listen'
+                                syscall: 'listen',
                             });
                         }, 0);
                     }
@@ -173,9 +189,12 @@ describe('Server Utils', function () {
                 return new Server();
             });
 
-            server.start({
-                set: () => {}
-            }, testPort);
+            server.start(
+                {
+                    set: () => {},
+                },
+                testPort,
+            );
         });
     });
 
@@ -185,7 +204,10 @@ describe('Server Utils', function () {
         await new Promise((resolve) => {
             sandbox.stub(process, 'exit').callsFake(function () {});
             sandbox.stub(logging, 'error').callsFake(function (message) {
-                assert.equal(message.startsWith(`Pipe ${testPipe} requires elevated privileges`), true);
+                assert.equal(
+                    message.startsWith(`Pipe ${testPipe} requires elevated privileges`),
+                    true,
+                );
                 resolve();
             });
 
@@ -195,7 +217,7 @@ describe('Server Utils', function () {
                         setTimeout(() => {
                             this.emit('error', {
                                 code: 'EACCES',
-                                syscall: 'listen'
+                                syscall: 'listen',
                             });
                         }, 0);
                     }
@@ -204,9 +226,12 @@ describe('Server Utils', function () {
                 return new Server();
             });
 
-            server.start({
-                set: () => {}
-            }, testPipe);
+            server.start(
+                {
+                    set: () => {},
+                },
+                testPipe,
+            );
         });
     });
 
@@ -216,8 +241,7 @@ describe('Server Utils', function () {
                 constructor() {
                     super();
                 }
-                listen() {
-                }
+                listen() {}
                 close() {
                     throw new Error();
                 }
@@ -225,9 +249,12 @@ describe('Server Utils', function () {
             return new Server();
         });
 
-        server.start({
-            set: () => {}
-        }, 180);
+        server.start(
+            {
+                set: () => {},
+            },
+            180,
+        );
 
         assert.doesNotThrow(server.stop);
     });
@@ -249,16 +276,19 @@ describe('Server Utils', function () {
                         }, 0);
                     }
                     address() {
-                        return {port: testPort};
+                        return { port: testPort };
                     }
                 }
 
                 return new Server();
             });
 
-            server.start({
-                set: () => {}
-            }, testPort);
+            server.start(
+                {
+                    set: () => {},
+                },
+                testPort,
+            );
         });
     });
 
@@ -271,7 +301,7 @@ describe('Server Utils', function () {
                             assert.throws(() => {
                                 this.emit('error', {
                                     code: 'EOTHER',
-                                    syscall: 'listen'
+                                    syscall: 'listen',
                                 });
                             });
                             resolve();
@@ -282,9 +312,12 @@ describe('Server Utils', function () {
                 return new Server();
             });
 
-            server.start({
-                set: () => {}
-            }, 180);
+            server.start(
+                {
+                    set: () => {},
+                },
+                180,
+            );
         });
     });
 
@@ -297,7 +330,7 @@ describe('Server Utils', function () {
                             assert.throws(() => {
                                 this.emit('error', {
                                     code: 'EACCES',
-                                    syscall: 'not-listen'
+                                    syscall: 'not-listen',
                                 });
                             });
                             resolve();
@@ -308,9 +341,12 @@ describe('Server Utils', function () {
                 return new Server();
             });
 
-            server.start({
-                set: () => {}
-            }, 180);
+            server.start(
+                {
+                    set: () => {},
+                },
+                180,
+            );
         });
     });
 });

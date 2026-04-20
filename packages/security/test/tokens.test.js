@@ -12,7 +12,7 @@ describe('Utils: tokens', function () {
     });
 
     it('generateFromContent creates encoded content+hash token', function () {
-        const token = security.tokens.generateFromContent({content: 'abc'});
+        const token = security.tokens.generateFromContent({ content: 'abc' });
         const decoded = Buffer.from(token, 'base64').toString('ascii');
         const parts = decoded.split('|');
 
@@ -26,7 +26,7 @@ describe('Utils: tokens', function () {
         const token = security.tokens.generateFromEmail({
             expires,
             email: 'test@example.com',
-            secret: 's3cr3t'
+            secret: 's3cr3t',
         });
         const decoded = Buffer.from(token, 'base64').toString('ascii');
         const parts = decoded.split('|');
@@ -46,7 +46,7 @@ describe('Utils: tokens', function () {
             email: 'test1@ghost.org',
             expires: expires,
             password: 'password',
-            dbHash: dbHash
+            dbHash: dbHash,
         });
 
         assert.notEqual(token, undefined);
@@ -63,13 +63,13 @@ describe('Utils: tokens', function () {
             email: 'test1@ghost.org',
             expires: expires,
             password: '12345678',
-            dbHash: dbHash
+            dbHash: dbHash,
         });
 
         tokenIsCorrect = security.tokens.resetToken.compare({
             token: token,
             dbHash: dbHash,
-            password: '12345678'
+            password: '12345678',
         });
 
         assert.equal(tokenIsCorrect.correct, true);
@@ -86,13 +86,13 @@ describe('Utils: tokens', function () {
             email: 'test1@ghost.org',
             expires: expires,
             password: '12345678',
-            dbHash: dbHash
+            dbHash: dbHash,
         });
 
         tokenIsCorrect = security.tokens.resetToken.compare({
             token: token,
             dbHash: dbHash,
-            password: '123456'
+            password: '123456',
         });
 
         assert.equal(tokenIsCorrect.correct, false);
@@ -109,13 +109,13 @@ describe('Utils: tokens', function () {
             email: 'test1@ghost.org',
             expires: invalidDate,
             password: '12345678',
-            dbHash: dbHash
+            dbHash: dbHash,
         });
 
         tokenIsCorrect = security.tokens.resetToken.compare({
             token: token,
             dbHash: dbHash,
-            password: '123456'
+            password: '123456',
         });
 
         assert.equal(tokenIsCorrect.correct, false);
@@ -132,13 +132,13 @@ describe('Utils: tokens', function () {
             email: 'test1@ghost.org',
             expires: dateInThePast,
             password: '12345678',
-            dbHash: dbHash
+            dbHash: dbHash,
         });
 
         tokenIsCorrect = security.tokens.resetToken.compare({
             token: token,
             dbHash: dbHash,
-            password: '123456'
+            password: '123456',
         });
 
         assert.equal(tokenIsCorrect.correct, false);
@@ -156,11 +156,11 @@ describe('Utils: tokens', function () {
             email: email,
             expires: expires,
             password: '12345678',
-            dbHash: dbHash
+            dbHash: dbHash,
         });
 
         parts = security.tokens.resetToken.extract({
-            token: token
+            token: token,
         });
 
         assert.equal(parts.email, email);
@@ -180,11 +180,11 @@ describe('Utils: tokens', function () {
             email: email,
             expires: expires,
             password: '$2a$10$t5dY1uRRdjvqfNlXhae3uuc0nuhi.Rd7/K/9JaHHwSkLm6UUa3NsW',
-            dbHash: dbHash
+            dbHash: dbHash,
         });
 
         parts = security.tokens.resetToken.extract({
-            token: token
+            token: token,
         });
 
         assert.equal(parts.email, email);
@@ -195,7 +195,7 @@ describe('Utils: tokens', function () {
 
     it('extract returns false for invalid token structure', function () {
         const invalidToken = Buffer.from('one|two').toString('base64');
-        const result = security.tokens.resetToken.extract({token: invalidToken});
+        const result = security.tokens.resetToken.extract({ token: invalidToken });
 
         assert.equal(result, false);
     });
@@ -212,7 +212,7 @@ describe('Utils: tokens', function () {
             email: email,
             expires: expires,
             password: '12345678',
-            dbHash: dbHash
+            dbHash: dbHash,
         });
 
         token = security.url.encodeBase64(token);
@@ -221,7 +221,7 @@ describe('Utils: tokens', function () {
         token = security.url.decodeBase64(token);
 
         parts = security.tokens.resetToken.extract({
-            token: token
+            token: token,
         });
 
         assert.equal(parts.email, email);
@@ -230,7 +230,7 @@ describe('Utils: tokens', function () {
         tokenIsCorrect = security.tokens.resetToken.compare({
             token: token,
             dbHash: dbHash,
-            password: '12345678'
+            password: '12345678',
         });
 
         assert.equal(tokenIsCorrect.correct, true);
@@ -244,7 +244,7 @@ describe('Utils: tokens', function () {
             email: 'test4@ghost.org',
             expires,
             password: '12345678',
-            dbHash
+            dbHash,
         });
 
         const mismatchedLengthToken = `${token}A`;
@@ -252,7 +252,7 @@ describe('Utils: tokens', function () {
         const tokenIsCorrect = security.tokens.resetToken.compare({
             token: mismatchedLengthToken,
             dbHash,
-            password: '12345678'
+            password: '12345678',
         });
 
         assert.equal(tokenIsCorrect.correct, false);

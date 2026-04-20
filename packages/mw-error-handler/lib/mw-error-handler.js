@@ -3,8 +3,8 @@ const path = require('path');
 const semver = require('semver');
 const debug = require('@tryghost/debug')('error-handler');
 const errors = require('@tryghost/errors');
-const {prepareStackForUser} = require('@tryghost/errors').utils;
-const {isReqResUserSpecific, cacheControlValues} = require('@tryghost/http-cache-utils');
+const { prepareStackForUser } = require('@tryghost/errors').utils;
+const { isReqResUserSpecific, cacheControlValues } = require('@tryghost/http-cache-utils');
 const tpl = require('@tryghost/tpl');
 
 const messages = {
@@ -14,19 +14,21 @@ const messages = {
     resourceNotFound: 'Resource not found',
     methodNotAcceptableVersionAhead: {
         message: 'Request could not be served, the endpoint was not found.',
-        context: 'Provided client accept-version {acceptVersion} is ahead of current Ghost version {ghostVersion}.',
-        help: 'Try upgrading your Ghost install.'
+        context:
+            'Provided client accept-version {acceptVersion} is ahead of current Ghost version {ghostVersion}.',
+        help: 'Try upgrading your Ghost install.',
     },
     methodNotAcceptableVersionBehind: {
         message: 'Request could not be served, the endpoint was not found.',
-        context: 'Provided client accept-version {acceptVersion} is behind current Ghost version {ghostVersion}.',
-        help: 'Try upgrading your Ghost API client.'
+        context:
+            'Provided client accept-version {acceptVersion} is behind current Ghost version {ghostVersion}.',
+        help: 'Try upgrading your Ghost API client.',
     },
     badVersion: 'Requested version is not supported.',
     actions: {
         images: {
-            upload: 'upload image'
-        }
+            upload: 'upload image',
+        },
     },
     userMessages: {
         BookshelfRelationsError: 'Database error, cannot {action}.',
@@ -50,10 +52,11 @@ const messages = {
         EmailError: 'Error sending email!',
         ThemeValidationError: 'Theme validation error, cannot {action}.',
         HostLimitError: 'Host Limit error, cannot {action}.',
-        DisabledFeatureError: 'Theme validation error, the {{{helperName}}} helper is not available. Cannot {action}.',
-        UpdateCollisionError: 'Saving failed! Someone else is editing this post.'
+        DisabledFeatureError:
+            'Theme validation error, the {{{helperName}}} helper is not available. Cannot {action}.',
+        UpdateCollisionError: 'Saving failed! Someone else is editing this post.',
     },
-    UnknownError: 'Unknown error - {name}, cannot {action}.'
+    UnknownError: 'Unknown error - {name}, cannot {action}.',
 };
 
 function isDependencyInStack(dependency, err) {
@@ -78,18 +81,21 @@ module.exports.prepareError = function prepareError(err, req, res, next) {
         // Catch bookshelf empty errors and other 404s, and turn into a Ghost 404
         if ((err.statusCode && err.statusCode === 404) || err.message === 'EmptyResponse') {
             err = new errors.NotFoundError({
-                err: err
+                err: err,
             });
-        // Catch handlebars / express-hbs errors, and render them as 400, rather than 500 errors as the server isn't broken
-        } else if (isDependencyInStack('handlebars', err) || isDependencyInStack('express-hbs', err)) {
+            // Catch handlebars / express-hbs errors, and render them as 400, rather than 500 errors as the server isn't broken
+        } else if (
+            isDependencyInStack('handlebars', err) ||
+            isDependencyInStack('express-hbs', err)
+        ) {
             // Temporary handling of theme errors from handlebars
             // @TODO remove this when #10496 is solved properly
             err = new errors.IncorrectUsageError({
                 err: err,
                 message: err.message,
-                statusCode: err.statusCode
+                statusCode: err.statusCode,
             });
-        // Catch database errors and turn them into 500 errors, but log some useful data to sentry
+            // Catch database errors and turn them into 500 errors, but log some useful data to sentry
         } else if (isDependencyInStack('mysql2', err)) {
             // we don't want to return raw database errors to our users
             err.sqlErrorCode = err.code;
@@ -98,24 +104,24 @@ module.exports.prepareError = function prepareError(err, req, res, next) {
                 err = new errors.ValidationError({
                     message: tpl(messages.invalidValue),
                     context: err.message,
-                    err
+                    err,
                 });
             } else {
                 err = new errors.InternalServerError({
                     err: err,
                     message: tpl(messages.genericError),
                     statusCode: err.statusCode,
-                    code: 'UNEXPECTED_ERROR'
+                    code: 'UNEXPECTED_ERROR',
                 });
             }
-        // For everything else, create a generic 500 error, with context set to the original error message
+            // For everything else, create a generic 500 error, with context set to the original error message
         } else {
             err = new errors.InternalServerError({
                 err: err,
                 message: tpl(messages.genericError),
                 context: err.message,
                 statusCode: err.statusCode,
-                code: 'UNEXPECTED_ERROR'
+                code: 'UNEXPECTED_ERROR',
             });
         }
     }
@@ -129,7 +135,8 @@ module.exports.prepareError = function prepareError(err, req, res, next) {
     next(err);
 };
 
-module.exports.prepareStack = function prepareStack(err, req, res, next) { // eslint-disable-line no-unused-vars
+module.exports.prepareStack = function prepareStack(err, req, res, next) {
+    // eslint-disable-line no-unused-vars
     const clonedError = prepareStackForUser(err);
 
     next(clonedError);
@@ -142,21 +149,24 @@ module.exports.prepareStack = function prepareStack(err, req, res, next) { // es
  * @param {import('express').Response} res
  * @param {import('express').NextFunction} next
  */
-module.exports.jsonErrorRenderer = function jsonErrorRenderer(err, req, res, next) { // eslint-disable-line no-unused-vars
+module.exports.jsonErrorRenderer = function jsonErrorRenderer(err, req, res, next) {
+    // eslint-disable-line no-unused-vars
     const userError = prepareUserMessage(err, req);
 
     res.json({
-        errors: [{
-            message: userError.message,
-            context: userError.context || null,
-            type: err.errorType || null,
-            details: err.errorDetails || null,
-            property: err.property || null,
-            help: err.help || null,
-            code: err.code || null,
-            id: err.id || null,
-            ghostErrorCode: err.ghostErrorCode || null
-        }]
+        errors: [
+            {
+                message: userError.message,
+                context: userError.context || null,
+                type: err.errorType || null,
+                details: err.errorDetails || null,
+                property: err.property || null,
+                help: err.help || null,
+                code: err.code || null,
+                id: err.id || null,
+                ghostErrorCode: err.ghostErrorCode || null,
+            },
+        ],
     });
 };
 
@@ -164,7 +174,9 @@ module.exports.jsonErrorRenderer = function jsonErrorRenderer(err, req, res, nex
  *
  * @param {String} [cacheControlHeaderValue] cache-control header value
  */
-module.exports.prepareErrorCacheControl = function prepareErrorCacheControl(cacheControlHeaderValue) {
+module.exports.prepareErrorCacheControl = function prepareErrorCacheControl(
+    cacheControlHeaderValue,
+) {
     return function prepareErrorCacheControlInner(err, req, res, next) {
         let cacheControl = cacheControlHeaderValue;
         if (!cacheControlHeaderValue) {
@@ -178,7 +190,7 @@ module.exports.prepareErrorCacheControl = function prepareErrorCacheControl(cach
         }
 
         res.set({
-            'Cache-Control': cacheControl
+            'Cache-Control': cacheControl,
         });
 
         next(err);
@@ -188,7 +200,7 @@ module.exports.prepareErrorCacheControl = function prepareErrorCacheControl(cach
 const prepareUserMessage = function prepareUserMessage(err, req) {
     const userError = {
         message: err.message,
-        context: err.context
+        context: err.context,
     };
 
     const docName = _.get(req, 'frameOptions.docName');
@@ -202,7 +214,7 @@ const prepareUserMessage = function prepareUserMessage(err, req) {
             read: 'read',
             add: 'save',
             edit: 'edit',
-            destroy: 'delete'
+            destroy: 'delete',
         };
 
         if (_.get(messages.actions, [docName, method])) {
@@ -225,9 +237,9 @@ const prepareUserMessage = function prepareUserMessage(err, req) {
             }
 
             if (_.get(messages.userMessages, err.name)) {
-                userError.message = tpl(messages.userMessages[err.name], {action: action});
+                userError.message = tpl(messages.userMessages[err.name], { action: action });
             } else {
-                userError.message = tpl(messages.UnknownError, {action, name: err.name});
+                userError.message = tpl(messages.UnknownError, { action, name: err.name });
             }
         }
     }
@@ -240,41 +252,39 @@ module.exports.resourceNotFound = function resourceNotFound(req, res, next) {
         // Protect against invalid `Accept-Version` headers
         const acceptVersionSemver = semver.coerce(req.headers['accept-version']);
         if (!acceptVersionSemver) {
-            return next(new errors.BadRequestError({
-                message: tpl(messages.badVersion)
-            }));
+            return next(
+                new errors.BadRequestError({
+                    message: tpl(messages.badVersion),
+                }),
+            );
         }
 
         if (semver.compare(acceptVersionSemver, semver.coerce(res.locals.safeVersion)) !== 0) {
             const versionComparison = semver.compare(
                 acceptVersionSemver,
-                semver.coerce(res.locals.safeVersion)
+                semver.coerce(res.locals.safeVersion),
             );
 
             let notAcceptableError;
             if (versionComparison === 1) {
                 notAcceptableError = new errors.RequestNotAcceptableError({
-                    message: tpl(
-                        messages.methodNotAcceptableVersionAhead.message
-                    ),
+                    message: tpl(messages.methodNotAcceptableVersionAhead.message),
                     context: tpl(messages.methodNotAcceptableVersionAhead.context, {
                         acceptVersion: req.headers['accept-version'],
-                        ghostVersion: `v${res.locals.safeVersion}`
+                        ghostVersion: `v${res.locals.safeVersion}`,
                     }),
                     help: tpl(messages.methodNotAcceptableVersionAhead.help),
-                    code: 'UPDATE_GHOST'
+                    code: 'UPDATE_GHOST',
                 });
             } else {
                 notAcceptableError = new errors.RequestNotAcceptableError({
-                    message: tpl(
-                        messages.methodNotAcceptableVersionBehind.message
-                    ),
+                    message: tpl(messages.methodNotAcceptableVersionBehind.message),
                     context: tpl(messages.methodNotAcceptableVersionBehind.context, {
                         acceptVersion: req.headers['accept-version'],
-                        ghostVersion: `v${res.locals.safeVersion}`
+                        ghostVersion: `v${res.locals.safeVersion}`,
                     }),
                     help: tpl(messages.methodNotAcceptableVersionBehind.help),
-                    code: 'UPDATE_CLIENT'
+                    code: 'UPDATE_CLIENT',
                 });
             }
 
@@ -282,14 +292,14 @@ module.exports.resourceNotFound = function resourceNotFound(req, res, next) {
         }
     }
 
-    next(new errors.NotFoundError({message: tpl(messages.resourceNotFound)}));
+    next(new errors.NotFoundError({ message: tpl(messages.resourceNotFound) }));
 };
 
 module.exports.pageNotFound = function pageNotFound(req, res, next) {
-    next(new errors.NotFoundError({message: tpl(messages.pageNotFound)}));
+    next(new errors.NotFoundError({ message: tpl(messages.pageNotFound) }));
 };
 
-module.exports.handleJSONResponse = sentry => [
+module.exports.handleJSONResponse = (sentry) => [
     // Make sure the error can be served
     module.exports.prepareError,
     // Add cache-control header
@@ -299,10 +309,10 @@ module.exports.handleJSONResponse = sentry => [
     // Format the stack for the user
     module.exports.prepareStack,
     // Render the error using JSON format
-    module.exports.jsonErrorRenderer
+    module.exports.jsonErrorRenderer,
 ];
 
-module.exports.handleHTMLResponse = sentry => [
+module.exports.handleHTMLResponse = (sentry) => [
     // Make sure the error can be served
     module.exports.prepareError,
     // Add cache-control header
@@ -310,5 +320,5 @@ module.exports.handleHTMLResponse = sentry => [
     // Handle the error in Sentry
     sentry.errorHandler,
     // Format the stack for the user
-    module.exports.prepareStack
+    module.exports.prepareStack,
 ];

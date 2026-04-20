@@ -11,7 +11,7 @@ const default_fqdn_options = {
     allow_underscores: false,
     allow_trailing_dot: false,
     allow_numeric_tld: false,
-    allow_wildcard: false
+    allow_wildcard: false,
 };
 
 module.exports = function isFQDN(str, options) {
@@ -32,12 +32,17 @@ module.exports = function isFQDN(str, options) {
     const tld = parts[parts.length - 1];
 
     if (options.require_tld) {
-    // disallow fqdns without tld
+        // disallow fqdns without tld
         if (parts.length < 2) {
             return false;
         }
 
-        if (!options.allow_numeric_tld && !/^([a-z\u00A1-\u00A8\u00AA-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]{2,}|xn[a-z0-9-]{2,})$/i.test(tld)) {
+        if (
+            !options.allow_numeric_tld &&
+            !/^([a-z\u00A1-\u00A8\u00AA-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]{2,}|xn[a-z0-9-]{2,})$/i.test(
+                tld,
+            )
+        ) {
             return false;
         }
 

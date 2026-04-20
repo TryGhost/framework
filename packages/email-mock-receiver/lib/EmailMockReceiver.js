@@ -1,12 +1,12 @@
 const assert = require('assert');
-const {AssertionError} = require('assert');
+const { AssertionError } = require('assert');
 
 class EmailMockReceiver {
     #sendResponse;
     #snapshotManager;
     #snapshots = [];
 
-    constructor({snapshotManager, sendResponse = 'Mail is disabled'}) {
+    constructor({ snapshotManager, sendResponse = 'Mail is disabled' }) {
         this.#snapshotManager = snapshotManager;
         this.#sendResponse = sendResponse;
     }
@@ -56,12 +56,12 @@ class EmailMockReceiver {
             properties: null,
             field: field,
             hint: `[${field} ${snapshotIndex + 1}]`,
-            error
+            error,
         };
 
         let text = this.#snapshots[snapshotIndex][field];
         if (replacements.length) {
-            for (const [, {pattern, replacement}] of Object.entries(replacements)) {
+            for (const [, { pattern, replacement }] of Object.entries(replacements)) {
                 text = text.replace(pattern, replacement);
             }
         }
@@ -105,16 +105,19 @@ class EmailMockReceiver {
             properties: properties,
             field: 'metadata',
             hint: `[metadata ${snapshotIndex + 1}]`,
-            error
+            error,
         };
 
         const metadata = Object.assign({}, this.#snapshots[snapshotIndex]);
         delete metadata.html;
         delete metadata.text;
 
-        this.#snapshotManager.assertSnapshot({
-            metadata
-        }, assertion);
+        this.#snapshotManager.assertSnapshot(
+            {
+                metadata,
+            },
+            assertion,
+        );
 
         return this;
     }

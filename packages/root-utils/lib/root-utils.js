@@ -29,7 +29,7 @@ exports.getCallerRoot = function getCallerRoot() {
  * Used to find the root directory (where a package.json exists) nearest to the current
  * working directory of the process. This means that configuration that exists at the root
  * of the project can be accessed by any of the modules required by the project.
- * 
+ *
  * Includes logic to determine whether a `current` symlink exists in the working directory,
  * which will be used rather than walking up the file tree if it exists
  */
@@ -44,7 +44,7 @@ exports.getProcessRoot = function getProcessRoot() {
     } catch (err) {
         // No-op - continue with normal working directory
     }
-    try {   
+    try {
         return findRoot(workingDirectory);
     } catch (err) {
         return;

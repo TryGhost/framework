@@ -16,7 +16,7 @@ module.exports = function assertString(input) {
         }
 
         throw new errors.ValidationError({
-            message: `Expected a string but received a ${invalidType}`
+            message: `Expected a string but received a ${invalidType}`,
         });
     }
 };

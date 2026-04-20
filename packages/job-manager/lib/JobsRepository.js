@@ -10,7 +10,7 @@ class JobsRepository {
      * @param {Object} options - The options object.
      * @param {Object} options.JobModel - The Job model for database operations.
      */
-    constructor({JobModel}) {
+    constructor({ JobModel }) {
         // NOTE: We ought to clean this up. We want to use bookshelf models for all db operations,
         //  but we use knex directly in a few places still largely for performance reasons.
         this._JobModel = JobModel;
@@ -36,7 +36,7 @@ class JobsRepository {
      * @returns {Promise<Object|null>} The job object if found, null otherwise.
      */
     async read(name) {
-        const job = await this._JobModel.findOne({name});
+        const job = await this._JobModel.findOne({ name });
         return job;
     }
 
@@ -49,7 +49,7 @@ class JobsRepository {
      * @returns {Promise<void>}
      */
     async update(id, data) {
-        await this._JobModel.edit(data, {id});
+        await this._JobModel.edit(data, { id });
     }
 
     /**
@@ -61,7 +61,7 @@ class JobsRepository {
      */
     async delete(id) {
         try {
-            await this._JobModel.destroy({id});
+            await this._JobModel.destroy({ id });
         } catch (error) {
             logging.error(`Error deleting job ${id}:`, error);
         }

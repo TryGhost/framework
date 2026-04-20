@@ -1,4 +1,4 @@
 module.exports = {
     extract: require('./lib/extract'),
-    compress: require('./lib/compress')
+    compress: require('./lib/compress'),
 };

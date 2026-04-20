@@ -4,7 +4,7 @@ const defaultOptions = {
     type: 'zip',
     glob: '**/*',
     dot: true,
-    ignore: ['node_modules/**']
+    ignore: ['node_modules/**'],
 };
 
 /**
@@ -36,7 +36,7 @@ module.exports = (folderToZip, destination, options = {}) => {
         }
 
         output.on('close', function () {
-            resolve({path: destination, size: archive.pointer()});
+            resolve({ path: destination, size: archive.pointer() });
         });
 
         archive.on('error', function (err) {
@@ -45,7 +45,7 @@ module.exports = (folderToZip, destination, options = {}) => {
         archive.glob(opts.glob, {
             cwd: folderToZip,
             dot: opts.dot,
-            ignore: opts.ignore
+            ignore: opts.ignore,
         });
         archive.pipe(output);
         archive.finalize();

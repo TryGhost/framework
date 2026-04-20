@@ -11,7 +11,7 @@ describe('tpl', function () {
 
     it('Can handle a string with data', function () {
         const string = 'Go visit {url}';
-        const data = {url: 'https://example.com'};
+        const data = { url: 'https://example.com' };
 
         let result = tpl(string, data);
 
@@ -21,7 +21,7 @@ describe('tpl', function () {
     it('Can mix interpolation handlebars in the same message', function () {
         const string = '{{#get}} helper took {totalMs}ms to complete';
         const data = {
-            totalMs: '500'
+            totalMs: '500',
         };
 
         let result = tpl(string, data);
@@ -33,7 +33,7 @@ describe('tpl', function () {
 
         const data = {
             helperName: 'get',
-            totalMs: '500'
+            totalMs: '500',
         };
 
         let result = tpl(string, data);
@@ -44,7 +44,7 @@ describe('tpl', function () {
         const string = 'The {{{helperName}}} helper is not available.';
         const data = {
             helperName: 'get',
-            totalMs: '500'
+            totalMs: '500',
         };
         let result = tpl(string, data);
         assert.equal(result, 'The {{{helperName}}} helper is not available.');
@@ -54,7 +54,7 @@ describe('tpl', function () {
         const string = 'The {\\{{helperName}}} helper is not available.';
         const data = {
             helperName: 'get',
-            totalMs: '500'
+            totalMs: '500',
         };
         let result = tpl(string, data);
         assert.equal(result, 'The {{get}} helper is not available.');
@@ -64,7 +64,7 @@ describe('tpl', function () {
         const string = 'The \\{\\{{helperName}}} helper is not available.';
         const data = {
             helperName: 'get',
-            totalMs: '500'
+            totalMs: '500',
         };
         let result = tpl(string, data);
         assert.equal(result, 'The {{get}} helper is not available.');
@@ -74,7 +74,7 @@ describe('tpl', function () {
         const string = 'The \\{\\{{helperName}\\}\\} helper is not available.';
         const data = {
             helperName: 'get',
-            totalMs: '500'
+            totalMs: '500',
         };
         let result = tpl(string, data);
         assert.equal(result, 'The {{get}} helper is not available.');
@@ -83,7 +83,7 @@ describe('tpl', function () {
     it('Returns a sensible error if data is missing', function () {
         const string = '{helperName} helper took {totalMs}ms to complete';
         const data = {
-            totalMs: '500'
+            totalMs: '500',
         };
 
         let resultFn = () => {

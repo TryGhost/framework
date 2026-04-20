@@ -7,5 +7,5 @@ module.exports.snapshot = {
     snapshotManager: require('@tryghost/jest-snapshot').snapshotManager,
     matchSnapshotAssertion: require('@tryghost/jest-snapshot').matchSnapshotAssertion,
     any: require('@tryghost/jest-snapshot').any,
-    stringMatching: require('@tryghost/jest-snapshot').stringMatching
+    stringMatching: require('@tryghost/jest-snapshot').stringMatching,
 };

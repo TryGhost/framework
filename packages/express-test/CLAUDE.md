@@ -34,21 +34,21 @@ NODE_ENV=testing npx mocha --require ./test/utils/overrides.js './test/**/*.test
 ### Core Components
 
 1. **Agent.js** (lib/Agent.js) - Main testing agent that wraps Express applications
-   - Handles cookie jar management
-   - Provides HTTP method shortcuts (get, post, put, delete, etc.)
-   - Integrates with snapshot testing
+    - Handles cookie jar management
+    - Provides HTTP method shortcuts (get, post, put, delete, etc.)
+    - Integrates with snapshot testing
 
 2. **Request.js** (lib/Request.js) - Handles the actual request execution
-   - Manages request/response lifecycle
-   - Processes headers, body, and query parameters
-   - Executes the Express app internally without HTTP
+    - Manages request/response lifecycle
+    - Processes headers, body, and query parameters
+    - Executes the Express app internally without HTTP
 
 3. **ExpectRequest.js** (lib/ExpectRequest.js) - Assertion chaining system
-   - Implements prioritized assertion execution order:
-     1. `expect` (custom assertions)
-     2. `expectHeader` (header assertions)
-     3. `expectStatus` (status code assertions)
-   - Provides fluent API for test assertions
+    - Implements prioritized assertion execution order:
+        1. `expect` (custom assertions)
+        2. `expectHeader` (header assertions)
+        3. `expectStatus` (status code assertions)
+    - Provides fluent API for test assertions
 
 ### Key Design Patterns
 

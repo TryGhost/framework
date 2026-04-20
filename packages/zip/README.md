@@ -8,7 +8,6 @@ or
 
 `yarn add @tryghost/zip`
 
-
 ## Purpose
 
 Zip compression and extraction utilities with safety checks for symlinks and unsafe filenames.
@@ -32,22 +31,18 @@ let res = await zip.extract('path/to/archive.zip', 'path/to/files', [options])
 This is a mono repository, managed with [lerna](https://lernajs.io/).
 
 Follow the instructions for the top-level repo.
+
 1. `git clone` this repo & `cd` into it as usual
 2. Run `yarn` to install top-level dependencies.
-
 
 ## Run
 
 - `yarn dev`
 
-
 ## Test
 
 - `yarn lint` run just eslint
 - `yarn test` run lint and tests
-
-
-
 
 # Copyright & License
 

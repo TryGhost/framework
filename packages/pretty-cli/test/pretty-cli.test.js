@@ -21,7 +21,7 @@ describe('API', function () {
             'hints',
             'hintsError',
             'messages',
-            'usagePrefix'
+            'usagePrefix',
         ]);
 
         assert.equal(typeof prettyCLI.ui, 'object');
@@ -33,7 +33,7 @@ describe('API', function () {
             'info',
             'ok',
             'trace',
-            'warn'
+            'warn',
         ]);
     });
 });
@@ -53,7 +53,10 @@ describe('styles', function () {
         assert.equal(String(prettyCLI.styles.groupError('Options:')).includes('Options:'), true);
         assert.equal(String(prettyCLI.styles.flagsError('--help')).includes('--help'), true);
         assert.equal(String(prettyCLI.styles.descError('bad arg')).includes('bad arg'), true);
-        assert.equal(String(prettyCLI.styles.hintsError('[required]')).includes('[required]'), true);
+        assert.equal(
+            String(prettyCLI.styles.hintsError('[required]')).includes('[required]'),
+            true,
+        );
         assert.equal(String(prettyCLI.styles.messages('boom')).includes('boom'), true);
     });
 });

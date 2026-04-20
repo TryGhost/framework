@@ -1,9 +1,9 @@
 const http = require('http');
-const {Writable, Readable} = require('stream');
+const { Writable, Readable } = require('stream');
 const express = require('express');
-const {CookieAccessInfo} = require('cookiejar');
-const {parse} = require('url');
-const {isJSON, attachFile} = require('./utils');
+const { CookieAccessInfo } = require('cookiejar');
+const { parse } = require('url');
+const { isJSON, attachFile } = require('./utils');
 
 class MockSocket extends Writable {
     constructor() {
@@ -16,7 +16,7 @@ class MockSocket extends Writable {
 }
 
 class RequestOptions {
-    constructor({method, url, headers, body} = {}) {
+    constructor({ method, url, headers, body } = {}) {
         this.method = method || 'GET';
         this.url = url || '/';
         this.headers = headers || {};
@@ -31,7 +31,8 @@ class RequestOptions {
 class Request {
     constructor(app, cookieJar, reqOptions) {
         this.app = app;
-        this.reqOptions = reqOptions instanceof RequestOptions ? reqOptions : new RequestOptions(reqOptions);
+        this.reqOptions =
+            reqOptions instanceof RequestOptions ? reqOptions : new RequestOptions(reqOptions);
         this.cookieJar = cookieJar;
         this._formData = null; // Track FormData instance for multiple attachments
     }
@@ -53,7 +54,7 @@ class Request {
             // body is FormData (we cannot reliably check instanceof, not working in all situations)
             const requestBuffer = body.getBuffer();
             const headers = body.getHeaders({
-                ...this.reqOptions.headers
+                ...this.reqOptions.headers,
             });
             this.reqOptions.headers = headers;
             return this.body(requestBuffer);
@@ -110,7 +111,7 @@ class Request {
             },
             read: () => {
                 return readableStream.read(...arguments);
-            }
+            },
         };
         return this;
     }
@@ -149,7 +150,7 @@ class Request {
     }
 
     _getReqRes() {
-        const {app, reqOptions} = this;
+        const { app, reqOptions } = this;
 
         // Create proper Node.js req/res objects using built-in http module.
         // MockSocket provides a writable stream so that res.end() properly emits 'finish'.
@@ -159,7 +160,7 @@ class Request {
         // When streaming body data, the socket must appear readable so that
         // body-parser's on-finished check doesn't skip the request as "already finished".
         if (hasStreamOverrides) {
-            Object.defineProperty(socket, 'readable', {value: true});
+            Object.defineProperty(socket, 'readable', { value: true });
         }
 
         const req = new http.IncomingMessage(socket);
@@ -211,12 +212,15 @@ class Request {
         if (hasStreamOverrides) {
             const props = Object.keys(this.reqOptions.methodOverrides);
             for (const prop of props) {
-                const descriptor = Object.getOwnPropertyDescriptor(this.reqOptions.methodOverrides, prop);
+                const descriptor = Object.getOwnPropertyDescriptor(
+                    this.reqOptions.methodOverrides,
+                    prop,
+                );
                 Object.defineProperty(req, prop, descriptor);
             }
         }
 
-        return {req, res};
+        return { req, res };
     }
 
     _buildResponse(res) {
@@ -229,12 +233,12 @@ class Request {
             body = text && JSON.parse(text);
         }
 
-        return {statusCode, headers, text, body, response: res};
+        return { statusCode, headers, text, body, response: res };
     }
 
     _doRequest(callback) {
         try {
-            const {req, res} = this._getReqRes();
+            const { req, res } = this._getReqRes();
 
             this._restoreCookies(req);
 
@@ -255,11 +259,7 @@ class Request {
     _getCookies(req) {
         const url = parse(req.url);
 
-        const access = new CookieAccessInfo(
-            url.hostname,
-            url.pathname,
-            url.protocol === 'https:'
-        );
+        const access = new CookieAccessInfo(url.hostname, url.pathname, url.protocol === 'https:');
 
         return this.cookieJar.getCookies(access).toValueString();
     }

@@ -1,6 +1,6 @@
 const assert = require('assert/strict');
 
-const {isReqResUserSpecific} = require('../');
+const { isReqResUserSpecific } = require('../');
 
 describe('Cache Utils', function () {
     describe('isReqResUserSpecific', function () {
@@ -10,13 +10,13 @@ describe('Cache Utils', function () {
             req = {
                 get() {
                     return false;
-                }
+                },
             };
 
             res = {
                 get() {
                     return false;
-                }
+                },
             };
 
             assert.equal(false, isReqResUserSpecific(req, res));
@@ -28,7 +28,7 @@ describe('Cache Utils', function () {
             req = {
                 get() {
                     return false;
-                }
+                },
             };
 
             res = {
@@ -36,7 +36,7 @@ describe('Cache Utils', function () {
                     if (header === 'set-cookie') {
                         return 'maui:cafebabe; MaxAge=42';
                     }
-                }
+                },
             };
 
             assert(isReqResUserSpecific(req, res));
@@ -46,14 +46,13 @@ describe('Cache Utils', function () {
                     if (header === 'cookie') {
                         return 'PHPSESSID=298zf09hf012fh2; csrftoken=u32t4o3tb3gg43; _gat=1';
                     }
-                }
-
+                },
             };
 
             res = {
                 get() {
                     return false;
-                }
+                },
             };
 
             assert(isReqResUserSpecific(req, res));
@@ -63,14 +62,13 @@ describe('Cache Utils', function () {
                     if (header === 'authorization') {
                         return 'Basic YWxhZGRpbjpvcGVuc2VzYW1l';
                     }
-                }
-
+                },
             };
 
             res = {
                 get() {
                     return false;
-                }
+                },
             };
 
             assert(isReqResUserSpecific(req, res));

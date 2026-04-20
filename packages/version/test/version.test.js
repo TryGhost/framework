@@ -10,13 +10,13 @@ const loadVersionModuleFor = function loadVersionModuleFor(version) {
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'version-test-'));
 
     try {
-        fs.writeFileSync(path.join(tempDir, 'package.json'), JSON.stringify({version}));
+        fs.writeFileSync(path.join(tempDir, 'package.json'), JSON.stringify({ version }));
         process.chdir(tempDir);
         delete require.cache[modulePath];
         return require('../lib/version');
     } finally {
         process.chdir(previousCwd);
-        fs.rmSync(tempDir, {recursive: true, force: true});
+        fs.rmSync(tempDir, { recursive: true, force: true });
         delete require.cache[modulePath];
     }
 };

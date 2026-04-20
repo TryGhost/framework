@@ -29,7 +29,7 @@ describe('@tryghost/bookshelf-eager-load', function () {
             return Child;
         };
 
-        Bookshelf = {Model: ParentModel};
+        Bookshelf = { Model: ParentModel };
         installPlugin(Bookshelf);
     });
 
@@ -51,7 +51,7 @@ describe('@tryghost/bookshelf-eager-load', function () {
     it('fetch calls parent fetch and skips load when options are missing', function () {
         sinon.stub(debugBase, 'enabled').returns(false);
         const model = new Bookshelf.Model();
-        model.query = sinon.stub().returns({toQuery: sinon.stub().returns('SQL')});
+        model.query = sinon.stub().returns({ toQuery: sinon.stub().returns('SQL') });
 
         const result = model.fetch();
 
@@ -66,30 +66,30 @@ describe('@tryghost/bookshelf-eager-load', function () {
         model.relationsMeta = {
             authors: {
                 targetTableName: 'users',
-                foreignKey: 'post_id'
+                foreignKey: 'post_id',
             },
             tags: {
                 targetTableName: 'tags',
-                foreignKey: 'post_id'
-            }
+                foreignKey: 'post_id',
+            },
         };
-        model.constructor = {prototype: {tableName: 'posts'}};
+        model.constructor = { prototype: { tableName: 'posts' } };
 
         const leftJoin = sinon.stub().returns({
             toSQL() {
-                return {sql: 'select *'};
-            }
+                return { sql: 'select *' };
+            },
         });
-        const qb = {leftJoin};
+        const qb = { leftJoin };
 
         model.query = sinon.stub().callsFake((arg) => {
             if (typeof arg === 'function') {
                 return arg(qb);
             }
-            return {toQuery: sinon.stub().returns('SQL')};
+            return { toQuery: sinon.stub().returns('SQL') };
         });
 
-        const result = model.fetch({withRelated: ['authors', 'tags']});
+        const result = model.fetch({ withRelated: ['authors', 'tags'] });
 
         assert.equal(result, 'FETCH');
         assert.equal(leftJoin.calledOnceWithExactly('users', 'posts.id', 'users.post_id'), true);
@@ -103,26 +103,26 @@ describe('@tryghost/bookshelf-eager-load', function () {
         model.relationsMeta = {
             authors: {
                 targetTableName: 'users',
-                foreignKey: 'post_id'
-            }
+                foreignKey: 'post_id',
+            },
         };
-        model.constructor = {prototype: {tableName: 'posts'}};
+        model.constructor = { prototype: { tableName: 'posts' } };
 
         const leftJoin = sinon.stub().returns({
             toSQL() {
-                return {sql: 'select *'};
-            }
+                return { sql: 'select *' };
+            },
         });
-        const qb = {leftJoin};
+        const qb = { leftJoin };
 
         model.query = sinon.stub().callsFake((arg) => {
             if (typeof arg === 'function') {
                 return arg(qb);
             }
-            return {toQuery: sinon.stub().returns('SQL')};
+            return { toQuery: sinon.stub().returns('SQL') };
         });
 
-        model.fetch({columns: ['id'], withRelated: ['authors']});
+        model.fetch({ columns: ['id'], withRelated: ['authors'] });
 
         assert.equal(leftJoin.called, false);
     });
@@ -134,26 +134,26 @@ describe('@tryghost/bookshelf-eager-load', function () {
         model.relationsMeta = {
             authors: {
                 targetTableName: 'users',
-                foreignKey: 'post_id'
-            }
+                foreignKey: 'post_id',
+            },
         };
-        model.constructor = {prototype: {tableName: 'posts'}};
+        model.constructor = { prototype: { tableName: 'posts' } };
 
         const leftJoin = sinon.stub().returns({
             toSQL() {
-                return {sql: 'select *'};
-            }
+                return { sql: 'select *' };
+            },
         });
-        const qb = {leftJoin};
+        const qb = { leftJoin };
 
         model.query = sinon.stub().callsFake((arg) => {
             if (typeof arg === 'function') {
                 return arg(qb);
             }
-            return {toQuery: sinon.stub().returns('SQL')};
+            return { toQuery: sinon.stub().returns('SQL') };
         });
 
-        model.fetch({withRelated: ['tags']});
+        model.fetch({ withRelated: ['tags'] });
 
         assert.equal(leftJoin.called, false);
     });
@@ -162,16 +162,16 @@ describe('@tryghost/bookshelf-eager-load', function () {
         sinon.stub(debugBase, 'enabled').returns(false);
         const model = new Bookshelf.Model();
         model.eagerLoad = ['authors'];
-        model.constructor = {prototype: {tableName: 'posts'}};
+        model.constructor = { prototype: { tableName: 'posts' } };
 
         model.query = sinon.stub().callsFake((arg) => {
             if (typeof arg === 'function') {
                 return arg({});
             }
-            return {toQuery: sinon.stub().returns('SQL')};
+            return { toQuery: sinon.stub().returns('SQL') };
         });
 
-        model.fetch({withRelated: ['authors']});
+        model.fetch({ withRelated: ['authors'] });
 
         assert.equal(fetchStub.calledOnce, true);
     });
@@ -180,7 +180,7 @@ describe('@tryghost/bookshelf-eager-load', function () {
         sinon.stub(debugBase, 'enabled').returns(true);
         const model = new Bookshelf.Model();
         model.query = sinon.stub().callsFake(() => {
-            return {toQuery: sinon.stub().returns('SELECT 1')};
+            return { toQuery: sinon.stub().returns('SELECT 1') };
         });
 
         const result = model.fetch({});
@@ -193,7 +193,7 @@ describe('@tryghost/bookshelf-eager-load', function () {
         sinon.stub(debugBase, 'enabled').returns(true);
         const model = new Bookshelf.Model();
         model.query = sinon.stub().callsFake(() => {
-            return {toQuery: sinon.stub().returns('SELECT 1')};
+            return { toQuery: sinon.stub().returns('SELECT 1') };
         });
 
         const result = model.fetchAll({});

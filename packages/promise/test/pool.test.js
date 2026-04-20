@@ -1,6 +1,6 @@
 const assert = require('assert/strict');
-const {promisify} = require('util');
-const {pool} = require('../');
+const { promisify } = require('util');
+const { pool } = require('../');
 
 describe('Promise pool', function () {
     it('preserves order', function () {
@@ -11,12 +11,11 @@ describe('Promise pool', function () {
             },
             function b() {
                 return Promise.resolve('hi');
-            }
+            },
         ];
-        return pool(tasks, 3)
-            .then(function (result) {
-                assert.deepEqual(result, ['hello', 'hi']);
-            });
+        return pool(tasks, 3).then(function (result) {
+            assert.deepEqual(result, ['hello', 'hi']);
+        });
     });
 
     it('handles mixed promises and values', function () {
@@ -26,24 +25,23 @@ describe('Promise pool', function () {
             },
             function b() {
                 return Promise.resolve('hi');
-            }
+            },
         ];
-        return pool(tasks, 3)
-            .then(function (result) {
-                assert.deepEqual(result, ['hello', 'hi']);
-            });
+        return pool(tasks, 3).then(function (result) {
+            assert.deepEqual(result, ['hello', 'hi']);
+        });
     });
 
     it('does not allow less than 1 worker', async function () {
         const tasks = [
             async function a() {
                 return 'hello';
-            }
+            },
         ];
 
         await assert.rejects(pool(tasks, 0), {
             name: 'Error',
-            message: 'Must set at least 1 concurrent workers'
+            message: 'Must set at least 1 concurrent workers',
         });
     });
 
@@ -54,12 +52,11 @@ describe('Promise pool', function () {
             },
             function b() {
                 return Promise.resolve('hello');
-            }
+            },
         ];
 
-        return pool(tasks, 100)
-            .then(function (result) {
-                assert.deepEqual(result, ['hi', 'hello']);
-            });
+        return pool(tasks, 100).then(function (result) {
+            assert.deepEqual(result, ['hi', 'hello']);
+        });
     });
 });

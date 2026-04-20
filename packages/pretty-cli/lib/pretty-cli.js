@@ -9,10 +9,10 @@ const ui = require('./ui');
 
 // Exports a pre-configured version of sywac
 module.exports = Api.get()
-// Use help & version with short forms AND
-// group them into a Global Options group to keep them separate from per-command options
-    .help('-h, --help', {group: 'Global Options:'})
-    .version('-v, --version', {group: 'Global Options:'})
+    // Use help & version with short forms AND
+    // group them into a Global Options group to keep them separate from per-command options
+    .help('-h, --help', { group: 'Global Options:' })
+    .version('-v, --version', { group: 'Global Options:' })
     // Load our style rules
     .style(styles)
     // Add some padding at the end

@@ -11,14 +11,14 @@ const GelfStream = require('gelf-stream').GelfStream;
 const ElasticSearch = require('@tryghost/elasticsearch').BunyanStream;
 const HttpStream = require('@tryghost/http-stream');
 const sandbox = sinon.createSandbox();
-const {Worker} = require('worker_threads');
+const { Worker } = require('worker_threads');
 const testArtifactsRoot = path.resolve(__dirname, 'artifacts', 'logs');
 
 function prepareTestLogDir(name) {
     const dir = path.join(testArtifactsRoot, name);
 
-    fs.rmSync(dir, {recursive: true, force: true});
-    fs.mkdirSync(dir, {recursive: true});
+    fs.rmSync(dir, { recursive: true, force: true });
+    fs.mkdirSync(dir, { recursive: true });
 
     return dir;
 }
@@ -58,13 +58,13 @@ describe('Logging', function () {
 
     it('throws for an invalid transport', function () {
         assert.throws(() => {
-            new GhostLogger({transports: ['nope']});
+            new GhostLogger({ transports: ['nope'] });
         }, /Nope is an invalid transport/);
     });
 
     it('moves stdout to the first transport position', function () {
         const ghostLogger = new GhostLogger({
-            transports: ['stderr', 'stdout']
+            transports: ['stderr', 'stdout'],
         });
 
         assert.equal(ghostLogger.transports[0], 'stdout');
@@ -73,7 +73,7 @@ describe('Logging', function () {
     it('respects LOIN env override for level and mode', function () {
         process.env.LOIN = '1';
         try {
-            const ghostLogger = new GhostLogger({transports: []});
+            const ghostLogger = new GhostLogger({ transports: [] });
             assert.equal(ghostLogger.level, 'info');
             assert.equal(ghostLogger.mode, 'long');
         } finally {
@@ -97,8 +97,12 @@ describe('Logging', function () {
                 resolve();
             });
 
-            var ghostLogger = new GhostLogger({name: 'testLogging'});
-            ghostLogger.info({err: new Error('message'), req: {body: {}, headers: {}}, res: {getHeaders: () => ({})}});
+            var ghostLogger = new GhostLogger({ name: 'testLogging' });
+            ghostLogger.info({
+                err: new Error('message'),
+                req: { body: {}, headers: {} },
+                res: { getHeaders: () => ({}) },
+            });
         });
     });
 
@@ -122,12 +126,18 @@ describe('Logging', function () {
                 assert.notEqual(data.err, null);
                 assert.equal(data.test, 2);
                 assert.equal(data.name, 'Log');
-                assert.equal(data.msg, 'Got an error from 3rd party service X! Resource could not be found.');
+                assert.equal(
+                    data.msg,
+                    'Got an error from 3rd party service X! Resource could not be found.',
+                );
                 resolve();
             });
 
             var ghostLogger = new GhostLogger();
-            ghostLogger.error({err: new errors.NotFoundError(), test: 2}, 'Got an error from 3rd party service X!');
+            ghostLogger.error(
+                { err: new errors.NotFoundError(), test: 2 },
+                'Got an error from 3rd party service X!',
+            );
         });
     });
 
@@ -139,7 +149,7 @@ describe('Logging', function () {
                 resolve();
             });
 
-            var ghostLogger = new GhostLogger({metadata: {version: 2}});
+            var ghostLogger = new GhostLogger({ metadata: { version: 2 } });
             ghostLogger.info('Message to be logged!');
         });
     });
@@ -172,26 +182,26 @@ describe('Logging', function () {
                 resolve();
             });
 
-            var ghostLogger = new GhostLogger({logBody: true});
+            var ghostLogger = new GhostLogger({ logBody: true });
 
             ghostLogger.error({
-                err: new errors.IncorrectUsageError({message: 'Hallo', errorDetails: []}),
+                err: new errors.IncorrectUsageError({ message: 'Hallo', errorDetails: [] }),
                 req: {
                     body: {
                         password: '12345678',
                         data: {
                             attributes: {
                                 pin: '1234',
-                                test: 'ja'
-                            }
-                        }
+                                test: 'ja',
+                            },
+                        },
                     },
                     headers: {
                         authorization: 'secret',
-                        Connection: 'keep-alive'
-                    }
+                        Connection: 'keep-alive',
+                    },
                 },
-                res: {getHeaders: () => ({})}
+                res: { getHeaders: () => ({}) },
             });
         });
     });
@@ -207,8 +217,8 @@ describe('Logging', function () {
                 transports: ['gelf'],
                 gelf: {
                     host: 'localhost',
-                    port: 12201
-                }
+                    port: 12201,
+                },
             });
 
             ghostLogger.error(new errors.NotFoundError());
@@ -219,7 +229,7 @@ describe('Logging', function () {
     it('gelf uses default host and port when not provided', function () {
         const ghostLogger = new GhostLogger({
             transports: ['gelf'],
-            gelf: {}
+            gelf: {},
         });
 
         assert.notEqual(ghostLogger.streams.gelf, undefined);
@@ -233,8 +243,8 @@ describe('Logging', function () {
             level: 'warn',
             gelf: {
                 host: 'localhost',
-                port: 12201
-            }
+                port: 12201,
+            },
         });
 
         ghostLogger.info('testing');
@@ -253,8 +263,8 @@ describe('Logging', function () {
                 loggly: {
                     token: 'invalid',
                     subdomain: 'invalid',
-                    match: 'level:critical'
-                }
+                    match: 'level:critical',
+                },
             });
 
             ghostLogger.error(new errors.InternalServerError());
@@ -270,8 +280,8 @@ describe('Logging', function () {
             loggly: {
                 token: 'invalid',
                 subdomain: 'invalid',
-                match: 'level:critical'
-            }
+                match: 'level:critical',
+            },
         });
 
         ghostLogger.error(new errors.NotFoundError());
@@ -286,8 +296,8 @@ describe('Logging', function () {
             loggly: {
                 token: 'invalid',
                 subdomain: 'invalid',
-                match: '^((?!statusCode:4\\d{2}).)*$'
-            }
+                match: '^((?!statusCode:4\\d{2}).)*$',
+            },
         });
 
         ghostLogger.error(new errors.NotFoundError());
@@ -302,8 +312,8 @@ describe('Logging', function () {
             loggly: {
                 token: 'invalid',
                 subdomain: 'invalid',
-                match: '^((?!statusCode:4\\d{2}).)*$'
-            }
+                match: '^((?!statusCode:4\\d{2}).)*$',
+            },
         });
 
         ghostLogger.error(new errors.NoPermissionError());
@@ -318,8 +328,8 @@ describe('Logging', function () {
             loggly: {
                 token: 'invalid',
                 subdomain: 'invalid',
-                match: '^((?!statusCode:4\\d{2}).)*$'
-            }
+                match: '^((?!statusCode:4\\d{2}).)*$',
+            },
         });
 
         ghostLogger.error(new errors.InternalServerError());
@@ -338,8 +348,8 @@ describe('Logging', function () {
                 loggly: {
                     token: 'invalid',
                     subdomain: 'invalid',
-                    match: 'level:normal'
-                }
+                    match: 'level:normal',
+                },
             });
 
             ghostLogger.error(new errors.NotFoundError());
@@ -355,8 +365,8 @@ describe('Logging', function () {
             loggly: {
                 token: 'invalid',
                 subdomain: 'invalid',
-                match: '^null$'
-            }
+                match: '^null$',
+            },
         });
 
         ghostLogger.error('plain error message');
@@ -375,8 +385,8 @@ describe('Logging', function () {
                 loggly: {
                     token: 'invalid',
                     subdomain: 'invalid',
-                    match: 'level:critical|statusCode:404'
-                }
+                    match: 'level:critical|statusCode:404',
+                },
             });
 
             ghostLogger.error(new errors.NotFoundError());
@@ -398,14 +408,19 @@ describe('Logging', function () {
                 loggly: {
                     token: 'invalid',
                     subdomain: 'invalid',
-                    match: 'statusCode:404'
-                }
+                    match: 'statusCode:404',
+                },
             });
 
             ghostLogger.error({
                 err: new errors.NotFoundError(),
-                req: {body: {password: '12345678', data: {attributes: {pin: '1234', test: 'ja'}}}},
-                res: {getHeaders: () => ({})}
+                req: {
+                    body: {
+                        password: '12345678',
+                        data: { attributes: { pin: '1234', test: 'ja' } },
+                    },
+                },
+                res: { getHeaders: () => ({}) },
             });
             assert.equal(Bunyan2Loggly.prototype.write.called, true);
         });
@@ -422,8 +437,8 @@ describe('Logging', function () {
                 transports: ['loggly'],
                 loggly: {
                     token: 'invalid',
-                    subdomain: 'invalid'
-                }
+                    subdomain: 'invalid',
+                },
             });
 
             ghostLogger.error(new errors.NotFoundError());
@@ -432,13 +447,17 @@ describe('Logging', function () {
     });
 
     it('elasticsearch should make a stream', function () {
-        const es = new ElasticSearch({
-            node: 'http://test-elastic-client',
-            auth: {
-                username: 'user',
-                password: 'pass'
-            }
-        }, 'index', 'pipeline');
+        const es = new ElasticSearch(
+            {
+                node: 'http://test-elastic-client',
+                auth: {
+                    username: 'user',
+                    password: 'pass',
+                },
+            },
+            'index',
+            'pipeline',
+        );
 
         const stream = es.getStream();
         assert.equal(typeof stream.write, 'function');
@@ -451,7 +470,7 @@ describe('Logging', function () {
                 const data = JSON.parse(jsonData);
                 assert.equal(data.msg, 'hello 1');
                 assert.equal(data.prop, 'prop val');
-            }
+            },
         });
 
         var ghostLogger = new GhostLogger({
@@ -460,13 +479,17 @@ describe('Logging', function () {
                 index: 'ghost-index',
                 username: 'example',
                 password: 'password',
-                host: 'elastic-search-host'
-            }
+                host: 'elastic-search-host',
+            },
         });
 
-        await ghostLogger.info({
-            prop: 'prop val'
-        }, 'hello', 1);
+        await ghostLogger.info(
+            {
+                prop: 'prop val',
+            },
+            'hello',
+            1,
+        );
     });
 
     it('http writes a log message', async function () {
@@ -479,8 +502,8 @@ describe('Logging', function () {
             var ghostLogger = new GhostLogger({
                 transports: ['http'],
                 http: {
-                    host: 'http://localhost'
-                }
+                    host: 'http://localhost',
+                },
             });
 
             ghostLogger.error(new errors.NotFoundError());
@@ -495,8 +518,8 @@ describe('Logging', function () {
             transports: ['http'],
             http: {
                 host: 'http://localhost',
-                level: 'error'
-            }
+                level: 'error',
+            },
         });
 
         ghostLogger.info('testing');
@@ -510,21 +533,29 @@ describe('Logging', function () {
             transports: ['http'],
             http: {
                 host: 'http://localhost',
-                level: 'info'
-            }
+                level: 'info',
+            },
         });
 
         ghostLogger.error('testing');
         assert.equal(HttpStream.prototype.write.called, true);
     });
 
-    it('automatically adds stdout to transports if stderr transport is configured and stdout isn\'t', function () {
+    it("automatically adds stdout to transports if stderr transport is configured and stdout isn't", function () {
         var ghostLogger = new GhostLogger({
-            transports: ['stderr']
+            transports: ['stderr'],
         });
 
-        assert.equal(includes(ghostLogger.transports, 'stderr'), true, 'stderr transport should exist');
-        assert.equal(includes(ghostLogger.transports, 'stdout'), true, 'stdout transport should exist');
+        assert.equal(
+            includes(ghostLogger.transports, 'stderr'),
+            true,
+            'stderr transport should exist',
+        );
+        assert.equal(
+            includes(ghostLogger.transports, 'stdout'),
+            true,
+            'stdout transport should exist',
+        );
     });
 
     it('logs errors only to stderr if both stdout and stderr transports are defined', function () {
@@ -532,7 +563,7 @@ describe('Logging', function () {
         var stdout = sandbox.spy(process.stdout, 'write');
 
         var ghostLogger = new GhostLogger({
-            transports: ['stdout', 'stderr']
+            transports: ['stdout', 'stderr'],
         });
 
         ghostLogger.error('some error');
@@ -563,34 +594,43 @@ describe('Logging', function () {
     describe('filename computation', function () {
         it('sanitizeDomain should replace non-word characters with underscores', function () {
             var ghostLogger = new GhostLogger();
-            assert.equal(ghostLogger.sanitizeDomain('http://my-domain.com'), 'http___my_domain_com');
+            assert.equal(
+                ghostLogger.sanitizeDomain('http://my-domain.com'),
+                'http___my_domain_com',
+            );
             assert.equal(ghostLogger.sanitizeDomain('localhost'), 'localhost');
             assert.equal(ghostLogger.sanitizeDomain('example.com:8080'), 'example_com_8080');
         });
 
         it('replaceFilenamePlaceholders should replace {env} placeholder', function () {
-            var ghostLogger = new GhostLogger({env: 'production'});
+            var ghostLogger = new GhostLogger({ env: 'production' });
             assert.equal(ghostLogger.replaceFilenamePlaceholders('{env}'), 'production');
         });
 
         it('replaceFilenamePlaceholders should replace {domain} placeholder', function () {
-            var ghostLogger = new GhostLogger({domain: 'http://example.com'});
+            var ghostLogger = new GhostLogger({ domain: 'http://example.com' });
             assert.equal(ghostLogger.replaceFilenamePlaceholders('{domain}'), 'http___example_com');
         });
 
         it('replaceFilenamePlaceholders should replace both {env} and {domain} placeholders', function () {
             var ghostLogger = new GhostLogger({
                 domain: 'http://example.com',
-                env: 'staging'
+                env: 'staging',
             });
-            assert.equal(ghostLogger.replaceFilenamePlaceholders('{domain}-{env}'), 'http___example_com-staging');
-            assert.equal(ghostLogger.replaceFilenamePlaceholders('{env}.{domain}'), 'staging.http___example_com');
+            assert.equal(
+                ghostLogger.replaceFilenamePlaceholders('{domain}-{env}'),
+                'http___example_com-staging',
+            );
+            assert.equal(
+                ghostLogger.replaceFilenamePlaceholders('{env}.{domain}'),
+                'staging.http___example_com',
+            );
         });
 
         it('logger should return default format when no filename option provided', function () {
             var ghostLogger = new GhostLogger({
                 domain: 'http://example.com',
-                env: 'production'
+                env: 'production',
             });
             assert.equal(ghostLogger.filename, '{domain}_{env}');
         });
@@ -599,7 +639,7 @@ describe('Logging', function () {
             var ghostLogger = new GhostLogger({
                 domain: 'http://example.com',
                 env: 'production',
-                filename: '{env}'
+                filename: '{env}',
             });
             assert.equal(ghostLogger.filename, '{env}');
         });
@@ -612,7 +652,7 @@ describe('Logging', function () {
                 env: 'production',
                 filename: '{env}',
                 transports: ['file'],
-                path: tempDir
+                path: tempDir,
             });
 
             ghostLogger.info('Test log message');
@@ -625,7 +665,7 @@ describe('Logging', function () {
             assert.equal(fs.existsSync(path.join(tempDir, 'production.log')), true);
             assert.equal(fs.existsSync(path.join(tempDir, 'production.error.log')), true);
 
-            fs.rmSync(tempDir, {recursive: true, force: true});
+            fs.rmSync(tempDir, { recursive: true, force: true });
         });
 
         it('file stream supports built-in rotating-file transport config', function () {
@@ -640,8 +680,8 @@ describe('Logging', function () {
                     enabled: true,
                     useLibrary: false,
                     period: '1d',
-                    count: 2
-                }
+                    count: 2,
+                },
             });
 
             assert.notEqual(ghostLogger.streams['rotation-errors'], undefined);
@@ -663,8 +703,8 @@ describe('Logging', function () {
                     threshold: '10m',
                     count: 2,
                     gzip: true,
-                    rotateExisting: false
-                }
+                    rotateExisting: false,
+                },
             });
 
             assert.notEqual(ghostLogger.streams['rotation-errors'], undefined);
@@ -685,8 +725,8 @@ describe('Logging', function () {
                     period: '1d',
                     threshold: '10m',
                     count: 2,
-                    gzip: true
-                }
+                    gzip: true,
+                },
             });
 
             assert.notEqual(ghostLogger.streams['rotation-errors'], undefined);
@@ -695,10 +735,10 @@ describe('Logging', function () {
 
         it('file stream exits early when target directory does not exist', function () {
             const badPath = getTestLogDir('missing-dir');
-            fs.rmSync(badPath, {recursive: true, force: true});
+            fs.rmSync(badPath, { recursive: true, force: true });
             const ghostLogger = new GhostLogger({
                 transports: ['file'],
-                path: badPath
+                path: badPath,
             });
 
             assert.equal(ghostLogger.streams['file-errors'], undefined);
@@ -732,11 +772,11 @@ describe('Logging', function () {
                     transports: ['loggly'],
                     loggly: {
                         token: 'invalid',
-                        subdomain: 'invalid'
-                    }
+                        subdomain: 'invalid',
+                    },
                 });
                 ghostLogger.error({
-                    err
+                    err,
                 });
 
                 assert.equal(Bunyan2Loggly.prototype.write.called, true);
@@ -757,21 +797,21 @@ describe('Logging', function () {
                     transports: ['loggly'],
                     loggly: {
                         token: 'invalid',
-                        subdomain: 'invalid'
-                    }
+                        subdomain: 'invalid',
+                    },
                 });
                 ghostLogger.error({
                     err: new errors.NotFoundError({
                         context: {
-                            a: 'b'
+                            a: 'b',
                         },
                         errorDetails: {
-                            c: 'd'
+                            c: 'd',
                         },
                         help: {
-                            b: 'a'
-                        }
-                    })
+                            b: 'a',
+                        },
+                    }),
                 });
 
                 assert.equal(Bunyan2Loggly.prototype.write.called, true);
@@ -789,12 +829,12 @@ describe('Logging', function () {
                 params: {},
                 headers: {},
                 query: {},
-                extra: {feature: 'on'},
-                queueDepth: 7
+                extra: { feature: 'on' },
+                queueDepth: 7,
             };
 
             const serialized = ghostLogger.serializers.req(req);
-            assert.deepEqual(serialized.extra, {feature: 'on'});
+            assert.deepEqual(serialized.extra, { feature: 'on' });
             assert.equal(serialized.queueDepth, 7);
         });
 
@@ -805,10 +845,10 @@ describe('Logging', function () {
                 enumerable: true,
                 get() {
                     throw new Error('boom');
-                }
+                },
             });
 
-            const data = ghostLogger.removeSensitiveData({nested});
+            const data = ghostLogger.removeSensitiveData({ nested });
             assert.equal(data.nested, nested);
         });
     });
@@ -817,15 +857,15 @@ describe('Logging', function () {
         it('adds local timestamp when useLocalTime is enabled', function () {
             const ghostLogger = new GhostLogger({
                 transports: [],
-                useLocalTime: true
+                useLocalTime: true,
             });
             const info = sinon.spy();
 
             ghostLogger.streams = {
                 stdout: {
                     name: 'stdout',
-                    log: {info}
-                }
+                    log: { info },
+                },
             };
 
             ghostLogger.log('info', ['hello']);
@@ -835,7 +875,7 @@ describe('Logging', function () {
         });
 
         it('trace/debug/fatal delegate to log()', function () {
-            const ghostLogger = new GhostLogger({transports: []});
+            const ghostLogger = new GhostLogger({ transports: [] });
             const logSpy = sinon.spy(ghostLogger, 'log');
 
             ghostLogger.trace('t');
@@ -848,31 +888,31 @@ describe('Logging', function () {
         });
 
         it('child creates stream children with bound properties', function () {
-            const ghostLogger = new GhostLogger({transports: []});
-            const childA = sinon.stub().returns({id: 'a'});
-            const childB = sinon.stub().returns({id: 'b'});
+            const ghostLogger = new GhostLogger({ transports: [] });
+            const childA = sinon.stub().returns({ id: 'a' });
+            const childB = sinon.stub().returns({ id: 'b' });
 
             ghostLogger.streams = {
                 one: {
                     name: 'one',
-                    log: {child: childA}
+                    log: { child: childA },
                 },
                 two: {
                     name: 'two',
-                    log: {child: childB}
-                }
+                    log: { child: childB },
+                },
             };
 
-            const child = ghostLogger.child({requestId: 'abc'});
+            const child = ghostLogger.child({ requestId: 'abc' });
 
             assert.equal(childA.calledOnce, true);
             assert.equal(childB.calledOnce, true);
-            assert.deepEqual(childA.args[0][0], {requestId: 'abc'});
-            assert.deepEqual(childB.args[0][0], {requestId: 'abc'});
+            assert.deepEqual(childA.args[0][0], { requestId: 'abc' });
+            assert.deepEqual(childB.args[0][0], { requestId: 'abc' });
             assert.equal(child.streams.one.name, 'one');
             assert.equal(child.streams.two.name, 'two');
-            assert.deepEqual(child.streams.one.log, {id: 'a'});
-            assert.deepEqual(child.streams.two.log, {id: 'b'});
+            assert.deepEqual(child.streams.one.log, { id: 'a' });
+            assert.deepEqual(child.streams.two.log, { id: 'b' });
         });
     });
 });

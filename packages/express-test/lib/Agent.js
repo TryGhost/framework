@@ -1,8 +1,8 @@
 /* eslint-disable ghost/ghost-custom/no-native-error */
-const {CookieJar} = require('cookiejar');
+const { CookieJar } = require('cookiejar');
 const ExpectRequest = require('./ExpectRequest');
-const {RequestOptions} = require('./Request');
-const {normalizeURL} = require('./utils');
+const { RequestOptions } = require('./Request');
+const { normalizeURL } = require('./utils');
 
 /**
  * @typedef AgentOptions
@@ -73,22 +73,26 @@ class Agent {
     _mergeOptions(method, url, options = {}) {
         // It doesn't make sense to call this method without these properties
         if (!method) {
-            throw new Error('_mergeOptions cannot be called without a method'); /* eslint-disable-line no-restricted-syntax */
+            throw new Error(
+                '_mergeOptions cannot be called without a method',
+            ); /* eslint-disable-line no-restricted-syntax */
         }
 
         if (!url) {
-            throw new Error('_mergeOptions cannot be called without a url'); /* eslint-disable-line no-restricted-syntax */
+            throw new Error(
+                '_mergeOptions cannot be called without a url',
+            ); /* eslint-disable-line no-restricted-syntax */
         }
 
         // urlOptions
-        const {baseUrl, queryParams} = options;
+        const { baseUrl, queryParams } = options;
 
         return new RequestOptions({
             method,
-            url: this._makeUrl(url, Object.assign({}, {baseUrl, queryParams})),
+            url: this._makeUrl(url, Object.assign({}, { baseUrl, queryParams })),
             headers: Object.assign({}, this.defaults.headers, options.headers),
             // Set this to an empty object for ease, as express.json will do this anyway
-            body: Object.assign({}, this.defaults.body, options.body)
+            body: Object.assign({}, this.defaults.body, options.body),
         });
     }
 
@@ -105,9 +109,16 @@ class Agent {
 ['get', 'post', 'put', 'patch', 'delete', 'options', 'head'].forEach((method) => {
     Agent.prototype[method] = function (url, options) {
         if (!url) {
-            throw new Error('Cannot make a request without supplying a url'); /* eslint-disable-line no-restricted-syntax */
+            throw new Error(
+                'Cannot make a request without supplying a url',
+            ); /* eslint-disable-line no-restricted-syntax */
         }
-        return new ExpectRequest(this.app, this.jar, this._mergeOptions(method.toUpperCase(), url, options), this.snapshotManager);
+        return new ExpectRequest(
+            this.app,
+            this.jar,
+            this._mergeOptions(method.toUpperCase(), url, options),
+            this.snapshotManager,
+        );
     };
 });
 

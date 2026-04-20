@@ -12,7 +12,7 @@ type ServerConfig = {
 type CreateApp = () => express.Application;
 type CreateStoppableServer = (
     server: ReturnType<express.Application['listen']>,
-    grace?: number
+    grace?: number,
 ) => stoppable.StoppableServer;
 
 export class MetricsServer {
@@ -28,7 +28,7 @@ export class MetricsServer {
         serverConfig,
         handler,
         createApp,
-        createStoppableServer
+        createStoppableServer,
     }: {
         serverConfig: ServerConfig;
         handler: express.Handler;
@@ -49,13 +49,15 @@ export class MetricsServer {
         this.app = this.createApp();
         this.app.get('/metrics', this.handler);
         const httpServer = this.app.listen(this.serverConfig.port, this.serverConfig.host, () => {
-            debug(`Metrics server listening at ${this.serverConfig.host}:${this.serverConfig.port}`);
+            debug(
+                `Metrics server listening at ${this.serverConfig.host}:${this.serverConfig.port}`,
+            );
         });
         this.httpServer = this.createStoppableServer(httpServer, 0);
 
         process.on('SIGINT', () => this.shutdown());
         process.on('SIGTERM', () => this.shutdown());
-        return {app: this.app, httpServer: this.httpServer};
+        return { app: this.app, httpServer: this.httpServer };
     }
 
     async stop() {

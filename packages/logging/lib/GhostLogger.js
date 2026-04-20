@@ -75,7 +75,7 @@ class GhostLogger {
         this.rotation = options.rotation || {
             enabled: false,
             period: '1w',
-            count: 100
+            count: 100,
         };
 
         this.streams = {};
@@ -102,7 +102,7 @@ class GhostLogger {
     setStdoutStream() {
         const GhostPrettyStream = require('@tryghost/pretty-stream');
         const prettyStdOut = new GhostPrettyStream({
-            mode: this.mode
+            mode: this.mode,
         });
 
         prettyStdOut.pipe(process.stdout);
@@ -111,13 +111,15 @@ class GhostLogger {
             name: 'stdout',
             log: bunyan.createLogger({
                 name: this.name,
-                streams: [{
-                    type: 'raw',
-                    stream: prettyStdOut,
-                    level: this.level
-                }],
-                serializers: this.serializers
-            })
+                streams: [
+                    {
+                        type: 'raw',
+                        stream: prettyStdOut,
+                        level: this.level,
+                    },
+                ],
+                serializers: this.serializers,
+            }),
         };
     }
 
@@ -127,7 +129,7 @@ class GhostLogger {
     setStderrStream() {
         const GhostPrettyStream = require('@tryghost/pretty-stream');
         const prettyStdErr = new GhostPrettyStream({
-            mode: this.mode
+            mode: this.mode,
         });
 
         prettyStdErr.pipe(process.stderr);
@@ -136,13 +138,15 @@ class GhostLogger {
             name: 'stderr',
             log: bunyan.createLogger({
                 name: this.name,
-                streams: [{
-                    type: 'raw',
-                    stream: prettyStdErr,
-                    level: 'error'
-                }],
-                serializers: this.serializers
-            })
+                streams: [
+                    {
+                        type: 'raw',
+                        stream: prettyStdErr,
+                        level: 'error',
+                    },
+                ],
+                serializers: this.serializers,
+            }),
         };
     }
 
@@ -150,26 +154,28 @@ class GhostLogger {
      * Setup stream for posting the message to a parent instance
      */
     setParentStream() {
-        const {parentPort} = require('worker_threads');
+        const { parentPort } = require('worker_threads');
         const bunyanStream = {
             // Parent stream only supports sending a string
             write: (bunyanObject) => {
-                const {msg} = bunyanObject;
+                const { msg } = bunyanObject;
                 parentPort.postMessage(msg);
-            }
+            },
         };
 
         this.streams.parent = {
             name: 'parent',
             log: bunyan.createLogger({
                 name: this.name,
-                streams: [{
-                    type: 'raw',
-                    stream: bunyanStream,
-                    level: this.level
-                }],
-                serializers: this.serializers
-            })
+                streams: [
+                    {
+                        type: 'raw',
+                        stream: bunyanStream,
+                        level: this.level,
+                    },
+                ],
+                serializers: this.serializers,
+            }),
         };
     }
 
@@ -182,7 +188,7 @@ class GhostLogger {
         const logglyStream = new Bunyan2Loggly({
             token: this.loggly.token,
             subdomain: this.loggly.subdomain,
-            tags: this.loggly.tags
+            tags: this.loggly.tags,
         });
 
         this.streams.loggly = {
@@ -190,13 +196,15 @@ class GhostLogger {
             match: this.loggly.match,
             log: bunyan.createLogger({
                 name: this.name,
-                streams: [{
-                    type: 'raw',
-                    stream: logglyStream,
-                    level: 'error'
-                }],
-                serializers: this.serializers
-            })
+                streams: [
+                    {
+                        type: 'raw',
+                        stream: logglyStream,
+                        level: 'error',
+                    },
+                ],
+                serializers: this.serializers,
+            }),
         };
     }
 
@@ -206,25 +214,31 @@ class GhostLogger {
     setElasticsearchStream() {
         const ElasticSearch = require('@tryghost/elasticsearch').BunyanStream;
 
-        const elasticSearchInstance = new ElasticSearch({
-            node: this.elasticsearch.host,
-            auth: {
-                username: this.elasticsearch.username,
-                password: this.elasticsearch.password
-            }
-        }, this.elasticsearch.index, this.elasticsearch.pipeline);
+        const elasticSearchInstance = new ElasticSearch(
+            {
+                node: this.elasticsearch.host,
+                auth: {
+                    username: this.elasticsearch.username,
+                    password: this.elasticsearch.password,
+                },
+            },
+            this.elasticsearch.index,
+            this.elasticsearch.pipeline,
+        );
 
         this.streams.elasticsearch = {
             name: 'elasticsearch',
             log: bunyan.createLogger({
                 name: this.name,
-                streams: [{
-                    type: 'stream',
-                    stream: elasticSearchInstance.getStream(),
-                    level: this.elasticsearch.level
-                }],
-                serializers: this.serializers
-            })
+                streams: [
+                    {
+                        type: 'stream',
+                        stream: elasticSearchInstance.getStream(),
+                        level: this.elasticsearch.level,
+                    },
+                ],
+                serializers: this.serializers,
+            }),
         };
     }
 
@@ -235,20 +249,22 @@ class GhostLogger {
             url: this.http.url,
             headers: this.http.headers || {},
             username: this.http.username || '',
-            password: this.http.password || ''
+            password: this.http.password || '',
         });
 
         this.streams.http = {
             name: 'http',
             log: bunyan.createLogger({
                 name: this.name,
-                streams: [{
-                    type: 'raw',
-                    stream: httpStream,
-                    level: this.http.level
-                }],
-                serializers: this.serializers
-            })
+                streams: [
+                    {
+                        type: 'raw',
+                        stream: httpStream,
+                        level: this.http.level,
+                    },
+                ],
+                serializers: this.serializers,
+            }),
         };
     }
 
@@ -261,20 +277,22 @@ class GhostLogger {
         const stream = gelfStream.forBunyan(
             this.gelf.host || 'localhost',
             this.gelf.port || 12201,
-            this.gelf.options || {}
+            this.gelf.options || {},
         );
 
         this.streams.gelf = {
             name: 'gelf',
             log: bunyan.createLogger({
                 name: this.name,
-                streams: [{
-                    type: 'raw',
-                    stream: stream,
-                    level: this.level
-                }],
-                serializers: this.serializers
-            })
+                streams: [
+                    {
+                        type: 'raw',
+                        stream: stream,
+                        level: this.level,
+                    },
+                ],
+                serializers: this.serializers,
+            }),
         };
     }
 
@@ -327,33 +345,42 @@ class GhostLogger {
                     threshold: this.rotation.threshold,
                     totalFiles: this.rotation.count,
                     gzip: this.rotation.gzip,
-                    rotateExisting: (typeof this.rotation.rotateExisting === 'undefined') ? this.rotation.rotateExisting : true
+                    rotateExisting:
+                        typeof this.rotation.rotateExisting === 'undefined'
+                            ? this.rotation.rotateExisting
+                            : true,
                 };
 
                 this.streams['rotation-errors'] = {
                     name: 'rotation-errors',
                     log: bunyan.createLogger({
                         name: this.name,
-                        streams: [{
-                            stream: new RotatingFileStream(Object.assign({}, rotationConfig, {
-                                path: `${this.path}${baseFilename}.error.log`
-                            })),
-                            level: 'error'
-                        }],
-                        serializers: this.serializers
-                    })
+                        streams: [
+                            {
+                                stream: new RotatingFileStream(
+                                    Object.assign({}, rotationConfig, {
+                                        path: `${this.path}${baseFilename}.error.log`,
+                                    }),
+                                ),
+                                level: 'error',
+                            },
+                        ],
+                        serializers: this.serializers,
+                    }),
                 };
 
                 this.streams['rotation-all'] = {
                     name: 'rotation-all',
                     log: bunyan.createLogger({
                         name: this.name,
-                        streams: [{
-                            stream: new RotatingFileStream(rotationConfig),
-                            level: this.level
-                        }],
-                        serializers: this.serializers
-                    })
+                        streams: [
+                            {
+                                stream: new RotatingFileStream(rotationConfig),
+                                level: this.level,
+                            },
+                        ],
+                        serializers: this.serializers,
+                    }),
                 };
             } else {
                 // TODO: Remove this when confidence is high in the external library for rotation
@@ -361,30 +388,34 @@ class GhostLogger {
                     name: 'rotation-errors',
                     log: bunyan.createLogger({
                         name: this.name,
-                        streams: [{
-                            type: 'rotating-file',
-                            path: `${this.path}${baseFilename}.error.log`,
-                            period: this.rotation.period,
-                            count: this.rotation.count,
-                            level: 'error'
-                        }],
-                        serializers: this.serializers
-                    })
+                        streams: [
+                            {
+                                type: 'rotating-file',
+                                path: `${this.path}${baseFilename}.error.log`,
+                                period: this.rotation.period,
+                                count: this.rotation.count,
+                                level: 'error',
+                            },
+                        ],
+                        serializers: this.serializers,
+                    }),
                 };
 
                 this.streams['rotation-all'] = {
                     name: 'rotation-all',
                     log: bunyan.createLogger({
                         name: this.name,
-                        streams: [{
-                            type: 'rotating-file',
-                            path: `${this.path}${baseFilename}.log`,
-                            period: this.rotation.period,
-                            count: this.rotation.count,
-                            level: this.level
-                        }],
-                        serializers: this.serializers
-                    })
+                        streams: [
+                            {
+                                type: 'rotating-file',
+                                path: `${this.path}${baseFilename}.log`,
+                                period: this.rotation.period,
+                                count: this.rotation.count,
+                                level: this.level,
+                            },
+                        ],
+                        serializers: this.serializers,
+                    }),
                 };
             }
         } else {
@@ -392,24 +423,28 @@ class GhostLogger {
                 name: 'file',
                 log: bunyan.createLogger({
                     name: this.name,
-                    streams: [{
-                        path: `${this.path}${baseFilename}.error.log`,
-                        level: 'error'
-                    }],
-                    serializers: this.serializers
-                })
+                    streams: [
+                        {
+                            path: `${this.path}${baseFilename}.error.log`,
+                            level: 'error',
+                        },
+                    ],
+                    serializers: this.serializers,
+                }),
             };
 
             this.streams['file-all'] = {
                 name: 'file',
                 log: bunyan.createLogger({
                     name: this.name,
-                    streams: [{
-                        path: `${this.path}${baseFilename}.log`,
-                        level: this.level
-                    }],
-                    serializers: this.serializers
-                })
+                    streams: [
+                        {
+                            path: `${this.path}${baseFilename}.log`,
+                            level: this.level,
+                        },
+                    ],
+                    serializers: this.serializers,
+                }),
             };
         }
     }
@@ -428,14 +463,14 @@ class GhostLogger {
                 const requestLog = {
                     meta: {
                         requestId: req.requestId,
-                        userId: req.userId
+                        userId: req.userId,
                     },
                     url: req.url,
                     method: req.method,
                     originalUrl: req.originalUrl,
                     params: req.params,
                     headers: this.removeSensitiveData(req.headers),
-                    query: this.removeSensitiveData(req.query)
+                    query: this.removeSensitiveData(req.query),
                 };
 
                 if (req.extra) {
@@ -456,7 +491,7 @@ class GhostLogger {
                 return {
                     _headers: this.removeSensitiveData(res.getHeaders()),
                     statusCode: res.statusCode,
-                    responseTime: res.responseTime
+                    responseTime: res.responseTime,
                 };
             },
             err: (err) => {
@@ -472,9 +507,9 @@ class GhostLogger {
                     help: jsonStringifySafe(err.help),
                     stack: err.stack,
                     hideStack: err.hideStack,
-                    errorDetails: jsonStringifySafe(err.errorDetails)
+                    errorDetails: jsonStringifySafe(err.errorDetails),
                 };
-            }
+            },
         };
     }
 
@@ -556,7 +591,11 @@ class GhostLogger {
         each(this.streams, (logger) => {
             // If we have both a stdout and a stderr stream, don't log errors to stdout
             // because it would result in duplicate logs
-            if (type === 'error' && logger.name === 'stdout' && includes(this.transports, 'stderr')) {
+            if (
+                type === 'error' &&
+                logger.name === 'stdout' &&
+                includes(this.transports, 'stderr')
+            ) {
                 return;
             }
 
@@ -581,7 +620,11 @@ class GhostLogger {
              * https://github.com/moll/json-stringify-safe
              */
             if (logger.match && type === 'error') {
-                if (new RegExp(logger.match).test(jsonStringifySafe(modifiedArguments[0].err || null).replace(/"/g, ''))) {
+                if (
+                    new RegExp(logger.match).test(
+                        jsonStringifySafe(modifiedArguments[0].err || null).replace(/"/g, ''),
+                    )
+                ) {
                     logger.log[type](...modifiedArguments);
                 }
             } else {
@@ -625,13 +668,13 @@ class GhostLogger {
             transports: [],
             level: this.level,
             logBody: this.logBody,
-            mode: this.mode
+            mode: this.mode,
         });
 
         result.streams = Object.keys(this.streams).reduce((acc, id) => {
             acc[id] = {
                 name: this.streams[id].name,
-                log: this.streams[id].log.child(boundProperties)
+                log: this.streams[id].log.child(boundProperties),
             };
             return acc;
         }, {});

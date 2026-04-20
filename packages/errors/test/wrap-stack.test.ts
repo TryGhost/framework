@@ -1,5 +1,5 @@
 import assert from 'assert/strict';
-import {wrapStack} from '../src/wrap-stack';
+import { wrapStack } from '../src/wrap-stack';
 
 describe('wrapStack', function () {
     it('returns combined stack lines', function () {
@@ -8,7 +8,10 @@ describe('wrapStack', function () {
         const internalError = new Error('I am the internal one!');
         internalError.stack = 'internal fn\ninternal stack 1\ninternal stack 2';
 
-        assert.equal(wrapStack(ghostError, internalError), 'internal fn\nghost stack 1\ninternal stack 1\ninternal stack 2');
+        assert.equal(
+            wrapStack(ghostError, internalError),
+            'internal fn\nghost stack 1\ninternal stack 1\ninternal stack 2',
+        );
     });
 
     it('handles errors without a stack', function () {

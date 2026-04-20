@@ -29,7 +29,7 @@ describe('@tryghost/bookshelf-has-posts', function () {
             return Child;
         };
 
-        Bookshelf = {Model: ParentModel};
+        Bookshelf = { Model: ParentModel };
         plugin(Bookshelf);
     });
 
@@ -51,11 +51,11 @@ describe('@tryghost/bookshelf-has-posts', function () {
 
     it('addHasPostsWhere builds expected query shape', function () {
         const whereIn = sinon.stub();
-        const qb = {whereIn};
+        const qb = { whereIn };
         const tableName = 'tags';
         const config = {
             joinTable: 'posts_tags',
-            joinTo: 'tag_id'
+            joinTo: 'tag_id',
         };
 
         const whereFn = plugin.addHasPostsWhere(tableName, config);
@@ -71,24 +71,30 @@ describe('@tryghost/bookshelf-has-posts', function () {
             whereRaw: sinon.stub().returnsThis(),
             join: sinon.stub().returnsThis(),
             andWhere: sinon.stub().returnsThis(),
-            toSQL: sinon.stub().returns({sql: 'select *'})
+            toSQL: sinon.stub().returns({ sql: 'select *' }),
         };
 
         const callbackResult = whereIn.firstCall.args[1].call(subqueryBuilder);
         assert.equal(callbackResult, subqueryBuilder);
         assert.equal(subqueryBuilder.distinct.calledOnceWithExactly('posts_tags.tag_id'), true);
         assert.equal(subqueryBuilder.from.calledOnceWithExactly('posts_tags'), true);
-        assert.equal(subqueryBuilder.join.calledOnceWithExactly('posts', 'posts.id', 'posts_tags.post_id'), true);
-        assert.equal(subqueryBuilder.andWhere.calledOnceWithExactly('posts.status', '=', 'published'), true);
+        assert.equal(
+            subqueryBuilder.join.calledOnceWithExactly('posts', 'posts.id', 'posts_tags.post_id'),
+            true,
+        );
+        assert.equal(
+            subqueryBuilder.andWhere.calledOnceWithExactly('posts.status', '=', 'published'),
+            true,
+        );
     });
 
     it('addHasPostsWhere does not use a correlated subquery', function () {
         const whereIn = sinon.stub();
-        const qb = {whereIn};
+        const qb = { whereIn };
         const tableName = 'tags';
         const config = {
             joinTable: 'posts_tags',
-            joinTo: 'tag_id'
+            joinTo: 'tag_id',
         };
 
         const whereFn = plugin.addHasPostsWhere(tableName, config);
@@ -101,7 +107,7 @@ describe('@tryghost/bookshelf-has-posts', function () {
             whereRaw: sinon.stub().returnsThis(),
             join: sinon.stub().returnsThis(),
             andWhere: sinon.stub().returnsThis(),
-            toSQL: sinon.stub().returns({sql: 'select *'})
+            toSQL: sinon.stub().returns({ sql: 'select *' }),
         };
 
         whereIn.firstCall.args[1].call(subqueryBuilder);
@@ -110,16 +116,19 @@ describe('@tryghost/bookshelf-has-posts', function () {
         // A correlated whereRaw (e.g. `posts_tags.tag_id = tags.id`) forces MySQL to
         // re-evaluate the subquery for every row in the outer table, causing excessive
         // row scanning on sites with many tags/authors.
-        assert.equal(subqueryBuilder.whereRaw.called, false,
-            'subquery should not use whereRaw — correlated subqueries cause O(n²) row scanning');
+        assert.equal(
+            subqueryBuilder.whereRaw.called,
+            false,
+            'subquery should not use whereRaw — correlated subqueries cause O(n²) row scanning',
+        );
     });
 
     it('fetch applies has-posts query when configured', function () {
         sinon.stub(debugBase, 'enabled').returns(false);
         const model = new Bookshelf.Model();
         model.tableName = 'tags';
-        model.shouldHavePosts = {joinTable: 'posts_tags', joinTo: 'tag_id'};
-        model.query = sinon.stub().returns({toQuery: sinon.stub().returns('SQL')});
+        model.shouldHavePosts = { joinTable: 'posts_tags', joinTo: 'tag_id' };
+        model.query = sinon.stub().returns({ toQuery: sinon.stub().returns('SQL') });
 
         const result = model.fetch({});
         assert.equal(result, 'FETCH');
@@ -130,7 +139,7 @@ describe('@tryghost/bookshelf-has-posts', function () {
     it('fetch skips has-posts query when not configured', function () {
         sinon.stub(debugBase, 'enabled').returns(false);
         const model = new Bookshelf.Model();
-        model.query = sinon.stub().returns({toQuery: sinon.stub().returns('SQL')});
+        model.query = sinon.stub().returns({ toQuery: sinon.stub().returns('SQL') });
 
         model.fetch({});
         assert.equal(model.query.called, false);
@@ -140,7 +149,7 @@ describe('@tryghost/bookshelf-has-posts', function () {
     it('fetch logs query when debug is enabled', function () {
         sinon.stub(debugBase, 'enabled').returns(true);
         const model = new Bookshelf.Model();
-        model.query = sinon.stub().returns({toQuery: sinon.stub().returns('SELECT 1')});
+        model.query = sinon.stub().returns({ toQuery: sinon.stub().returns('SELECT 1') });
 
         const result = model.fetch({});
         assert.equal(result, 'FETCH');
@@ -151,8 +160,8 @@ describe('@tryghost/bookshelf-has-posts', function () {
         sinon.stub(debugBase, 'enabled').returns(true);
         const model = new Bookshelf.Model();
         model.tableName = 'authors';
-        model.shouldHavePosts = {joinTable: 'posts_authors', joinTo: 'author_id'};
-        model.query = sinon.stub().returns({toQuery: sinon.stub().returns('SELECT 2')});
+        model.shouldHavePosts = { joinTable: 'posts_authors', joinTo: 'author_id' };
+        model.query = sinon.stub().returns({ toQuery: sinon.stub().returns('SELECT 2') });
 
         const result = model.fetchAll({});
         assert.equal(result, 'FETCH_ALL');
@@ -163,7 +172,7 @@ describe('@tryghost/bookshelf-has-posts', function () {
     it('fetchAll skips query decoration when shouldHavePosts is missing', function () {
         sinon.stub(debugBase, 'enabled').returns(false);
         const model = new Bookshelf.Model();
-        model.query = sinon.stub().returns({toQuery: sinon.stub().returns('SELECT 3')});
+        model.query = sinon.stub().returns({ toQuery: sinon.stub().returns('SELECT 3') });
 
         model.fetchAll({});
         assert.equal(model.query.called, false);

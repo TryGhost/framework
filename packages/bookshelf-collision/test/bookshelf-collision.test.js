@@ -12,7 +12,7 @@ describe('@tryghost/bookshelf-collision', function () {
 
     beforeEach(function () {
         parentUpdate = sinon.stub().resolves('UPDATED');
-        parentSync = {update: parentUpdate};
+        parentSync = { update: parentUpdate };
         parentSave = sinon.stub().resolves('SAVED');
 
         ParentModel = function BaseModel() {
@@ -34,7 +34,7 @@ describe('@tryghost/bookshelf-collision', function () {
             return Child;
         };
 
-        Bookshelf = {Model: ParentModel};
+        Bookshelf = { Model: ParentModel };
         installPlugin(Bookshelf);
     });
 
@@ -54,14 +54,14 @@ describe('@tryghost/bookshelf-collision', function () {
         const Model = Bookshelf.Model;
         const model = new Model();
 
-        model.attributes = {id: 1, updated_at: '2024-01-01T00:00:00.000Z'};
-        const clientPayload = {title: 'post'};
+        model.attributes = { id: 1, updated_at: '2024-01-01T00:00:00.000Z' };
+        const clientPayload = { title: 'post' };
         const result = await model.save(clientPayload);
 
         assert.equal(result, 'SAVED');
         assert.equal(parentSave.calledOnce, true);
-        assert.deepEqual(model.clientData, {title: 'post'});
-        assert.deepEqual(model.serverData, {id: 1, updated_at: '2024-01-01T00:00:00.000Z'});
+        assert.deepEqual(model.clientData, { title: 'post' });
+        assert.deepEqual(model.serverData, { id: 1, updated_at: '2024-01-01T00:00:00.000Z' });
         assert.notEqual(model.clientData, clientPayload);
         assert.notEqual(model.serverData, model.attributes);
     });
@@ -69,21 +69,21 @@ describe('@tryghost/bookshelf-collision', function () {
     it('save defaults clientData to empty object when no data is passed', async function () {
         const Model = Bookshelf.Model;
         const model = new Model();
-        model.attributes = {id: 1};
+        model.attributes = { id: 1 };
 
         await model.save();
 
         assert.deepEqual(model.clientData, {});
-        assert.deepEqual(model.serverData, {id: 1});
+        assert.deepEqual(model.serverData, { id: 1 });
     });
 
     it('sync returns parent sync for non-post tables', function () {
         const Model = Bookshelf.Model;
         const model = new Model();
         model.tableName = 'users';
-        model.serverData = {updated_at: '2024-01-01T00:00:00.000Z'};
+        model.serverData = { updated_at: '2024-01-01T00:00:00.000Z' };
 
-        const result = model.sync({method: 'update'});
+        const result = model.sync({ method: 'update' });
 
         assert.equal(result, parentSync);
         assert.equal(result.update, parentUpdate);
@@ -94,7 +94,7 @@ describe('@tryghost/bookshelf-collision', function () {
         const model = new Model();
         model.tableName = 'posts';
 
-        const result = model.sync({method: 'patch'});
+        const result = model.sync({ method: 'patch' });
 
         assert.equal(result, parentSync);
         assert.equal(result.update, parentUpdate);
@@ -104,9 +104,9 @@ describe('@tryghost/bookshelf-collision', function () {
         const Model = Bookshelf.Model;
         const model = new Model();
         model.tableName = 'posts';
-        model.serverData = {updated_at: '2024-01-01T00:00:00.000Z'};
+        model.serverData = { updated_at: '2024-01-01T00:00:00.000Z' };
 
-        const result = model.sync({method: 'insert'});
+        const result = model.sync({ method: 'insert' });
 
         assert.equal(result, parentSync);
         assert.equal(result.update, parentUpdate);
@@ -116,9 +116,9 @@ describe('@tryghost/bookshelf-collision', function () {
         const Model = Bookshelf.Model;
         const model = new Model();
         model.tableName = 'posts';
-        model.serverData = {updated_at: '2024-01-01T00:00:00.000Z'};
+        model.serverData = { updated_at: '2024-01-01T00:00:00.000Z' };
 
-        const updateSync = model.sync({method: 'patch'});
+        const updateSync = model.sync({ method: 'patch' });
 
         assert.equal(updateSync, parentSync);
         assert.notEqual(updateSync.update, parentUpdate);
@@ -128,11 +128,11 @@ describe('@tryghost/bookshelf-collision', function () {
         const Model = Bookshelf.Model;
         const model = new Model();
         model.tableName = 'posts';
-        model.serverData = {updated_at: '2024-01-01T00:00:00.000Z'};
-        model.clientData = {updated_at: '2024-01-02T00:00:00.000Z'};
-        model._changed = {updated_at: '2024-01-02T00:00:00.000Z', html: '<p>x</p>'};
+        model.serverData = { updated_at: '2024-01-01T00:00:00.000Z' };
+        model.clientData = { updated_at: '2024-01-02T00:00:00.000Z' };
+        model._changed = { updated_at: '2024-01-02T00:00:00.000Z', html: '<p>x</p>' };
 
-        const updateSync = model.sync({method: 'update'});
+        const updateSync = model.sync({ method: 'update' });
         const result = await updateSync.update();
 
         assert.equal(result, 'UPDATED');
@@ -143,11 +143,11 @@ describe('@tryghost/bookshelf-collision', function () {
         const Model = Bookshelf.Model;
         const model = new Model();
         model.tableName = 'posts';
-        model.serverData = {updated_at: '2024-01-01T00:00:00.000Z'};
-        model.clientData = {updated_at: '2024-01-01T00:00:00.000Z'};
-        model._changed = {title: 'changed'};
+        model.serverData = { updated_at: '2024-01-01T00:00:00.000Z' };
+        model.clientData = { updated_at: '2024-01-01T00:00:00.000Z' };
+        model._changed = { title: 'changed' };
 
-        const updateSync = model.sync({method: 'update'});
+        const updateSync = model.sync({ method: 'update' });
         const result = await updateSync.update('a1', 'a2');
 
         assert.equal(result, 'UPDATED');
@@ -158,24 +158,27 @@ describe('@tryghost/bookshelf-collision', function () {
         const Model = Bookshelf.Model;
         const model = new Model();
         model.tableName = 'posts';
-        model.serverData = {updated_at: '2024-01-01T00:00:00.000Z'};
-        model.clientData = {updated_at: '2024-01-02T00:00:00.000Z'};
-        model._changed = {title: 'new-title'};
+        model.serverData = { updated_at: '2024-01-01T00:00:00.000Z' };
+        model.clientData = { updated_at: '2024-01-02T00:00:00.000Z' };
+        model._changed = { title: 'new-title' };
 
-        const updateSync = model.sync({method: 'update'});
+        const updateSync = model.sync({ method: 'update' });
 
-        await assert.rejects(async function () {
-            await updateSync.update();
-        }, function (err) {
-            assert.equal(err instanceof errors.UpdateCollisionError, true);
-            assert.equal(err.code, 'UPDATE_COLLISION');
-            assert.deepEqual(err.errorDetails, {
-                changedFields: ['title'],
-                clientUpdatedAt: '2024-01-02T00:00:00.000Z',
-                serverUpdatedAt: '2024-01-01T00:00:00.000Z'
-            });
-            return true;
-        });
+        await assert.rejects(
+            async function () {
+                await updateSync.update();
+            },
+            function (err) {
+                assert.equal(err instanceof errors.UpdateCollisionError, true);
+                assert.equal(err.code, 'UPDATE_COLLISION');
+                assert.deepEqual(err.errorDetails, {
+                    changedFields: ['title'],
+                    clientUpdatedAt: '2024-01-02T00:00:00.000Z',
+                    serverUpdatedAt: '2024-01-01T00:00:00.000Z',
+                });
+                return true;
+            },
+        );
 
         assert.equal(parentUpdate.calledOnce, true);
     });
@@ -188,7 +191,7 @@ describe('@tryghost/bookshelf-collision', function () {
         model.clientData = {};
         model._changed = {};
 
-        const updateSync = model.sync({method: 'update'});
+        const updateSync = model.sync({ method: 'update' });
         const result = await updateSync.update();
 
         assert.equal(result, 'UPDATED');

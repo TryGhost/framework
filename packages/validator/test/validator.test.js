@@ -2,7 +2,8 @@ const assert = require('assert/strict');
 
 const validator = require('../');
 
-const validators = ['isLength',
+const validators = [
+    'isLength',
     'isEmpty',
     'isURL',
     'isEmail',
@@ -12,7 +13,7 @@ const validators = ['isLength',
     'isInt',
     'isLowercase',
     'equals',
-    'matches'
+    'matches',
 ];
 
 const custom = ['isTimezone', 'isEmptyOrURL', 'isSlug'];
@@ -29,8 +30,14 @@ describe('Validator', function () {
     describe('Custom Validators', function () {
         it('isEmptyOrUrl filters javascript urls', function () {
             assert.equal(validator.isEmptyOrURL('javascript:alert(0)'), false);
-            assert.equal(validator.isEmptyOrURL('http://example.com/lol/<script>lalala</script>/'), false);
-            assert.equal(validator.isEmptyOrURL('http://example.com/lol?somequery=<script>lalala</script>'), false);
+            assert.equal(
+                validator.isEmptyOrURL('http://example.com/lol/<script>lalala</script>/'),
+                false,
+            );
+            assert.equal(
+                validator.isEmptyOrURL('http://example.com/lol?somequery=<script>lalala</script>'),
+                false,
+            );
             assert.equal(validator.isEmptyOrURL(''), true);
             assert.equal(validator.isEmptyOrURL('http://localhost:2368'), true);
             assert.equal(validator.isEmptyOrURL('http://example.com/test/'), true);
@@ -41,15 +48,15 @@ describe('Validator', function () {
 
         it('custom isEmail validator detects incorrect emails', function () {
             assert.equal(validator.isEmail('member@example.com'), true);
-            assert.equal(validator.isEmail('member@example.com', {legacy: false}), true);
+            assert.equal(validator.isEmail('member@example.com', { legacy: false }), true);
 
             assert.equal(validator.isEmail('member@example'), false);
-            assert.equal(validator.isEmail('member@example', {legacy: false}), false);
+            assert.equal(validator.isEmail('member@example', { legacy: false }), false);
 
             // old email validator doesn't detect this as invalid
             assert.equal(validator.isEmail('member@example.com�'), true);
             // new email validator detects this as invalid
-            assert.equal(validator.isEmail('member@example.com�', {legacy: false}), false);
+            assert.equal(validator.isEmail('member@example.com�', { legacy: false }), false);
         });
     });
 });

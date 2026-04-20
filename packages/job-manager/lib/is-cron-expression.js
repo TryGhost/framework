@@ -28,8 +28,8 @@ const isCronExpression = (expression) => {
     let cronResult = cronValidate(expression, {
         preset: 'default', // second field not supported in default preset
         override: {
-            useSeconds: true // override preset option
-        }
+            useSeconds: true, // override preset option
+        },
     });
 
     return cronResult.isValid();

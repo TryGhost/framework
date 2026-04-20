@@ -2,7 +2,7 @@ const assert = require('assert/strict');
 const sinon = require('sinon');
 
 // Stuff we are testing
-const {pipeline} = require('../');
+const { pipeline } = require('../');
 
 // These tests are based on the tests in https://github.com/cujojs/when/blob/3.7.4/test/pipeline-test.js
 function createTask(y) {
@@ -17,9 +17,11 @@ describe('Pipeline', function () {
     });
 
     it('should execute tasks in order', function () {
-        return pipeline([createTask('b'), createTask('c'), createTask('d')], 'a').then(function (result) {
-            assert.equal(result, 'abcd');
-        });
+        return pipeline([createTask('b'), createTask('c'), createTask('d')], 'a').then(
+            function (result) {
+                assert.equal(result, 'abcd');
+            },
+        );
     });
 
     it('should resolve to initial args when no tasks supplied', function () {
@@ -48,10 +50,12 @@ describe('Pipeline', function () {
         const expected = [1, 2, 3];
         const tasks = [sinon.spy()];
 
-        return pipeline(tasks, Promise.resolve(1), Promise.resolve(2), Promise.resolve(3)).then(function () {
-            assert.equal(tasks[0].calledOnce, true);
-            assert.deepEqual(tasks[0].firstCall.args, expected);
-        });
+        return pipeline(tasks, Promise.resolve(1), Promise.resolve(2), Promise.resolve(3)).then(
+            function () {
+                assert.equal(tasks[0].calledOnce, true);
+                assert.deepEqual(tasks[0].firstCall.args, expected);
+            },
+        );
     });
 
     it('should allow tasks to be promises', function () {
@@ -60,7 +64,7 @@ describe('Pipeline', function () {
         const tasks = [
             sinon.stub().returns(Promise.resolve(4)),
             sinon.stub().returns(Promise.resolve(5)),
-            sinon.stub().returns(Promise.resolve(6))
+            sinon.stub().returns(Promise.resolve(6)),
         ];
 
         return pipeline(tasks, 1, 2, 3).then(function (result) {
@@ -80,17 +84,19 @@ describe('Pipeline', function () {
         const tasks = [
             sinon.stub().returns(Promise.resolve(4)),
             sinon.stub().returns(Promise.resolve(5)),
-            sinon.stub().returns(Promise.resolve(6))
+            sinon.stub().returns(Promise.resolve(6)),
         ];
 
-        return pipeline(tasks, Promise.resolve(1), Promise.resolve(2), Promise.resolve(3)).then(function (result) {
-            assert.equal(result, 6);
-            assert.equal(tasks[0].calledOnce, true);
-            assert.deepEqual(tasks[0].firstCall.args, expected);
-            assert.equal(tasks[1].calledOnce, true);
-            assert.equal(tasks[1].firstCall.calledWith(4), true);
-            assert.equal(tasks[2].calledOnce, true);
-            assert.equal(tasks[2].firstCall.calledWith(5), true);
-        });
+        return pipeline(tasks, Promise.resolve(1), Promise.resolve(2), Promise.resolve(3)).then(
+            function (result) {
+                assert.equal(result, 6);
+                assert.equal(tasks[0].calledOnce, true);
+                assert.deepEqual(tasks[0].firstCall.args, expected);
+                assert.equal(tasks[1].calledOnce, true);
+                assert.equal(tasks[1].firstCall.calledWith(4), true);
+                assert.equal(tasks[2].calledOnce, true);
+                assert.equal(tasks[2].firstCall.calledWith(5), true);
+            },
+        );
     });
 });

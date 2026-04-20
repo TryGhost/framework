@@ -82,22 +82,21 @@ function onError(error) {
         throw error;
     }
 
-    const bind = typeof normalizedPort === 'string'
-        ? `Pipe ${normalizedPort}`
-        : `Port ${normalizedPort}`;
+    const bind =
+        typeof normalizedPort === 'string' ? `Pipe ${normalizedPort}` : `Port ${normalizedPort}`;
 
     // handle specific listen errors with friendly messages
     switch (error.code) {
-    case 'EACCES':
-        logging.error(`${bind} requires elevated privileges`);
-        process.exit(1);
-        break;
-    case 'EADDRINUSE':
-        logging.error(`${bind} is already in use`);
-        process.exit(1);
-        break;
-    default:
-        throw error;
+        case 'EACCES':
+            logging.error(`${bind} requires elevated privileges`);
+            process.exit(1);
+            break;
+        case 'EADDRINUSE':
+            logging.error(`${bind} is already in use`);
+            process.exit(1);
+            break;
+        default:
+            throw error;
     }
 }
 
@@ -106,9 +105,7 @@ function onError(error) {
  */
 function onListening() {
     const addr = server.address();
-    const bind = typeof addr === 'string'
-        ? 'pipe ' + addr
-        : 'port ' + addr.port;
+    const bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
     debug('Server ready');
     logging.info(`Listening on ${bind} \n`);
 }

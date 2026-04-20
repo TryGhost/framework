@@ -14,15 +14,17 @@ describe('Error Utils', function () {
         });
 
         it('returns full error clone of nested errors', function () {
-            const originalError = new Error('I am the original one!') as Error & {custom?: string};
+            const originalError = new Error('I am the original one!') as Error & {
+                custom?: string;
+            };
             originalError.custom = 'I am custom!';
 
             const ghostError = new errors.ValidationError({
                 message: 'mistakes were made',
                 help: 'help yourself',
                 errorDetails: {
-                    originalError: originalError
-                }
+                    originalError: originalError,
+                },
             });
 
             const processedError = utils.prepareStackForUser(ghostError);
@@ -39,10 +41,10 @@ describe('Error Utils', function () {
         });
 
         it('deep clones array values in errorDetails', function () {
-            const items = [{id: 1}, {id: 2}];
+            const items = [{ id: 1 }, { id: 2 }];
             const ghostError = new errors.ValidationError({
                 message: 'mistakes were made',
-                errorDetails: items
+                errorDetails: items,
             });
 
             const processedError = utils.prepareStackForUser(ghostError);
@@ -59,7 +61,7 @@ describe('Error Utils', function () {
             const originalError = errorCreatingFunction();
             const ghostError = new errors.EmailError({
                 message: 'Ghost error',
-                err: originalError
+                err: originalError,
             });
 
             assert.equal(ghostError.stack!.includes('errorCreatingFunction'), true);

@@ -17,7 +17,7 @@ describe('@tryghost/bookshelf-search', function () {
             return Child;
         };
 
-        Bookshelf = {Model: ParentModel};
+        Bookshelf = { Model: ParentModel };
         installPlugin(Bookshelf);
     });
 
@@ -44,9 +44,9 @@ describe('@tryghost/bookshelf-search', function () {
         const qb = {};
 
         model.searchQuery = sinon.stub();
-        model.query = sinon.stub().callsFake(fn => fn(qb));
+        model.query = sinon.stub().callsFake((fn) => fn(qb));
 
-        model.applySearchQuery({search: 'news'});
+        model.applySearchQuery({ search: 'news' });
 
         assert.equal(model.query.calledOnce, true);
         assert.equal(model.searchQuery.calledOnceWithExactly(qb, 'news'), true);

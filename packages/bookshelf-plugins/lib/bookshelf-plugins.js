@@ -8,5 +8,5 @@ module.exports = {
     order: require('@tryghost/bookshelf-order'),
     pagination: require('@tryghost/bookshelf-pagination'),
     search: require('@tryghost/bookshelf-search'),
-    transactionEvents: require('@tryghost/bookshelf-transaction-events')
+    transactionEvents: require('@tryghost/bookshelf-transaction-events'),
 };

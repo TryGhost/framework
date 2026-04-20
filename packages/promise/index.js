@@ -9,5 +9,5 @@ module.exports = {
 
     get pool() {
         return require('./lib/pool');
-    }
+    },
 };

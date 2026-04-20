@@ -71,9 +71,9 @@ const orderPlugin = function orderPlugin(Bookshelf) {
             return {
                 order,
                 orderRaw: orderRaw.join(', '),
-                eagerLoad: _.uniq(eagerLoadArray)
+                eagerLoad: _.uniq(eagerLoadArray),
             };
-        }
+        },
     });
 };
 

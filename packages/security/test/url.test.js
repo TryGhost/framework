@@ -1,5 +1,5 @@
 const assert = require('assert/strict');
-const {url} = require('../');
+const { url } = require('../');
 
 describe('Lib: Security - URL', function () {
     it('encodes and decodes URL-safe base64 values', function () {

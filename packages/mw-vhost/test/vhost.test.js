@@ -17,7 +17,7 @@ describe('vhost(hostname, server)', function () {
             res.end('loki');
         }
 
-        const response = await dispatch(app, {host: 'tobi.com'});
+        const response = await dispatch(app, { host: 'tobi.com' });
         assert.equal(response.statusCode, 200);
         assert.equal(response.body, 'tobi');
     });
@@ -40,7 +40,7 @@ describe('vhost(hostname, server)', function () {
             res.end('loki');
         }
 
-        const response = await dispatch(app, {host: 'loki.com'});
+        const response = await dispatch(app, { host: 'loki.com' });
         assert.equal(response.statusCode, 200);
         assert.equal(response.body, 'anotherhost');
     });
@@ -50,7 +50,7 @@ describe('vhost(hostname, server)', function () {
             res.end('tobi');
         });
 
-        const response = await dispatch(app, {host: 'tobi.com:8080'});
+        const response = await dispatch(app, { host: 'tobi.com:8080' });
         assert.equal(response.statusCode, 200);
         assert.equal(response.body, 'tobi');
     });
@@ -60,7 +60,7 @@ describe('vhost(hostname, server)', function () {
             res.end('loopback');
         });
 
-        const response = await dispatch(app, {host: '[::1]:8080'});
+        const response = await dispatch(app, { host: '[::1]:8080' });
         assert.equal(response.statusCode, 200);
         assert.equal(response.body, 'loopback');
     });
@@ -80,7 +80,7 @@ describe('vhost(hostname, server)', function () {
             res.end('loki');
         }
 
-        const response = await dispatch(app, {host: 'ferrets.com'});
+        const response = await dispatch(app, { host: 'ferrets.com' });
         assert.equal(response.statusCode, 404);
         assert.equal(response.body, 'no vhost for "ferrets.com"');
     });
@@ -100,7 +100,7 @@ describe('vhost(hostname, server)', function () {
             res.end('loki');
         }
 
-        const response = await dispatch(app, {host: undefined});
+        const response = await dispatch(app, { host: undefined });
         assert.equal(response.statusCode, 404);
         assert.equal(response.body, 'no vhost for "undefined"');
     });
@@ -141,7 +141,7 @@ describe('vhost(hostname, server)', function () {
                 res.end('wildcard!');
             });
 
-            const response = await dispatch(app, {host: 'loki.ferrets.com'});
+            const response = await dispatch(app, { host: 'loki.ferrets.com' });
             assert.equal(response.statusCode, 200);
             assert.equal(response.body, 'wildcard!');
         });
@@ -151,7 +151,7 @@ describe('vhost(hostname, server)', function () {
                 res.end('wildcard!');
             });
 
-            const response = await dispatch(app, {host: 'foo.loki.ferrets.com'});
+            const response = await dispatch(app, { host: 'foo.loki.ferrets.com' });
             assert.equal(response.statusCode, 404);
             assert.equal(response.body, 'no vhost for "foo.loki.ferrets.com"');
         });
@@ -161,7 +161,7 @@ describe('vhost(hostname, server)', function () {
                 res.end('tobi');
             });
 
-            const response = await dispatch(app, {host: 'aXb.com'});
+            const response = await dispatch(app, { host: 'aXb.com' });
             assert.equal(response.statusCode, 404);
             assert.equal(response.body, 'no vhost for "aXb.com"');
         });
@@ -171,7 +171,7 @@ describe('vhost(hostname, server)', function () {
                 res.end('commercial');
             });
 
-            const response = await dispatch(app, {host: 'foo.com'});
+            const response = await dispatch(app, { host: 'foo.com' });
             assert.equal(response.statusCode, 404);
             assert.equal(response.body, 'no vhost for "foo.com"');
         });
@@ -185,9 +185,12 @@ describe('vhost(hostname, server)', function () {
                 res.end(JSON.stringify(arr));
             });
 
-            const response = await dispatch(app, {host: 'user-bob.foo.com:8080'});
+            const response = await dispatch(app, { host: 'user-bob.foo.com:8080' });
             assert.equal(response.statusCode, 200);
-            assert.equal(response.body, '[["0","bob"],["1","foo"],["host","user-bob.foo.com:8080"],["hostname","user-bob.foo.com"],["length",2]]');
+            assert.equal(
+                response.body,
+                '[["0","bob"],["1","foo"],["host","user-bob.foo.com:8080"],["hostname","user-bob.foo.com"],["length",2]]',
+            );
         });
     });
 
@@ -197,7 +200,7 @@ describe('vhost(hostname, server)', function () {
                 res.end('tobi');
             });
 
-            const response = await dispatch(app, {host: 'toki.com'});
+            const response = await dispatch(app, { host: 'toki.com' });
             assert.equal(response.statusCode, 200);
             assert.equal(response.body, 'tobi');
         });
@@ -217,7 +220,7 @@ describe('vhost(hostname, server)', function () {
                 res.end('loki');
             }
 
-            const response = await dispatch(app, {host: 'loki.tobi.com'});
+            const response = await dispatch(app, { host: 'loki.tobi.com' });
             assert.equal(response.statusCode, 404);
             assert.equal(response.body, 'no vhost for "loki.tobi.com"');
         });
@@ -231,17 +234,18 @@ describe('vhost(hostname, server)', function () {
                 res.end(JSON.stringify(arr));
             });
 
-            const response = await dispatch(app, {host: 'user-bob.foo.com:8080'});
+            const response = await dispatch(app, { host: 'user-bob.foo.com:8080' });
             assert.equal(response.statusCode, 200);
-            assert.equal(response.body, '[["0","bob"],["1","foo"],["host","user-bob.foo.com:8080"],["hostname","user-bob.foo.com"],["length",2]]');
+            assert.equal(
+                response.body,
+                '[["0","bob"],["1","foo"],["host","user-bob.foo.com:8080"],["hostname","user-bob.foo.com"],["length",2]]',
+            );
         });
     });
 });
 
 function createServer(hostname, server, pretest) {
-    const vhosts = !Array.isArray(hostname)
-        ? [vhost(hostname, server)]
-        : hostname;
+    const vhosts = !Array.isArray(hostname) ? [vhost(hostname, server)] : hostname;
 
     return function onRequest(req, res) {
         // This allows you to perform changes to the request/response
@@ -256,7 +260,7 @@ function createServer(hostname, server, pretest) {
             index = index + 1;
 
             if (!foundVhost || err) {
-                res.statusCode = err ? (err.status || 500) : 404;
+                res.statusCode = err ? err.status || 500 : 404;
                 res.end(err ? err.message : `no vhost for "${req.headers.host}"`);
                 return;
             }
@@ -268,10 +272,10 @@ function createServer(hostname, server, pretest) {
     };
 }
 
-function dispatch(app, {host}) {
+function dispatch(app, { host }) {
     return new Promise((resolve, reject) => {
         const req = {
-            headers: {host}
+            headers: { host },
         };
 
         const res = {
@@ -279,9 +283,9 @@ function dispatch(app, {host}) {
             end(body) {
                 resolve({
                     statusCode: this.statusCode,
-                    body: body || ''
+                    body: body || '',
                 });
-            }
+            },
         };
 
         try {

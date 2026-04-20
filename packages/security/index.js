@@ -21,5 +21,5 @@ module.exports = {
 
     get secret() {
         return require('./lib/secret');
-    }
+    },
 };

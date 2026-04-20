@@ -16,7 +16,7 @@ describe('@tryghost/bookshelf-order', function () {
             return Child;
         };
 
-        Bookshelf = {Model: ParentModel};
+        Bookshelf = { Model: ParentModel };
         installPlugin(Bookshelf);
     });
 
@@ -42,10 +42,10 @@ describe('@tryghost/bookshelf-order', function () {
         assert.deepEqual(result, {
             order: {
                 'posts.created_at': 'DESC',
-                'posts.title': 'ASC'
+                'posts.title': 'ASC',
             },
             orderRaw: '',
-            eagerLoad: []
+            eagerLoad: [],
         });
     });
 
@@ -56,15 +56,18 @@ describe('@tryghost/bookshelf-order', function () {
         };
         model.orderRawQuery = function () {};
 
-        const result = model.parseOrderOption(['count.posts desc', 'created_at asc'], ['count.posts']);
+        const result = model.parseOrderOption(
+            ['count.posts desc', 'created_at asc'],
+            ['count.posts'],
+        );
 
         assert.deepEqual(result, {
             order: {
                 'count.posts': 'DESC',
-                'posts.created_at': 'ASC'
+                'posts.created_at': 'ASC',
             },
             orderRaw: '',
-            eagerLoad: []
+            eagerLoad: [],
         });
     });
 
@@ -77,14 +80,14 @@ describe('@tryghost/bookshelf-order', function () {
             if (field === 'score') {
                 return {
                     orderByRaw: `SCORE ${direction}`,
-                    eagerLoad: 'authors'
+                    eagerLoad: 'authors',
                 };
             }
 
             if (field === 'rank') {
                 return {
                     orderByRaw: `RANK ${direction}`,
-                    eagerLoad: 'authors'
+                    eagerLoad: 'authors',
                 };
             }
         };
@@ -93,10 +96,10 @@ describe('@tryghost/bookshelf-order', function () {
 
         assert.deepEqual(result, {
             order: {
-                'posts.title': 'ASC'
+                'posts.title': 'ASC',
             },
             orderRaw: 'SCORE ASC, RANK DESC',
-            eagerLoad: ['authors']
+            eagerLoad: ['authors'],
         });
     });
 
@@ -108,7 +111,7 @@ describe('@tryghost/bookshelf-order', function () {
         model.orderRawQuery = function (field, direction) {
             if (field === 'custom') {
                 return {
-                    orderByRaw: `CUSTOM ${direction}`
+                    orderByRaw: `CUSTOM ${direction}`,
                 };
             }
         };
@@ -118,7 +121,7 @@ describe('@tryghost/bookshelf-order', function () {
         assert.deepEqual(result, {
             order: {},
             orderRaw: 'CUSTOM ASC',
-            eagerLoad: []
+            eagerLoad: [],
         });
     });
 });
