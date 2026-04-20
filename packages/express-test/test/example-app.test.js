@@ -448,7 +448,7 @@ describe('Example App', function () {
             // Delete the file
             try {
                 await fs.unlink(body.path);
-            } catch (e) {
+            } catch {
                 // ignore if this fails
             }
         });
@@ -473,7 +473,7 @@ describe('Example App', function () {
             // Delete the file
             try {
                 await fs.unlink(body.path);
-            } catch (e) {
+            } catch {
                 // ignore if this fails
             }
         });
@@ -508,7 +508,7 @@ describe('Example App', function () {
                 await fs.unlink(body.image[0].path);
                 await fs.unlink(body.document[0].path);
                 await fs.unlink(textFilePath);
-            } catch (e) {
+            } catch {
                 // ignore if this fails
             }
         });

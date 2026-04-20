@@ -47,7 +47,7 @@ const _private = {
                     errorType: err.errorType,
                 },
             };
-        } catch (error) {
+        } catch {
             return {
                 detail: 'Something went wrong.',
             };
@@ -101,7 +101,7 @@ const _private = {
             return new errorsWithBase[
                 errorFormat.title || errorFormat.name || errors.InternalServerError.name
             ](_private.deserialize(errorFormat));
-        } catch (err) {
+        } catch {
             // CASE: you receive an OAuth formatted error, but the error prototype is unknown
             return new errors.InternalServerError({
                 errorType: errorFormat.title || errorFormat.name,
@@ -141,7 +141,7 @@ const _private = {
             internalError = new errorsWithBase[
                 errorFormat.title || errorFormat.name || errors.InternalServerError.name
             ](_private.deserialize(errorFormat));
-        } catch (err) {
+        } catch {
             // CASE: you receive a JSON format error, but the error prototype is unknown
             internalError = new errors.InternalServerError({
                 errorType: errorFormat.title || errorFormat.name,
@@ -180,7 +180,7 @@ export function serialize(err: GhostError, options?: { format: 'jsonapi' | 'oaut
         } else {
             errorFormat = _private.OAuthSerialize(err);
         }
-    } catch (error) {
+    } catch {
         errorFormat.message = 'Something went wrong.';
     }
 

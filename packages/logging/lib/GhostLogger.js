@@ -532,7 +532,7 @@ class GhostLogger {
                 } else {
                     newObj[key] = value;
                 }
-            } catch (err) {
+            } catch {
                 newObj[key] = value;
             }
         }

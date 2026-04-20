@@ -3,9 +3,6 @@ const { URL } = require('url');
 const nock = require('nock');
 class WebhookMockReceiver {
     constructor({ snapshotManager }) {
-        this.body;
-        this.headers;
-        this._receiver;
         this.snapshotManager = snapshotManager;
         this.recordRequest = this.recordRequest.bind(this);
     }

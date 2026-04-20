@@ -18,7 +18,7 @@ const caller = require('caller');
 exports.getCallerRoot = function getCallerRoot() {
     try {
         return findRoot(caller(2));
-    } catch (err) {
+    } catch {
         return;
     }
 };
@@ -41,12 +41,12 @@ exports.getProcessRoot = function getProcessRoot() {
         if (folderInfo.isDirectory()) {
             workingDirectory = currentFolder;
         }
-    } catch (err) {
+    } catch {
         // No-op - continue with normal working directory
     }
     try {
         return findRoot(workingDirectory);
-    } catch (err) {
+    } catch {
         return;
     }
 };

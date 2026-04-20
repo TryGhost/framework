@@ -53,7 +53,7 @@ module.exports = class DatabaseInfo {
 
                         this._databaseDetails.version = mysqlVersion;
                     }
-                } catch (err) {
+                } catch {
                     return this._databaseDetails;
                 }
                 break;

@@ -6,7 +6,7 @@ const GhostLogger = require('./GhostLogger');
 let loggingConfig;
 try {
     loggingConfig = require(path.join(getProcessRoot(), 'loggingrc'));
-} catch (err) {
+} catch {
     loggingConfig = {};
 }
 

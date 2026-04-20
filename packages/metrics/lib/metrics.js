@@ -6,7 +6,7 @@ const GhostMetrics = require('./GhostMetrics');
 let loggingConfig;
 try {
     loggingConfig = require(path.join(getProcessRoot(), 'loggingrc'));
-} catch (err) {
+} catch {
     loggingConfig = {};
 }
 

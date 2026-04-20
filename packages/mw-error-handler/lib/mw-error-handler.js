@@ -135,8 +135,7 @@ module.exports.prepareError = function prepareError(err, req, res, next) {
     next(err);
 };
 
-module.exports.prepareStack = function prepareStack(err, req, res, next) {
-    // eslint-disable-line no-unused-vars
+module.exports.prepareStack = function prepareStack(err, _req, _res, next) {
     const clonedError = prepareStackForUser(err);
 
     next(clonedError);
@@ -149,8 +148,7 @@ module.exports.prepareStack = function prepareStack(err, req, res, next) {
  * @param {import('express').Response} res
  * @param {import('express').NextFunction} next
  */
-module.exports.jsonErrorRenderer = function jsonErrorRenderer(err, req, res, next) {
-    // eslint-disable-line no-unused-vars
+module.exports.jsonErrorRenderer = function jsonErrorRenderer(err, req, res, _next) {
     const userError = prepareUserMessage(err, req);
 
     res.json({

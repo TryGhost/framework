@@ -201,7 +201,7 @@ class PrettyStream extends Transform {
                         try {
                             const jsonDetails = JSON.parse(value.errorDetails);
                             details = isArray(jsonDetails) ? jsonDetails[0] : jsonDetails;
-                        } catch (err) {
+                        } catch {
                             // no need for special handling as we default to unparsed 'errorDetails'
                         }
 

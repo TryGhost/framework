@@ -39,8 +39,8 @@ const start = function start(app, port) {
 const stop = function stop(done) {
     try {
         server.close(done);
-    } catch (e) {
-        /*jshint unused:false*/
+    } catch {
+        // ignore
     }
 };
 
