@@ -10,7 +10,6 @@
   "scripts": {
     "dev": "echo \"Implement me!\"",
     "main": "git checkout main && git pull && pnpm install",
-    "presetup": "pnpm install",
     "setup": "pnpm install",
     "test": "nx run-many -t test --parallel=10 --outputStyle=dynamic-legacy",
     "test:ci": "nx run-many -t test --outputStyle=static",
