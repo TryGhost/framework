@@ -7,8 +7,7 @@ const addHasPostsWhere = (tableName, config) => {
 
     return function (qb) {
         return qb.whereIn(comparisonField, function () {
-            const innerQb = this
-                .distinct(`${config.joinTable}.${config.joinTo}`)
+            const innerQb = this.distinct(`${config.joinTable}.${config.joinTo}`)
                 .select()
                 .from(config.joinTable)
                 .join('posts', 'posts.id', `${config.joinTable}.post_id`)
@@ -54,7 +53,7 @@ const hasPosts = function hasPosts(Bookshelf) {
             }
 
             return modelPrototype.fetchAll.apply(this, arguments);
-        }
+        },
     });
 };
 

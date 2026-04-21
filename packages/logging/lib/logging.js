@@ -1,12 +1,12 @@
 const path = require('path');
-const {isMainThread} = require('worker_threads');
-const {getProcessRoot} = require('@tryghost/root-utils');
+const { isMainThread } = require('worker_threads');
+const { getProcessRoot } = require('@tryghost/root-utils');
 const GhostLogger = require('./GhostLogger');
 
 let loggingConfig;
 try {
     loggingConfig = require(path.join(getProcessRoot(), 'loggingrc'));
-} catch (err) {
+} catch {
     loggingConfig = {};
 }
 

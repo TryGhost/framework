@@ -1,34 +1,32 @@
 {
   "name": "@tryghost/webhook-mock-receiver",
   "version": "2.0.3",
+  "license": "MIT",
+  "author": "Ghost Foundation",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
     "directory": "packages/webhook-mock-receiver"
   },
-  "author": "Ghost Foundation",
-  "license": "MIT",
-  "main": "index.js",
-  "scripts": {
-    "dev": "echo \"Implement me!\"",
-    "test": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
-    "lint:code": "eslint *.js lib/ --ext .js --cache",
-    "lint": "yarn lint:code && yarn lint:test",
-    "lint:test": "eslint -c test/.eslintrc.js test/ --ext .js --cache",
-    "posttest": "yarn lint"
-  },
   "files": [
     "index.js",
     "lib"
   ],
+  "main": "index.js",
   "publishConfig": {
     "access": "public"
+  },
+  "scripts": {
+    "dev": "echo \"Implement me!\"",
+    "test": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
+    "lint": "oxlint -c ../../.oxlintrc.json .",
+    "posttest": "yarn lint"
+  },
+  "dependencies": {
+    "p-wait-for": "6.0.0"
   },
   "devDependencies": {
     "got": "14.6.6",
     "sinon": "21.1.2"
-  },
-  "dependencies": {
-    "p-wait-for": "6.0.0"
   }
 }

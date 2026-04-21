@@ -1,21 +1,21 @@
 const assert = require('assert/strict');
 const path = require('path');
 const fs = require('fs');
-const {hashElement} = require('folder-hash');
+const { hashElement } = require('folder-hash');
 const archiver = require('archiver');
 const EventEmitter = require('events');
 const Module = require('module');
 
 // Mimic how we expect this to be required
-const {compress, extract} = require('../');
+const { compress, extract } = require('../');
 
 describe('Compress and Extract should be opposite functions', function () {
     let symlinkPath, themeFolder, zipDestination, unzipDestination;
 
     const cleanUp = () => {
-        fs.rmSync(symlinkPath, {recursive: true, force: true});
-        fs.rmSync(zipDestination, {recursive: true, force: true});
-        fs.rmSync(unzipDestination, {recursive: true, force: true});
+        fs.rmSync(symlinkPath, { recursive: true, force: true });
+        fs.rmSync(zipDestination, { recursive: true, force: true });
+        fs.rmSync(unzipDestination, { recursive: true, force: true });
     };
 
     beforeAll(function () {
@@ -62,7 +62,7 @@ describe('Compress and Extract should be opposite functions', function () {
                             setTimeout(() => fake.emit('error', new Error('archive failed')), 0);
                         };
                         return fake;
-                    }
+                    },
                 };
             }
 
@@ -70,10 +70,7 @@ describe('Compress and Extract should be opposite functions', function () {
         };
 
         try {
-            await assert.rejects(
-                () => compress(themeFolder, zipDestination),
-                /archive failed/
-            );
+            await assert.rejects(() => compress(themeFolder, zipDestination), /archive failed/);
         } finally {
             Module._load = originalLoad;
         }
@@ -92,19 +89,19 @@ describe('Extract zip', function () {
 
     afterEach(function () {
         if (fs.existsSync(zipDestination)) {
-            fs.rmSync(zipDestination, {recursive: true, force: true});
+            fs.rmSync(zipDestination, { recursive: true, force: true });
         }
 
         if (fs.existsSync(unzipDestination)) {
-            fs.rmSync(unzipDestination, {recursive: true, force: true});
+            fs.rmSync(unzipDestination, { recursive: true, force: true });
         }
 
         if (fs.existsSync(symLinkPath)) {
-            fs.rmSync(symLinkPath, {recursive: true, force: true});
+            fs.rmSync(symLinkPath, { recursive: true, force: true });
         }
 
         if (fs.existsSync(longFilePath)) {
-            fs.rmSync(longFilePath, {recursive: true, force: true});
+            fs.rmSync(longFilePath, { recursive: true, force: true });
         }
     });
 
@@ -126,7 +123,7 @@ describe('Extract zip', function () {
         await compress(themeFolder, zipDestination);
         await assert.rejects(
             () => extract(zipDestination, unzipDestination),
-            /File names in the zip folder must be shorter than 254 characters\./
+            /File names in the zip folder must be shorter than 254 characters\./,
         );
     });
 
@@ -144,7 +141,7 @@ describe('Extract zip', function () {
 
         await assert.rejects(
             () => extract(zipDestination, unzipDestination),
-            /Symlinks are not allowed in the zip folder\./
+            /Symlinks are not allowed in the zip folder\./,
         );
     });
 
@@ -155,7 +152,7 @@ describe('Extract zip', function () {
         await extract(zipDestination, unzipDestination, {
             onEntry: () => {
                 called = true;
-            }
+            },
         });
 
         assert.equal(called, true);

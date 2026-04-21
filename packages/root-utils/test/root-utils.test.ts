@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const Module = require('module');
-const {getProcessRoot} = require('../index');
+const { getProcessRoot } = require('../index');
 const rootUtilsModulePath = require.resolve('../lib/root-utils');
 
 function loadRootUtilsWithMocks(mocks) {
@@ -28,7 +28,7 @@ describe('getCallerRoot', function () {
     it('Gets the root directory of the caller', function () {
         const mockedModule = loadRootUtilsWithMocks({
             caller: () => __filename,
-            'find-root': require('find-root')
+            'find-root': require('find-root'),
         });
 
         const callerRoot = mockedModule.getCallerRoot();
@@ -42,7 +42,7 @@ describe('getCallerRoot', function () {
             caller: () => '/tmp/no-root-here.js',
             'find-root': () => {
                 throw new Error('no package root');
-            }
+            },
         });
 
         assert.equal(mockedModule.getCallerRoot(), undefined);

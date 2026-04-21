@@ -1,8 +1,8 @@
-import {GhostError} from './GhostError';
+import { GhostError } from './GhostError';
 import * as errors from './errors';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyObject = Record<string, any>
+type AnyObject = Record<string, any>;
 
 // structuredClone doesn't preserve custom properties on Error subclasses
 // (see https://github.com/ungap/structured-clone/issues/12)
@@ -28,7 +28,7 @@ function deepCloneValue(value: any): any {
     return clone;
 }
 
-const errorsWithBase: Record<string, typeof GhostError> = {...errors, GhostError};
+const errorsWithBase: Record<string, typeof GhostError> = { ...errors, GhostError };
 
 const _private = {
     serialize(err: GhostError) {
@@ -44,12 +44,12 @@ const _private = {
                     help: err.help,
                     errorDetails: err.errorDetails,
                     level: err.level,
-                    errorType: err.errorType
-                }
+                    errorType: err.errorType,
+                },
             };
-        } catch (error) {
+        } catch {
             return {
-                detail: 'Something went wrong.'
+                detail: 'Something went wrong.',
             };
         }
     },
@@ -62,7 +62,7 @@ const _private = {
             code: obj.code || obj.error,
             level: obj.meta && obj.meta.level,
             help: obj.meta && obj.meta.help,
-            context: obj.meta && obj.meta.context
+            context: obj.meta && obj.meta.context,
         };
     },
 
@@ -79,16 +79,16 @@ const _private = {
             [errors.MaintenanceError.name]: 'temporarily_unavailable',
             [errors.BadRequestError.name]: 'invalid_request',
             [errors.ValidationError.name]: 'invalid_request',
-            default: 'server_error'
+            default: 'server_error',
         };
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const {detail, code, ...properties} = _private.serialize(err);
+        const { detail, code, ...properties } = _private.serialize(err);
 
         return {
             error: err.code || matchTable[err.name] || 'server_error',
             error_description: err.message,
-            ...properties
+            ...properties,
         };
     },
 
@@ -98,12 +98,14 @@ const _private = {
      */
     OAuthDeserialize(errorFormat: AnyObject): GhostError {
         try {
-            return new errorsWithBase[errorFormat.title || errorFormat.name || errors.InternalServerError.name](_private.deserialize(errorFormat));
-        } catch (err) {
+            return new errorsWithBase[
+                errorFormat.title || errorFormat.name || errors.InternalServerError.name
+            ](_private.deserialize(errorFormat));
+        } catch {
             // CASE: you receive an OAuth formatted error, but the error prototype is unknown
             return new errors.InternalServerError({
                 errorType: errorFormat.title || errorFormat.name,
-                ..._private.deserialize(errorFormat)
+                ..._private.deserialize(errorFormat),
             });
         }
     },
@@ -115,7 +117,7 @@ const _private = {
      */
     JSONAPISerialize(err: GhostError): AnyObject {
         const errorFormat: AnyObject = {
-            errors: [_private.serialize(err)]
+            errors: [_private.serialize(err)],
         };
 
         errorFormat.errors[0].source = {};
@@ -131,17 +133,19 @@ const _private = {
      * @description Deserialize JSON api format into GhostError instance.
      */
     JSONAPIDeserialize(errorFormat: AnyObject): GhostError {
-        errorFormat = errorFormat.errors && errorFormat.errors[0] || {};
+        errorFormat = (errorFormat.errors && errorFormat.errors[0]) || {};
 
         let internalError;
 
         try {
-            internalError = new errorsWithBase[errorFormat.title || errorFormat.name || errors.InternalServerError.name](_private.deserialize(errorFormat));
-        } catch (err) {
+            internalError = new errorsWithBase[
+                errorFormat.title || errorFormat.name || errors.InternalServerError.name
+            ](_private.deserialize(errorFormat));
+        } catch {
             // CASE: you receive a JSON format error, but the error prototype is unknown
             internalError = new errors.InternalServerError({
                 errorType: errorFormat.title || errorFormat.name,
-                ..._private.deserialize(errorFormat)
+                ..._private.deserialize(errorFormat),
             });
         }
 
@@ -150,7 +154,7 @@ const _private = {
         }
 
         return internalError;
-    }
+    },
 };
 
 /**
@@ -165,8 +169,8 @@ const _private = {
  *
  * @see http://jsonapi.org/format/#errors
  */
-export function serialize(err: GhostError, options?: {format: 'jsonapi' | 'oauth'}) {
-    options = options || {format: 'jsonapi'};
+export function serialize(err: GhostError, options?: { format: 'jsonapi' | 'oauth' }) {
+    options = options || { format: 'jsonapi' };
 
     let errorFormat: AnyObject = {};
 
@@ -176,13 +180,13 @@ export function serialize(err: GhostError, options?: {format: 'jsonapi' | 'oauth
         } else {
             errorFormat = _private.OAuthSerialize(err);
         }
-    } catch (error) {
+    } catch {
         errorFormat.message = 'Something went wrong.';
     }
 
     // no need to sanitize the undefined values, on response send JSON.stringify get's called
     return errorFormat;
-};
+}
 
 /**
  * @description Deserialize from error JSON format to GhostError instance
@@ -197,14 +201,14 @@ export function deserialize(errorFormat: AnyObject): AnyObject {
     }
 
     return internalError;
-};
+}
 
 /**
  * @description Replace the stack with a user-facing one
  * @returns Clone of the original error with a user-facing stack
  */
-export function prepareStackForUser(error: GhostError): GhostError
-export function prepareStackForUser(error: Error): Error
+export function prepareStackForUser(error: GhostError): GhostError;
+export function prepareStackForUser(error: Error): Error;
 export function prepareStackForUser(error: Error): Error {
     const stackbits = error.stack?.split(/\n/) || [];
 
@@ -231,7 +235,7 @@ export function prepareStackForUser(error: Error): Error {
     const errorClone = deepCloneValue(error);
     errorClone.stack = stackbits.join('\n');
     return errorClone;
-};
+}
 
 /**
  * @description Check whether an error instance is a GhostError.
@@ -254,4 +258,4 @@ export function isGhostError(err: Error) {
     };
 
     return recursiveIsGhostError(err.constructor);
-};
+}

@@ -5,7 +5,9 @@ const packageInfo = require(path.join(rootUtils.getProcessRoot(), 'package.json'
 const version = packageInfo.version;
 const plainVersion = version.match(/^(\d+\.)?(\d+\.)?(\d+)/)[0];
 const prereleaseParts = semver.prerelease(version);
-const prereleaseVersion = prereleaseParts ? `${plainVersion}-${prereleaseParts.join('.')}` : plainVersion;
+const prereleaseVersion = prereleaseParts
+    ? `${plainVersion}-${prereleaseParts.join('.')}`
+    : plainVersion;
 
 // major.minor
 module.exports.safe = version.match(/^(\d+\.)?(\d+)/)[0];

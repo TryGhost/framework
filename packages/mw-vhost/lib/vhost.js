@@ -8,7 +8,6 @@
  * MIT Licensed
  */
 
-
 'use strict';
 
 /**
@@ -87,14 +86,10 @@ function hostnameof(req) {
         return;
     }
 
-    var offset = host[0] === '['
-        ? host.indexOf(']') + 1
-        : 0;
+    var offset = host[0] === '[' ? host.indexOf(']') + 1 : 0;
     var index = host.indexOf(':', offset);
 
-    return index !== -1
-        ? host.substring(0, index)
-        : host;
+    return index !== -1 ? host.substring(0, index) : host;
 }
 
 /**
@@ -118,7 +113,9 @@ function isregexp(val) {
 
 function hostregexp(val) {
     var source = !isregexp(val)
-        ? String(val).replace(ESCAPE_REGEXP, ESCAPE_REPLACE).replace(ASTERISK_REGEXP, ASTERISK_REPLACE)
+        ? String(val)
+              .replace(ESCAPE_REGEXP, ESCAPE_REPLACE)
+              .replace(ASTERISK_REGEXP, ASTERISK_REPLACE)
         : val.source;
 
     // force leading anchor matching

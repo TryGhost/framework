@@ -1,6 +1,6 @@
-const {parentPort} = require('worker_threads');
+const { parentPort } = require('worker_threads');
 
-setInterval(() => { }, 10);
+setInterval(() => {}, 10);
 
 if (parentPort) {
     parentPort.on('message', (message) => {

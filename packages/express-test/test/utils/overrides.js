@@ -1,11 +1,10 @@
-const {snapshotManager} = require('@tryghost/jest-snapshot');
+const { snapshotManager } = require('@tryghost/jest-snapshot');
 
-/* eslint-disable ghost/mocha/no-mocha-arrows, ghost/mocha/no-top-level-hooks, ghost/mocha/handle-done-callback */
-beforeAll(() => { // eslint-disable-line no-undef
+beforeAll(() => {
     snapshotManager.resetRegistry();
 });
 
-beforeEach((context) => { // eslint-disable-line no-undef
+beforeEach((context) => {
     // Reconstruct full title similar to mocha's fullTitle()
     const parts = [];
     let suite = context.task.suite;
@@ -17,6 +16,6 @@ beforeEach((context) => { // eslint-disable-line no-undef
 
     snapshotManager.setCurrentTest({
         testPath: context.task.file.filepath,
-        testTitle: parts.join(' ')
+        testTitle: parts.join(' '),
     });
 });

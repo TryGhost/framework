@@ -1,5 +1,5 @@
 const assert = require('assert/strict');
-const {identifier} = require('../');
+const { identifier } = require('../');
 
 describe('Lib: Security - Identifier', function () {
     it('creates UID strings with requested length', function () {

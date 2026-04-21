@@ -1,5 +1,5 @@
 import assert from 'assert/strict';
-import {MetricsServer} from '../src';
+import { MetricsServer } from '../src';
 import express from 'express';
 import * as sinon from 'sinon';
 
@@ -17,7 +17,7 @@ describe('Metrics Server', function () {
     let metricsServer: MetricsServer;
     let serverConfig = {
         host: '127.0.0.1',
-        port: 9416
+        port: 9416,
     };
     let handler = (req: express.Request, res: express.Response) => {
         res.send('metrics');
@@ -33,7 +33,7 @@ describe('Metrics Server', function () {
         fakeHttpServer = {};
         fakeApp = {
             get: sinon.stub(),
-            listen: sinon.stub()
+            listen: sinon.stub(),
         };
         fakeApp.listen.callsFake((port: number, host: string, cb?: () => void) => {
             cb?.();
@@ -42,7 +42,7 @@ describe('Metrics Server', function () {
 
         fakeStoppableServer = {
             listening: true,
-            stop: sinon.stub().resolves()
+            stop: sinon.stub().resolves(),
         };
 
         createAppStub = sinon.stub().returns(fakeApp);
@@ -52,7 +52,7 @@ describe('Metrics Server', function () {
             serverConfig,
             handler,
             createApp: createAppStub,
-            createStoppableServer: createStoppableServerStub
+            createStoppableServer: createStoppableServerStub,
         });
     });
 
@@ -71,7 +71,7 @@ describe('Metrics Server', function () {
         });
 
         it('should support default server factories', function () {
-            const instance = new MetricsServer({serverConfig, handler});
+            const instance = new MetricsServer({ serverConfig, handler });
             assert.ok(instance);
         });
     });
@@ -82,12 +82,17 @@ describe('Metrics Server', function () {
             assert.ok(server);
             sinon.assert.calledOnce(createAppStub);
             sinon.assert.calledOnceWithExactly(fakeApp.get, '/metrics', handler);
-            sinon.assert.calledOnceWithExactly(fakeApp.listen, serverConfig.port, serverConfig.host, sinon.match.func);
+            sinon.assert.calledOnceWithExactly(
+                fakeApp.listen,
+                serverConfig.port,
+                serverConfig.host,
+                sinon.match.func,
+            );
             sinon.assert.calledOnceWithExactly(createStoppableServerStub, fakeHttpServer, 0);
         });
 
         it('should use the provided handler', async function () {
-            const {app} = await metricsServer.start();
+            const { app } = await metricsServer.start();
             assert.equal(app, fakeApp as unknown as express.Application);
         });
 

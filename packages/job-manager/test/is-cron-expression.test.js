@@ -21,11 +21,11 @@ describe('Is cron expression', function () {
         let calledWith = null;
 
         rewiredModule.__set__('cronValidate', (expression, options) => {
-            calledWith = {expression, options};
+            calledWith = { expression, options };
             return {
                 isValid() {
                     return true;
-                }
+                },
             };
         });
 
@@ -35,9 +35,9 @@ describe('Is cron expression', function () {
             options: {
                 preset: 'default',
                 override: {
-                    useSeconds: true
-                }
-            }
+                    useSeconds: true,
+                },
+            },
         });
     });
 });

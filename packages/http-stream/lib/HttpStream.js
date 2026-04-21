@@ -10,15 +10,17 @@ class HttpStream {
     async write(data) {
         try {
             if (typeof data !== 'object') {
-                throw new GhostError.IncorrectUsageError({message: 'Type Error: Http transport requires log data to be an object'});
+                throw new GhostError.IncorrectUsageError({
+                    message: 'Type Error: Http transport requires log data to be an object',
+                });
             }
 
             const options = {
                 ...this.config,
                 method: 'POST',
-                json: data
+                json: data,
             };
-            const {url} = options;
+            const { url } = options;
             delete options.url;
 
             return await request(url, options);

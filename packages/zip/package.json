@@ -1,34 +1,34 @@
 {
   "name": "@tryghost/zip",
   "version": "3.0.3",
+  "license": "MIT",
+  "author": "Ghost Foundation",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
     "directory": "packages/zip"
   },
-  "author": "Ghost Foundation",
-  "license": "MIT",
-  "main": "index.js",
-  "scripts": {
-    "dev": "echo \"Implement me!\"",
-    "test": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
-    "lint": "eslint . --ext .js --cache",
-    "posttest": "yarn lint"
-  },
   "files": [
     "index.js",
     "lib"
   ],
+  "main": "index.js",
   "publishConfig": {
     "access": "public"
   },
-  "devDependencies": {
-    "folder-hash": "4.1.2",
-    "sinon": "21.1.2"
+  "scripts": {
+    "dev": "echo \"Implement me!\"",
+    "test": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
+    "lint": "oxlint -c ../../.oxlintrc.json .",
+    "posttest": "yarn lint"
   },
   "dependencies": {
     "@tryghost/errors": "^3.0.3",
     "archiver": "7.0.1",
     "extract-zip": "2.0.1"
+  },
+  "devDependencies": {
+    "folder-hash": "4.1.2",
+    "sinon": "21.1.2"
   }
 }

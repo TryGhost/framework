@@ -1,8 +1,8 @@
-const {assert} = require('./utils');
+const { assert } = require('./utils');
 const path = require('path');
 const FormData = require('form-data');
 
-const {isJSON, normalizeURL, attachFile} = require('../lib/utils');
+const { isJSON, normalizeURL, attachFile } = require('../lib/utils');
 
 describe('Utils', function () {
     it('isJSON', function () {

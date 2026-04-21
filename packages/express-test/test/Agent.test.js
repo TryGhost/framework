@@ -1,11 +1,11 @@
-const {assert} = require('./utils');
+const { assert } = require('./utils');
 
 const Agent = require('../lib/Agent');
 
 describe('Agent', function () {
     describe('Class methods', function () {
         it('constructor sets app + defaults, & creates http verb methods', function () {
-            const fn = () => { };
+            const fn = () => {};
             const opts = {};
             const agent = new Agent(fn, opts);
 
@@ -22,7 +22,7 @@ describe('Agent', function () {
         });
 
         it('constructor works without being passed defaults', function () {
-            const fn = () => { };
+            const fn = () => {};
             const agent = new Agent(fn);
 
             assert.equal(agent.app, fn);
@@ -38,7 +38,7 @@ describe('Agent', function () {
         });
 
         it('_makeUrl without defaults', function () {
-            const fn = () => { };
+            const fn = () => {};
             const opts = {};
             const agent = new Agent(fn, opts);
 
@@ -46,9 +46,9 @@ describe('Agent', function () {
         });
 
         it('_makeUrl with baseUrl + slashes', function () {
-            const fn = () => { };
+            const fn = () => {};
             const opts = {
-                baseUrl: '/base/'
+                baseUrl: '/base/',
             };
             const agent = new Agent(fn, opts);
 
@@ -56,9 +56,9 @@ describe('Agent', function () {
         });
 
         it('_makeUrl with baseUrl + no slashes', function () {
-            const fn = () => { };
+            const fn = () => {};
             const opts = {
-                baseUrl: 'base'
+                baseUrl: 'base',
             };
             const agent = new Agent(fn, opts);
 
@@ -66,21 +66,21 @@ describe('Agent', function () {
         });
 
         it('_makeUrl with baseUrl + override baseUrl', function () {
-            const fn = () => { };
+            const fn = () => {};
             const opts = {
-                baseUrl: '/base/'
+                baseUrl: '/base/',
             };
             const agent = new Agent(fn, opts);
 
-            assert.equal(agent._makeUrl('/', {baseUrl: 'override'}), '/override/');
+            assert.equal(agent._makeUrl('/', { baseUrl: 'override' }), '/override/');
         });
 
         it('_makeUrl with query params', function () {
-            const fn = () => { };
+            const fn = () => {};
             const opts = {
                 queryParams: {
-                    key: 'very_secret'
-                }
+                    key: 'very_secret',
+                },
             };
             const agent = new Agent(fn, opts);
 
@@ -88,19 +88,19 @@ describe('Agent', function () {
         });
 
         it('_makeUrl with queryParams + override queryParams', function () {
-            const fn = () => { };
+            const fn = () => {};
             const opts = {
                 queryParams: {
                     key: 'very_secret',
-                    foo: 'bar'
-                }
+                    foo: 'bar',
+                },
             };
 
             const overrides = {
                 queryParams: {
                     key: 'not_so_secret',
-                    bar: 'baz'
-                }
+                    bar: 'baz',
+                },
             };
             const agent = new Agent(fn, opts);
 
@@ -108,11 +108,11 @@ describe('Agent', function () {
         });
 
         it('_makeUrl with query params and existing query params', function () {
-            const fn = () => { };
+            const fn = () => {};
             const opts = {
                 queryParams: {
-                    key: 'very_secret'
-                }
+                    key: 'very_secret',
+                },
             };
             const agent = new Agent(fn, opts);
 
@@ -120,9 +120,9 @@ describe('Agent', function () {
         });
 
         it('_mergeOptions validation', function () {
-            const fn = () => { };
+            const fn = () => {};
             const opts = {
-                baseUrl: 'base'
+                baseUrl: 'base',
             };
             const agent = new Agent(fn, opts);
 
@@ -144,7 +144,7 @@ describe('Agent', function () {
         });
 
         it('_mergeOptions with no defaults or options', function () {
-            const fn = () => { };
+            const fn = () => {};
             const opts = {};
             const agent = new Agent(fn, opts);
 
@@ -156,57 +156,60 @@ describe('Agent', function () {
         });
 
         it('_mergeOptions with defaults but no options', function () {
-            const fn = () => { };
+            const fn = () => {};
             const opts = {
                 baseUrl: 'base',
-                headers: {origin: 'localhost'},
-                body: {hello: 'world'}
+                headers: { origin: 'localhost' },
+                body: { hello: 'world' },
             };
             const agent = new Agent(fn, opts);
 
             const options = agent._mergeOptions('GET', '/', {});
             assert.equal(options.method, 'GET');
             assert.equal(options.url, '/base/');
-            assert.deepEqual(options.headers, {origin: 'localhost'});
-            assert.deepEqual(options.body, {hello: 'world'});
+            assert.deepEqual(options.headers, { origin: 'localhost' });
+            assert.deepEqual(options.body, { hello: 'world' });
         });
 
         it('_mergeOptions with no defaults but all options', function () {
-            const fn = () => { };
+            const fn = () => {};
             const opts = {};
             const agent = new Agent(fn, opts);
 
             const options = agent._mergeOptions('GET', '/', {
-                headers: {'content-type': 'application/json'},
-                body: {foo: 'bar'}
+                headers: { 'content-type': 'application/json' },
+                body: { foo: 'bar' },
             });
             assert.equal(options.method, 'GET');
             assert.equal(options.url, '/');
-            assert.deepEqual(options.headers, {'content-type': 'application/json'});
-            assert.deepEqual(options.body, {foo: 'bar'});
+            assert.deepEqual(options.headers, { 'content-type': 'application/json' });
+            assert.deepEqual(options.body, { foo: 'bar' });
         });
 
         it('_mergeOptions with defaults and options', function () {
-            const fn = () => { };
+            const fn = () => {};
             const opts = {
                 baseUrl: 'base',
-                headers: {origin: 'localhost'},
-                body: {hello: 'world'}
+                headers: { origin: 'localhost' },
+                body: { hello: 'world' },
             };
             const agent = new Agent(fn, opts);
 
             const options = agent._mergeOptions('GET', '/', {
-                headers: {'content-type': 'application/json'},
-                body: {foo: 'bar'}
+                headers: { 'content-type': 'application/json' },
+                body: { foo: 'bar' },
             });
             assert.equal(options.method, 'GET');
             assert.equal(options.url, '/base/');
-            assert.deepEqual(options.headers, {origin: 'localhost', 'content-type': 'application/json'});
-            assert.deepEqual(options.body, {hello: 'world', foo: 'bar'});
+            assert.deepEqual(options.headers, {
+                origin: 'localhost',
+                'content-type': 'application/json',
+            });
+            assert.deepEqual(options.body, { hello: 'world', foo: 'bar' });
         });
 
         it('http verb methods error without url', function () {
-            const fn = () => { };
+            const fn = () => {};
             const opts = {};
             const agent = new Agent(fn, opts);
 
@@ -214,11 +217,11 @@ describe('Agent', function () {
                 agent.get();
             };
 
-            assert.throws(noUrl, {message: 'Cannot make a request without supplying a url'});
+            assert.throws(noUrl, { message: 'Cannot make a request without supplying a url' });
         });
 
         it('http verb methods (public interface)', function () {
-            const fn = () => { };
+            const fn = () => {};
             const opts = {};
             const agent = new Agent(fn, opts);
 
@@ -234,7 +237,7 @@ describe('Agent', function () {
         });
 
         it('clearCookies creates a new CookieJar and returns agent for chaining', function () {
-            const fn = () => { };
+            const fn = () => {};
             const opts = {};
             const agent = new Agent(fn, opts);
 
@@ -243,11 +246,15 @@ describe('Agent', function () {
 
             assert.notEqual(agent.jar, originalJar, 'Should create a new CookieJar instance');
             assert.equal(result, agent, 'Should return agent for chaining');
-            assert.equal(typeof agent.jar.setCookie, 'function', 'New jar should be a valid CookieJar');
+            assert.equal(
+                typeof agent.jar.setCookie,
+                'function',
+                'New jar should be a valid CookieJar',
+            );
         });
 
         it('clearCookies can be chained with other methods', function () {
-            const fn = () => { };
+            const fn = () => {};
             const opts = {};
             const agent = new Agent(fn, opts);
 

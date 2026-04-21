@@ -12,10 +12,10 @@ describe('Webhook Mock Receiver', function () {
     beforeAll(async function () {
         got = (await import('got')).default;
         snapshotManager = {
-            assertSnapshot: sinon.spy()
+            assertSnapshot: sinon.spy(),
         };
         webhookMockReceiver = new WebhookMockReceiver({
-            snapshotManager
+            snapshotManager,
         });
     });
 
@@ -26,21 +26,24 @@ describe('Webhook Mock Receiver', function () {
 
     describe('recordBodyResponse', function () {
         it('saves the payload', function () {
-            webhookMockReceiver.recordRequest({foo: 'bar'}, {
-                headers: {
-                    lorem: 'ipsum'
-                }
-            });
+            webhookMockReceiver.recordRequest(
+                { foo: 'bar' },
+                {
+                    headers: {
+                        lorem: 'ipsum',
+                    },
+                },
+            );
 
             assert.deepEqual(webhookMockReceiver.body, {
                 body: {
-                    foo: 'bar'
-                }
+                    foo: 'bar',
+                },
             });
             assert.deepEqual(webhookMockReceiver.headers, {
                 headers: {
-                    lorem: 'ipsum'
-                }
+                    lorem: 'ipsum',
+                },
             });
         });
     });
@@ -51,14 +54,14 @@ describe('Webhook Mock Receiver', function () {
 
             await got.post(webhookURL, {
                 json: {
-                    avocado: 'toast'
-                }
+                    avocado: 'toast',
+                },
             });
 
             assert.deepEqual(webhookMockReceiver.body, {
                 body: {
-                    avocado: 'toast'
-                }
+                    avocado: 'toast',
+                },
             });
         });
     });
@@ -68,8 +71,8 @@ describe('Webhook Mock Receiver', function () {
             webhookMockReceiver.mock(webhookURL);
             await got.post(webhookURL, {
                 headers: {
-                    hey: 'ho'
-                }
+                    hey: 'ho',
+                },
             });
 
             assert.notEqual(webhookMockReceiver.body, undefined);
@@ -90,10 +93,10 @@ describe('Webhook Mock Receiver', function () {
             setTimeout(() => {
                 got.post(webhookURL, {
                     json: {
-                        avocado: 'toast'
-                    }
+                        avocado: 'toast',
+                    },
                 });
-            }, (10 + 1));
+            }, 10 + 1);
 
             assert.equal(webhookMockReceiver._receiver.isDone(), false);
 
@@ -108,8 +111,8 @@ describe('Webhook Mock Receiver', function () {
             webhookMockReceiver.mock(webhookURL);
             await got.post(webhookURL, {
                 json: {
-                    avocado: 'toast'
-                }
+                    avocado: 'toast',
+                },
             });
 
             webhookMockReceiver.matchBodySnapshot();
@@ -117,14 +120,17 @@ describe('Webhook Mock Receiver', function () {
             assert.equal(snapshotManager.assertSnapshot.calledOnce, true);
             assert.deepEqual(snapshotManager.assertSnapshot.args[0][0], {
                 body: {
-                    avocado: 'toast'
-                }
+                    avocado: 'toast',
+                },
             });
 
             assert.deepEqual(snapshotManager.assertSnapshot.args[0][1].field, 'body');
             assert.deepEqual(snapshotManager.assertSnapshot.args[0][1].type, 'body');
             assert.deepEqual(snapshotManager.assertSnapshot.args[0][1].properties, {});
-            assert.deepEqual(snapshotManager.assertSnapshot.args[0][1].error.constructor.name, 'AssertionError');
+            assert.deepEqual(
+                snapshotManager.assertSnapshot.args[0][1].error.constructor.name,
+                'AssertionError',
+            );
         });
 
         it('waits for the request completion before checking the request payload', async function () {
@@ -135,10 +141,10 @@ describe('Webhook Mock Receiver', function () {
             setTimeout(() => {
                 got.post(webhookURL, {
                     json: {
-                        avocado: 'toast'
-                    }
+                        avocado: 'toast',
+                    },
                 });
-            }, (10 + 1));
+            }, 10 + 1);
 
             await webhookMockReceiver.receivedRequest();
             webhookMockReceiver.matchBodySnapshot();
@@ -146,8 +152,8 @@ describe('Webhook Mock Receiver', function () {
             assert.equal(snapshotManager.assertSnapshot.calledOnce, true);
             assert.deepEqual(snapshotManager.assertSnapshot.args[0][0], {
                 body: {
-                    avocado: 'toast'
-                }
+                    avocado: 'toast',
+                },
             });
         });
     });
@@ -157,8 +163,8 @@ describe('Webhook Mock Receiver', function () {
             webhookMockReceiver.mock(webhookURL);
             await got.post(webhookURL, {
                 headers: {
-                    foo: 'bar'
-                }
+                    foo: 'bar',
+                },
             });
 
             await webhookMockReceiver.matchHeaderSnapshot();
@@ -173,7 +179,10 @@ describe('Webhook Mock Receiver', function () {
             assert.deepEqual(snapshotManager.assertSnapshot.args[0][1].field, 'headers');
             assert.deepEqual(snapshotManager.assertSnapshot.args[0][1].type, 'header');
             assert.deepEqual(snapshotManager.assertSnapshot.args[0][1].properties, {});
-            assert.deepEqual(snapshotManager.assertSnapshot.args[0][1].error.constructor.name, 'AssertionError');
+            assert.deepEqual(
+                snapshotManager.assertSnapshot.args[0][1].error.constructor.name,
+                'AssertionError',
+            );
         });
     });
 
@@ -182,9 +191,7 @@ describe('Webhook Mock Receiver', function () {
             webhookMockReceiver.mock(webhookURL);
             await got.post(webhookURL);
 
-            webhookMockReceiver
-                .matchHeaderSnapshot()
-                .matchBodySnapshot();
+            webhookMockReceiver.matchHeaderSnapshot().matchBodySnapshot();
         });
     });
 });

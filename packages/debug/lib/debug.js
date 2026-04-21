@@ -21,7 +21,7 @@ module.exports = function initDebug(name) {
         } else {
             alias = pkg.name;
         }
-    } catch (err) {
+    } catch {
         alias = 'undefined';
     }
 

@@ -13,7 +13,7 @@ describe('@tryghost/bookshelf-plugins', function () {
             'order',
             'pagination',
             'search',
-            'transactionEvents'
+            'transactionEvents',
         ]);
     });
 

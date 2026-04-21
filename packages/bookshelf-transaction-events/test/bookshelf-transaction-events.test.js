@@ -15,13 +15,13 @@ describe('@tryghost/bookshelf-transaction-events', function () {
                 const trx = {
                     emit: sinon.stub(),
                     commit: sinon.stub().resolves('COMMIT_RETURN'),
-                    rollback: sinon.stub().resolves('ROLLBACK_RETURN')
+                    rollback: sinon.stub().resolves('ROLLBACK_RETURN'),
                 };
                 transactionState.trx = trx;
                 transactionState.originalCommit = trx.commit;
                 transactionState.originalRollback = trx.rollback;
                 return callback(trx);
-            }
+            },
         };
     });
 

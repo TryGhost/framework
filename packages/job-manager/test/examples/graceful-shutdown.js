@@ -7,7 +7,7 @@ const JobManager = require('../../lib/job-manager');
 const jobManager = new JobManager({
     info: console.log,
     warn: console.log,
-    error: console.log
+    error: console.log,
 });
 
 process.on('SIGINT', () => {
@@ -23,13 +23,17 @@ async function shutdown(signal) {
 (async () => {
     jobManager.addJob({
         at: 'every 10 seconds',
-        job: path.resolve(__dirname, '../jobs/graceful.js')
+        job: path.resolve(__dirname, '../jobs/graceful.js'),
     });
 
     await setTimeoutPromise(100); // allow job to get scheduled
 
-    const {default: pWaitFor} = await import('p-wait-for');
-    await pWaitFor(() => (Object.keys(jobManager.bree.workers).length === 0) && (Object.keys(jobManager.bree.intervals).length === 0));
+    const { default: pWaitFor } = await import('p-wait-for');
+    await pWaitFor(
+        () =>
+            Object.keys(jobManager.bree.workers).length === 0 &&
+            Object.keys(jobManager.bree.intervals).length === 0,
+    );
 
     process.exit(0);
 })();

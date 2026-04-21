@@ -1,5 +1,5 @@
 const assert = require('assert/strict');
-const {join} = require('path');
+const { join } = require('path');
 
 const rootUtils = require('@tryghost/root-utils');
 
@@ -56,9 +56,14 @@ describe('Config', function () {
     });
 
     it('Reads configuration file when exists', function () {
-        const config = withEnv('testing', () => withRoot(fixturePath(), () => loadFreshGetConfig()()));
+        const config = withEnv('testing', () =>
+            withRoot(fixturePath(), () => loadFreshGetConfig()()),
+        );
 
-        assert.equal(config.stores.file.file.endsWith('config/test/fixtures/config.testing.json'), true);
+        assert.equal(
+            config.stores.file.file.endsWith('config/test/fixtures/config.testing.json'),
+            true,
+        );
         assert.equal(config.get('hello'), 'world');
         assert.equal(config.get('test'), 'root-config');
         assert.equal(config.get('should-be-used'), true);
@@ -72,7 +77,7 @@ describe('Config', function () {
 
     it('index exports lib/config and only initializes config once', function () {
         const originalGetConfig = require(getConfigPath);
-        const fakeConfig = {name: 'fake-config'};
+        const fakeConfig = { name: 'fake-config' };
         let callCount = 0;
 
         try {

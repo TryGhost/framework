@@ -26,20 +26,30 @@ describe('Lib: Security - String', function () {
         });
 
         it('should replace most special characters with dashes', function () {
-            const result = security.string.safe('a:b/c?d#e[f]g!h$i&j(k)l*m+n,o;{p}=q\\r%s<t>u|v^w~x£y"z@1.2`3', options);
+            const result = security.string.safe(
+                'a:b/c?d#e[f]g!h$i&j(k)l*m+n,o;{p}=q\\r%s<t>u|v^w~x£y"z@1.2`3',
+                options,
+            );
             assert.equal(result, 'a-b-c-d-e-f-g-h-i-j-k-l-m-n-o-p-q-r-s-t-u-v-w-x-y-z-1-2-3');
         });
 
         it('should replace all of the html4 compat symbols in ascii except hyphen and underscore', function () {
             // note: This is missing the soft-hyphen char that isn't much-liked by linters/browsers/etc,
             // it passed the test before it was removed
-            const result = security.string.safe('!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿');
+            const result = security.string.safe(
+                '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿',
+            );
             assert.equal(result, '_-c-y-ss-c-a-r-deg-23up-1o-1-41-23-4');
         });
 
         it('should replace all of the foreign chars in ascii', function () {
-            const result = security.string.safe('ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ');
-            assert.equal(result, 'aaaaaaaeceeeeiiiidnoooooxouuuuythssaaaaaaaeceeeeiiiidnooooo-ouuuuythy');
+            const result = security.string.safe(
+                'ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ',
+            );
+            assert.equal(
+                result,
+                'aaaaaaaeceeeeiiiidnoooooxouuuuythssaaaaaaaeceeeeiiiidnooooo-ouuuuythy',
+            );
         });
 
         it('should remove special characters at the beginning of a string', function () {
@@ -48,7 +58,7 @@ describe('Lib: Security - String', function () {
         });
 
         it('should remove apostrophes ', function () {
-            const result = security.string.safe('how we shouldn\'t be', options);
+            const result = security.string.safe("how we shouldn't be", options);
             assert.equal(result, 'how-we-shouldnt-be');
         });
 
@@ -73,17 +83,27 @@ describe('Lib: Security - String', function () {
         });
 
         it('should properly handle unicode punctuation conversion', function () {
-            const result = security.string.safe('に間違いがないか、再度確認してください。再読み込みしてください。', options);
-            assert.equal(result, 'nijian-wei-iganaika-zai-du-que-ren-sitekudasai-zai-du-miip-misitekudasai');
+            const result = security.string.safe(
+                'に間違いがないか、再度確認してください。再読み込みしてください。',
+                options,
+            );
+            assert.equal(
+                result,
+                'nijian-wei-iganaika-zai-du-que-ren-sitekudasai-zai-du-miip-misitekudasai',
+            );
         });
 
         it('should not lose or convert dashes if options are passed with truthy importing flag', function () {
-            let result = security.string.safe('-slug-with-starting-ending-and---multiple-dashes-', {importing: true});
+            let result = security.string.safe('-slug-with-starting-ending-and---multiple-dashes-', {
+                importing: true,
+            });
             assert.equal(result, '-slug-with-starting-ending-and---multiple-dashes-');
         });
 
         it('should still remove/convert invalid characters when passed options with truthy importing flag', function () {
-            let result = security.string.safe('-slug-&with-✓-invalid-characters-に\'', {importing: true});
+            let result = security.string.safe("-slug-&with-✓-invalid-characters-に'", {
+                importing: true,
+            });
             assert.equal(result, '-slug--with--invalid-characters-ni');
         });
     });

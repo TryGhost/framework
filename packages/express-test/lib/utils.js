@@ -29,7 +29,7 @@ module.exports.attachFile = function attachFile(name, filePath, existingFormData
 
     formData.append(name, fileContent, {
         filename,
-        contentType
+        contentType,
     });
 
     return formData;

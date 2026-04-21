@@ -11,11 +11,13 @@ Provides pre-configured transport options for common transport services.
 ### Supported Transport Types
 
 1. `smtp` - send via SMTP server.
-  *  Detects when service: 'sendmail' is used and enables sendmail mode
+
+- Detects when service: 'sendmail' is used and enables sendmail mode
 
 2. `mailgun` - Allows using Mailgun with API key instead of via SMTP.
-  *  `auth: { api_key: 'your-mailgun-api-key' }`
-  * Defaults to 60-second timeout.
+
+- `auth: { api_key: 'your-mailgun-api-key' }`
+- Defaults to 60-second timeout.
 
 3. `sendmail` - use local sendmail binary.
 
@@ -36,23 +38,19 @@ Factory for creating Nodemailer transports across SMTP, SES, Mailgun, Sendmail, 
 This is a mono repository, managed with [lerna](https://lernajs.io/).
 
 Follow the instructions for the top-level repo.
+
 1. `git clone` this repo & `cd` into it as usual
 2. Run `yarn` to install top-level dependencies.
-
 
 ## Run
 
 - `yarn dev`
-
 
 ## Test
 
 - `yarn lint` run just eslint
 - `yarn test` run lint and tests
 
-
-
-
-# Copyright & License 
+# Copyright & License
 
 Copyright (c) 2013-2026 Ghost Foundation - Released under the [MIT license](LICENSE).

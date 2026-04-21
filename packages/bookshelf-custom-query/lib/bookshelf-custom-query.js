@@ -10,7 +10,7 @@ const customQueryPlug = function customQueryPlug(Bookshelf) {
             this.query((qb) => {
                 this.customQuery(qb, options);
             });
-        }
+        },
     });
 
     Bookshelf.Model = Model;

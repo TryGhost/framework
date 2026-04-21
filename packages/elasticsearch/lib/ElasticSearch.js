@@ -1,4 +1,4 @@
-const {Client} = require('@elastic/elasticsearch');
+const { Client } = require('@elastic/elasticsearch');
 const debug = require('@tryghost/debug')('logging:elasticsearch');
 
 // Singleton client - multiple children made from it for a single connection pool
@@ -9,7 +9,7 @@ class ElasticSearch {
         if (!client) {
             client = new Client(clientConfig);
         }
-        
+
         this.client = client.child();
     }
 
@@ -25,13 +25,13 @@ class ElasticSearch {
         }
 
         if (typeof index === 'string') {
-            index = {index};
+            index = { index };
         }
 
         try {
             await this.client.index({
                 body: data,
-                ...index
+                ...index,
             });
         } catch (error) {
             debug('Failed to ship log', error.message);

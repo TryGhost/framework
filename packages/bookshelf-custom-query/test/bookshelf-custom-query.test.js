@@ -17,7 +17,7 @@ describe('@tryghost/bookshelf-custom-query', function () {
             return Child;
         };
 
-        Bookshelf = {Model: ParentModel};
+        Bookshelf = { Model: ParentModel };
         installPlugin(Bookshelf);
     });
 
@@ -41,11 +41,11 @@ describe('@tryghost/bookshelf-custom-query', function () {
 
     it('applyCustomQuery calls query and forwards qb/options to customQuery', function () {
         const model = new Bookshelf.Model();
-        const qb = {where: sinon.stub()};
-        const options = {filter: 'status:published'};
+        const qb = { where: sinon.stub() };
+        const options = { filter: 'status:published' };
 
         model.customQuery = sinon.stub();
-        model.query = sinon.stub().callsFake(fn => fn(qb));
+        model.query = sinon.stub().callsFake((fn) => fn(qb));
 
         model.applyCustomQuery(options);
 

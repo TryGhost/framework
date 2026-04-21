@@ -12,28 +12,28 @@ const assemble = (at, job, data, name) => {
     const breeJob = {
         name: name,
         // NOTE: both function and path syntaxes work with 'path' parameter
-        path: job
+        path: job,
     };
 
     if (data) {
         Object.assign(breeJob, {
             worker: {
-                workerData: data
-            }
+                workerData: data,
+            },
         });
     }
 
     if (at instanceof Date) {
         Object.assign(breeJob, {
-            date: at
+            date: at,
         });
     } else if (at && isCronExpression(at)) {
         Object.assign(breeJob, {
-            cron: at
+            cron: at,
         });
     } else if (at !== undefined) {
         Object.assign(breeJob, {
-            interval: at
+            interval: at,
         });
     }
 

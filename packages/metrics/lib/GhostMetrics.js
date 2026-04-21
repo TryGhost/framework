@@ -39,7 +39,7 @@ class GhostMetrics {
             let transportFn = `setup${transport[0].toUpperCase()}${transport.substr(1)}Shipper`;
 
             if (!this[transportFn]) {
-                throw new Error(`${transport} is an invalid transport`); // eslint-disable-line
+                throw new Error(`${transport} is an invalid transport`);
             }
 
             this[transportFn]();
@@ -52,7 +52,7 @@ class GhostMetrics {
     setupStdoutShipper() {
         const GhostPrettyStream = require('@tryghost/pretty-stream');
         const prettyStdOut = new GhostPrettyStream({
-            mode: this.mode
+            mode: this.mode,
         });
 
         prettyStdOut.pipe(process.stdout);
@@ -60,7 +60,7 @@ class GhostMetrics {
         this.shippers.stdout = (name, value) => {
             prettyStdOut.write({
                 msg: `Metric ${name}: ${jsonStringifySafe(value)}`,
-                level: 30 // Magic number, log level for info
+                level: 30, // Magic number, log level for info
             });
 
             return Promise.resolve();
@@ -79,15 +79,15 @@ class GhostMetrics {
             node: this.elasticsearch.host,
             auth: {
                 username: this.elasticsearch.username,
-                password: this.elasticsearch.password
+                password: this.elasticsearch.password,
             },
             requestTimeout: 5000,
-            proxy: 'proxy' in this.elasticsearch ? this.elasticsearch.proxy : null
+            proxy: 'proxy' in this.elasticsearch ? this.elasticsearch.proxy : null,
         });
 
         this.shippers.elasticsearch = (name, value) => {
             if (typeof value !== 'object') {
-                value = {value};
+                value = { value };
             }
 
             if (!('@timestamp' in value)) {

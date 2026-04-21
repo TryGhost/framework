@@ -1,8 +1,8 @@
-import {Request, Response} from 'express';
+import { Request, Response } from 'express';
 import http from 'http';
 import client from 'prom-client';
-import type {Metric, MetricObjectWithValues, MetricValue} from 'prom-client';
-import type {Knex} from 'knex';
+import type { Metric, MetricObjectWithValues, MetricValue } from 'prom-client';
+import type { Knex } from 'knex';
 import logging from '@tryghost/logging';
 
 type PrometheusClientConfig = {
@@ -12,7 +12,7 @@ type PrometheusClientConfig = {
         url?: string;
         interval?: number;
         jobName?: string;
-    }
+    };
 };
 
 /**
@@ -54,8 +54,8 @@ export class PrometheusClient {
                 timeout: 5000,
                 agent: new http.Agent({
                     keepAlive: true,
-                    maxSockets: 1
-                })
+                    maxSockets: 1,
+                }),
             });
             this.pushMetrics();
             this.pushInterval = setInterval(() => {
@@ -76,13 +76,13 @@ export class PrometheusClient {
         if (this.config.pushgateway?.enabled && this.gateway) {
             const jobName = this.config.pushgateway?.jobName || 'ghost';
             try {
-                await this.gateway.pushAdd({jobName});
+                await this.gateway.pushAdd({ jobName });
                 this.logger.debug('Metrics pushed to pushgateway - jobName: ', jobName);
                 this.pushRetries = 0;
             } catch (err) {
                 let error;
                 if (typeof err === 'object' && err !== null && 'code' in err) {
-                    error = 'Error pushing metrics to pushgateway: ' + err.code as string;
+                    error = ('Error pushing metrics to pushgateway: ' + err.code) as string;
                 } else {
                     error = 'Error pushing metrics to pushgateway: Unknown error';
                 }
@@ -107,7 +107,7 @@ export class PrometheusClient {
      * Only called once on init
      */
     collectDefaultMetrics() {
-        this.client.collectDefaultMetrics({prefix: this.prefix});
+        this.client.collectDefaultMetrics({ prefix: this.prefix });
     }
 
     /**
@@ -137,7 +137,7 @@ export class PrometheusClient {
 
     /**
      * Returns the metrics from the registry as a JSON object
-     * 
+     *
      * Particularly useful for testing
      */
     async getMetricsAsJSON(): Promise<object[]> {
@@ -172,7 +172,9 @@ export class PrometheusClient {
      * @param name - The name of the metric
      * @returns The values of the metric
      */
-    async getMetricObject(name: string): Promise<MetricObjectWithValues<MetricValue<string>> | undefined> {
+    async getMetricObject(
+        name: string,
+    ): Promise<MetricObjectWithValues<MetricValue<string>> | undefined> {
         const metric = this.getMetric(name);
         if (!metric) {
             return undefined;
@@ -189,7 +191,7 @@ export class PrometheusClient {
     }
 
     /**
-     * 
+     *
      */
 
     /**
@@ -199,11 +201,19 @@ export class PrometheusClient {
      * @param labelNames - The names of the labels for the metric
      * @returns The counter metric
      */
-    registerCounter({name, help, labelNames = []}: {name: string, help: string, labelNames?: string[]}): client.Counter {
+    registerCounter({
+        name,
+        help,
+        labelNames = [],
+    }: {
+        name: string;
+        help: string;
+        labelNames?: string[];
+    }): client.Counter {
         return new this.client.Counter({
             name: `${this.prefix}${name}`,
             help,
-            labelNames
+            labelNames,
         });
     }
 
@@ -214,11 +224,19 @@ export class PrometheusClient {
      * @param collect - The collect function to use for the gauge
      * @returns The gauge metric
      */
-    registerGauge({name, help, collect}: {name: string, help: string, collect?: () => void}): client.Gauge {
+    registerGauge({
+        name,
+        help,
+        collect,
+    }: {
+        name: string;
+        help: string;
+        collect?: () => void;
+    }): client.Gauge {
         return new this.client.Gauge({
             name: `${this.prefix}${name}`,
             help,
-            collect
+            collect,
         });
     }
 
@@ -230,7 +248,23 @@ export class PrometheusClient {
      * @param collect - The collect function to use for the summary
      * @returns The summary metric
      */
-    registerSummary({name, help, percentiles, maxAgeSeconds, ageBuckets, pruneAgedBuckets, collect}: {name: string, help: string, percentiles?: number[], maxAgeSeconds?: number, ageBuckets?: number, pruneAgedBuckets?: boolean, collect?: () => void}): client.Summary {
+    registerSummary({
+        name,
+        help,
+        percentiles,
+        maxAgeSeconds,
+        ageBuckets,
+        pruneAgedBuckets,
+        collect,
+    }: {
+        name: string;
+        help: string;
+        percentiles?: number[];
+        maxAgeSeconds?: number;
+        ageBuckets?: number;
+        pruneAgedBuckets?: boolean;
+        collect?: () => void;
+    }): client.Summary {
         return new this.client.Summary({
             name: `${this.prefix}${name}`,
             help,
@@ -238,7 +272,7 @@ export class PrometheusClient {
             maxAgeSeconds,
             ageBuckets,
             pruneAgedBuckets,
-            collect
+            collect,
         });
     }
 
@@ -250,11 +284,20 @@ export class PrometheusClient {
      * @param collect - The collect function to use for the histogram
      * @returns The histogram metric
      */
-    registerHistogram({name, help, buckets}: {name: string, help: string, buckets: number[], collect?: () => void}): client.Histogram {
+    registerHistogram({
+        name,
+        help,
+        buckets,
+    }: {
+        name: string;
+        help: string;
+        buckets: number[];
+        collect?: () => void;
+    }): client.Histogram {
         return new this.client.Histogram({
             name: `${this.prefix}${name}`,
             help,
-            buckets: buckets
+            buckets: buckets,
         });
     }
 
@@ -267,27 +310,29 @@ export class PrometheusClient {
     instrumentKnex(knexInstance: Knex) {
         // Create some gauges for tracking the connection pool
         this.registerGauge({
-            name: `db_connection_pool_max`, 
-            help: 'The maximum number of connections allowed in the pool', 
+            name: `db_connection_pool_max`,
+            help: 'The maximum number of connections allowed in the pool',
             collect() {
                 (this as unknown as client.Gauge).set(knexInstance.client.pool.max);
-            }
+            },
         });
 
         this.registerGauge({
-            name: `db_connection_pool_min`, 
+            name: `db_connection_pool_min`,
             help: 'The minimum number of connections allowed in the pool',
             collect() {
                 (this as unknown as client.Gauge).set(knexInstance.client.pool.min);
-            }
+            },
         });
 
         this.registerGauge({
-            name: `db_connection_pool_active`, 
+            name: `db_connection_pool_active`,
             help: 'The number of active connections to the database, which can be in use or idle',
             collect() {
-                (this as unknown as client.Gauge).set(knexInstance.client.pool.numUsed() + knexInstance.client.pool.numFree());
-            }
+                (this as unknown as client.Gauge).set(
+                    knexInstance.client.pool.numUsed() + knexInstance.client.pool.numFree(),
+                );
+            },
         });
 
         this.registerGauge({
@@ -295,7 +340,7 @@ export class PrometheusClient {
             help: 'The number of connections currently in use by the database',
             collect() {
                 (this as unknown as client.Gauge).set(knexInstance.client.pool.numUsed());
-            }
+            },
         });
 
         this.registerGauge({
@@ -303,15 +348,17 @@ export class PrometheusClient {
             help: 'The number of active connections currently idle in pool',
             collect() {
                 (this as unknown as client.Gauge).set(knexInstance.client.pool.numFree());
-            }
+            },
         });
 
         this.registerGauge({
             name: `db_connection_pool_pending_acquires`,
             help: 'The number of connections currently waiting to be acquired from the pool',
             collect() {
-                (this as unknown as client.Gauge).set(knexInstance.client.pool.numPendingAcquires());
-            }
+                (this as unknown as client.Gauge).set(
+                    knexInstance.client.pool.numPendingAcquires(),
+                );
+            },
         });
 
         this.registerGauge({
@@ -319,7 +366,7 @@ export class PrometheusClient {
             help: 'The number of connections currently waiting to be created',
             collect() {
                 (this as unknown as client.Gauge).set(knexInstance.client.pool.numPendingCreates());
-            }
+            },
         });
 
         const queryDurationSummary = this.registerSummary({
@@ -328,7 +375,7 @@ export class PrometheusClient {
             percentiles: [0.5, 0.9, 0.99],
             maxAgeSeconds: 60,
             ageBuckets: 6,
-            pruneAgedBuckets: false
+            pruneAgedBuckets: false,
         });
 
         const acquireDurationSummary = this.registerSummary({
@@ -337,7 +384,7 @@ export class PrometheusClient {
             percentiles: [0.5, 0.9, 0.99],
             maxAgeSeconds: 60,
             ageBuckets: 6,
-            pruneAgedBuckets: false
+            pruneAgedBuckets: false,
         });
 
         const createDurationSummary = this.registerSummary({
@@ -346,7 +393,7 @@ export class PrometheusClient {
             percentiles: [0.5, 0.9, 0.99],
             maxAgeSeconds: 60,
             ageBuckets: 6,
-            pruneAgedBuckets: false
+            pruneAgedBuckets: false,
         });
 
         knexInstance.on('query', (query) => {

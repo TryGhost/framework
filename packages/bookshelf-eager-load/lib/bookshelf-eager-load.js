@@ -18,8 +18,11 @@ function withEager(model, relationsToLoad) {
 
         for (const [key, config] of Object.entries(model.relationsMeta)) {
             if (relationsToLoad.includes(key)) {
-                const innerQb = qb
-                    .leftJoin(config.targetTableName, `${tableName}.id`, `${config.targetTableName}.${config.foreignKey}`);
+                const innerQb = qb.leftJoin(
+                    config.targetTableName,
+                    `${tableName}.id`,
+                    `${config.targetTableName}.${config.foreignKey}`,
+                );
 
                 debug(`QUERY has posts: ${innerQb.toSQL().sql}`);
             }
@@ -35,7 +38,11 @@ function load(options) {
     }
 
     if (this.eagerLoad) {
-        if (!options.columns && options.withRelated && _.intersection(this.eagerLoad, options.withRelated).length) {
+        if (
+            !options.columns &&
+            options.withRelated &&
+            _.intersection(this.eagerLoad, options.withRelated).length
+        ) {
             this.query(withEager(this, this.eagerLoad));
         }
     }
@@ -73,7 +80,7 @@ module.exports = function eagerLoadPlugin(Bookshelf) {
             }
 
             return modelPrototype.fetchAll.apply(this, arguments);
-        }
+        },
     });
 };
 

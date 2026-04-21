@@ -2,8 +2,17 @@
   "name": "@tryghost/mw-error-handler",
   "version": "3.0.3",
   "description": "Express middleware utilities for normalizing and rendering Ghost API errors",
-  "author": "Ghost Foundation",
   "license": "MIT",
+  "author": "Ghost Foundation",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TryGhost/framework.git",
+    "directory": "packages/mw-error-handler"
+  },
+  "files": [
+    "index.js",
+    "lib"
+  ],
   "main": "index.js",
   "publishConfig": {
     "access": "public"
@@ -12,16 +21,7 @@
     "dev": "echo \"Implement me!\"",
     "test:unit": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
     "test": "yarn test:unit",
-    "lint:code": "eslint *.js lib/ --ext .js --cache",
-    "lint": "yarn lint:code && yarn lint:test",
-    "lint:test": "eslint -c test/.eslintrc.js test/ --ext .js --cache"
-  },
-  "files": [
-    "index.js",
-    "lib"
-  ],
-  "devDependencies": {
-    "sinon": "21.1.2"
+    "lint": "oxlint -c ../../.oxlintrc.json ."
   },
   "dependencies": {
     "@tryghost/debug": "^2.0.3",
@@ -31,9 +31,7 @@
     "lodash": "4.18.1",
     "semver": "7.7.4"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/TryGhost/framework.git",
-    "directory": "packages/mw-error-handler"
+  "devDependencies": {
+    "sinon": "21.1.2"
   }
 }

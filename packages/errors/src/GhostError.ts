@@ -1,5 +1,5 @@
-import {randomUUID} from 'crypto';
-import {wrapStack} from './wrap-stack';
+import { randomUUID } from 'crypto';
+import { wrapStack } from './wrap-stack';
 
 export interface GhostErrorOptions {
     message?: string;
@@ -66,13 +66,13 @@ export class GhostError extends Error {
         if (options.err) {
             // CASE: Support err as string (it happens that third party libs return a string instead of an error instance)
             if (typeof options.err === 'string') {
-                /* eslint-disable no-restricted-syntax */
                 options.err = new Error(options.err);
-                /* eslint-enable no-restricted-syntax */
             }
 
             Object.getOwnPropertyNames(options.err).forEach((property) => {
-                if (['errorType', 'name', 'statusCode', 'message', 'level'].indexOf(property) !== -1) {
+                if (
+                    ['errorType', 'name', 'statusCode', 'message', 'level'].indexOf(property) !== -1
+                ) {
                     return;
                 }
 

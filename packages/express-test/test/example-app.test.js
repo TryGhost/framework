@@ -1,10 +1,10 @@
-const {assert} = require('./utils');
+const { assert } = require('./utils');
 const path = require('path');
 
 const Agent = require('../'); // we require the root file
 const app = require('../example/app');
-const {any} = require('@tryghost/jest-snapshot');
-const {promises: fs, createReadStream} = require('node:fs');
+const { any } = require('@tryghost/jest-snapshot');
+const { promises: fs, createReadStream } = require('node:fs');
 const FormData = require('form-data');
 let agent;
 
@@ -21,7 +21,7 @@ async function getAgent() {
 }
 
 async function getAPIAgent() {
-    return new Agent(app, {baseUrl: '/api/'});
+    return new Agent(app, { baseUrl: '/api/' });
 }
 
 async function getExtendedAPIAgent() {
@@ -31,8 +31,8 @@ async function getExtendedAPIAgent() {
         return await agent.post('/session/', {
             body: {
                 username: 'hello',
-                password: 'world'
-            }
+                password: 'world',
+            },
         });
     };
 
@@ -46,7 +46,7 @@ describe('Example App', function () {
 
     it('GET / works', async function () {
         try {
-            const {statusCode, text} = await agent.get('/');
+            const { statusCode, text } = await agent.get('/');
             assert.equal(statusCode, 200);
             assert.equal(text, 'Hello World!');
         } catch (error) {
@@ -56,7 +56,7 @@ describe('Example App', function () {
 
     it('GET /idontexist 404s', async function () {
         try {
-            const {statusCode, text} = await agent.get('/idontexist');
+            const { statusCode, text } = await agent.get('/idontexist');
             assert.equal(statusCode, 404);
             assert.match(text, /Cannot GET \/idontexist/);
         } catch (error) {
@@ -70,10 +70,15 @@ describe('Example App', function () {
         });
 
         it('cannot perform request without session', async function () {
-            const {statusCode, headers, body, text} = await agent.get('/foo/');
+            const { statusCode, headers, body, text } = await agent.get('/foo/');
 
             assert.equal(statusCode, 403);
-            assert.deepEqual(Object.keys(headers), ['x-powered-by', 'content-type', 'content-length', 'etag']);
+            assert.deepEqual(Object.keys(headers), [
+                'x-powered-by',
+                'content-type',
+                'content-length',
+                'etag',
+            ]);
             assert.deepEqual(body, {});
             assert.equal(text, 'Forbidden');
         });
@@ -81,12 +86,17 @@ describe('Example App', function () {
         it('cannot create a session without valid credentials', async function () {
             const sessionRes = await agent.post('/session/', {
                 body: {
-                    username: 'hello'
-                }
+                    username: 'hello',
+                },
             });
 
             assert.equal(sessionRes.statusCode, 401);
-            assert.deepEqual(Object.keys(sessionRes.headers), ['x-powered-by', 'content-type', 'content-length', 'etag']);
+            assert.deepEqual(Object.keys(sessionRes.headers), [
+                'x-powered-by',
+                'content-type',
+                'content-length',
+                'etag',
+            ]);
             assert.deepEqual(sessionRes.body, {});
             assert.equal(sessionRes.text, 'Unauthorized');
         });
@@ -95,20 +105,31 @@ describe('Example App', function () {
             const sessionRes = await agent.post('/session/', {
                 body: {
                     username: 'hello',
-                    password: 'world'
-                }
+                    password: 'world',
+                },
             });
 
             assert.equal(sessionRes.statusCode, 200);
-            assert.deepEqual(Object.keys(sessionRes.headers), ['x-powered-by', 'content-type', 'content-length', 'etag', 'set-cookie']);
+            assert.deepEqual(Object.keys(sessionRes.headers), [
+                'x-powered-by',
+                'content-type',
+                'content-length',
+                'etag',
+                'set-cookie',
+            ]);
             assert.deepEqual(sessionRes.body, {});
             assert.equal(sessionRes.text, 'OK');
 
-            const {statusCode, headers, body, text} = await agent.get('/foo/');
+            const { statusCode, headers, body, text } = await agent.get('/foo/');
 
             assert.equal(statusCode, 200);
-            assert.deepEqual(Object.keys(headers), ['x-powered-by', 'content-type', 'content-length', 'etag']);
-            assert.deepEqual(body, {foo: [{bar: 'baz'}]});
+            assert.deepEqual(Object.keys(headers), [
+                'x-powered-by',
+                'content-type',
+                'content-length',
+                'etag',
+            ]);
+            assert.deepEqual(body, { foo: [{ bar: 'baz' }] });
             assert.equal(text, '{"foo":[{"bar":"baz"}]}');
         });
     });
@@ -120,11 +141,16 @@ describe('Example App', function () {
         });
 
         it('make an authenticated request', async function () {
-            const {statusCode, headers, body, text} = await agent.get('/foo/');
+            const { statusCode, headers, body, text } = await agent.get('/foo/');
 
             assert.equal(statusCode, 200);
-            assert.deepEqual(Object.keys(headers), ['x-powered-by', 'content-type', 'content-length', 'etag']);
-            assert.deepEqual(body, {foo: [{bar: 'baz'}]});
+            assert.deepEqual(Object.keys(headers), [
+                'x-powered-by',
+                'content-type',
+                'content-length',
+                'etag',
+            ]);
+            assert.deepEqual(body, { foo: [{ bar: 'baz' }] });
             assert.equal(text, '{"foo":[{"bar":"baz"}]}');
         });
     });
@@ -139,15 +165,15 @@ describe('Example App', function () {
             const sessionRes = await agent.post('/session/', {
                 body: {
                     username: 'hello',
-                    password: 'world'
-                }
+                    password: 'world',
+                },
             });
             assert.equal(sessionRes.statusCode, 200);
 
             // Verify we can make authenticated requests
             const authRes = await agent.get('/foo/');
             assert.equal(authRes.statusCode, 200);
-            assert.deepEqual(authRes.body, {foo: [{bar: 'baz'}]});
+            assert.deepEqual(authRes.body, { foo: [{ bar: 'baz' }] });
 
             // Clear cookies
             agent.clearCookies();
@@ -163,8 +189,8 @@ describe('Example App', function () {
             await agent.post('/session/', {
                 body: {
                     username: 'hello',
-                    password: 'world'
-                }
+                    password: 'world',
+                },
             });
 
             // Verify authenticated request works
@@ -184,10 +210,9 @@ describe('Example App', function () {
         });
 
         it('set headers but not body using reqOptions', async function () {
-            const {statusCode, headers, body} = await agent
-                .post('/check/', {
-                    headers: {'x-check': true}
-                });
+            const { statusCode, headers, body } = await agent.post('/check/', {
+                headers: { 'x-check': true },
+            });
 
             assert.equal(statusCode, 200);
             assert.deepEqual(body, {});
@@ -195,67 +220,65 @@ describe('Example App', function () {
         });
 
         it('set headers, status and body using reqOptions', async function () {
-            const {statusCode, headers, body} = await agent
-                .post('/check/', {
-                    body: {foo: 'bar'},
-                    headers: {'x-check': true}
-                });
+            const { statusCode, headers, body } = await agent.post('/check/', {
+                body: { foo: 'bar' },
+                headers: { 'x-check': true },
+            });
 
             assert.equal(statusCode, 200);
-            assert.deepEqual(body, {foo: 'bar'});
+            assert.deepEqual(body, { foo: 'bar' });
             assert.equal(headers['x-checked'], 'true');
         });
 
         it('set headers, status and body using set chaining', async function () {
-            const {statusCode, headers, body} = await agent
+            const { statusCode, headers, body } = await agent
                 .post('/check/')
-                .body({foo: 'bar'})
+                .body({ foo: 'bar' })
                 .header('x-check', true);
 
             assert.equal(statusCode, 200);
-            assert.deepEqual(body, {foo: 'bar'});
+            assert.deepEqual(body, { foo: 'bar' });
             assert.equal(headers['x-checked'], 'true');
         });
 
         it('set headers, status and body with mixed-case header', async function () {
-            const {statusCode, headers, body} = await agent
-                .post('/check/', {
-                    body: {foo: 'bar'},
-                    headers: {'X-Check': true}
-                });
+            const { statusCode, headers, body } = await agent.post('/check/', {
+                body: { foo: 'bar' },
+                headers: { 'X-Check': true },
+            });
 
             assert.equal(statusCode, 200);
-            assert.deepEqual(body, {foo: 'bar'});
+            assert.deepEqual(body, { foo: 'bar' });
             assert.equal(headers['x-checked'], 'true');
         });
 
         it('set headers, status and body with mixed-case header and chaining', async function () {
-            const {statusCode, headers, body} = await agent
+            const { statusCode, headers, body } = await agent
                 .post('/check/')
-                .body({foo: 'bar'})
+                .body({ foo: 'bar' })
                 .header('X-Check', true);
 
             assert.equal(statusCode, 200);
-            assert.deepEqual(body, {foo: 'bar'});
+            assert.deepEqual(body, { foo: 'bar' });
             assert.equal(headers['x-checked'], 'true');
         });
 
         it('check headers, status and body using set and expect chaining', async function () {
             await agent
                 .post('/check/')
-                .body({foo: 'bar'})
+                .body({ foo: 'bar' })
                 .header('x-check', true)
                 .expectStatus(200)
                 .expectHeader('x-checked', 'true')
-                .expect(({body}) => {
-                    assert.deepEqual(body, {foo: 'bar'});
+                .expect(({ body }) => {
+                    assert.deepEqual(body, { foo: 'bar' });
                 });
         });
 
         it('check headers, status and body using set, expect chaining & snapshot matching', async function () {
             await agent
                 .post('/check/')
-                .body({foo: 'bar'})
+                .body({ foo: 'bar' })
                 .header('x-check', true)
                 .expectStatus(200)
                 .expectHeader('x-checked', 'true')
@@ -264,11 +287,14 @@ describe('Example App', function () {
         });
 
         it('check status using expect chaining errors correctly', async function () {
-            await assert.rejects(async () => {
-                return await agent
-                    .post('/check/')
-                    .expectStatus(404);
-            }), {message: 'Expected header "x-checked: false", got "x-checked: true" POST request on /check/'};
+            await assert.rejects(
+                async () => {
+                    return await agent.post('/check/').expectStatus(404);
+                },
+                {
+                    message: 'Expected statusCode 404, got statusCode 200 POST request on /check/',
+                },
+            );
         });
 
         it('check headers, status and empty body using set and expect chaining', async function () {
@@ -281,76 +307,97 @@ describe('Example App', function () {
         });
 
         it('check header using expect chaining errors correctly', async function () {
-            await assert.rejects(async () => {
-                return await agent
-                    .post('/check/')
-                    .header('x-check', true)
-                    .expectStatus(200)
-                    .expectHeader('x-checked', 'false');
-            }, {message: 'Expected header "x-checked: false", got "x-checked: true" POST request on /check/'});
+            await assert.rejects(
+                async () => {
+                    return await agent
+                        .post('/check/')
+                        .header('x-check', true)
+                        .expectStatus(200)
+                        .expectHeader('x-checked', 'false');
+                },
+                {
+                    message:
+                        'Expected header "x-checked: false", got "x-checked: true" POST request on /check/',
+                },
+            );
         });
 
         it('check body using expect chaining errors correctly', async function () {
-            await assert.rejects(async () => {
-                return await agent
-                    .post('/check/')
-                    .body({foo: 'bar'})
-                    .expect(({body}) => {
-                        assert.deepEqual(body, {foo: 'ba'});
-                    });
-            }, (error) => {
-                assert.match(error.message, /^Expected values to be loosely deep-equal/);
-                return true;
-            });
+            await assert.rejects(
+                async () => {
+                    return await agent
+                        .post('/check/')
+                        .body({ foo: 'bar' })
+                        .expect(({ body }) => {
+                            assert.deepEqual(body, { foo: 'ba' });
+                        });
+                },
+                (error) => {
+                    assert.match(error.message, /^Expected values to be loosely deep-equal/);
+                    return true;
+                },
+            );
         });
 
         it('check empty body using expect chaining errors correctly', async function () {
-            await assert.rejects(async () => {
-                return await agent
-                    .post('/check/')
-                    .body({foo: 'bar'})
-                    .expectEmptyBody();
-            }, (error) => {
-                assert.match(error.message, /^Expected body to be empty, got/);
-                return true;
-            });
+            await assert.rejects(
+                async () => {
+                    return await agent.post('/check/').body({ foo: 'bar' }).expectEmptyBody();
+                },
+                (error) => {
+                    assert.match(error.message, /^Expected body to be empty, got/);
+                    return true;
+                },
+            );
         });
 
         it('check body using snapshot matching errors correctly for missing property', async function () {
-            await assert.rejects(async () => {
-                return await agent
-                    .post('/check/')
-                    .body({
-                        foo: 'bar'
-                    })
-                    .matchBodySnapshot({
-                        id: any(String)
-                    });
-            }, (error) => {
-                assert.match(error.message, /check body using snapshot matching errors correctly for missing property/);
-                assert.match(error.message, /\[body\]/);
-                assert.match(error.message, /Expected properties {2}- 1/);
-                assert.match(error.message, /Received value {2,}\+ 1/);
-                return true;
-            });
+            await assert.rejects(
+                async () => {
+                    return await agent
+                        .post('/check/')
+                        .body({
+                            foo: 'bar',
+                        })
+                        .matchBodySnapshot({
+                            id: any(String),
+                        });
+                },
+                (error) => {
+                    assert.match(
+                        error.message,
+                        /check body using snapshot matching errors correctly for missing property/,
+                    );
+                    assert.match(error.message, /\[body\]/);
+                    assert.match(error.message, /Expected properties {2}- 1/);
+                    assert.match(error.message, /Received value {2,}\+ 1/);
+                    return true;
+                },
+            );
         });
 
         it('check body using snapshot matching errors correctly for random data', async function () {
-            await assert.rejects(async () => {
-                return await agent
-                    .post('/check/')
-                    .body({
-                        foo: 'bar',
-                        id: Math.random().toString(36)
-                    })
-                    .matchBodySnapshot();
-            }, (error) => {
-                assert.match(error.message, /check body using snapshot matching errors correctly for random data/);
-                assert.match(error.message, /\[body\]/);
-                assert.match(error.message, /Snapshot {2}- 1/);
-                assert.match(error.message, /Received {2}\+ 1/);
-                return true;
-            });
+            await assert.rejects(
+                async () => {
+                    return await agent
+                        .post('/check/')
+                        .body({
+                            foo: 'bar',
+                            id: Math.random().toString(36),
+                        })
+                        .matchBodySnapshot();
+                },
+                (error) => {
+                    assert.match(
+                        error.message,
+                        /check body using snapshot matching errors correctly for random data/,
+                    );
+                    assert.match(error.message, /\[body\]/);
+                    assert.match(error.message, /Snapshot {2}- 1/);
+                    assert.match(error.message, /Received {2}\+ 1/);
+                    return true;
+                },
+            );
         });
 
         it('check body using snapshot matching properties works for random data', async function () {
@@ -358,21 +405,21 @@ describe('Example App', function () {
                 .post('/check/')
                 .body({
                     foo: 'bar',
-                    id: Math.random().toString(36)
+                    id: Math.random().toString(36),
                 })
                 .matchBodySnapshot({
-                    id: any(String)
+                    id: any(String),
                 });
         });
 
         it('can send the body as a string', async function () {
-            const data = {foo: 'bar', nested: {foo: 'bar'}};
+            const data = { foo: 'bar', nested: { foo: 'bar' } };
             await agent
                 .post('/api/ping/')
                 .body(JSON.stringify(data))
                 .header('content-type', 'application/json')
                 .expectStatus(200)
-                .expect(({body}) => {
+                .expect(({ body }) => {
                     assert.deepEqual(body, data);
                 });
         });
@@ -385,13 +432,10 @@ describe('Example App', function () {
             const form = new FormData();
             form.append('image', fileContents, {
                 filename,
-                contentType
+                contentType,
             });
 
-            const {body} = await agent
-                .post('/api/upload/')
-                .body(form)
-                .expectStatus(200);
+            const { body } = await agent.post('/api/upload/').body(form).expectStatus(200);
 
             assert.equal(body.originalname, filename);
             assert.equal(body.mimetype, contentType);
@@ -405,7 +449,7 @@ describe('Example App', function () {
             // Delete the file
             try {
                 await fs.unlink(body.path);
-            } catch (e) {
+            } catch {
                 // ignore if this fails
             }
         });
@@ -413,7 +457,7 @@ describe('Example App', function () {
         it('can upload a file using the attach method', async function () {
             const fileContents = await fs.readFile(__dirname + '/fixtures/ghost-favicon.png');
 
-            const {body} = await agent
+            const { body } = await agent
                 .post('/api/upload/')
                 .attach('image', path.join(__dirname, '/fixtures/ghost-favicon.png'))
                 .expectStatus(200);
@@ -430,7 +474,7 @@ describe('Example App', function () {
             // Delete the file
             try {
                 await fs.unlink(body.path);
-            } catch (e) {
+            } catch {
                 // ignore if this fails
             }
         });
@@ -443,7 +487,7 @@ describe('Example App', function () {
             const imageContents = await fs.readFile(__dirname + '/fixtures/ghost-favicon.png');
             const textContents = await fs.readFile(textFilePath);
 
-            const {body} = await agent
+            const { body } = await agent
                 .post('/api/upload-multiple/')
                 .attach('image', path.join(__dirname, '/fixtures/ghost-favicon.png'))
                 .attach('document', textFilePath)
@@ -465,7 +509,7 @@ describe('Example App', function () {
                 await fs.unlink(body.image[0].path);
                 await fs.unlink(body.document[0].path);
                 await fs.unlink(textFilePath);
-            } catch (e) {
+            } catch {
                 // ignore if this fails
             }
         });
@@ -474,14 +518,17 @@ describe('Example App', function () {
             const stat = await fs.stat(__dirname + '/fixtures/long-json-body.json');
             const stream = createReadStream(__dirname + '/fixtures/long-json-body.json');
 
-            const {body} = await agent
+            const { body } = await agent
                 .post('/api/ping/')
                 .header('content-type', 'application/json')
                 .header('content-length', stat.size) // the Express json middleware requires content-length to work
                 .stream(stream)
                 .expectStatus(200);
 
-            const fileContents = await fs.readFile(__dirname + '/fixtures/long-json-body.json', 'utf8');
+            const fileContents = await fs.readFile(
+                __dirname + '/fixtures/long-json-body.json',
+                'utf8',
+            );
             assert.equal(JSON.stringify(body) + '\n', fileContents);
         });
     });

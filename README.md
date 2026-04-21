@@ -27,8 +27,10 @@ To add a new package to the repo:
 
 ## Test
 
-- `yarn lint` run just eslint
-- `yarn test` run lint and tests
+- `yarn lint` runs `oxlint` across all packages
+- `yarn format` formats `js/ts/json/md` files with `oxfmt`
+- `yarn format:check` checks formatting without writing
+- `yarn test` runs tests (most packages also run lint in `posttest`)
 
 
 ## Publish

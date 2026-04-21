@@ -10,7 +10,7 @@ let HttpStream;
 let requestStub;
 
 const testConfig = {
-    url: 'http://127.0.0.1:3001'
+    url: 'http://127.0.0.1:3001',
 };
 
 describe('HttpStream', function () {
@@ -40,17 +40,17 @@ describe('HttpStream', function () {
         it('be successful when object passed', async function () {
             const expectedRes = {
                 statusCode: 200,
-                body: '{"this":"should work"}'
+                body: '{"this":"should work"}',
             };
             requestStub.resolves(expectedRes);
 
             const stream = new HttpStream(testConfig);
-            const body = {this: 'should work'};
+            const body = { this: 'should work' };
             const res = await stream.write(body);
 
             sinon.assert.calledOnceWithExactly(requestStub, testConfig.url, {
                 method: 'POST',
-                json: body
+                json: body,
             });
             assert.deepEqual(res, expectedRes);
         });
@@ -59,7 +59,7 @@ describe('HttpStream', function () {
             requestStub.rejects(new Error('request failed'));
 
             const stream = new HttpStream(testConfig);
-            const res = await stream.write({this: 'should fail'});
+            const res = await stream.write({ this: 'should fail' });
 
             assert.equal(res, false);
         });

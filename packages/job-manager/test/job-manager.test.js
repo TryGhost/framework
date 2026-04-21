@@ -1,7 +1,7 @@
 const assert = require('assert/strict');
 const path = require('path');
 const sinon = require('sinon');
-const {setTimeout: delay} = require('timers/promises');
+const { setTimeout: delay } = require('timers/promises');
 const FakeTimers = require('@sinonjs/fake-timers');
 const logging = require('@tryghost/logging');
 
@@ -17,7 +17,7 @@ const jobModelInstance = {
         if (field === 'status') {
             return 'finished';
         }
-    }
+    },
 };
 
 describe('Job Manager', function () {
@@ -30,12 +30,12 @@ describe('Job Manager', function () {
 
         stubConfig = {
             get: sinon.stub().returns({
-                enabled: true
-            })
+                enabled: true,
+            }),
         };
 
         jobManager = new JobManager({
-            config: stubConfig
+            config: stubConfig,
         });
     });
 
@@ -61,7 +61,7 @@ describe('Job Manager', function () {
                 jobManager.addJob({
                     job: spy,
                     data: 'test data',
-                    offloaded: false
+                    offloaded: false,
                 });
                 assert.equal(jobManager.inlineQueue.idle(), false);
 
@@ -76,13 +76,13 @@ describe('Job Manager', function () {
             it('handles failed job gracefully', async function () {
                 const spy = sinon.stub().throws();
                 const jobModelSpy = {
-                    findOne: sinon.spy()
+                    findOne: sinon.spy(),
                 };
 
                 jobManager.addJob({
                     job: spy,
                     data: 'test data',
-                    offloaded: false
+                    offloaded: false,
                 });
                 assert.equal(jobManager.inlineQueue.idle(), false);
 
@@ -107,7 +107,7 @@ describe('Job Manager', function () {
                 await jobManager.addJob({
                     at: '* * * * * *',
                     job: jobPath,
-                    name: 'cron-job'
+                    name: 'cron-job',
                 });
 
                 assert.equal(jobManager.bree.add.called, true);
@@ -115,29 +115,37 @@ describe('Job Manager', function () {
             });
 
             it('fails to schedule for invalid scheduling expression', async function () {
-                await assert.rejects(() => jobManager.addJob({
-                    at: 'invalid expression',
-                    name: 'jobName'
-                }), {message: 'Invalid schedule format'});
+                await assert.rejects(
+                    () =>
+                        jobManager.addJob({
+                            at: 'invalid expression',
+                            name: 'jobName',
+                        }),
+                    { message: 'Invalid schedule format' },
+                );
             });
 
             it('fails to schedule for no job name', async function () {
-                await assert.rejects(() => jobManager.addJob({
-                    at: 'invalid expression',
-                    job: () => {}
-                }), {message: 'Name parameter should be present if job is a function'});
+                await assert.rejects(
+                    () =>
+                        jobManager.addJob({
+                            at: 'invalid expression',
+                            job: () => {},
+                        }),
+                    { message: 'Name parameter should be present if job is a function' },
+                );
             });
 
             it('schedules a job using date format', async function () {
                 const timeInTenSeconds = new Date(Date.now() + 10);
                 const jobPath = path.resolve(__dirname, './jobs/simple.js');
 
-                const clock = FakeTimers.install({now: Date.now()});
+                const clock = FakeTimers.install({ now: Date.now() });
                 try {
                     await jobManager.addJob({
                         at: timeInTenSeconds,
                         job: jobPath,
-                        name: 'job-in-ten'
+                        name: 'job-in-ten',
                     });
 
                     assert.equal(jobManager.bree.timeouts.has('job-in-ten'), true);
@@ -168,12 +176,12 @@ describe('Job Manager', function () {
             });
 
             it('schedules a job to run immediately', async function () {
-                const clock = FakeTimers.install({now: Date.now()});
+                const clock = FakeTimers.install({ now: Date.now() });
                 try {
                     const jobPath = path.resolve(__dirname, './jobs/simple.js');
                     await jobManager.addJob({
                         job: jobPath,
-                        name: 'job-now'
+                        name: 'job-now',
                     });
 
                     assert.equal(jobManager.bree.timeouts.has('job-now'), true);
@@ -200,12 +208,12 @@ describe('Job Manager', function () {
             });
 
             it('fails to schedule a job with the same name to run immediately one after another', async function () {
-                const clock = FakeTimers.install({now: Date.now()});
+                const clock = FakeTimers.install({ now: Date.now() });
                 try {
                     const jobPath = path.resolve(__dirname, './jobs/simple.js');
                     await jobManager.addJob({
                         job: jobPath,
-                        name: 'job-now'
+                        name: 'job-now',
                     });
 
                     assert.equal(jobManager.bree.timeouts.has('job-now'), true);
@@ -227,26 +235,30 @@ describe('Job Manager', function () {
 
                     assert.equal(jobManager.bree.workers.has('job-now'), false);
 
-                    await assert.rejects(() => jobManager.addJob({
-                        job: jobPath,
-                        name: 'job-now'
-                    }), /Job #1 has a duplicate job name of job-now/);
+                    await assert.rejects(
+                        () =>
+                            jobManager.addJob({
+                                job: jobPath,
+                                name: 'job-now',
+                            }),
+                        /Job #1 has a duplicate job name of job-now/,
+                    );
                 } finally {
                     clock.uninstall();
                 }
             });
 
-            it('uses custom error handler when job fails', async function (){
+            it('uses custom error handler when job fails', async function () {
                 let job = function namedJob() {
                     throw new Error('job error');
                 };
                 const spyHandler = sinon.spy();
-                jobManager = new JobManager({errorHandler: spyHandler, config: stubConfig});
+                jobManager = new JobManager({ errorHandler: spyHandler, config: stubConfig });
                 const completion = jobManager.awaitCompletion('will-fail');
 
                 await jobManager.addJob({
                     job,
-                    name: 'will-fail'
+                    name: 'will-fail',
                 });
 
                 await assert.rejects(completion, /job error/);
@@ -256,14 +268,17 @@ describe('Job Manager', function () {
                 assert.equal(spyHandler.args[0][1].name, 'will-fail');
             });
 
-            it('uses worker message handler when job sends a message', async function (){
+            it('uses worker message handler when job sends a message', async function () {
                 const workerMessageHandlerSpy = sinon.spy();
-                jobManager = new JobManager({workerMessageHandler: workerMessageHandlerSpy, config: stubConfig});
+                jobManager = new JobManager({
+                    workerMessageHandler: workerMessageHandlerSpy,
+                    config: stubConfig,
+                });
                 const completion = jobManager.awaitCompletion('will-send-msg');
 
                 await jobManager.addJob({
                     job: path.resolve(__dirname, './jobs/message.js'),
-                    name: 'will-send-msg'
+                    name: 'will-send-msg',
                 });
                 await jobManager.bree.run('will-send-msg');
                 await delay(100);
@@ -273,7 +288,10 @@ describe('Job Manager', function () {
 
                 assert.equal(workerMessageHandlerSpy.called, true);
                 assert.equal(workerMessageHandlerSpy.args[0][0].name, 'will-send-msg');
-                assert.equal(workerMessageHandlerSpy.args[0][0].message, 'Worker received: hello from Ghost!');
+                assert.equal(
+                    workerMessageHandlerSpy.args[0][0].message,
+                    'Worker received: hello from Ghost!',
+                );
             });
         });
     });
@@ -282,7 +300,7 @@ describe('Job Manager', function () {
         it('throws if name parameter is not provided', async function () {
             try {
                 await jobManager.addOneOffJob({
-                    job: () => {}
+                    job: () => {},
                 });
                 throw new Error('should have thrown');
             } catch (err) {
@@ -295,7 +313,7 @@ describe('Job Manager', function () {
                 jobManager.addJob({
                     job: path.resolve(__dirname, './jobs/inline-module.js'),
                     data: 'test data',
-                    offloaded: false
+                    offloaded: false,
                 });
 
                 await delay(10);
@@ -306,7 +324,7 @@ describe('Job Manager', function () {
                 const modulePath = path.resolve(__dirname, './jobs/inline-module-throws.js');
                 jobManager.addJob({
                     job: modulePath,
-                    offloaded: false
+                    offloaded: false,
                 });
 
                 await delay(10);
@@ -318,15 +336,15 @@ describe('Job Manager', function () {
                 const spy = sinon.spy();
                 const JobModel = {
                     findOne: sinon.stub().resolves(undefined),
-                    add: sinon.stub().resolves()
+                    add: sinon.stub().resolves(),
                 };
 
-                jobManager = new JobManager({JobModel, config: stubConfig});
+                jobManager = new JobManager({ JobModel, config: stubConfig });
                 await jobManager.addOneOffJob({
                     job: spy,
                     name: 'unique name',
                     data: 'test data',
-                    offloaded: false
+                    offloaded: false,
                 });
 
                 assert.equal(JobModel.add.called, true);
@@ -336,35 +354,39 @@ describe('Job Manager', function () {
                 const spy = sinon.spy();
                 const JobModel = {
                     findOne: sinon.stub().resolves(jobModelInstance),
-                    add: sinon.stub().throws('should not be called')
+                    add: sinon.stub().throws('should not be called'),
                 };
 
-                jobManager = new JobManager({JobModel, config: stubConfig});
+                jobManager = new JobManager({ JobModel, config: stubConfig });
 
                 try {
                     await jobManager.addOneOffJob({
                         job: spy,
                         name: 'I am the only one',
                         data: 'test data',
-                        offloaded: false
+                        offloaded: false,
                     });
                     throw new Error('should not reach this point');
                 } catch (error) {
-                    assert.equal(error.message, 'A "I am the only one" one off job has already been executed.');
+                    assert.equal(
+                        error.message,
+                        'A "I am the only one" one off job has already been executed.',
+                    );
                 }
             });
 
             it('sets a finished state on an inline job', async function () {
                 const JobModel = {
-                    findOne: sinon.stub()
+                    findOne: sinon
+                        .stub()
                         .onCall(0)
                         .resolves(null)
-                        .resolves({id: 'unique', name: 'successful-oneoff'}),
-                    add: sinon.stub().resolves({name: 'successful-oneoff'}),
-                    edit: sinon.stub().resolves({name: 'successful-oneoff'})
+                        .resolves({ id: 'unique', name: 'successful-oneoff' }),
+                    add: sinon.stub().resolves({ name: 'successful-oneoff' }),
+                    edit: sinon.stub().resolves({ name: 'successful-oneoff' }),
                 };
 
-                jobManager = new JobManager({JobModel, config: stubConfig});
+                jobManager = new JobManager({ JobModel, config: stubConfig });
                 const completion = jobManager.awaitCompletion('successful-oneoff');
 
                 jobManager.addOneOffJob({
@@ -372,7 +394,7 @@ describe('Job Manager', function () {
                         return await delay(10);
                     },
                     name: 'successful-oneoff',
-                    offloaded: false
+                    offloaded: false,
                 });
 
                 await completion;
@@ -394,25 +416,30 @@ describe('Job Manager', function () {
 
             it('sets a failed state on a job', async function () {
                 const JobModel = {
-                    findOne: sinon.stub()
+                    findOne: sinon
+                        .stub()
                         .onCall(0)
                         .resolves(null)
-                        .resolves({id: 'unique', name: 'failed-oneoff'}),
-                    add: sinon.stub().resolves({name: 'failed-oneoff'}),
-                    edit: sinon.stub().resolves({name: 'failed-oneoff'})
+                        .resolves({ id: 'unique', name: 'failed-oneoff' }),
+                    add: sinon.stub().resolves({ name: 'failed-oneoff' }),
+                    edit: sinon.stub().resolves({ name: 'failed-oneoff' }),
                 };
 
                 let job = function namedJob() {
                     throw new Error('job error');
                 };
                 const spyHandler = sinon.spy();
-                jobManager = new JobManager({errorHandler: spyHandler, JobModel, config: stubConfig});
+                jobManager = new JobManager({
+                    errorHandler: spyHandler,
+                    JobModel,
+                    config: stubConfig,
+                });
                 const completion = jobManager.awaitCompletion('failed-oneoff');
 
                 await jobManager.addOneOffJob({
                     job,
                     name: 'failed-oneoff',
-                    offloaded: false
+                    offloaded: false,
                 });
 
                 await assert.rejects(completion, /job error/);
@@ -429,34 +456,39 @@ describe('Job Manager', function () {
 
             it('adds job to the queue after failing', async function () {
                 const JobModel = {
-                    findOne: sinon.stub()
+                    findOne: sinon
+                        .stub()
                         .onCall(0)
                         .resolves(null)
                         .onCall(1)
-                        .resolves({id: 'unique'})
+                        .resolves({ id: 'unique' })
                         .resolves({
                             id: 'unique',
                             get: (field) => {
                                 if (field === 'status') {
                                     return 'failed';
                                 }
-                            }
+                            },
                         }),
                     add: sinon.stub().resolves({}),
-                    edit: sinon.stub().resolves()
+                    edit: sinon.stub().resolves(),
                 };
 
                 let job = function namedJob() {
                     throw new Error('job error');
                 };
                 const spyHandler = sinon.spy();
-                jobManager = new JobManager({errorHandler: spyHandler, JobModel, config: stubConfig});
+                jobManager = new JobManager({
+                    errorHandler: spyHandler,
+                    JobModel,
+                    config: stubConfig,
+                });
                 const completion1 = jobManager.awaitCompletion('failed-oneoff');
 
                 await jobManager.addOneOffJob({
                     job,
                     name: 'failed-oneoff',
-                    offloaded: false
+                    offloaded: false,
                 });
 
                 // give time to execute the job and fail
@@ -470,7 +502,7 @@ describe('Job Manager', function () {
                 await jobManager.addOneOffJob({
                     job,
                     name: 'failed-oneoff',
-                    offloaded: false
+                    offloaded: false,
                 });
 
                 // give time to execute the job and fail AGAIN
@@ -485,14 +517,14 @@ describe('Job Manager', function () {
                 const spy = sinon.spy();
                 const JobModel = {
                     findOne: sinon.stub().resolves(undefined),
-                    add: sinon.stub().resolves()
+                    add: sinon.stub().resolves(),
                 };
 
-                jobManager = new JobManager({JobModel, config: stubConfig});
+                jobManager = new JobManager({ JobModel, config: stubConfig });
                 await jobManager.addOneOffJob({
                     job: spy,
                     name: 'unique name',
-                    data: 'test data'
+                    data: 'test data',
                 });
 
                 assert.equal(JobModel.add.called, true);
@@ -502,40 +534,44 @@ describe('Job Manager', function () {
                 const spy = sinon.spy();
                 const JobModel = {
                     findOne: sinon.stub().resolves(jobModelInstance),
-                    add: sinon.stub().throws('should not be called')
+                    add: sinon.stub().throws('should not be called'),
                 };
 
-                jobManager = new JobManager({JobModel, config: stubConfig});
+                jobManager = new JobManager({ JobModel, config: stubConfig });
 
                 try {
                     await jobManager.addOneOffJob({
                         job: spy,
                         name: 'I am the only one',
-                        data: 'test data'
+                        data: 'test data',
                     });
                     throw new Error('should not reach this point');
                 } catch (error) {
-                    assert.equal(error.message, 'A "I am the only one" one off job has already been executed.');
+                    assert.equal(
+                        error.message,
+                        'A "I am the only one" one off job has already been executed.',
+                    );
                 }
             });
 
             it('sets a finished state on a job', async function () {
                 const JobModel = {
-                    findOne: sinon.stub()
+                    findOne: sinon
+                        .stub()
                         .onCall(0)
                         .resolves(null)
-                        .resolves({id: 'unique', name: 'successful-oneoff'}),
-                    add: sinon.stub().resolves({name: 'successful-oneoff'}),
-                    edit: sinon.stub().resolves({name: 'successful-oneoff'})
+                        .resolves({ id: 'unique', name: 'successful-oneoff' }),
+                    add: sinon.stub().resolves({ name: 'successful-oneoff' }),
+                    edit: sinon.stub().resolves({ name: 'successful-oneoff' }),
                 };
 
-                jobManager = new JobManager({JobModel, config: stubConfig});
+                jobManager = new JobManager({ JobModel, config: stubConfig });
 
                 const jobCompletion = jobManager.awaitCompletion('successful-oneoff');
 
                 await jobManager.addOneOffJob({
                     job: path.resolve(__dirname, './jobs/message.js'),
-                    name: 'successful-oneoff'
+                    name: 'successful-oneoff',
                 });
 
                 // allow job to get picked up and executed
@@ -559,25 +595,26 @@ describe('Job Manager', function () {
 
             it('handles a failed job', async function () {
                 const JobModel = {
-                    findOne: sinon.stub()
-                        .onCall(0)
-                        .resolves(null)
-                        .resolves(jobModelInstance),
-                    add: sinon.stub().resolves({name: 'failed-oneoff'}),
-                    edit: sinon.stub().resolves({name: 'failed-oneoff'})
+                    findOne: sinon.stub().onCall(0).resolves(null).resolves(jobModelInstance),
+                    add: sinon.stub().resolves({ name: 'failed-oneoff' }),
+                    edit: sinon.stub().resolves({ name: 'failed-oneoff' }),
                 };
 
                 let job = function namedJob() {
                     throw new Error('job error');
                 };
                 const spyHandler = sinon.spy();
-                jobManager = new JobManager({errorHandler: spyHandler, JobModel, config: stubConfig});
+                jobManager = new JobManager({
+                    errorHandler: spyHandler,
+                    JobModel,
+                    config: stubConfig,
+                });
 
                 const completion = jobManager.awaitCompletion('failed-oneoff');
 
                 await jobManager.addOneOffJob({
                     job,
-                    name: 'failed-oneoff'
+                    name: 'failed-oneoff',
                 });
 
                 await assert.rejects(completion, /job error/);
@@ -601,14 +638,15 @@ describe('Job Manager', function () {
 
     describe('Job execution progress', function () {
         it('returns false when persistence is not configured', async function () {
-            jobManager = new JobManager({config: stubConfig});
+            jobManager = new JobManager({ config: stubConfig });
             const executed = await jobManager.hasExecutedSuccessfully('no-repo-job');
             assert.equal(executed, false);
         });
 
         it('checks if job has ever been executed', async function () {
             const JobModel = {
-                findOne: sinon.stub()
+                findOne: sinon
+                    .stub()
                     .withArgs('solovei')
                     .onCall(0)
                     .resolves(null)
@@ -619,7 +657,7 @@ describe('Job Manager', function () {
                             if (field === 'status') {
                                 return 'finished';
                             }
-                        }
+                        },
                     })
                     .onCall(2)
                     .resolves({
@@ -628,11 +666,11 @@ describe('Job Manager', function () {
                             if (field === 'status') {
                                 return 'failed';
                             }
-                        }
-                    })
+                        },
+                    }),
             };
 
-            jobManager = new JobManager({JobModel, config: stubConfig});
+            jobManager = new JobManager({ JobModel, config: stubConfig });
             let executed = await jobManager.hasExecutedSuccessfully('solovei');
             assert.equal(executed, false);
 
@@ -652,7 +690,8 @@ describe('Job Manager', function () {
                 spy();
             };
             const JobModel = {
-                findOne: sinon.stub()
+                findOne: sinon
+                    .stub()
                     // first call when adding a job
                     .withArgs('solovei')
                     .onCall(0)
@@ -662,17 +701,17 @@ describe('Job Manager', function () {
                     .resolves(null)
                     .resolves({
                         id: 'unique',
-                        get: () => status
+                        get: () => status,
                     }),
-                add: sinon.stub().resolves()
+                add: sinon.stub().resolves(),
             };
 
-            jobManager = new JobManager({JobModel, config: stubConfig});
+            jobManager = new JobManager({ JobModel, config: stubConfig });
 
             await jobManager.addOneOffJob({
                 job: jobWithDelay,
                 name: 'solovei',
-                offloaded: false
+                offloaded: false,
             });
 
             assert.equal(spy.called, false);
@@ -683,7 +722,7 @@ describe('Job Manager', function () {
 
     describe('Remove a job', function () {
         it('removes a scheduled job from the queue', async function () {
-            jobManager = new JobManager({config: stubConfig});
+            jobManager = new JobManager({ config: stubConfig });
 
             const timeInTenSeconds = new Date(Date.now() + 10);
             const jobPath = path.resolve(__dirname, './jobs/simple.js');
@@ -691,7 +730,7 @@ describe('Job Manager', function () {
             await jobManager.addJob({
                 at: timeInTenSeconds,
                 job: jobPath,
-                name: 'job-in-ten'
+                name: 'job-in-ten',
             });
             assert.equal(jobManager.bree.config.jobs[0].name, 'job-in-ten');
 
@@ -703,12 +742,12 @@ describe('Job Manager', function () {
 
     describe('Shutdown', function () {
         it('gracefully shuts down inline jobs', async function () {
-            jobManager = new JobManager({config: stubConfig});
+            jobManager = new JobManager({ config: stubConfig });
 
             jobManager.addJob({
                 job: require('./jobs/timed-job'),
                 data: 200,
-                offloaded: false
+                offloaded: false,
             });
 
             assert.equal(jobManager.inlineQueue.idle(), false);
@@ -719,11 +758,11 @@ describe('Job Manager', function () {
         });
 
         it('gracefully shuts down an interval job', async function () {
-            jobManager = new JobManager({config: stubConfig});
+            jobManager = new JobManager({ config: stubConfig });
 
             await jobManager.addJob({
                 at: 'every 5 seconds',
-                job: path.resolve(__dirname, './jobs/graceful.js')
+                job: path.resolve(__dirname, './jobs/graceful.js'),
             });
 
             await delay(1); // let the job execution kick in
@@ -751,7 +790,7 @@ describe('Job Manager', function () {
                 job: async () => {
                     await delay(10);
                 },
-                offloaded: false
+                offloaded: false,
             });
 
             await assert.doesNotReject(() => jobManager.allSettled());
@@ -762,35 +801,35 @@ describe('Job Manager', function () {
     describe('Unit helpers', function () {
         it('_jobMessageHandler dispatches domain events from worker messages', async function () {
             const domainEvents = {
-                dispatchRaw: sinon.spy()
+                dispatchRaw: sinon.spy(),
             };
-            jobManager = new JobManager({config: stubConfig, domainEvents});
+            jobManager = new JobManager({ config: stubConfig, domainEvents });
 
             await jobManager._jobMessageHandler({
                 name: 'event-job',
                 message: {
                     event: {
                         type: 'my-event',
-                        data: {foo: 'bar'}
-                    }
-                }
+                        data: { foo: 'bar' },
+                    },
+                },
             });
 
             assert.equal(domainEvents.dispatchRaw.calledOnce, true);
-            assert.deepEqual(domainEvents.dispatchRaw.args[0], ['my-event', {foo: 'bar'}]);
+            assert.deepEqual(domainEvents.dispatchRaw.args[0], ['my-event', { foo: 'bar' }]);
         });
 
         it('_jobErrorHandler rejects allSettled listeners', async function () {
             sandbox.stub(jobManager.inlineQueue, 'idle').returns(false);
             const all = jobManager.allSettled();
 
-            await jobManager._jobErrorHandler(new Error('all failed'), {name: 'no-op'});
+            await jobManager._jobErrorHandler(new Error('all failed'), { name: 'no-op' });
 
             await assert.rejects(all, /all failed/);
         });
 
         it('assembleBreeJob supports cron expressions', function () {
-            const job = assembleBreeJob('* * * * * *', '/tmp/job.js', {foo: 'bar'}, 'cron-job');
+            const job = assembleBreeJob('* * * * * *', '/tmp/job.js', { foo: 'bar' }, 'cron-job');
             assert.equal(job.cron, '* * * * * *');
             assert.equal(job.interval, undefined);
             assert.equal(job.date, undefined);
@@ -798,9 +837,9 @@ describe('Job Manager', function () {
 
         it('JobsRepository delete handles model delete errors', async function () {
             const JobModel = {
-                destroy: sinon.stub().rejects(new Error('destroy failed'))
+                destroy: sinon.stub().rejects(new Error('destroy failed')),
             };
-            const repository = new JobsRepository({JobModel});
+            const repository = new JobsRepository({ JobModel });
 
             await assert.doesNotReject(() => repository.delete('abc'));
             assert.equal(logging.error.called, true);
@@ -808,9 +847,9 @@ describe('Job Manager', function () {
 
         it('JobsRepository delete resolves when model delete succeeds', async function () {
             const JobModel = {
-                destroy: sinon.stub().resolves()
+                destroy: sinon.stub().resolves(),
             };
-            const repository = new JobsRepository({JobModel});
+            const repository = new JobsRepository({ JobModel });
 
             await assert.doesNotReject(() => repository.delete('abc'));
             assert.equal(JobModel.destroy.calledOnce, true);

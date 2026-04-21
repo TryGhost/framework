@@ -15,12 +15,13 @@ module.exports = function getConfig() {
         Object.assign(defaults, require(path.join(parentPath, 'config.example.json')));
     }
 
-    config.argv()
+    config
+        .argv()
         .env({
-            separator: '__'
+            separator: '__',
         })
         .file({
-            file: path.join(parentPath, 'config.' + env + '.json')
+            file: path.join(parentPath, 'config.' + env + '.json'),
         });
 
     config.set('env', env);

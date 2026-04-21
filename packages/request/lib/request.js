@@ -11,9 +11,9 @@ let cacheableLookup;
 
 const defaultOptions = {
     headers: {
-        'user-agent': 'Ghost/' + ghostVersion.safe + ' (https://github.com/TryGhost/Ghost)'
+        'user-agent': 'Ghost/' + ghostVersion.safe + ' (https://github.com/TryGhost/Ghost)',
     },
-    method: 'GET'
+    method: 'GET',
 };
 
 module.exports = async function request(url, options = {}) {
@@ -25,22 +25,27 @@ module.exports = async function request(url, options = {}) {
         // Ensure OS-level name resolution is not used
         const CacheableLookup = (await cacheableLookupPromise).default;
         cacheableLookup = new CacheableLookup({
-            lookup: false
+            lookup: false,
         });
         defaultOptions.dnsLookup = cacheableLookup.lookup;
     }
 
     if (_.isEmpty(url) || !validator.isURL(url)) {
-        return Promise.reject(new errors.InternalServerError({
-            message: 'URL empty or invalid.',
-            code: 'URL_MISSING_INVALID',
-            context: url
-        }));
+        return Promise.reject(
+            new errors.InternalServerError({
+                message: 'URL empty or invalid.',
+                code: 'URL_MISSING_INVALID',
+                context: url,
+            }),
+        );
     }
 
-    if (process.env.NODE_ENV?.startsWith('test') && !Object.prototype.hasOwnProperty.call(options, 'retry')) {
+    if (
+        process.env.NODE_ENV?.startsWith('test') &&
+        !Object.prototype.hasOwnProperty.call(options, 'retry')
+    ) {
         options.retry = {
-            limit: 0
+            limit: 0,
         };
     }
 

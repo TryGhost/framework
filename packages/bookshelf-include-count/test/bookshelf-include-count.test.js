@@ -27,7 +27,9 @@ describe('@tryghost/bookshelf-include-count', function () {
         BaseModel.prototype.serialize = modelSerialize;
         BaseModel.prototype.sync = modelSync;
         BaseModel.prototype.save = modelSave;
-        BaseModel.prototype.query = sinon.stub().returns({toQuery: sinon.stub().returns('SELECT 1')});
+        BaseModel.prototype.query = sinon
+            .stub()
+            .returns({ toQuery: sinon.stub().returns('SELECT 1') });
         BaseModel.extend = function extend(proto) {
             function Child() {
                 BaseModel.apply(this, arguments);
@@ -44,7 +46,9 @@ describe('@tryghost/bookshelf-include-count', function () {
             this.constructor = BaseCollection;
         };
         BaseCollection.prototype.sync = collectionSync;
-        BaseCollection.prototype.query = sinon.stub().returns({toQuery: sinon.stub().returns('SELECT 2')});
+        BaseCollection.prototype.query = sinon
+            .stub()
+            .returns({ toQuery: sinon.stub().returns('SELECT 2') });
         BaseCollection.extend = function extend(proto) {
             function Child() {
                 BaseCollection.apply(this, arguments);
@@ -59,7 +63,7 @@ describe('@tryghost/bookshelf-include-count', function () {
 
         Bookshelf = {
             Model: BaseModel,
-            Collection: BaseCollection
+            Collection: BaseCollection,
         };
 
         installPlugin(Bookshelf);
@@ -79,7 +83,7 @@ describe('@tryghost/bookshelf-include-count', function () {
             id: '1',
             count__posts: 3,
             count__members: 9,
-            title: 'hello'
+            title: 'hello',
         };
 
         const result = model.serialize({});
@@ -89,20 +93,20 @@ describe('@tryghost/bookshelf-include-count', function () {
             title: 'hello',
             count: {
                 posts: 3,
-                members: 9
-            }
+                members: 9,
+            },
         });
     });
 
     it('model sync applies counts for non-insert/update methods', function () {
         sinon.stub(debugBase, 'enabled').returns(false);
         const model = new Bookshelf.Model();
-        model.query = sinon.stub().returns({toQuery: sinon.stub().returns('SQL')});
+        model.query = sinon.stub().returns({ toQuery: sinon.stub().returns('SQL') });
         model.constructor.countRelations = sinon.stub().returns({
-            posts: sinon.stub()
+            posts: sinon.stub(),
         });
 
-        const options = {method: 'read', withRelated: ['count.posts']};
+        const options = { method: 'read', withRelated: ['count.posts'] };
         const result = model.sync(options);
 
         assert.equal(result, 'MODEL_SYNC');
@@ -115,11 +119,11 @@ describe('@tryghost/bookshelf-include-count', function () {
         sinon.stub(debugBase, 'enabled').returns(false);
         const model = new Bookshelf.Model();
         model.constructor.countRelations = sinon.stub().returns({
-            posts: sinon.stub()
+            posts: sinon.stub(),
         });
 
-        const resultInsert = model.sync({method: 'insert', withRelated: ['count.posts']});
-        const resultUpdate = model.sync({method: 'update', withRelated: ['count.posts']});
+        const resultInsert = model.sync({ method: 'insert', withRelated: ['count.posts'] });
+        const resultUpdate = model.sync({ method: 'update', withRelated: ['count.posts'] });
 
         assert.equal(resultInsert, 'MODEL_SYNC');
         assert.equal(resultUpdate, 'MODEL_SYNC');
@@ -129,9 +133,9 @@ describe('@tryghost/bookshelf-include-count', function () {
     it('model sync logs query when debug is enabled', function () {
         sinon.stub(debugBase, 'enabled').returns(true);
         const model = new Bookshelf.Model();
-        model.query = sinon.stub().returns({toQuery: sinon.stub().returns('SQL')});
+        model.query = sinon.stub().returns({ toQuery: sinon.stub().returns('SQL') });
 
-        const result = model.sync({method: 'read'});
+        const result = model.sync({ method: 'read' });
 
         assert.equal(result, 'MODEL_SYNC');
         assert.equal(model.query.calledOnce, true);
@@ -142,21 +146,18 @@ describe('@tryghost/bookshelf-include-count', function () {
         const collection = new Bookshelf.Collection();
         collection.model = {
             countRelations: sinon.stub().returns({
-                likes: countLikes
-            })
+                likes: countLikes,
+            }),
         };
 
         const options = {
-            withRelated: [
-                {foo: sinon.stub()},
-                {'count.likes': sinon.stub()}
-            ]
+            withRelated: [{ foo: sinon.stub() }, { 'count.likes': sinon.stub() }],
         };
 
         collection.addCounts(options);
 
         assert.equal(countLikes.calledOnceWithExactly(collection, options), true);
-        assert.deepEqual(options.withRelated, [{foo: options.withRelated[0].foo}]);
+        assert.deepEqual(options.withRelated, [{ foo: options.withRelated[0].foo }]);
     });
 
     it('addCounts exits early for missing options/withRelated and absent countRelations', function () {
@@ -165,19 +166,19 @@ describe('@tryghost/bookshelf-include-count', function () {
 
         assert.equal(model.addCounts(), undefined);
         assert.equal(model.addCounts({}), undefined);
-        assert.equal(model.addCounts({withRelated: ['count.posts']}), undefined);
+        assert.equal(model.addCounts({ withRelated: ['count.posts'] }), undefined);
     });
 
     it('addCounts does nothing when no relation key matches withRelated entries', function () {
         const countTags = sinon.stub();
         const model = new Bookshelf.Model();
         model.constructor.countRelations = sinon.stub().returns({
-            tags: countTags
+            tags: countTags,
         });
 
         const marker = sinon.stub();
         const options = {
-            withRelated: ['author', {editor: marker}]
+            withRelated: ['author', { editor: marker }],
         };
 
         model.addCounts(options);
@@ -185,7 +186,7 @@ describe('@tryghost/bookshelf-include-count', function () {
         assert.equal(countTags.called, false);
         assert.equal(options.withRelated.length, 2);
         assert.equal(options.withRelated[0], 'author');
-        assert.deepEqual(options.withRelated[1], {editor: marker});
+        assert.deepEqual(options.withRelated[1], { editor: marker });
     });
 
     it('save preserves count__ attributes through save promise', async function () {
@@ -193,23 +194,23 @@ describe('@tryghost/bookshelf-include-count', function () {
         model.attributes = {
             id: '1',
             count__posts: 4,
-            title: 'before'
+            title: 'before',
         };
 
         modelSave.callsFake(function () {
             model.attributes = {
                 id: '1',
-                title: 'after'
+                title: 'after',
             };
             return Promise.resolve('MODEL_SAVE');
         });
 
-        const result = await model.save({title: 'after'});
+        const result = await model.save({ title: 'after' });
         assert.equal(result, 'MODEL_SAVE');
         assert.deepEqual(model.attributes, {
             id: '1',
             title: 'after',
-            count__posts: 4
+            count__posts: 4,
         });
     });
 
@@ -219,12 +220,12 @@ describe('@tryghost/bookshelf-include-count', function () {
         const countTags = sinon.stub();
         collection.model = {
             countRelations: sinon.stub().returns({
-                tags: countTags
-            })
+                tags: countTags,
+            }),
         };
-        collection.query = sinon.stub().returns({toQuery: sinon.stub().returns('SELECT 10')});
+        collection.query = sinon.stub().returns({ toQuery: sinon.stub().returns('SELECT 10') });
 
-        const options = {withRelated: ['count.tags']};
+        const options = { withRelated: ['count.tags'] };
         const result = collection.sync(options);
 
         assert.equal(result, 'COLLECTION_SYNC');

@@ -4,7 +4,7 @@ const sinon = require('sinon');
 const assert = require('assert/strict');
 const ElasticSearch = require('@tryghost/elasticsearch');
 const PrettyStream = require('@tryghost/pretty-stream');
-const {getProcessRoot} = require('@tryghost/root-utils');
+const { getProcessRoot } = require('@tryghost/root-utils');
 const GhostMetrics = require('../lib/GhostMetrics');
 const sandbox = sinon.createSandbox();
 
@@ -35,7 +35,7 @@ describe('Metrics config', function () {
         const transports = ['stdout'];
         const loggingRc = `module.exports = {
             metrics: {
-                transports: [${transports.map(t => `'${t}'`).join(', ')}]
+                transports: [${transports.map((t) => `'${t}'`).join(', ')}]
             }
         };`;
 
@@ -77,8 +77,8 @@ describe('Logging', function () {
 
             const ghostMetrics = new GhostMetrics({
                 metrics: {
-                    transports: ['stdout']
-                }
+                    transports: ['stdout'],
+                },
             });
             ghostMetrics.metric(name, value);
         });
@@ -92,15 +92,15 @@ describe('Logging', function () {
             metrics: {
                 transports: ['elasticsearch'],
                 metadata: {
-                    id: '123123'
-                }
+                    id: '123123',
+                },
             },
             elasticsearch: {
                 host: 'https://test-elasticsearch',
                 username: 'user',
                 password: 'pass',
-                level: 'info'
-            }
+                level: 'info',
+            },
         });
 
         await new Promise((resolve) => {
@@ -122,8 +122,8 @@ describe('Logging', function () {
         assert.throws(() => {
             new GhostMetrics({
                 metrics: {
-                    transports: ['not-a-transport']
-                }
+                    transports: ['not-a-transport'],
+                },
             });
         });
     });
@@ -131,8 +131,8 @@ describe('Logging', function () {
     it('defaults to short mode', function () {
         const ghostMetrics = new GhostMetrics({
             metrics: {
-                transports: ['stdout']
-            }
+                transports: ['stdout'],
+            },
         });
 
         assert.equal(ghostMetrics.mode, 'short');
@@ -150,7 +150,7 @@ describe('Logging', function () {
         const noOptionsMetrics = new GhostMetrics();
         assert.deepEqual(noOptionsMetrics.transports, []);
 
-        const emptyMetricsConfig = new GhostMetrics({metrics: {}});
+        const emptyMetricsConfig = new GhostMetrics({ metrics: {} });
         assert.deepEqual(emptyMetricsConfig.transports, []);
         assert.deepEqual(emptyMetricsConfig.metadata, {});
     });
@@ -163,15 +163,15 @@ describe('Logging', function () {
             metrics: {
                 transports: ['elasticsearch'],
                 metadata: {
-                    id: '123123'
-                }
+                    id: '123123',
+                },
             },
             elasticsearch: {
                 host: 'https://test-elasticsearch',
                 username: 'user',
                 password: 'pass',
-                level: 'info'
-            }
+                level: 'info',
+            },
         });
 
         sandbox.stub(ElasticSearch.prototype, 'index').rejects();
@@ -185,14 +185,14 @@ describe('Logging', function () {
 
         const ghostMetrics = new GhostMetrics({
             metrics: {
-                transports: ['elasticsearch']
+                transports: ['elasticsearch'],
             },
             elasticsearch: {
                 host: 'https://test-elasticsearch',
                 username: 'user',
                 password: 'pass',
-                proxy: 'https://proxy.example.com'
-            }
+                proxy: 'https://proxy.example.com',
+            },
         });
 
         sandbox.stub(ElasticSearch.prototype, 'index').resolves();

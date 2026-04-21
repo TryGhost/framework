@@ -1,31 +1,26 @@
 {
   "name": "@tryghost/request",
   "version": "3.0.3",
+  "license": "MIT",
+  "author": "Ghost Foundation",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
     "directory": "packages/request"
   },
-  "author": "Ghost Foundation",
-  "license": "MIT",
-  "main": "index.js",
-  "scripts": {
-    "dev": "echo \"Implement me!\"",
-    "test": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
-    "lint": "eslint . --ext .js --cache",
-    "posttest": "yarn lint"
-  },
   "files": [
     "index.js",
     "lib"
   ],
+  "main": "index.js",
   "publishConfig": {
     "access": "public"
   },
-  "devDependencies": {
-    "nock": "14.0.12",
-    "rewire": "9.0.1",
-    "sinon": "21.1.2"
+  "scripts": {
+    "dev": "echo \"Implement me!\"",
+    "test": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
+    "lint": "oxlint -c ../../.oxlintrc.json .",
+    "posttest": "yarn lint"
   },
   "dependencies": {
     "@tryghost/errors": "^3.0.3",
@@ -34,5 +29,10 @@
     "cacheable-lookup": "7.0.0",
     "got": "14.6.6",
     "lodash": "4.18.1"
+  },
+  "devDependencies": {
+    "nock": "14.0.12",
+    "rewire": "9.0.1",
+    "sinon": "21.1.2"
   }
 }

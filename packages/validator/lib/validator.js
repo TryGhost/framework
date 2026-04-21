@@ -17,7 +17,7 @@ const allowedValidators = [
     'isInt',
     'isLowercase',
     'equals',
-    'matches'
+    'matches',
 ];
 
 function assertString(input) {
@@ -39,7 +39,7 @@ validators.isTimezone = function isTimezone(str) {
 
 validators.isEmptyOrURL = function isEmptyOrURL(str) {
     assertString(str);
-    return (validators.isEmpty(str) || validators.isURL(str, {require_protocol: false}));
+    return validators.isEmpty(str) || validators.isURL(str, { require_protocol: false });
 };
 
 validators.isSlug = function isSlug(str) {
@@ -47,7 +47,7 @@ validators.isSlug = function isSlug(str) {
     return validators.matches(str, /^[a-z0-9\-_]+$/);
 };
 
-validators.isEmail = function isEmail(str, options = {legacy: true}) {
+validators.isEmail = function isEmail(str, options = { legacy: true }) {
     assertString(str);
     // Use the latest email validator if legacy is set to false
     if (!options?.legacy) {

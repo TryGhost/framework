@@ -1,4 +1,4 @@
-const {assert, sinon} = require('./utils');
+const { assert, sinon } = require('./utils');
 
 // We require the root dire
 const snapshotTools = require('../');
@@ -9,9 +9,16 @@ describe('Jest Snapshot', function () {
     });
 
     it('exposes a set of functions', function () {
-        assert.deepEqual(Object.keys(snapshotTools), ['mochaHooks', 'snapshotManager', 'matchSnapshotAssertion', 'any', 'anything', 'stringMatching']);
+        assert.deepEqual(Object.keys(snapshotTools), [
+            'mochaHooks',
+            'snapshotManager',
+            'matchSnapshotAssertion',
+            'any',
+            'anything',
+            'stringMatching',
+        ]);
 
-        const {any, anything, stringMatching} = snapshotTools;
+        const { any, anything, stringMatching } = snapshotTools;
 
         // Check the methods we export from other packages still exist and are functions
         assert.equal(typeof any, 'function');
@@ -20,17 +27,15 @@ describe('Jest Snapshot', function () {
     });
 
     it('matchSnapshotAssertion calls the match function and asserts the result', function () {
-        const matchSnapshotSpy = sinon.stub(snapshotTools.snapshotManager, 'match').returns(
-            {
-                message: () => { },
-                pass: {
-                    should: {
-                        eql: () => { }
-                    }
-                }
-            }
-        );
-        const fakeThis = {obj: {foo: 'bar'}, assert: () => {}};
+        const matchSnapshotSpy = sinon.stub(snapshotTools.snapshotManager, 'match').returns({
+            message: () => {},
+            pass: {
+                should: {
+                    eql: () => {},
+                },
+            },
+        });
+        const fakeThis = { obj: { foo: 'bar' }, assert: () => {} };
         const fakeProps = {};
         snapshotTools.matchSnapshotAssertion.call(fakeThis, fakeProps);
         sinon.assert.calledOnce(matchSnapshotSpy);
@@ -45,16 +50,28 @@ describe('Jest Snapshot', function () {
         });
 
         it('beforeEach correctly sets the current test', function () {
-            const setTestSpy = sinon.stub(snapshotTools.snapshotManager, 'setCurrentTest').returns();
-            snapshotTools.mochaHooks.beforeEach.call({currentTest: {file: 'test', fullTitle: () => { }, currentRetry: () => 0}});
+            const setTestSpy = sinon
+                .stub(snapshotTools.snapshotManager, 'setCurrentTest')
+                .returns();
+            snapshotTools.mochaHooks.beforeEach.call({
+                currentTest: { file: 'test', fullTitle: () => {}, currentRetry: () => 0 },
+            });
             sinon.assert.calledOnce(setTestSpy);
         });
 
         it('beforeEach with retries correctly resets the registry for the current test', function () {
-            const setTestSpy = sinon.stub(snapshotTools.snapshotManager, 'setCurrentTest').returns();
-            const resetRegistrySpy = sinon.stub(snapshotTools.snapshotManager, 'resetRegistryForCurrentTest').returns();
-            snapshotTools.mochaHooks.beforeEach.call({currentTest: {file: 'test', fullTitle: () => { }, currentRetry: () => 0}});
-            snapshotTools.mochaHooks.beforeEach.call({currentTest: {file: 'test', fullTitle: () => { }, currentRetry: () => 1}});
+            const setTestSpy = sinon
+                .stub(snapshotTools.snapshotManager, 'setCurrentTest')
+                .returns();
+            const resetRegistrySpy = sinon
+                .stub(snapshotTools.snapshotManager, 'resetRegistryForCurrentTest')
+                .returns();
+            snapshotTools.mochaHooks.beforeEach.call({
+                currentTest: { file: 'test', fullTitle: () => {}, currentRetry: () => 0 },
+            });
+            snapshotTools.mochaHooks.beforeEach.call({
+                currentTest: { file: 'test', fullTitle: () => {}, currentRetry: () => 1 },
+            });
             sinon.assert.calledTwice(setTestSpy);
             sinon.assert.calledOnce(resetRegistrySpy);
         });
@@ -75,9 +92,17 @@ describe('Jest Snapshot', function () {
             const resetRegistrySpy = sinon.spy(snapshotTools.snapshotManager, 'resetRegistry');
             const setCurrentTestSpy = sinon.spy(snapshotTools.snapshotManager, 'setCurrentTest');
 
-            const firstTest = {file: `${testFile}`, fullTitle: () => firstTestTitle, currentRetry: () => 0};
-            const secondTest = {file: `${testFile}`, fullTitle: () => secondTestTitle, currentRetry: () => 0};
-            const expectedResult = {foo: 'bar'};
+            const firstTest = {
+                file: `${testFile}`,
+                fullTitle: () => firstTestTitle,
+                currentRetry: () => 0,
+            };
+            const secondTest = {
+                file: `${testFile}`,
+                fullTitle: () => secondTestTitle,
+                currentRetry: () => 0,
+            };
+            const expectedResult = { foo: 'bar' };
 
             let testResult;
 
@@ -87,51 +112,60 @@ describe('Jest Snapshot', function () {
             assert.deepEqual(snapshotTools.snapshotManager.registry, {});
 
             // Execute a test calling beforeEach and using match
-            snapshotTools.mochaHooks.beforeEach.call({currentTest: firstTest});
+            snapshotTools.mochaHooks.beforeEach.call({ currentTest: firstTest });
             testResult = snapshotTools.snapshotManager.match(expectedResult);
 
             // Check the test was called how we expected
             sinon.assert.calledOnce(setCurrentTestSpy);
-            assert.deepEqual(setCurrentTestSpy.firstCall.args[0], {testPath: `${testFile}`, testTitle: firstTestTitle});
+            assert.deepEqual(setCurrentTestSpy.firstCall.args[0], {
+                testPath: `${testFile}`,
+                testTitle: firstTestTitle,
+            });
             assert.equal(testResult.pass, true);
 
             // Check the registry looks as expected
             assert.deepEqual(snapshotTools.snapshotManager.registry, {
                 [`${testFile}`]: {
-                    [`${firstTestTitle}`]: 1
-                }
+                    [`${firstTestTitle}`]: 1,
+                },
             });
 
             // Execute a second test
-            snapshotTools.mochaHooks.beforeEach.call({currentTest: secondTest});
+            snapshotTools.mochaHooks.beforeEach.call({ currentTest: secondTest });
             testResult = snapshotTools.snapshotManager.match(expectedResult);
 
             sinon.assert.calledTwice(setCurrentTestSpy);
-            assert.deepEqual(setCurrentTestSpy.secondCall.args[0], {testPath: `${testFile}`, testTitle: secondTestTitle});
+            assert.deepEqual(setCurrentTestSpy.secondCall.args[0], {
+                testPath: `${testFile}`,
+                testTitle: secondTestTitle,
+            });
             assert.equal(testResult.pass, false);
 
             // Check the registry looks as expected
             assert.deepEqual(snapshotTools.snapshotManager.registry, {
                 [`${testFile}`]: {
                     [`${firstTestTitle}`]: 1,
-                    [`${secondTestTitle}`]: 1
-                }
+                    [`${secondTestTitle}`]: 1,
+                },
             });
 
             // Execute a third test, which is the second test duplicated
-            snapshotTools.mochaHooks.beforeEach.call({currentTest: secondTest});
+            snapshotTools.mochaHooks.beforeEach.call({ currentTest: secondTest });
             testResult = snapshotTools.snapshotManager.match(expectedResult);
 
             sinon.assert.calledThrice(setCurrentTestSpy);
-            assert.deepEqual(setCurrentTestSpy.thirdCall.args[0], {testPath: `${testFile}`, testTitle: secondTestTitle});
+            assert.deepEqual(setCurrentTestSpy.thirdCall.args[0], {
+                testPath: `${testFile}`,
+                testTitle: secondTestTitle,
+            });
             assert.equal(testResult.pass, false);
 
             // Check the registry looks as expected
             assert.deepEqual(snapshotTools.snapshotManager.registry, {
                 [`${testFile}`]: {
                     [`${firstTestTitle}`]: 1,
-                    [`${secondTestTitle}`]: 2
-                }
+                    [`${secondTestTitle}`]: 2,
+                },
             });
         });
     });

@@ -1,4 +1,4 @@
-const {assert, sinon} = require('./utils');
+const { assert, sinon } = require('./utils');
 
 const SnapshotManager = require('../lib/SnapshotManager');
 
@@ -21,8 +21,8 @@ describe('Snapshot Manager', function () {
         snapshotManager.registry = {
             'test/my-fake.test.js': {
                 bar: 1,
-                foo: 2
-            }
+                foo: 2,
+            },
         };
 
         snapshotManager.resetRegistry();
@@ -42,29 +42,32 @@ describe('Snapshot Manager', function () {
         snapshotManager.registry = {
             'test/my-fake.test.js': {
                 bar: 1,
-                foo: 2
-            }
+                foo: 2,
+            },
         };
 
-        snapshotManager.setCurrentTest({testPath: 'test/my-fake.test.js', testTitle: 'foo'});
+        snapshotManager.setCurrentTest({ testPath: 'test/my-fake.test.js', testTitle: 'foo' });
 
         snapshotManager.resetRegistryForCurrentTest();
-        assert.deepEqual(snapshotManager.registry, {'test/my-fake.test.js': {bar: 1}});
+        assert.deepEqual(snapshotManager.registry, { 'test/my-fake.test.js': { bar: 1 } });
     });
 
     it('resetRegistryForCurrentTest: will not throw if no registry exists for current test', function () {
         const snapshotManager = new SnapshotManager();
-        snapshotManager.setCurrentTest({testPath: 'test/my-fake.test.js', testTitle: 'foo'});
+        snapshotManager.setCurrentTest({ testPath: 'test/my-fake.test.js', testTitle: 'foo' });
 
-        assert.doesNotThrow(() => snapshotManager.resetRegistryForCurrentTest(), 'should not throw if no registry exists for current test');
+        assert.doesNotThrow(
+            () => snapshotManager.resetRegistryForCurrentTest(),
+            'should not throw if no registry exists for current test',
+        );
     });
 
     it('setCurrentTest: results in currentTest being set', function () {
         const snapshotManager = new SnapshotManager();
         assert.deepEqual(snapshotManager.currentTest, {});
 
-        snapshotManager.setCurrentTest({foo: 'bar'});
-        assert.deepEqual(snapshotManager.currentTest, {foo: 'bar'});
+        snapshotManager.setCurrentTest({ foo: 'bar' });
+        assert.deepEqual(snapshotManager.currentTest, { foo: 'bar' });
     });
 
     it('_getNameForSnapshot: will increment the counter for each snapshot name correctly', function () {
@@ -72,17 +75,17 @@ describe('Snapshot Manager', function () {
 
         assert.equal(
             snapshotManager._getNameForSnapshot('test/my-fake.test.js', 'testing bar'),
-            'testing bar 1'
+            'testing bar 1',
         );
 
         assert.equal(
             snapshotManager._getNameForSnapshot('test/my-fake.test.js', 'testing baz'),
-            'testing baz 1'
+            'testing baz 1',
         );
 
         assert.equal(
             snapshotManager._getNameForSnapshot('test/my-fake.test.js', 'testing bar'),
-            'testing bar 2'
+            'testing bar 2',
         );
     });
 
@@ -102,7 +105,10 @@ describe('Snapshot Manager', function () {
         // Real example using current test file path
         inputPath = __filename;
         outputPath = snapshotManager._resolveSnapshotFilePath(inputPath);
-        assert.match(outputPath, /\/packages\/jest-snapshot\/test\/__snapshots__\/SnapshotManager\.test\.js\.snap/);
+        assert.match(
+            outputPath,
+            /\/packages\/jest-snapshot\/test\/__snapshots__\/SnapshotManager\.test\.js\.snap/,
+        );
     });
 
     it('_resolveSnapshotFilePath: resolve snapshot files paths exactly the same as jest', function () {
@@ -141,7 +147,9 @@ describe('Snapshot Manager', function () {
             snapshotManager._getConfig();
         };
 
-        assert.throws(assertFn, {message: 'Unable to run snapshot tests, current test was not configured'});
+        assert.throws(assertFn, {
+            message: 'Unable to run snapshot tests, current test was not configured',
+        });
     });
 
     it('_getConfig: will return the correct config when a current test is set', function () {
@@ -150,7 +158,7 @@ describe('Snapshot Manager', function () {
 
         snapshotManager.setCurrentTest({
             testPath: 'test/my-fake.test.js',
-            testTitle: 'My fake test title'
+            testTitle: 'My fake test title',
         });
 
         let config = snapshotManager._getConfig();
@@ -163,13 +171,13 @@ describe('Snapshot Manager', function () {
     describe('assert snapshot', function () {
         it('ok when match is a pass', function () {
             const snapshotManager = new SnapshotManager();
-            const matchStub = sinon.stub(snapshotManager, 'match').returns({pass: true});
+            const matchStub = sinon.stub(snapshotManager, 'match').returns({ pass: true });
 
             const error = new assert.AssertionError({});
             error.contextString = 'foo';
 
-            const response = {body: {foo: 'bar'}};
-            const assertion = {properties: {}, field: 'body', error};
+            const response = { body: { foo: 'bar' } };
+            const assertion = { properties: {}, field: 'body', error };
 
             const assertFn = () => {
                 snapshotManager.assertSnapshot(response, assertion);
@@ -186,14 +194,19 @@ describe('Snapshot Manager', function () {
             const snapshotManager = new SnapshotManager();
             const matchStub = sinon.stub(snapshotManager, 'match').returns({
                 message: () => 'hello',
-                pass: true
+                pass: true,
             });
 
             const error = new assert.AssertionError({});
             error.contextString = 'foo';
 
-            const response = {body: {foo: 'bar'}};
-            const assertion = {properties: {foo: 'bar'}, field: 'body', hint: '[custom hint]', error};
+            const response = { body: { foo: 'bar' } };
+            const assertion = {
+                properties: { foo: 'bar' },
+                field: 'body',
+                hint: '[custom hint]',
+                error,
+            };
 
             const assertFn = () => {
                 snapshotManager.assertSnapshot(response, assertion);
@@ -203,18 +216,23 @@ describe('Snapshot Manager', function () {
 
             // Assert side effects, check that custom hinting works as expected
             sinon.assert.calledOnce(matchStub);
-            sinon.assert.calledOnceWithExactly(matchStub, response.body, {foo: 'bar'}, '[custom hint]');
+            sinon.assert.calledOnceWithExactly(
+                matchStub,
+                response.body,
+                { foo: 'bar' },
+                '[custom hint]',
+            );
         });
 
         it('not ok when match is not a pass', function () {
             const snapshotManager = new SnapshotManager();
-            sinon.stub(snapshotManager, 'match').returns({pass: false});
+            sinon.stub(snapshotManager, 'match').returns({ pass: false });
 
             const error = new assert.AssertionError({});
             error.contextString = 'foo';
 
-            const response = {body: {foo: 'bar'}};
-            const assertion = {properties: {}, field: 'body', error};
+            const response = { body: { foo: 'bar' } };
+            const assertion = { properties: {}, field: 'body', error };
 
             const assertFn = () => {
                 snapshotManager.assertSnapshot(response, assertion);
@@ -225,19 +243,21 @@ describe('Snapshot Manager', function () {
 
         it('not ok when field not set', function () {
             const snapshotManager = new SnapshotManager();
-            sinon.stub(snapshotManager, 'match').returns({pass: false});
+            sinon.stub(snapshotManager, 'match').returns({ pass: false });
 
             const error = new assert.AssertionError({});
             error.contextString = 'foo';
 
-            const response = {body: {foo: 'bar'}};
-            const assertion = {properties: {}, error};
+            const response = { body: { foo: 'bar' } };
+            const assertion = { properties: {}, error };
 
             const assertFn = () => {
                 snapshotManager.assertSnapshot(response, assertion);
             };
 
-            assert.throws(assertFn, {message: 'Unable to match snapshot on undefined field undefined foo'});
+            assert.throws(assertFn, {
+                message: 'Unable to match snapshot on undefined field undefined foo',
+            });
         });
     });
 
@@ -250,7 +270,7 @@ describe('Snapshot Manager', function () {
 
             const configStub = sinon.stub(snapshotManager, '_getConfig').returns({
                 snapshotPath: 'test/__snapshots__/foo.js.snap',
-                snapshotName: 'testing bar 1'
+                snapshotName: 'testing bar 1',
             });
 
             const result = snapshotManager.match({});
@@ -268,7 +288,7 @@ describe('Snapshot Manager', function () {
 
             const configStub = sinon.stub(snapshotManager, '_getConfig').returns({
                 snapshotPath: 'test/__snapshots__/foo.js.snap',
-                snapshotName: 'testing bar 1'
+                snapshotName: 'testing bar 1',
             });
 
             const result = snapshotManager.match({}, {}, '[headers]');
@@ -285,7 +305,7 @@ describe('Snapshot Manager', function () {
 
             const configStub = sinon.stub(snapshotManager, '_getConfig').returns({
                 snapshotPath: 'test/__snapshots__/foo.js.snap',
-                snapshotName: 'testing bar 1'
+                snapshotName: 'testing bar 1',
             });
 
             const result = snapshotManager.match('foo', null, '[html]');

@@ -3,7 +3,7 @@ const errors = require('@tryghost/errors');
 const tpl = require('@tryghost/tpl');
 
 const messages = {
-    errorParsing: 'Error parsing filter'
+    errorParsing: 'Error parsing filter',
 };
 
 /**
@@ -61,16 +61,16 @@ const filter = function filter(Bookshelf) {
                         overrides: overrides,
                         defaults: defaults,
                         transformer: transformer,
-                        cte: cte
+                        cte: cte,
                     }).querySQL(qb);
                 });
             } catch (err) {
                 throw new errors.BadRequestError({
                     message: tpl(messages.errorParsing),
-                    err
+                    err,
                 });
             }
-        }
+        },
     });
 
     Bookshelf.Model = Model;
