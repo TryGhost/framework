@@ -15,7 +15,7 @@
     "presetup": "yarn",
     "setup": "yarn",
     "test": "nx run-many -t test --parallel=10 --outputStyle=dynamic-legacy",
-    "test:ci": "nx run-many -t test --outputStyle=dynamic --nxBail",
+    "test:ci": "nx run-many -t test --outputStyle=static --nxBail",
     "lint": "nx run-many -t lint --outputStyle=dynamic",
     "format": "oxfmt -c .oxfmtrc.json \"packages/**/*.{js,ts,json,md}\"",
     "format:check": "oxfmt -c .oxfmtrc.json --check \"packages/**/*.{js,ts,json,md}\"",
