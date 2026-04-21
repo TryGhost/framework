@@ -28,13 +28,13 @@
   },
   "devDependencies": {
     "@nx/js": "22.6.5",
-    "@vitest/coverage-v8": "4.1.0",
+    "@vitest/coverage-v8": "4.1.4",
     "nx": "22.6.5",
     "oxfmt": "0.45.0",
     "oxlint": "1.60.0",
     "sinon": "21.1.2",
     "ts-node": "10.9.2",
-    "vitest": "4.1.0"
+    "vitest": "4.1.4"
   },
   "resolutions": {
     "node-loggly-bulk": "^4.0.2"
