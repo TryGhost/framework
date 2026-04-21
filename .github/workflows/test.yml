@@ -27,7 +27,7 @@ jobs:
       - run: yarn --prefer-offline --frozen-lockfile
       - run: yarn test:ci
 
-      - uses: codecov/codecov-action@75cd11691c0faa626561e295848008c8a7dddffe # v5
+      - uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6
 
       - uses: tryghost/actions/actions/slack-build@7de01409beac61eaffcce08f764b338d00870493 # main
         if: failure() && github.event_name == 'push' && github.ref == 'refs/heads/main'
