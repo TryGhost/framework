@@ -17,11 +17,11 @@
   },
   "scripts": {
     "dev": "tsc --watch --preserveWatchOutput --sourceMap",
-    "build": "yarn build:ts",
+    "build": "pnpm run build:ts",
     "build:ts": "tsc",
     "prepare": "tsc",
     "test:unit": "NODE_ENV=testing vitest run --coverage",
-    "test": "yarn test:types && yarn test:unit",
+    "test": "pnpm run test:types && pnpm run test:unit",
     "test:types": "tsc --noEmit",
     "lint": "oxlint -c ../../.oxlintrc.json ."
   },
