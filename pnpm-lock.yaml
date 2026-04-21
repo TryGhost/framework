@@ -39,19 +39,19 @@ importers:
   packages/api-framework:
     dependencies:
       '@tryghost/debug':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../debug
       '@tryghost/errors':
-        specifier: ^3.0.3
+        specifier: workspace:*
         version: link:../errors
       '@tryghost/promise':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../promise
       '@tryghost/tpl':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../tpl
       '@tryghost/validator':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../validator
       lodash:
         specifier: 4.18.1
@@ -64,7 +64,7 @@ importers:
   packages/bookshelf-collision:
     dependencies:
       '@tryghost/errors':
-        specifier: ^3.0.3
+        specifier: workspace:*
         version: link:../errors
       lodash:
         specifier: 4.18.1
@@ -86,7 +86,7 @@ importers:
   packages/bookshelf-eager-load:
     dependencies:
       '@tryghost/debug':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../debug
       lodash:
         specifier: 4.18.1
@@ -99,16 +99,16 @@ importers:
   packages/bookshelf-filter:
     dependencies:
       '@tryghost/debug':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../debug
       '@tryghost/errors':
-        specifier: ^3.0.3
+        specifier: workspace:*
         version: link:../errors
       '@tryghost/nql':
         specifier: 0.12.10
         version: 0.12.10
       '@tryghost/tpl':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../tpl
     devDependencies:
       sinon:
@@ -118,7 +118,7 @@ importers:
   packages/bookshelf-has-posts:
     dependencies:
       '@tryghost/debug':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../debug
       lodash:
         specifier: 4.18.1
@@ -131,7 +131,7 @@ importers:
   packages/bookshelf-include-count:
     dependencies:
       '@tryghost/debug':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../debug
       lodash:
         specifier: 4.18.1
@@ -154,10 +154,10 @@ importers:
   packages/bookshelf-pagination:
     dependencies:
       '@tryghost/errors':
-        specifier: ^3.0.3
+        specifier: workspace:*
         version: link:../errors
       '@tryghost/tpl':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../tpl
       lodash:
         specifier: 4.18.1
@@ -170,34 +170,34 @@ importers:
   packages/bookshelf-plugins:
     dependencies:
       '@tryghost/bookshelf-collision':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../bookshelf-collision
       '@tryghost/bookshelf-custom-query':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../bookshelf-custom-query
       '@tryghost/bookshelf-eager-load':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../bookshelf-eager-load
       '@tryghost/bookshelf-filter':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../bookshelf-filter
       '@tryghost/bookshelf-has-posts':
-        specifier: ^2.1.0
+        specifier: workspace:*
         version: link:../bookshelf-has-posts
       '@tryghost/bookshelf-include-count':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../bookshelf-include-count
       '@tryghost/bookshelf-order':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../bookshelf-order
       '@tryghost/bookshelf-pagination':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../bookshelf-pagination
       '@tryghost/bookshelf-search':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../bookshelf-search
       '@tryghost/bookshelf-transaction-events':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../bookshelf-transaction-events
     devDependencies:
       sinon:
@@ -219,7 +219,7 @@ importers:
   packages/config:
     dependencies:
       '@tryghost/root-utils':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../root-utils
       nconf:
         specifier: 0.13.0
@@ -234,7 +234,7 @@ importers:
   packages/debug:
     dependencies:
       '@tryghost/root-utils':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../root-utils
       debug:
         specifier: 4.4.3
@@ -243,7 +243,7 @@ importers:
   packages/domain-events:
     devDependencies:
       '@tryghost/logging':
-        specifier: ^4.0.3
+        specifier: workspace:*
         version: link:../logging
 
   packages/elasticsearch:
@@ -252,7 +252,7 @@ importers:
         specifier: 9.3.4
         version: 9.3.4
       '@tryghost/debug':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../debug
       split2:
         specifier: 4.2.0
@@ -273,6 +273,9 @@ importers:
       '@types/lodash':
         specifier: 4.17.24
         version: 4.17.24
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.19.17
       esbuild:
         specifier: 0.28.0
         version: 0.28.0
@@ -281,7 +284,7 @@ importers:
         version: 4.18.1
       ts-node:
         specifier: 10.9.2
-        version: 10.9.2(@types/node@25.6.0)(typescript@5.9.3)
+        version: 10.9.2(@types/node@22.19.17)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -289,7 +292,7 @@ importers:
   packages/express-test:
     dependencies:
       '@tryghost/jest-snapshot':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../jest-snapshot
       cookiejar:
         specifier: 2.1.4
@@ -323,10 +326,10 @@ importers:
   packages/http-stream:
     dependencies:
       '@tryghost/errors':
-        specifier: ^3.0.3
+        specifier: workspace:*
         version: link:../errors
       '@tryghost/request':
-        specifier: ^3.0.3
+        specifier: workspace:*
         version: link:../request
     devDependencies:
       express:
@@ -345,7 +348,7 @@ importers:
         specifier: 30.3.0
         version: 30.3.0
       '@tryghost/errors':
-        specifier: ^3.0.3
+        specifier: workspace:*
         version: link:../errors
       jest-snapshot:
         specifier: 30.3.0
@@ -361,10 +364,10 @@ importers:
         specifier: 4.2.0
         version: 4.2.0
       '@tryghost/errors':
-        specifier: ^3.0.3
+        specifier: workspace:*
         version: link:../errors
       '@tryghost/logging':
-        specifier: ^4.0.3
+        specifier: workspace:*
         version: link:../logging
       bree:
         specifier: 9.2.9
@@ -401,16 +404,16 @@ importers:
         specifier: 0.0.7
         version: 0.0.7
       '@tryghost/elasticsearch':
-        specifier: ^5.0.3
+        specifier: workspace:*
         version: link:../elasticsearch
       '@tryghost/http-stream':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../http-stream
       '@tryghost/pretty-stream':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../pretty-stream
       '@tryghost/root-utils':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../root-utils
       bunyan:
         specifier: 1.8.15
@@ -432,8 +435,8 @@ importers:
         version: 4.18.1
     devDependencies:
       '@tryghost/errors':
-        specifier: 1.0.0
-        version: 1.0.0
+        specifier: workspace:*
+        version: link:../errors
       sinon:
         specifier: 21.1.2
         version: 21.1.2
@@ -441,13 +444,13 @@ importers:
   packages/metrics:
     dependencies:
       '@tryghost/elasticsearch':
-        specifier: ^5.0.3
+        specifier: workspace:*
         version: link:../elasticsearch
       '@tryghost/pretty-stream':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../pretty-stream
       '@tryghost/root-utils':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../root-utils
       json-stringify-safe:
         specifier: 5.0.1
@@ -463,16 +466,16 @@ importers:
   packages/mw-error-handler:
     dependencies:
       '@tryghost/debug':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../debug
       '@tryghost/errors':
-        specifier: ^3.0.3
+        specifier: workspace:*
         version: link:../errors
       '@tryghost/http-cache-utils':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../http-cache-utils
       '@tryghost/tpl':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../tpl
       lodash:
         specifier: 4.18.1
@@ -497,7 +500,7 @@ importers:
         specifier: 3.1032.0
         version: 3.1032.0
       '@tryghost/errors':
-        specifier: ^3.0.3
+        specifier: workspace:*
         version: link:../errors
       nodemailer:
         specifier: 8.0.5
@@ -544,8 +547,11 @@ importers:
 
   packages/prometheus-metrics:
     dependencies:
+      '@tryghost/debug':
+        specifier: workspace:*
+        version: link:../debug
       '@tryghost/logging':
-        specifier: ^4.0.3
+        specifier: workspace:*
         version: link:../logging
       express:
         specifier: 5.2.1
@@ -560,6 +566,9 @@ importers:
       '@types/express':
         specifier: 5.0.6
         version: 5.0.6
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.19.17
       '@types/sinon':
         specifier: 21.0.1
         version: 21.0.1
@@ -583,7 +592,7 @@ importers:
         version: 7.2.2
       ts-node:
         specifier: 10.9.2
-        version: 10.9.2(@types/node@25.6.0)(typescript@5.9.3)
+        version: 10.9.2(@types/node@22.19.17)(typescript@5.9.3)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -597,13 +606,13 @@ importers:
   packages/request:
     dependencies:
       '@tryghost/errors':
-        specifier: ^3.0.3
+        specifier: workspace:*
         version: link:../errors
       '@tryghost/validator':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../validator
       '@tryghost/version':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../version
       cacheable-lookup:
         specifier: 7.0.0
@@ -657,10 +666,10 @@ importers:
   packages/server:
     dependencies:
       '@tryghost/debug':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../debug
       '@tryghost/logging':
-        specifier: ^4.0.3
+        specifier: workspace:*
         version: link:../logging
     devDependencies:
       sinon:
@@ -676,10 +685,10 @@ importers:
   packages/validator:
     dependencies:
       '@tryghost/errors':
-        specifier: ^3.0.3
+        specifier: workspace:*
         version: link:../errors
       '@tryghost/tpl':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../tpl
       lodash:
         specifier: 4.18.1
@@ -694,7 +703,7 @@ importers:
   packages/version:
     dependencies:
       '@tryghost/root-utils':
-        specifier: ^2.0.3
+        specifier: workspace:*
         version: link:../root-utils
       semver:
         specifier: 7.7.4
@@ -720,7 +729,7 @@ importers:
   packages/zip:
     dependencies:
       '@tryghost/errors':
-        specifier: ^3.0.3
+        specifier: workspace:*
         version: link:../errors
       archiver:
         specifier: 7.0.1
@@ -2454,9 +2463,6 @@ packages:
   '@tryghost/bunyan-rotating-filestream@0.0.7':
     resolution: {integrity: sha512-dswM+dxG8J7WpVoSjzAdoWXqqB5Dg0C2T7Zh6eoUvl5hkA8yWWJi/fS4jNXlHF700lWQ0g8/t+leJ7SGSWd+aw==}
 
-  '@tryghost/errors@1.0.0':
-    resolution: {integrity: sha512-w6PEPKGzYDfaNUbjueQ7bp5tyXLTiwa4aEF9tM7xOAhlDFgeHG1xxP5vOfJgEPS20B0ZEHkTGNdh4KJwLEN9yw==}
-
   '@tryghost/mongo-knex@0.9.4':
     resolution: {integrity: sha512-R5mqpuQ1nN4qWAii9Tvg5POZ0nLO7Voy7QaQF+95sseUpfe4XEUsr3+mm4HYPC8MNKginlUm/unLf5QFzFQl5w==}
 
@@ -2543,6 +2549,9 @@ packages:
 
   '@types/methods@1.1.4':
     resolution: {integrity: sha512-ymXWVrDiCxTBE3+RIrrP533E70eA+9qu7zdWoHuOmGujkYtzf4HQF96b8nwHLqhuf4ykX61IGRIB38CC6/sImQ==}
+
+  '@types/node@22.19.17':
+    resolution: {integrity: sha512-wGdMcf+vPYM6jikpS/qhg6WiqSV/OhG+jeeHT/KlVqxYfD40iYJf9/AE1uQxVWFvU7MipKRkRv8NSHiCGgPr8Q==}
 
   '@types/node@24.12.2':
     resolution: {integrity: sha512-A1sre26ke7HDIuY/M23nd9gfB+nrmhtYyMINbjI1zHJxYteKR6qSMX56FsmjMcDb3SMcjJg5BiRRgOCC/yBD0g==}
@@ -5073,6 +5082,9 @@ packages:
     resolution: {integrity: sha512-KPHm4VL5dDXKz01UuEd88Df+KzynaohSL9fBh096KWAxSKZQDI2uBrVqtvRM4rwrIrRRKsdLNML/lnaaVSRioA==}
     engines: {node: '>= 0.8'}
 
+  undici-types@6.21.0:
+    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
+
   undici-types@7.16.0:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
 
@@ -6689,7 +6701,7 @@ snapshots:
 
   '@jest/pattern@30.0.1':
     dependencies:
-      '@types/node': 25.6.0
+      '@types/node': 22.19.17
       jest-regex-util: 30.0.1
 
   '@jest/schemas@30.0.5':
@@ -6728,7 +6740,7 @@ snapshots:
       '@jest/schemas': 30.0.5
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
-      '@types/node': 25.6.0
+      '@types/node': 22.19.17
       '@types/yargs': 17.0.35
       chalk: 4.1.2
 
@@ -7368,10 +7380,6 @@ snapshots:
     dependencies:
       long-timeout: 0.1.1
 
-  '@tryghost/errors@1.0.0':
-    dependencies:
-      lodash: 4.18.1
-
   '@tryghost/mongo-knex@0.9.4':
     dependencies:
       debug: 4.4.3
@@ -7420,7 +7428,7 @@ snapshots:
   '@types/body-parser@1.19.6':
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 25.6.0
+      '@types/node': 22.19.17
 
   '@types/chai@5.2.3':
     dependencies:
@@ -7433,7 +7441,7 @@ snapshots:
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 25.6.0
+      '@types/node': 22.19.17
 
   '@types/cookiejar@2.1.5': {}
 
@@ -7443,7 +7451,7 @@ snapshots:
 
   '@types/express-serve-static-core@5.1.1':
     dependencies:
-      '@types/node': 25.6.0
+      '@types/node': 22.19.17
       '@types/qs': 6.15.0
       '@types/range-parser': 1.2.7
       '@types/send': 1.2.1
@@ -7474,6 +7482,10 @@ snapshots:
 
   '@types/methods@1.1.4': {}
 
+  '@types/node@22.19.17':
+    dependencies:
+      undici-types: 6.21.0
+
   '@types/node@24.12.2':
     dependencies:
       undici-types: 7.16.0
@@ -7490,12 +7502,12 @@ snapshots:
 
   '@types/send@1.2.1':
     dependencies:
-      '@types/node': 25.6.0
+      '@types/node': 22.19.17
 
   '@types/serve-static@2.2.0':
     dependencies:
       '@types/http-errors': 2.0.5
-      '@types/node': 25.6.0
+      '@types/node': 22.19.17
 
   '@types/sinon@21.0.1':
     dependencies:
@@ -7507,13 +7519,13 @@ snapshots:
 
   '@types/stoppable@1.1.3':
     dependencies:
-      '@types/node': 25.6.0
+      '@types/node': 22.19.17
 
   '@types/superagent@8.1.9':
     dependencies:
       '@types/cookiejar': 2.1.5
       '@types/methods': 1.1.4
-      '@types/node': 25.6.0
+      '@types/node': 22.19.17
       form-data: 4.0.5
 
   '@types/supertest@7.2.0':
@@ -7529,7 +7541,7 @@ snapshots:
 
   '@types/yauzl@2.10.3':
     dependencies:
-      '@types/node': 25.6.0
+      '@types/node': 22.19.17
     optional: true
 
   '@ungap/structured-clone@1.3.0': {}
@@ -8829,7 +8841,7 @@ snapshots:
   jest-haste-map@30.3.0:
     dependencies:
       '@jest/types': 30.3.0
-      '@types/node': 25.6.0
+      '@types/node': 22.19.17
       anymatch: 3.1.3
       fb-watchman: 2.0.2
       graceful-fs: 4.2.11
@@ -8863,7 +8875,7 @@ snapshots:
   jest-mock@30.3.0:
     dependencies:
       '@jest/types': 30.3.0
-      '@types/node': 25.6.0
+      '@types/node': 22.19.17
       jest-util: 30.3.0
 
   jest-regex-util@30.0.1: {}
@@ -8897,7 +8909,7 @@ snapshots:
   jest-util@30.3.0:
     dependencies:
       '@jest/types': 30.3.0
-      '@types/node': 25.6.0
+      '@types/node': 22.19.17
       chalk: 4.1.2
       ci-info: 4.4.0
       graceful-fs: 4.2.11
@@ -8905,7 +8917,7 @@ snapshots:
 
   jest-worker@30.3.0:
     dependencies:
-      '@types/node': 25.6.0
+      '@types/node': 22.19.17
       '@ungap/structured-clone': 1.3.0
       jest-util: 30.3.0
       merge-stream: 2.0.0
@@ -10020,6 +10032,24 @@ snapshots:
 
   tree-kill@1.2.2: {}
 
+  ts-node@10.9.2(@types/node@22.19.17)(typescript@5.9.3):
+    dependencies:
+      '@cspotcode/source-map-support': 0.8.1
+      '@tsconfig/node10': 1.0.12
+      '@tsconfig/node12': 1.0.11
+      '@tsconfig/node14': 1.0.3
+      '@tsconfig/node16': 1.0.4
+      '@types/node': 22.19.17
+      acorn: 8.16.0
+      acorn-walk: 8.3.5
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.4
+      make-error: 1.3.6
+      typescript: 5.9.3
+      v8-compile-cache-lib: 3.0.1
+      yn: 3.1.1
+
   ts-node@10.9.2(@types/node@25.6.0)(typescript@5.9.3):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
@@ -10078,6 +10108,8 @@ snapshots:
   uid-safe@2.1.5:
     dependencies:
       random-bytes: 1.0.0
+
+  undici-types@6.21.0: {}
 
   undici-types@7.16.0: {}
 

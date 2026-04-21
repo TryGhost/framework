@@ -23,7 +23,7 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@tryghost/root-utils": "^2.0.3",
+    "@tryghost/root-utils": "workspace:*",
     "semver": "7.7.4"
   },
   "devDependencies": {
