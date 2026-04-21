@@ -20,6 +20,8 @@ module.exports = async function request(url, options = {}) {
     // Initialise ES6 imports
     if (!got) {
         got = (await gotPromise).default;
+    } else {
+        // Already initialized from a prior request in this process.
     }
     if (!defaultOptions.dnsLookup) {
         // Ensure OS-level name resolution is not used
@@ -28,6 +30,8 @@ module.exports = async function request(url, options = {}) {
             lookup: false,
         });
         defaultOptions.dnsLookup = cacheableLookup.lookup;
+    } else {
+        // DNS cache lookup has already been configured.
     }
 
     if (_.isEmpty(url) || !validator.isURL(url)) {
@@ -38,6 +42,8 @@ module.exports = async function request(url, options = {}) {
                 context: url,
             }),
         );
+    } else {
+        // URL is valid and request execution can continue.
     }
 
     if (
@@ -66,6 +72,8 @@ module.exports = async function request(url, options = {}) {
         if (error.response) {
             Object.assign(error, error.response);
             delete error.reponse;
+        } else {
+            // Some transport errors do not include a response object.
         }
         throw error;
     }

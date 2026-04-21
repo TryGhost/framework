@@ -1,6 +1,8 @@
 const { snapshotManager } = require('@tryghost/jest-snapshot');
-
+const SNAPSHOT_ROOT = '__jest_snapshots__';
 beforeAll(() => {
+    // Keep custom jest-snapshot files out of Vitest's native __snapshots__ discovery.
+    snapshotManager.defaultSnapshotRoot = SNAPSHOT_ROOT;
     snapshotManager.resetRegistry();
 });
 

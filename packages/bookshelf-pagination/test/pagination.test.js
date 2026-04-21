@@ -294,6 +294,58 @@ describe('@tryghost/bookshelf-pagination', function () {
         assert.equal(modelState.rawCalls[0], 'count(distinct posts.id) as aggregate');
     });
 
+    it('useSmartCount supports SQL fragments returned as an array', async function () {
+        const {bookshelf, modelState} = createBookshelf({countRows: [{aggregate: 1}]});
+        const model = new bookshelf.Model();
+
+        const originalQuery = model.query;
+        model.query = function () {
+            const qb = originalQuery.apply(this, arguments);
+            if (arguments.length === 0) {
+                qb.toSQL = () => [
+                    {sql: 'select *'},
+                    {},
+                    {sql: 'from `posts`, `tags` where `posts`.`id` = `tags`.`post_id`'}
+                ];
+            }
+            return qb;
+        };
+
+        await model.fetchPage({page: 1, limit: 10, useSmartCount: true});
+
+        assert.equal(modelState.rawCalls[0], 'count(distinct posts.id) as aggregate');
+    });
+
+    it('useSmartCount falls back safely when compiled SQL is missing', async function () {
+        const {bookshelf, modelState} = createBookshelf({countRows: [{aggregate: 1}]});
+        const model = new bookshelf.Model();
+
+        const originalQuery = model.query;
+        model.query = function () {
+            const qb = originalQuery.apply(this, arguments);
+            if (arguments.length === 0) {
+                qb.toSQL = () => ({});
+            }
+            return qb;
+        };
+
+        await model.fetchPage({page: 1, limit: 10, useSmartCount: true});
+
+        assert.equal(modelState.rawCalls[0], 'count(*) as aggregate');
+    });
+
+    it('handleRelation does not duplicate entries and ignores same-table properties', function () {
+        const {bookshelf} = createBookshelf();
+        const model = new bookshelf.Model();
+        model.eagerLoad = ['authors'];
+
+        paginationPlugin.paginationUtils.handleRelation(model, 'posts.id');
+        paginationPlugin.paginationUtils.handleRelation(model, 'title');
+        paginationPlugin.paginationUtils.handleRelation(model, 'authors.name');
+
+        assert.deepEqual(model.eagerLoad, ['authors']);
+    });
+
     it('falls back to zero total when aggregate row is missing', async function () {
         const { bookshelf } = createBookshelf({ countRows: [] });
         const model = new bookshelf.Model();
