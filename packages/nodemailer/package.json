@@ -23,7 +23,7 @@
     "posttest": "yarn lint"
   },
   "dependencies": {
-    "@aws-sdk/client-sesv2": "3.1031.0",
+    "@aws-sdk/client-sesv2": "3.1032.0",
     "@tryghost/errors": "^3.0.3",
     "nodemailer": "8.0.5",
     "nodemailer-mailgun-transport": "2.1.5",
