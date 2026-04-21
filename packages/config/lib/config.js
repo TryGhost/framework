@@ -1,11 +1,7 @@
 const getConfig = require('./get-config');
 
-let config;
+const config = getConfig();
 function initConfig() {
-    if (!config) {
-        config = getConfig();
-    }
-
     return config;
 }
 

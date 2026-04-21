@@ -7,7 +7,7 @@ export default defineConfig({
         include: ['test/**/*.test.{js,ts}'],
         coverage: {
             provider: 'v8',
-            all: true,
+            include: ['**/lib/**'],
             exclude: ['**/src/**', '**/build/**', '**/test/**', '**/.eslintrc.js'],
             reporter: ['text', 'cobertura'],
             thresholds: {

@@ -38,6 +38,8 @@ class DomainEvents {
             }
             if (this.#trackingEnabled) {
                 this.#onProcessed();
+            } else {
+                // Tracking is disabled outside tests.
             }
         });
     }
@@ -61,6 +63,8 @@ class DomainEvents {
     static dispatchRaw(name, data) {
         if (this.#trackingEnabled) {
             this.#dispatchCount += DomainEvents.ee.listenerCount(name);
+        } else {
+            // Tracking is disabled outside tests.
         }
         DomainEvents.ee.emit(name, data);
     }
@@ -93,6 +97,23 @@ class DomainEvents {
             }
             this.#awaitQueue = [];
         }
+    }
+
+    /**
+     * Enable or disable dispatch/processed tracking. Test-only.
+     * @param {boolean} enabled
+     */
+    static setTrackingEnabledForTest(enabled) {
+        this.#trackingEnabled = enabled;
+    }
+
+    /**
+     * Clear the await queue and reset dispatch/processed counts. Test-only.
+     */
+    static resetTrackingStateForTest() {
+        this.#awaitQueue = [];
+        this.#dispatchCount = 0;
+        this.#processedCount = 0;
     }
 }
 

@@ -1,7 +1,17 @@
 const assert = require('assert/strict');
 const nock = require('nock');
+const sinon = require('sinon');
+const rewire = require('rewire');
 
 const request = require('../lib/request');
+
+function restoreNodeEnv(originalNodeEnv) {
+    if (originalNodeEnv === undefined) {
+        delete process.env.NODE_ENV;
+    } else {
+        process.env.NODE_ENV = originalNodeEnv;
+    }
+}
 
 describe('Request', function () {
     it('has "safe" version in default user-agent header', function () {
@@ -234,6 +244,62 @@ describe('Request', function () {
         });
     });
 
+    it('[success] keeps explicit method when body is provided (non-rewire path)', function () {
+        const url = 'http://some-website.com/explicit-method-post-endpoint/';
+        const requestMock = nock('http://some-website.com')
+            .put('/explicit-method-post-endpoint/', 'hello')
+            .reply(200, 'ok');
+
+        return request(url, {
+            method: 'PUT',
+            body: 'hello',
+            retry: {
+                limit: 0
+            }
+        }).then(function (res) {
+            assert.equal(requestMock.isDone(), true);
+            assert.equal(res.statusCode, 200);
+        });
+    });
+
+    it('[success] does not auto-set retry when NODE_ENV is unset', function () {
+        const requestModule = rewire('../lib/request');
+        const gotStub = sinon.stub().resolves({
+            statusCode: 200,
+            body: 'ok'
+        });
+        const originalNodeEnv = process.env.NODE_ENV;
+
+        requestModule.__set__('got', gotStub);
+        requestModule.__get__('defaultOptions').dnsLookup = () => {};
+        delete process.env.NODE_ENV;
+
+        return requestModule('http://some-website.com/unset-env-endpoint/', {}).then((res) => {
+            assert.equal(res.statusCode, 200);
+            assert.equal(gotStub.calledOnce, true);
+            assert.equal(Object.prototype.hasOwnProperty.call(gotStub.firstCall.args[1], 'retry'), false);
+        }).finally(() => {
+            restoreNodeEnv(originalNodeEnv);
+        });
+    });
+
+    it('[success] can request successfully when NODE_ENV is unset', function () {
+        const url = 'http://some-website.com/unset-env-smoke-endpoint/';
+        const requestMock = nock('http://some-website.com')
+            .get('/unset-env-smoke-endpoint/')
+            .reply(200, 'ok');
+        const originalNodeEnv = process.env.NODE_ENV;
+
+        delete process.env.NODE_ENV;
+
+        return request(url, {}).then((res) => {
+            assert.equal(requestMock.isDone(), true);
+            assert.equal(res.statusCode, 200);
+        }).finally(() => {
+            restoreNodeEnv(originalNodeEnv);
+        });
+    });
+
     it('[failure] adds request options and response fields onto thrown error', function () {
         const url = 'http://some-website.com/forbidden/';
         const requestMock = nock('http://some-website.com')
@@ -257,5 +323,94 @@ describe('Request', function () {
                 assert.notEqual(err.response, undefined);
             },
         );
+    });
+
+    it('[failure] rethrows plain errors when response is missing', function () {
+        const requestModule = rewire('../lib/request');
+        const plainError = new Error('plain error');
+        const gotStub = sinon.stub().rejects(plainError);
+
+        requestModule.__set__('got', gotStub);
+        requestModule.__get__('defaultOptions').dnsLookup = () => {};
+
+        return requestModule('http://some-website.com/plain-error/', {retry: {limit: 0}}).then(() => {
+            throw new Error('Should have failed');
+        }, (err) => {
+            assert.equal(gotStub.calledOnce, true);
+            assert.equal(err, plainError);
+        });
+    });
+
+    it('[success] does not force retry outside test environment', function () {
+        const requestModule = rewire('../lib/request');
+        const gotStub = sinon.stub().resolves({
+            statusCode: 200,
+            body: 'ok'
+        });
+        const originalNodeEnv = process.env.NODE_ENV;
+
+        requestModule.__set__('got', gotStub);
+        requestModule.__get__('defaultOptions').dnsLookup = () => {};
+
+        process.env.NODE_ENV = 'production';
+
+        return requestModule('http://some-website.com/no-test-retry/').then((res) => {
+            assert.equal(res.statusCode, 200);
+            assert.equal(gotStub.calledOnce, true);
+            assert.equal(Object.prototype.hasOwnProperty.call(gotStub.firstCall.args[1], 'retry'), false);
+        }).finally(() => {
+            restoreNodeEnv(originalNodeEnv);
+        });
+    });
+
+    it('[success] keeps explicit method when body is provided', function () {
+        const requestModule = rewire('../lib/request');
+        const gotStub = sinon.stub().resolves({
+            statusCode: 200,
+            body: 'ok'
+        });
+
+        requestModule.__set__('got', gotStub);
+        requestModule.__get__('defaultOptions').dnsLookup = () => {};
+
+        return requestModule('http://some-website.com/explicit-method-body/', {
+            method: 'PUT',
+            body: 'hello',
+            retry: {
+                limit: 0
+            }
+        }).then(() => {
+            assert.equal(gotStub.calledOnce, true);
+            assert.equal(gotStub.firstCall.args[1].method, 'PUT');
+        });
+    });
+
+    it('[failure] hoists request options when response is missing', function () {
+        const requestModule = rewire('../lib/request');
+        const transportError = new Error('transport failure');
+
+        transportError.options = {
+            method: 'GET',
+            url: 'http://some-website.com/transport-failure/'
+        };
+
+        const gotStub = sinon.stub().rejects(transportError);
+
+        requestModule.__set__('got', gotStub);
+        requestModule.__get__('defaultOptions').dnsLookup = () => {};
+
+        return requestModule('http://some-website.com/transport-failure/', {
+            retry: {
+                limit: 0
+            }
+        }).then(() => {
+            throw new Error('Should have failed');
+        }, (err) => {
+            assert.equal(gotStub.calledOnce, true);
+            assert.equal(err.method, 'GET');
+            assert.equal(err.url, 'http://some-website.com/transport-failure/');
+            assert.equal(err.options, undefined);
+            assert.equal(err.response, undefined);
+        });
     });
 });
