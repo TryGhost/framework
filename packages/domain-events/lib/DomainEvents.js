@@ -84,8 +84,9 @@ class DomainEvents {
                 // Resolve immediately if there are no events in the queue
                 resolve();
                 return;
+            } else {
+                this.#awaitQueue.push({ resolve });
             }
-            this.#awaitQueue.push({ resolve });
         });
     }
 
@@ -96,6 +97,8 @@ class DomainEvents {
                 item.resolve();
             }
             this.#awaitQueue = [];
+        } else {
+            // Wait for the remaining tracked listeners.
         }
     }
 

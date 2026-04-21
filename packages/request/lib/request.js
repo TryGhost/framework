@@ -42,6 +42,8 @@ module.exports = async function request(url, options = {}) {
                 context: url,
             }),
         );
+    } else {
+        // URL is valid and request execution can continue.
     }
 
     if (
