@@ -36,7 +36,7 @@
     "lodash": "4.18.1"
   },
   "devDependencies": {
-    "@tryghost/errors": "1.0.0",
+    "@tryghost/errors": "3.0.3",
     "sinon": "21.1.2"
   }
 }

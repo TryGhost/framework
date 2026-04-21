@@ -432,8 +432,8 @@ importers:
         version: 4.18.1
     devDependencies:
       '@tryghost/errors':
-        specifier: 1.0.0
-        version: 1.0.0
+        specifier: 3.0.3
+        version: link:../errors
       sinon:
         specifier: 21.1.2
         version: 21.1.2
@@ -2453,9 +2453,6 @@ packages:
 
   '@tryghost/bunyan-rotating-filestream@0.0.7':
     resolution: {integrity: sha512-dswM+dxG8J7WpVoSjzAdoWXqqB5Dg0C2T7Zh6eoUvl5hkA8yWWJi/fS4jNXlHF700lWQ0g8/t+leJ7SGSWd+aw==}
-
-  '@tryghost/errors@1.0.0':
-    resolution: {integrity: sha512-w6PEPKGzYDfaNUbjueQ7bp5tyXLTiwa4aEF9tM7xOAhlDFgeHG1xxP5vOfJgEPS20B0ZEHkTGNdh4KJwLEN9yw==}
 
   '@tryghost/mongo-knex@0.9.4':
     resolution: {integrity: sha512-R5mqpuQ1nN4qWAii9Tvg5POZ0nLO7Voy7QaQF+95sseUpfe4XEUsr3+mm4HYPC8MNKginlUm/unLf5QFzFQl5w==}
@@ -7367,10 +7364,6 @@ snapshots:
   '@tryghost/bunyan-rotating-filestream@0.0.7':
     dependencies:
       long-timeout: 0.1.1
-
-  '@tryghost/errors@1.0.0':
-    dependencies:
-      lodash: 4.18.1
 
   '@tryghost/mongo-knex@0.9.4':
     dependencies:
