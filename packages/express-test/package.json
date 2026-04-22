@@ -32,7 +32,7 @@
     "express": "5.2.1",
     "express-session": "1.19.0",
     "multer": "2.1.1",
-    "sinon": "21.1.2"
+    "sinon": "catalog:"
   },
   "peerDependencies": {
     "express": "^4.0.0 || ^5.0.0"

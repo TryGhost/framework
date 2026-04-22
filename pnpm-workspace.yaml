@@ -1,2 +1,12 @@
 packages:
   - 'packages/*'
+overrides:
+  node-loggly-bulk: ^4.0.2
+onlyBuiltDependencies:
+  - dtrace-provider
+  - esbuild
+  - nx
+catalog:
+  sinon: 21.1.2
+  ts-node: 10.9.2
+  typescript: 5.9.3

@@ -30,6 +30,6 @@
     "nodemailer-stub-transport": "1.1.0"
   },
   "devDependencies": {
-    "sinon": "21.1.2"
+    "sinon": "catalog:"
   }
 }

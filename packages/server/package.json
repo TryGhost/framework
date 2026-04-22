@@ -27,6 +27,6 @@
     "@tryghost/logging": "workspace:*"
   },
   "devDependencies": {
-    "sinon": "21.1.2"
+    "sinon": "catalog:"
   }
 }

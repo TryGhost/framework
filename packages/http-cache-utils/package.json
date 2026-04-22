@@ -23,6 +23,6 @@
     "lint": "oxlint -c ../../.oxlintrc.json ."
   },
   "devDependencies": {
-    "sinon": "21.1.2"
+    "sinon": "catalog:"
   }
 }

@@ -28,7 +28,7 @@
     "bcryptjs": "3.0.3"
   },
   "devDependencies": {
-    "sinon": "21.1.2",
+    "sinon": "catalog:",
     "uuid": "13.0.0"
   }
 }

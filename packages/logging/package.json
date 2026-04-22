@@ -37,6 +37,6 @@
   },
   "devDependencies": {
     "@tryghost/errors": "workspace:*",
-    "sinon": "21.1.2"
+    "sinon": "catalog:"
   }
 }
