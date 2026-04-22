@@ -23,9 +23,9 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@tryghost/elasticsearch": "^5.0.3",
-    "@tryghost/pretty-stream": "^2.0.3",
-    "@tryghost/root-utils": "^2.0.3",
+    "@tryghost/elasticsearch": "workspace:*",
+    "@tryghost/pretty-stream": "workspace:*",
+    "@tryghost/root-utils": "workspace:*",
     "json-stringify-safe": "5.0.1"
   },
   "devDependencies": {

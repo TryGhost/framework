@@ -23,8 +23,8 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@tryghost/debug": "^2.0.3",
-    "@tryghost/logging": "^4.0.3"
+    "@tryghost/debug": "workspace:*",
+    "@tryghost/logging": "workspace:*"
   },
   "devDependencies": {
     "sinon": "21.1.2"

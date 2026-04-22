@@ -763,7 +763,7 @@ describe('Logging', function () {
                     assert.equal(data.err.context, undefined);
                     assert.equal(data.err.help, undefined);
                     assert.notEqual(data.err.stack, null);
-                    assert.equal(data.err.hideStack, undefined);
+                    assert.equal(data.err.hideStack, true);
                     assert.equal(data.err.errorDetails, undefined);
                     resolve();
                 });

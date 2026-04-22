@@ -23,10 +23,10 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@tryghost/debug": "^2.0.3",
-    "@tryghost/errors": "^3.0.3",
+    "@tryghost/debug": "workspace:*",
+    "@tryghost/errors": "workspace:*",
     "@tryghost/nql": "0.12.10",
-    "@tryghost/tpl": "^2.0.3"
+    "@tryghost/tpl": "workspace:*"
   },
   "devDependencies": {
     "sinon": "21.1.2"
