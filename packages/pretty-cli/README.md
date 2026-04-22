@@ -6,7 +6,7 @@ A mini-module to style a [sywac](http://sywac.io/) instance in a standard way
 
 Either: `npm install @tryghost/pretty-cli --save`
 
-Or: `yarn add @tryghost/pretty-cli`
+Or: `pnpm add @tryghost/pretty-cli`
 
 ## Purpose
 
@@ -51,8 +51,8 @@ The style rules used are available at `prettyCLI.styles`.
 
 ## Test
 
-- `yarn lint` run just eslint
-- `yarn test` run lint && tests
+- `pnpm lint` runs oxlint
+- `pnpm test` runs lint and tests
 
 # Copyright & License
 

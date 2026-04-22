@@ -10,7 +10,7 @@ It currently works with SQLite, MySQL 5 & 8, and MariaDB.
 
 or
 
-`yarn add @tryghost/database-info`
+`pnpm add @tryghost/database-info`
 
 ## Purpose
 
@@ -20,21 +20,21 @@ Utility for detecting database driver, engine family, and version from a Knex co
 
 ## Develop
 
-This is a mono repository, managed with [lerna](https://lernajs.io/).
+This is a mono repository, managed with [Nx](https://nx.dev).
 
 Follow the instructions for the top-level repo.
 
 1. `git clone` this repo & `cd` into it as usual
-2. Run `yarn` to install top-level dependencies.
+2. Run `pnpm install` to install top-level dependencies.
 
 ## Run
 
-- `yarn dev`
+- `pnpm dev`
 
 ## Test
 
-- `yarn lint` run just eslint
-- `yarn test` run lint and tests
+- `pnpm lint` runs oxlint
+- `pnpm test` runs lint and tests
 
 # Copyright & License
 

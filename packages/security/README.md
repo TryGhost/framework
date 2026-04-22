@@ -8,7 +8,7 @@ Security helper primitives used by Ghost services.
 
 or
 
-`yarn add @tryghost/security`
+`pnpm add @tryghost/security`
 
 ## Purpose
 
