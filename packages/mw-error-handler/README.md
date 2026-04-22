@@ -8,7 +8,7 @@ Express middleware helpers for Ghost-style API error handling.
 
 or
 
-`yarn add @tryghost/mw-error-handler`
+`pnpm add @tryghost/mw-error-handler`
 
 ## Purpose
 

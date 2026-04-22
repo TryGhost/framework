@@ -8,7 +8,7 @@ Mocks email sending method and manages snapshots for outgoing email information 
 
 or
 
-`yarn add @tryghost/email-mock-receiver`
+`pnpm add @tryghost/email-mock-receiver`
 
 ## Purpose
 
@@ -23,9 +23,9 @@ This is a monorepo package.
 Follow the instructions for the top-level repo.
 
 1. `git clone` this repo & `cd` into it as usual
-2. Run `yarn` to install top-level dependencies.
+2. Run `pnpm install` to install top-level dependencies.
 
 ## Test
 
-- `yarn lint` run just eslint
-- `yarn test` run lint and tests
+- `pnpm lint` runs oxlint
+- `pnpm test` runs lint and tests

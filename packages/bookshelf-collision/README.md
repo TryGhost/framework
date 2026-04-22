@@ -6,7 +6,7 @@
 
 or
 
-`yarn add @tryghost/bookshelf-collision`
+`pnpm add @tryghost/bookshelf-collision`
 
 ## Purpose
 
@@ -16,21 +16,21 @@ Bookshelf plugin that detects stale updates and throws an update-collision error
 
 ## Develop
 
-This is a mono repository, managed with [lerna](https://lernajs.io/).
+This is a mono repository, managed with [Nx](https://nx.dev).
 
 Follow the instructions for the top-level repo.
 
 1. `git clone` this repo & `cd` into it as usual
-2. Run `yarn` to install top-level dependencies.
+2. Run `pnpm install` to install top-level dependencies.
 
 ## Run
 
-- `yarn dev`
+- `pnpm dev`
 
 ## Test
 
-- `yarn lint` run just eslint
-- `yarn test` run lint and tests
+- `pnpm lint` runs oxlint
+- `pnpm test` runs lint and tests
 
 # Copyright & License
 
