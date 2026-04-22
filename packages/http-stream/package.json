@@ -28,6 +28,6 @@
   },
   "devDependencies": {
     "express": "5.2.1",
-    "sinon": "21.1.2"
+    "sinon": "catalog:"
   }
 }
