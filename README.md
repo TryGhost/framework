@@ -45,7 +45,7 @@ To add a new package to the repo:
 3. CI automatically publishes packages via `.github/workflows/publish.yml`:
    - authenticates to npm using `NPM_TOKEN`
    - checks each `packages/*` package version against npm
-   - runs `npm publish` only for versions that are not already published
+   - runs `pnpm publish` (via `nx release publish`) only for versions that are not already published
 
 
 # Copyright & License 
