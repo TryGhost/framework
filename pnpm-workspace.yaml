@@ -6,6 +6,7 @@ onlyBuiltDependencies:
   - dtrace-provider
   - esbuild
   - nx
+  - sqlite3
 catalog:
   sinon: 21.1.2
   ts-node: 10.9.2
