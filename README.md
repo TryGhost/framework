@@ -43,9 +43,9 @@ To add a new package to the repo:
 2. this runs tests, versions packages, and creates/pushes release commit + tags
    - creates the version commit and pushes tags to `main`
 3. CI automatically publishes packages via `.github/workflows/publish.yml`:
-   - authenticates to npm using `NPM_TOKEN`
+   - authenticates to npm via [Trusted Publishing](https://docs.npmjs.com/trusted-publishers) (OIDC, no long-lived tokens)
    - checks each `packages/*` package version against npm
-   - runs `pnpm publish` (via `nx release publish`) only for versions that are not already published
+   - runs `pnpm publish` (via `nx release publish`) only for versions that are not already published, with provenance attestations enabled
 
 
 # Copyright & License 
