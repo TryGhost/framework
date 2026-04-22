@@ -28,6 +28,9 @@
     "lodash": "4.18.1"
   },
   "devDependencies": {
-    "sinon": "catalog:"
+    "bookshelf": "1.2.0",
+    "knex": "3.2.9",
+    "sinon": "catalog:",
+    "sqlite3": "5.1.7"
   }
 }

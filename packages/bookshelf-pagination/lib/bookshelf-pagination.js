@@ -14,47 +14,40 @@ const messages = {
 let defaults;
 let paginationUtils;
 
-const JOIN_KEYWORD_REGEX = /\bjoin\b/i;
-const FROM_CLAUSE_REGEX =
-    /\bfrom\b([\s\S]*?)(?:\bwhere\b|\bgroup\s+by\b|\border\s+by\b|\blimit\b|\boffset\b|$)/i;
-
-function getCompiledSql(queryBuilder) {
-    const compiledQuery = queryBuilder.toSQL();
-
-    if (Array.isArray(compiledQuery)) {
-        return compiledQuery
-            .map((query) => {
-                return query && query.sql ? query.sql : '';
-            })
-            .join(' ');
+// Smart count only uses count(*) for single-table queries. Multi-table shapes
+// — outer JOINs, UNIONs, derived/raw FROM sources, or comma-separated FROM
+// lists — can duplicate base rows, so fetchPage must use count(distinct id).
+//
+// Crucially, JOINs that appear inside a subquery (eg. `where id in (select ...
+// inner join ...)`) do NOT count — the outer row set is still unique per base
+// row, so count(*) is both safe and materially faster. Walking knex's AST
+// instead of the compiled SQL gives us exactly this scoping for free.
+function hasMultiTableSource(queryBuilder) {
+    for (const statement of queryBuilder._statements) {
+        // Any outer join duplicates the base row set.
+        if (statement.grouping === 'join') {
+            return true;
+        }
+        // UNION combines multiple SELECTs — the outer row set comes
+        // from more than one source, so count(*) is unsafe.
+        if (statement.grouping === 'union') {
+            return true;
+        }
     }
 
-    return compiledQuery && compiledQuery.sql ? compiledQuery.sql : '';
-}
+    // For a bookshelf Model the outer FROM is normally a plain table name
+    // string. Anything else — a QueryBuilder (derived table) or a Raw (eg.
+    // `fromRaw('a, b')`) — can carry duplicate-producing shape that we can't
+    // introspect further, so treat it as multi-source.
+    const table = queryBuilder._single.table;
+    if (table && typeof table !== 'string') {
+        return true;
+    }
+    if (typeof table === 'string' && table.includes(',')) {
+        return true;
+    }
 
-function extractFromClause(sql) {
-    const fromClauseMatch = sql.match(FROM_CLAUSE_REGEX);
-
-    return fromClauseMatch ? fromClauseMatch[1] : '';
-}
-
-function hasJoinKeyword(sql) {
-    return JOIN_KEYWORD_REGEX.test(sql);
-}
-
-function hasCommaSeparatedFromSources(sql) {
-    return extractFromClause(sql).includes(',');
-}
-
-// Smart count only uses count(*) for single-table queries.
-// This check flags multi-table sources in two forms:
-// 1) explicit JOIN keywords (join, left join, join raw, etc.)
-// 2) old-style comma-separated FROM lists (eg `from posts, tags`)
-// Both can duplicate base rows, so fetchPage should use count(distinct id).
-function hasMultiTableSource(queryBuilder) {
-    const sql = getCompiledSql(queryBuilder);
-
-    return hasJoinKeyword(sql) || hasCommaSeparatedFromSources(sql);
+    return false;
 }
 
 /**
@@ -75,6 +68,7 @@ defaults = {
  * @api private
  */
 paginationUtils = {
+    hasMultiTableSource: hasMultiTableSource,
     /**
      * ### Parse Options
      * Take the given options and ensure they are valid pagination options, else use the defaults
