@@ -23,12 +23,12 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@tryghost/errors": "^3.0.3",
+    "@tryghost/errors": "workspace:*",
     "archiver": "7.0.1",
     "extract-zip": "2.0.1"
   },
   "devDependencies": {
     "folder-hash": "4.1.2",
-    "sinon": "21.1.2"
+    "sinon": "catalog:"
   }
 }

@@ -23,10 +23,10 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@tryghost/debug": "^2.0.3",
+    "@tryghost/debug": "workspace:*",
     "lodash": "4.18.1"
   },
   "devDependencies": {
-    "sinon": "21.1.2"
+    "sinon": "catalog:"
   }
 }

@@ -24,14 +24,14 @@
     "lint": "oxlint -c ../../.oxlintrc.json ."
   },
   "dependencies": {
-    "@tryghost/debug": "^2.0.3",
-    "@tryghost/errors": "^3.0.3",
-    "@tryghost/http-cache-utils": "^2.0.3",
-    "@tryghost/tpl": "^2.0.3",
+    "@tryghost/debug": "workspace:*",
+    "@tryghost/errors": "workspace:*",
+    "@tryghost/http-cache-utils": "workspace:*",
+    "@tryghost/tpl": "workspace:*",
     "lodash": "4.18.1",
     "semver": "7.7.4"
   },
   "devDependencies": {
-    "sinon": "21.1.2"
+    "sinon": "catalog:"
   }
 }

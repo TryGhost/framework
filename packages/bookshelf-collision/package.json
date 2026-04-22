@@ -23,11 +23,11 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@tryghost/errors": "^3.0.3",
+    "@tryghost/errors": "workspace:*",
     "lodash": "4.18.1",
     "moment-timezone": "^0.5.33"
   },
   "devDependencies": {
-    "sinon": "21.1.2"
+    "sinon": "catalog:"
   }
 }

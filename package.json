@@ -29,18 +29,8 @@
     "nx": "22.6.5",
     "oxfmt": "0.45.0",
     "oxlint": "1.60.0",
-    "sinon": "21.1.2",
-    "ts-node": "10.9.2",
+    "sinon": "catalog:",
+    "ts-node": "catalog:",
     "vitest": "4.1.4"
-  },
-  "pnpm": {
-    "overrides": {
-      "node-loggly-bulk": "^4.0.2"
-    },
-    "onlyBuiltDependencies": [
-      "dtrace-provider",
-      "esbuild",
-      "nx"
-    ]
   }
 }

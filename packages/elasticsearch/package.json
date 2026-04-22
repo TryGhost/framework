@@ -24,10 +24,10 @@
   },
   "dependencies": {
     "@elastic/elasticsearch": "9.3.4",
-    "@tryghost/debug": "^2.0.3",
+    "@tryghost/debug": "workspace:*",
     "split2": "4.2.0"
   },
   "devDependencies": {
-    "sinon": "21.1.2"
+    "sinon": "catalog:"
   }
 }

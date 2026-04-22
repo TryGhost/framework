@@ -37,9 +37,10 @@
   "dependencies": {},
   "devDependencies": {
     "@types/lodash": "4.17.24",
+    "@types/node": "24.12.2",
     "esbuild": "0.28.0",
     "lodash": "4.18.1",
-    "ts-node": "10.9.2",
-    "typescript": "5.9.3"
+    "ts-node": "catalog:",
+    "typescript": "catalog:"
   }
 }
