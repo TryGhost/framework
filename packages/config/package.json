@@ -20,10 +20,10 @@
     "dev": "echo \"Implement me!\"",
     "test": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
     "lint": "oxlint -c ../../.oxlintrc.json .",
-    "posttest": "yarn lint"
+    "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@tryghost/root-utils": "^2.0.3",
+    "@tryghost/root-utils": "workspace:*",
     "nconf": "0.13.0"
   }
 }

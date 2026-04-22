@@ -19,10 +19,10 @@
   "scripts": {
     "dev": "echo \"Implement me!\"",
     "test:unit": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
-    "test": "yarn test:unit",
+    "test": "pnpm run test:unit",
     "lint": "oxlint -c ../../.oxlintrc.json ."
   },
   "devDependencies": {
-    "sinon": "21.1.2"
+    "sinon": "catalog:"
   }
 }

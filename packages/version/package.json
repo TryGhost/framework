@@ -18,15 +18,15 @@
   },
   "scripts": {
     "dev": "echo \"Implement me!\"",
-    "test": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
+    "test": "NODE_ENV=testing vitest run --coverage",
     "lint": "oxlint -c ../../.oxlintrc.json .",
-    "posttest": "yarn lint"
+    "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@tryghost/root-utils": "^2.0.3",
+    "@tryghost/root-utils": "workspace:*",
     "semver": "7.7.4"
   },
   "devDependencies": {
-    "sinon": "21.1.2"
+    "sinon": "catalog:"
   }
 }

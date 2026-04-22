@@ -75,6 +75,11 @@ describe('Config', function () {
         assert.equal(config.get('env'), 'development');
     });
 
+    it('handles missing process root gracefully', function () {
+        const config = withEnv('testing', () => withRoot('', () => loadFreshGetConfig()()));
+        assert.equal(config.get('env'), 'testing');
+    });
+
     it('index exports lib/config and only initializes config once', function () {
         const originalGetConfig = require(getConfigPath);
         const fakeConfig = { name: 'fake-config' };

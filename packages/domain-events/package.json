@@ -20,10 +20,10 @@
   "scripts": {
     "dev": "echo \"Implement me!\"",
     "test:unit": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
-    "test": "yarn test:unit",
+    "test": "pnpm run test:unit",
     "lint": "oxlint -c ../../.oxlintrc.json ."
   },
   "devDependencies": {
-    "@tryghost/logging": "^4.0.3"
+    "@tryghost/logging": "workspace:*"
   }
 }

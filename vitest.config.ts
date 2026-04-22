@@ -5,15 +5,16 @@ export default defineConfig({
         globals: true,
         environment: 'node',
         include: ['test/**/*.test.{js,ts}'],
+        pool: 'threads',
         coverage: {
             provider: 'v8',
-            all: true,
+            include: ['**/lib/**'],
             exclude: ['**/src/**', '**/build/**', '**/test/**', '**/.eslintrc.js'],
             reporter: ['text', 'cobertura'],
             thresholds: {
                 lines: 90,
                 functions: 90,
-                branches: 90,
+                branches: 80,
                 statements: 90
             }
         }

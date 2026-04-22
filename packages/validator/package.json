@@ -20,11 +20,11 @@
     "dev": "echo \"Implement me!\"",
     "test": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
     "lint": "oxlint -c ../../.oxlintrc.json .",
-    "posttest": "yarn lint"
+    "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@tryghost/errors": "^3.0.3",
-    "@tryghost/tpl": "^2.0.3",
+    "@tryghost/errors": "workspace:*",
+    "@tryghost/tpl": "workspace:*",
     "lodash": "4.18.1",
     "moment-timezone": "^0.5.23",
     "validator": "7.2.0"

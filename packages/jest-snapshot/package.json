@@ -20,15 +20,15 @@
     "dev": "echo \"Implement me!\"",
     "test": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
     "lint": "oxlint -c ../../.oxlintrc.json .",
-    "posttest": "yarn lint"
+    "posttest": "pnpm run lint"
   },
   "dependencies": {
     "@jest/expect": "30.3.0",
     "@jest/expect-utils": "30.3.0",
-    "@tryghost/errors": "^3.0.3",
+    "@tryghost/errors": "workspace:*",
     "jest-snapshot": "30.3.0"
   },
   "devDependencies": {
-    "sinon": "21.1.2"
+    "sinon": "catalog:"
   }
 }

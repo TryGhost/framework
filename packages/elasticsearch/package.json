@@ -20,14 +20,14 @@
     "dev": "echo \"Implement me!\"",
     "test": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
     "lint": "oxlint -c ../../.oxlintrc.json .",
-    "posttest": "yarn lint"
+    "posttest": "pnpm run lint"
   },
   "dependencies": {
     "@elastic/elasticsearch": "9.3.4",
-    "@tryghost/debug": "^2.0.3",
+    "@tryghost/debug": "workspace:*",
     "split2": "4.2.0"
   },
   "devDependencies": {
-    "sinon": "21.1.2"
+    "sinon": "catalog:"
   }
 }

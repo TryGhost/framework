@@ -20,7 +20,7 @@
     "dev": "echo \"Implement me!\"",
     "test": "NODE_ENV=testing vitest run --coverage --config ../../vitest.config.ts",
     "lint": "oxlint -c ../../.oxlintrc.json .",
-    "posttest": "yarn lint"
+    "posttest": "pnpm run lint"
   },
   "dependencies": {
     "date-format": "4.0.14",
@@ -28,6 +28,6 @@
     "prettyjson": "1.2.5"
   },
   "devDependencies": {
-    "sinon": "21.1.2"
+    "sinon": "catalog:"
   }
 }
