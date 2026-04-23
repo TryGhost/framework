@@ -27,6 +27,6 @@
     "@tryghost/tpl": "workspace:*",
     "lodash": "4.18.1",
     "moment-timezone": "^0.5.23",
-    "validator": "^13.15.26"
+    "validator": "13.15.35"
   }
 }
