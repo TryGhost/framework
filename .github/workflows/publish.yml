@@ -48,7 +48,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           cache: pnpm
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
           path: .nx/cache
           key: nx-${{ runner.os }}-publish-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}

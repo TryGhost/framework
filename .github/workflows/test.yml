@@ -30,7 +30,7 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: pnpm
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
           path: .nx/cache
           key: nx-${{ runner.os }}-node${{ matrix.node }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
@@ -38,9 +38,19 @@ jobs:
             nx-${{ runner.os }}-node${{ matrix.node }}-${{ hashFiles('pnpm-lock.yaml') }}-
             nx-${{ runner.os }}-node${{ matrix.node }}-
 
+      - uses: nrwl/nx-set-shas@afb73a62d26e41464e9254689e1fd6122ee683c1 # v5
+        if: github.event_name == 'pull_request'
+
       - run: pnpm install --prefer-offline --frozen-lockfile
       - run: pnpm format:check
-      - run: pnpm test:ci
+
+      - name: Test affected (PRs)
+        if: github.event_name == 'pull_request'
+        run: pnpm exec nx affected -t test --output-style=static
+
+      - name: Test all (main)
+        if: github.event_name == 'push'
+        run: pnpm test:ci
 
       - uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6
 
