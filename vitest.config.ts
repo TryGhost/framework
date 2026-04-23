@@ -5,6 +5,7 @@ export default defineConfig({
         globals: true,
         environment: 'node',
         include: ['test/**/*.test.{js,ts}'],
+        pool: 'threads',
         coverage: {
             provider: 'v8',
             include: ['**/lib/**'],
