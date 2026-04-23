@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | grep -E '\\.(js|ts|json|md)$' | (cd \"$CLAUDE_PROJECT_DIR\" && xargs -r pnpm exec oxfmt -c .oxfmtrc.json)"
+          }
+        ]
+      }
+    ]
+  }
+}

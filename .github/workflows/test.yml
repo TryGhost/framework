@@ -38,9 +38,19 @@ jobs:
             nx-${{ runner.os }}-node${{ matrix.node }}-${{ hashFiles('pnpm-lock.yaml') }}-
             nx-${{ runner.os }}-node${{ matrix.node }}-
 
+      - uses: nrwl/nx-set-shas@v4
+        if: github.event_name == 'pull_request'
+
       - run: pnpm install --prefer-offline --frozen-lockfile
       - run: pnpm format:check
-      - run: pnpm test:ci
+
+      - name: Test affected (PRs)
+        if: github.event_name == 'pull_request'
+        run: pnpm exec nx affected -t test --output-style=static
+
+      - name: Test all (main)
+        if: github.event_name == 'push'
+        run: pnpm test:ci
 
       - uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6
 

@@ -61,6 +61,11 @@ typings/
 *.iml
 *.sublime-*
 .vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Claude Code local overrides
+.claude/settings.local.json
 
 # OSX
 .DS_Store
