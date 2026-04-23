@@ -17,7 +17,7 @@ function createBookshelf({ countRows, fetchResult, selectError, fetchError } = {
 
     const countQuery = {
         _statements: [],
-        _single: {table: 'posts'},
+        _single: { table: 'posts' },
         clone() {
             modelState.countCloned = true;
             return countQuery;
@@ -196,7 +196,7 @@ describe('@tryghost/bookshelf-pagination', function () {
     });
 
     it('passes the transacting option through to the count query', async function () {
-        const {bookshelf, modelState} = createBookshelf({countRows: [{aggregate: 1}]});
+        const { bookshelf, modelState } = createBookshelf({ countRows: [{ aggregate: 1 }] });
         const model = new bookshelf.Model();
 
         await model.fetchPage({
@@ -210,7 +210,7 @@ describe('@tryghost/bookshelf-pagination', function () {
     });
 
     it('handleRelation does not duplicate entries and ignores same-table properties', function () {
-        const {bookshelf} = createBookshelf();
+        const { bookshelf } = createBookshelf();
         const model = new bookshelf.Model();
         model.eagerLoad = ['authors'];
 

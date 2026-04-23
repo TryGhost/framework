@@ -203,13 +203,13 @@ describe('Logging', function () {
     it('ships object values with pre-set timestamp without adding metadata when disabled', async function () {
         const ghostMetrics = new GhostMetrics({
             metrics: {
-                transports: ['elasticsearch']
+                transports: ['elasticsearch'],
             },
             elasticsearch: {
                 host: 'https://test-elasticsearch',
                 username: 'user',
-                password: 'pass'
-            }
+                password: 'pass',
+            },
         });
 
         // Force metadata check false branch for coverage.
@@ -217,7 +217,7 @@ describe('Logging', function () {
 
         const payload = {
             value: 101,
-            '@timestamp': 12345
+            '@timestamp': 12345,
         };
 
         await new Promise((resolve) => {

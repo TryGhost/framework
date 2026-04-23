@@ -254,8 +254,8 @@ describe('Request', function () {
             method: 'PUT',
             body: 'hello',
             retry: {
-                limit: 0
-            }
+                limit: 0,
+            },
         }).then(function (res) {
             assert.equal(requestMock.isDone(), true);
             assert.equal(res.statusCode, 200);
@@ -266,7 +266,7 @@ describe('Request', function () {
         const requestModule = rewire('../lib/request');
         const gotStub = sinon.stub().resolves({
             statusCode: 200,
-            body: 'ok'
+            body: 'ok',
         });
         const originalNodeEnv = process.env.NODE_ENV;
 
@@ -274,13 +274,18 @@ describe('Request', function () {
         requestModule.__get__('defaultOptions').dnsLookup = () => {};
         delete process.env.NODE_ENV;
 
-        return requestModule('http://some-website.com/unset-env-endpoint/', {}).then((res) => {
-            assert.equal(res.statusCode, 200);
-            assert.equal(gotStub.calledOnce, true);
-            assert.equal(Object.prototype.hasOwnProperty.call(gotStub.firstCall.args[1], 'retry'), false);
-        }).finally(() => {
-            restoreNodeEnv(originalNodeEnv);
-        });
+        return requestModule('http://some-website.com/unset-env-endpoint/', {})
+            .then((res) => {
+                assert.equal(res.statusCode, 200);
+                assert.equal(gotStub.calledOnce, true);
+                assert.equal(
+                    Object.prototype.hasOwnProperty.call(gotStub.firstCall.args[1], 'retry'),
+                    false,
+                );
+            })
+            .finally(() => {
+                restoreNodeEnv(originalNodeEnv);
+            });
     });
 
     it('[success] can request successfully when NODE_ENV is unset', function () {
@@ -292,12 +297,14 @@ describe('Request', function () {
 
         delete process.env.NODE_ENV;
 
-        return request(url, {}).then((res) => {
-            assert.equal(requestMock.isDone(), true);
-            assert.equal(res.statusCode, 200);
-        }).finally(() => {
-            restoreNodeEnv(originalNodeEnv);
-        });
+        return request(url, {})
+            .then((res) => {
+                assert.equal(requestMock.isDone(), true);
+                assert.equal(res.statusCode, 200);
+            })
+            .finally(() => {
+                restoreNodeEnv(originalNodeEnv);
+            });
     });
 
     it('[failure] adds request options and response fields onto thrown error', function () {
@@ -333,19 +340,22 @@ describe('Request', function () {
         requestModule.__set__('got', gotStub);
         requestModule.__get__('defaultOptions').dnsLookup = () => {};
 
-        return requestModule('http://some-website.com/plain-error/', {retry: {limit: 0}}).then(() => {
-            throw new Error('Should have failed');
-        }, (err) => {
-            assert.equal(gotStub.calledOnce, true);
-            assert.equal(err, plainError);
-        });
+        return requestModule('http://some-website.com/plain-error/', { retry: { limit: 0 } }).then(
+            () => {
+                throw new Error('Should have failed');
+            },
+            (err) => {
+                assert.equal(gotStub.calledOnce, true);
+                assert.equal(err, plainError);
+            },
+        );
     });
 
     it('[success] does not force retry outside test environment', function () {
         const requestModule = rewire('../lib/request');
         const gotStub = sinon.stub().resolves({
             statusCode: 200,
-            body: 'ok'
+            body: 'ok',
         });
         const originalNodeEnv = process.env.NODE_ENV;
 
@@ -354,20 +364,25 @@ describe('Request', function () {
 
         process.env.NODE_ENV = 'production';
 
-        return requestModule('http://some-website.com/no-test-retry/').then((res) => {
-            assert.equal(res.statusCode, 200);
-            assert.equal(gotStub.calledOnce, true);
-            assert.equal(Object.prototype.hasOwnProperty.call(gotStub.firstCall.args[1], 'retry'), false);
-        }).finally(() => {
-            restoreNodeEnv(originalNodeEnv);
-        });
+        return requestModule('http://some-website.com/no-test-retry/')
+            .then((res) => {
+                assert.equal(res.statusCode, 200);
+                assert.equal(gotStub.calledOnce, true);
+                assert.equal(
+                    Object.prototype.hasOwnProperty.call(gotStub.firstCall.args[1], 'retry'),
+                    false,
+                );
+            })
+            .finally(() => {
+                restoreNodeEnv(originalNodeEnv);
+            });
     });
 
     it('[success] keeps explicit method when body is provided', function () {
         const requestModule = rewire('../lib/request');
         const gotStub = sinon.stub().resolves({
             statusCode: 200,
-            body: 'ok'
+            body: 'ok',
         });
 
         requestModule.__set__('got', gotStub);
@@ -377,8 +392,8 @@ describe('Request', function () {
             method: 'PUT',
             body: 'hello',
             retry: {
-                limit: 0
-            }
+                limit: 0,
+            },
         }).then(() => {
             assert.equal(gotStub.calledOnce, true);
             assert.equal(gotStub.firstCall.args[1].method, 'PUT');
@@ -391,7 +406,7 @@ describe('Request', function () {
 
         transportError.options = {
             method: 'GET',
-            url: 'http://some-website.com/transport-failure/'
+            url: 'http://some-website.com/transport-failure/',
         };
 
         const gotStub = sinon.stub().rejects(transportError);
@@ -401,16 +416,19 @@ describe('Request', function () {
 
         return requestModule('http://some-website.com/transport-failure/', {
             retry: {
-                limit: 0
-            }
-        }).then(() => {
-            throw new Error('Should have failed');
-        }, (err) => {
-            assert.equal(gotStub.calledOnce, true);
-            assert.equal(err.method, 'GET');
-            assert.equal(err.url, 'http://some-website.com/transport-failure/');
-            assert.equal(err.options, undefined);
-            assert.equal(err.response, undefined);
-        });
+                limit: 0,
+            },
+        }).then(
+            () => {
+                throw new Error('Should have failed');
+            },
+            (err) => {
+                assert.equal(gotStub.calledOnce, true);
+                assert.equal(err.method, 'GET');
+                assert.equal(err.url, 'http://some-website.com/transport-failure/');
+                assert.equal(err.options, undefined);
+                assert.equal(err.response, undefined);
+            },
+        );
     });
 });

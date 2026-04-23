@@ -8,13 +8,13 @@ const knex = require('knex');
 const bookshelf = require('bookshelf');
 const paginationPlugin = require('../lib/bookshelf-pagination');
 
-const {hasMultiTableSource} = paginationPlugin.paginationUtils;
+const { hasMultiTableSource } = paginationPlugin.paginationUtils;
 
 async function setupDatabase() {
     const db = knex({
         client: 'sqlite3',
         useNullAsDefault: true,
-        connection: ':memory:'
+        connection: ':memory:',
     });
 
     await db.schema.createTable('authors', (t) => {
@@ -37,25 +37,25 @@ async function setupDatabase() {
     });
 
     await db('authors').insert([
-        {id: 'a1', name: 'Alice'},
-        {id: 'a2', name: 'Bob'}
+        { id: 'a1', name: 'Alice' },
+        { id: 'a2', name: 'Bob' },
     ]);
     await db('posts').insert([
-        {id: 'p1', title: 'one', status: 'published', author_id: 'a1'},
-        {id: 'p2', title: 'two', status: 'published', author_id: 'a1'},
-        {id: 'p3', title: 'three', status: 'draft', author_id: 'a2'}
+        { id: 'p1', title: 'one', status: 'published', author_id: 'a1' },
+        { id: 'p2', title: 'two', status: 'published', author_id: 'a1' },
+        { id: 'p3', title: 'three', status: 'draft', author_id: 'a2' },
     ]);
     await db('tags').insert([
-        {id: 't1', name: 'tech'},
-        {id: 't2', name: 'news'}
+        { id: 't1', name: 'tech' },
+        { id: 't2', name: 'news' },
     ]);
     // p1 has two tags — the outer-join cases below will duplicate p1 into
     // two physical rows, which is what makes count(*) vs count(distinct)
     // observable at the result level.
     await db('posts_tags').insert([
-        {post_id: 'p1', tag_id: 't1'},
-        {post_id: 'p1', tag_id: 't2'},
-        {post_id: 'p2', tag_id: 't1'}
+        { post_id: 'p1', tag_id: 't1' },
+        { post_id: 'p1', tag_id: 't2' },
+        { post_id: 'p2', tag_id: 't1' },
     ]);
 
     // Capture every compiled SQL query so each test can assert which count
@@ -68,13 +68,13 @@ async function setupDatabase() {
     const bk = bookshelf(db);
     paginationPlugin(bk);
 
-    const Post = bk.model('Post', {tableName: 'posts', idAttribute: 'id'});
+    const Post = bk.model('Post', { tableName: 'posts', idAttribute: 'id' });
 
-    return {db, Post, queries};
+    return { db, Post, queries };
 }
 
 function countQuerySql(queries) {
-    return queries.find(sql => typeof sql === 'string' && /\bcount\(/i.test(sql));
+    return queries.find((sql) => typeof sql === 'string' && /\bcount\(/i.test(sql));
 }
 
 describe('hasMultiTableSource against real knex builders', function () {
@@ -86,7 +86,7 @@ describe('hasMultiTableSource against real knex builders', function () {
     let db;
 
     beforeEach(function () {
-        db = knex({client: 'sqlite3', useNullAsDefault: true});
+        db = knex({ client: 'sqlite3', useNullAsDefault: true });
     });
 
     afterEach(async function () {
@@ -108,18 +108,30 @@ describe('hasMultiTableSource against real knex builders', function () {
     });
 
     it('returns true for an outer innerJoin', function () {
-        assert.equal(hasMultiTableSource(db('posts').innerJoin('tags', 'tags.id', 'posts.id')), true);
+        assert.equal(
+            hasMultiTableSource(db('posts').innerJoin('tags', 'tags.id', 'posts.id')),
+            true,
+        );
     });
 
     it('returns true for leftJoin, rightJoin and joinRaw', function () {
-        assert.equal(hasMultiTableSource(db('posts').leftJoin('tags', 'tags.id', 'posts.id')), true);
-        assert.equal(hasMultiTableSource(db('posts').joinRaw('right join tags on tags.id = posts.id')), true);
+        assert.equal(
+            hasMultiTableSource(db('posts').leftJoin('tags', 'tags.id', 'posts.id')),
+            true,
+        );
+        assert.equal(
+            hasMultiTableSource(db('posts').joinRaw('right join tags on tags.id = posts.id')),
+            true,
+        );
     });
 
     it('returns true for a UNION query', function () {
-        const qb = db('posts').select('id').where('status', 'published').union(function () {
-            this.select('id').from('posts').where('status', 'draft');
-        });
+        const qb = db('posts')
+            .select('id')
+            .where('status', 'published')
+            .union(function () {
+                this.select('id').from('posts').where('status', 'draft');
+            });
         assert.equal(hasMultiTableSource(qb), true);
     });
 
@@ -165,7 +177,7 @@ describe('fetchPage end-to-end against real bookshelf + sqlite', function () {
     let queries;
 
     beforeEach(async function () {
-        ({db, Post, queries} = await setupDatabase());
+        ({ db, Post, queries } = await setupDatabase());
     });
 
     afterEach(async function () {
@@ -180,10 +192,12 @@ describe('fetchPage end-to-end against real bookshelf + sqlite', function () {
         // count(distinct posts.id) must report 2.
         const result = await Post.forge()
             .query(function (qb) {
-                qb.innerJoin('posts_tags', 'posts_tags.post_id', 'posts.id')
-                    .where('posts.status', 'published');
+                qb.innerJoin('posts_tags', 'posts_tags.post_id', 'posts.id').where(
+                    'posts.status',
+                    'published',
+                );
             })
-            .fetchPage({page: 1, limit: 10, useSmartCount: true});
+            .fetchPage({ page: 1, limit: 10, useSmartCount: true });
 
         const countSql = countQuerySql(queries);
         assert.ok(usesCountDistinct(countSql), `expected count(distinct), got: ${countSql}`);
@@ -201,7 +215,7 @@ describe('fetchPage end-to-end against real bookshelf + sqlite', function () {
                         .where('authors.name', 'Alice');
                 });
             })
-            .fetchPage({page: 1, limit: 10, useSmartCount: true});
+            .fetchPage({ page: 1, limit: 10, useSmartCount: true });
 
         const countSql = countQuerySql(queries);
         assert.ok(usesCountStar(countSql), `expected count(*), got: ${countSql}`);
