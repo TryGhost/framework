@@ -546,5 +546,58 @@ describe('Pipeline', function () {
             // cache not set
             assert.equal(apiController.browse.cache.set.calledOnce, false);
         });
+
+        it('produces distinct cache keys when cacheKeyData objects differ only in nested fields', async function () {
+            const cache = {
+                get: sinon.stub().resolves(null),
+                set: sinon.stub().resolves(true),
+            };
+
+            const apiController = {
+                browse: {
+                    cache,
+                    generateCacheKeyData: sinon.stub(),
+                },
+            };
+
+            const apiUtils = {};
+            const result = shared.pipeline(apiController, apiUtils);
+
+            shared.pipeline.STAGES.validation.input.resolves();
+            shared.pipeline.STAGES.serialisation.input.resolves();
+            shared.pipeline.STAGES.permissions.resolves();
+            shared.pipeline.STAGES.query.resolves('response');
+            shared.pipeline.STAGES.serialisation.output.callsFake(
+                function (response, _apiUtils, apiConfig, apiImpl, frame) {
+                    frame.response = response;
+                },
+            );
+
+            // Two requests that share every top-level key but differ deep inside
+            // a nested object must not collide. Top-level keys are identical on
+            // purpose — that is what the replacer-array form silently dropped.
+            apiController.browse.generateCacheKeyData.onFirstCall().resolves({
+                options: { filter: 'status:published', limit: 15 },
+                auth: { free: true, tiers: [] },
+                method: 'browse',
+            });
+            apiController.browse.generateCacheKeyData.onSecondCall().resolves({
+                options: { filter: 'status:published', limit: 15 },
+                auth: { free: false, tiers: ['gold'] },
+                method: 'browse',
+            });
+
+            await result.browse();
+            await result.browse();
+
+            const firstKey = cache.get.firstCall.args[0];
+            const secondKey = cache.get.secondCall.args[0];
+
+            assert.notEqual(
+                firstKey,
+                secondKey,
+                'nested-field differences must produce distinct cache keys',
+            );
+        });
     });
 });
