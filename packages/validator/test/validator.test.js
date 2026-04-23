@@ -53,9 +53,7 @@ describe('Validator', function () {
             assert.equal(validator.isEmail('member@example'), false);
             assert.equal(validator.isEmail('member@example', { legacy: false }), false);
 
-            // old email validator doesn't detect this as invalid
-            assert.equal(validator.isEmail('member@example.com�'), true);
-            // new email validator detects this as invalid
+            assert.equal(validator.isEmail('member@example.com�'), false);
             assert.equal(validator.isEmail('member@example.com�', { legacy: false }), false);
         });
     });

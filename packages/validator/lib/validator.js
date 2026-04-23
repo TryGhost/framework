@@ -39,7 +39,10 @@ validators.isTimezone = function isTimezone(str) {
 
 validators.isEmptyOrURL = function isEmptyOrURL(str) {
     assertString(str);
-    return validators.isEmpty(str) || validators.isURL(str, { require_protocol: false });
+    return (
+        validators.isEmpty(str) ||
+        validators.isURL(str, { require_protocol: false, require_tld: false })
+    );
 };
 
 validators.isSlug = function isSlug(str) {

@@ -711,8 +711,8 @@ importers:
         specifier: ^0.5.23
         version: 0.5.48
       validator:
-        specifier: 7.2.0
-        version: 7.2.0
+        specifier: ^13.15.26
+        version: 13.15.35
 
   packages/version:
     dependencies:
@@ -5320,8 +5320,8 @@ packages:
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
-  validator@7.2.0:
-    resolution: {integrity: sha512-c8NGTUYeBEcUIGeMppmNVKHE7wwfm3mYbNZxV+c5mlv9fDHI7Ad3p07qfNrn/CvpdkK2k61fOLRO2sTEhgQXmg==}
+  validator@13.15.35:
+    resolution: {integrity: sha512-TQ5pAGhd5whStmqWvYF4OjQROlmv9SMFVt37qoCBdqRffuuklWYQlCNnEs2ZaIBD1kZRNnikiZOS1eqgkar0iw==}
     engines: {node: '>= 0.10'}
 
   vary@1.1.2:
@@ -10502,7 +10502,7 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
-  validator@7.2.0: {}
+  validator@13.15.35: {}
 
   vary@1.1.2: {}
 
