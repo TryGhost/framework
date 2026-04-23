@@ -2,6 +2,7 @@ packages:
   - 'packages/*'
 overrides:
   node-loggly-bulk: ^4.0.2
+  axios: ^1.15.0
 onlyBuiltDependencies:
   - dtrace-provider
   - esbuild
