@@ -30,7 +30,6 @@
     "oxfmt": "0.45.0",
     "oxlint": "1.60.0",
     "sinon": "catalog:",
-    "ts-node": "catalog:",
     "vitest": "4.1.4"
   }
 }

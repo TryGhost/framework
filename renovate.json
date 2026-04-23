@@ -11,10 +11,6 @@
     {
       "matchUpdateTypes": ["major"],
       "automerge": false
-    },
-    {
-      "matchPackageNames": ["eslint"],
-      "enabled": false
     }
   ]
 }
