@@ -13,7 +13,7 @@
     "setup": "pnpm install",
     "test": "nx run-many -t test --parallel=10 --outputStyle=dynamic-legacy",
     "test:ci": "nx run-many -t test --outputStyle=static",
-    "lint": "nx run-many -t lint --outputStyle=dynamic",
+    "lint": "oxlint -c .oxlintrc.json packages",
     "format": "oxfmt -c .oxfmtrc.json \"packages/**/*.{js,ts,json,md}\"",
     "format:check": "oxfmt -c .oxfmtrc.json --check \"packages/**/*.{js,ts,json,md}\"",
     "preship": "git diff --quiet && git diff --cached --quiet || (echo 'Error: working tree must be clean before shipping' && exit 1) && pnpm test",
