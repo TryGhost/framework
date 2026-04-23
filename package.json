@@ -11,6 +11,7 @@
     "dev": "echo \"Implement me!\"",
     "main": "git checkout main && git pull && pnpm install",
     "setup": "pnpm install",
+    "prepare": "husky",
     "test": "nx run-many -t test --parallel=10 --outputStyle=dynamic-legacy",
     "test:ci": "nx run-many -t test --outputStyle=static",
     "lint": "nx run-many -t lint --outputStyle=dynamic",
@@ -26,10 +27,15 @@
   "devDependencies": {
     "@nx/js": "22.6.5",
     "@vitest/coverage-v8": "4.1.4",
+    "husky": "9.1.7",
+    "lint-staged": "16.4.0",
     "nx": "22.6.5",
     "oxfmt": "0.45.0",
     "oxlint": "1.60.0",
     "sinon": "catalog:",
     "vitest": "4.1.4"
+  },
+  "lint-staged": {
+    "packages/**/*.{js,ts,json,md}": "oxfmt -c .oxfmtrc.json"
   }
 }
