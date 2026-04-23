@@ -38,7 +38,7 @@ jobs:
             nx-${{ runner.os }}-node${{ matrix.node }}-${{ hashFiles('pnpm-lock.yaml') }}-
             nx-${{ runner.os }}-node${{ matrix.node }}-
 
-      - uses: nrwl/nx-set-shas@v4
+      - uses: nrwl/nx-set-shas@3e9ad7370203c1e93d109be57f3b72eb0eb511b1 # v4
         if: github.event_name == 'pull_request'
 
       - run: pnpm install --prefer-offline --frozen-lockfile
