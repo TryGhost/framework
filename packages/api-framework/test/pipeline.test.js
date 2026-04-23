@@ -599,5 +599,58 @@ describe('Pipeline', function () {
                 'nested-field differences must produce distinct cache keys',
             );
         });
+
+        it('produces identical cache keys when cacheKeyData objects are reordered at any depth', async function () {
+            const cache = {
+                get: sinon.stub().resolves(null),
+                set: sinon.stub().resolves(true),
+            };
+
+            const apiController = {
+                browse: {
+                    cache,
+                    generateCacheKeyData: sinon.stub(),
+                },
+            };
+
+            const apiUtils = {};
+            const result = shared.pipeline(apiController, apiUtils);
+
+            shared.pipeline.STAGES.validation.input.resolves();
+            shared.pipeline.STAGES.serialisation.input.resolves();
+            shared.pipeline.STAGES.permissions.resolves();
+            shared.pipeline.STAGES.query.resolves('response');
+            shared.pipeline.STAGES.serialisation.output.callsFake(
+                function (response, _apiUtils, apiConfig, apiImpl, frame) {
+                    frame.response = response;
+                },
+            );
+
+            // Same logical payload, keys inserted in different orders at every
+            // depth (top-level, options, auth, and an object nested inside an
+            // array). Insertion order must not affect the cache key.
+            apiController.browse.generateCacheKeyData.onFirstCall().resolves({
+                options: { filter: 'status:published', limit: 15 },
+                auth: { free: false, tiers: [{ slug: 'gold', order: 1 }] },
+                method: 'browse',
+            });
+            apiController.browse.generateCacheKeyData.onSecondCall().resolves({
+                method: 'browse',
+                auth: { tiers: [{ order: 1, slug: 'gold' }], free: false },
+                options: { limit: 15, filter: 'status:published' },
+            });
+
+            await result.browse();
+            await result.browse();
+
+            const firstKey = cache.get.firstCall.args[0];
+            const secondKey = cache.get.secondCall.args[0];
+
+            assert.equal(
+                firstKey,
+                secondKey,
+                'key insertion order must not affect the cache key',
+            );
+        });
     });
 });
