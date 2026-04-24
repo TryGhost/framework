@@ -602,8 +602,8 @@ importers:
         specifier: 3.2.9
         version: 3.2.9(sqlite3@6.0.1)
       nock:
-        specifier: 14.0.12
-        version: 14.0.12
+        specifier: 14.0.13
+        version: 14.0.13
       sinon:
         specifier: 'catalog:'
         version: 21.1.2
@@ -642,8 +642,8 @@ importers:
         version: 4.18.1
     devDependencies:
       nock:
-        specifier: 14.0.12
-        version: 14.0.12
+        specifier: 14.0.13
+        version: 14.0.13
       rewire:
         specifier: 9.0.1
         version: 9.0.1
@@ -4487,8 +4487,8 @@ packages:
     resolution: {integrity: sha512-8Ofs/AUQh8MaEcrlq5xOX0CQ9ypTF5dl78mjlMNfOK08fzpgTHQRQPBxcPlEtIw0yRpws+Zo/3r+5WRby7u3Gg==}
     engines: {node: '>= 0.6'}
 
-  nock@14.0.12:
-    resolution: {integrity: sha512-kZM3bHV0KzhHH6E2eRszHyML/w87AUzLBwupNTHohtYWP9fZYgUPmCbSKq6ITfEEmHqN4/p0MscvUipT4P5Qsg==}
+  nock@14.0.13:
+    resolution: {integrity: sha512-SCPsQmGVNY8h1rfS3aU0MzOGYY+wKIFukHEsoSIwPRCYocZkya7MFIlWIEYPWQZj+Gaksg6EyUaY255ZDqpQuA==}
     engines: {node: '>=18.20.0 <20 || >=20.12.1'}
 
   node-abi@3.89.0:
@@ -9508,7 +9508,7 @@ snapshots:
 
   negotiator@1.0.0: {}
 
-  nock@14.0.12:
+  nock@14.0.13:
     dependencies:
       '@mswjs/interceptors': 0.41.4
       json-stringify-safe: 5.0.1
