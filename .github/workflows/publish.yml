@@ -74,7 +74,7 @@ jobs:
       - name: Publish to npm
         run: npx nx release publish ${{ (github.event.inputs['dry-run'] == 'true' && '--dry-run') || '' }}
 
-      - uses: tryghost/actions/actions/slack-build@7de01409beac61eaffcce08f764b338d00870493 # main
+      - uses: tryghost/actions/actions/slack-build@46ce4046333519b93109b3db80bb7f279828b3c8 # main
         if: failure()
         with:
           status: ${{ job.status }}
