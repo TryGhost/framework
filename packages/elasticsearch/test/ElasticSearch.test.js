@@ -1,10 +1,20 @@
 const assert = require('assert/strict');
+const fs = require('fs');
+const path = require('path');
 const sinon = require('sinon');
 const sandbox = sinon.createSandbox();
 
 const { Client } = require('@elastic/elasticsearch');
 const ElasticSearch = require('../index');
 const ElasticSearchBunyan = require('../lib/ElasticSearchBunyan');
+
+const EXPECTED_ELASTICSEARCH_MAJOR = 8;
+const elasticsearchPackage = JSON.parse(
+    fs.readFileSync(
+        path.join(path.dirname(require.resolve('@elastic/elasticsearch')), 'package.json'),
+        'utf8',
+    ),
+);
 
 const testClientConfig = {
     node: 'http://test-elastic-client',
@@ -22,6 +32,15 @@ const indexConfig = {
 describe('ElasticSearch', function () {
     afterEach(function () {
         sandbox.restore();
+    });
+
+    it(`Uses @elastic/elasticsearch v${EXPECTED_ELASTICSEARCH_MAJOR}`, function () {
+        const installedMajor = Number(elasticsearchPackage.version.split('.')[0]);
+        assert.equal(
+            installedMajor,
+            EXPECTED_ELASTICSEARCH_MAJOR,
+            `Expected @elastic/elasticsearch v${EXPECTED_ELASTICSEARCH_MAJOR}, got v${elasticsearchPackage.version}`,
+        );
     });
 
     it('Processes client configuration', function () {
