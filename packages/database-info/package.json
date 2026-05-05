@@ -23,6 +23,6 @@
     "posttest": "pnpm run lint"
   },
   "devDependencies": {
-    "knex": "3.2.9"
+    "knex": "3.2.10"
   }
 }
