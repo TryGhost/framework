@@ -179,10 +179,10 @@ importers:
     devDependencies:
       bookshelf:
         specifier: 1.2.0
-        version: 1.2.0(knex@3.2.9(sqlite3@6.0.1))
+        version: 1.2.0(knex@3.2.10(sqlite3@6.0.1))
       knex:
-        specifier: 3.2.9
-        version: 3.2.9(sqlite3@6.0.1)
+        specifier: 3.2.10
+        version: 3.2.10(sqlite3@6.0.1)
       sinon:
         specifier: 'catalog:'
         version: 21.1.2
@@ -251,8 +251,8 @@ importers:
   packages/database-info:
     devDependencies:
       knex:
-        specifier: 3.2.9
-        version: 3.2.9(sqlite3@6.0.1)
+        specifier: 3.2.10
+        version: 3.2.10(sqlite3@6.0.1)
 
   packages/debug:
     dependencies:
@@ -599,8 +599,8 @@ importers:
         specifier: 7.2.0
         version: 7.2.0
       knex:
-        specifier: 3.2.9
-        version: 3.2.9(sqlite3@6.0.1)
+        specifier: 3.2.10
+        version: 3.2.10(sqlite3@6.0.1)
       nock:
         specifier: 14.0.14
         version: 14.0.14
@@ -4144,8 +4144,8 @@ packages:
   keyv@5.6.0:
     resolution: {integrity: sha512-CYDD3SOtsHtyXeEORYRx2qBtpDJFjRTGXUtmNEMGyzYOKj1TE3tycdlho7kA1Ufx9OYWZzg52QFBGALTirzDSw==}
 
-  knex@3.2.9:
-    resolution: {integrity: sha512-dtAILTjBMaG8YloP5oBxohDIKyIsdQ/TkcVvSjhsksvsjeH63Y0PADyuMDfNZKbVT3Rlx3vEYVBlecbPT/KerA==}
+  knex@3.2.10:
+    resolution: {integrity: sha512-oypTHfrc9i72iyxaUQBKHOxhcr0xM65MPf6FpN02nimsftXwzXprIkLjfXdubvhbu4PMWLp023q8o8CYvHSuZw==}
     engines: {node: '>=16'}
     hasBin: true
     peerDependencies:
@@ -8071,12 +8071,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  bookshelf@1.2.0(knex@3.2.9(sqlite3@6.0.1)):
+  bookshelf@1.2.0(knex@3.2.10(sqlite3@6.0.1)):
     dependencies:
       bluebird: 3.7.2
       create-error: 0.3.1
       inflection: 1.13.4
-      knex: 3.2.9(sqlite3@6.0.1)
+      knex: 3.2.10(sqlite3@6.0.1)
       lodash: 4.18.1
 
   bowser@2.14.1: {}
@@ -9208,7 +9208,7 @@ snapshots:
     dependencies:
       '@keyv/serialize': 1.1.1
 
-  knex@3.2.9(sqlite3@6.0.1):
+  knex@3.2.10(sqlite3@6.0.1):
     dependencies:
       colorette: 2.0.19
       commander: 10.0.1
