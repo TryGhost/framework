@@ -6,7 +6,7 @@
   },
   "author": "Ghost Foundation",
   "license": "MIT",
-  "packageManager": "pnpm@10.33.2",
+  "packageManager": "pnpm@10.33.3",
   "scripts": {
     "dev": "echo \"Implement me!\"",
     "main": "git checkout main && git pull && pnpm install",
