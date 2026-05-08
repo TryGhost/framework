@@ -517,8 +517,8 @@ importers:
   packages/nodemailer:
     dependencies:
       '@aws-sdk/client-sesv2':
-        specifier: 3.1042.0
-        version: 3.1042.0
+        specifier: 3.1043.0
+        version: 3.1043.0
       '@tryghost/errors':
         specifier: workspace:*
         version: link:../errors
@@ -774,8 +774,8 @@ packages:
   '@aws-crypto/util@5.2.0':
     resolution: {integrity: sha512-4RkU9EsI6ZpBve5fseQlGNUWKMa1RLPQ1dnjnQoe07ldfIzcsGb5hC5W0Dm7u423KWzawlrpbjXBrXCEv9zazQ==}
 
-  '@aws-sdk/client-sesv2@3.1042.0':
-    resolution: {integrity: sha512-aoA4cPc4+TLA088IDiGnAt1GpxSJKf67gt9r22HPmblb2MusvFGHu0EAig7rcwNKW37S+/5tl1AGk+XtH9xwFg==}
+  '@aws-sdk/client-sesv2@3.1043.0':
+    resolution: {integrity: sha512-OyovXcLuZODHUCth483Bxuof1rHpkf7AlsbcrurXZ5M5yC6QFFmvU6TIChz5xfYxOBR1BkCZhy918jdSShVnPw==}
     engines: {node: '>=20.0.0'}
 
   '@aws-sdk/core@3.974.8':
@@ -5556,7 +5556,7 @@ snapshots:
       '@smithy/util-utf8': 2.3.0
       tslib: 2.8.1
 
-  '@aws-sdk/client-sesv2@3.1042.0':
+  '@aws-sdk/client-sesv2@3.1043.0':
     dependencies:
       '@aws-crypto/sha256-browser': 5.2.0
       '@aws-crypto/sha256-js': 5.2.0
