@@ -23,7 +23,7 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@aws-sdk/client-sesv2": "3.1042.0",
+    "@aws-sdk/client-sesv2": "3.1043.0",
     "@tryghost/errors": "workspace:*",
     "nodemailer": "8.0.7",
     "nodemailer-mailgun-transport": "2.1.5",
