@@ -32,7 +32,7 @@
     "workerpool": "10.0.2"
   },
   "devDependencies": {
-    "@sinonjs/fake-timers": "15.3.2",
+    "@sinonjs/fake-timers": "15.4.0",
     "date-fns": "4.1.0",
     "rewire": "9.0.1",
     "sinon": "catalog:"
