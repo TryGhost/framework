@@ -2,10 +2,5 @@
   "extends": ["github>tryghost/renovate-config"],
   "assignees": ["9larsons"],
   "ignoreDeps": ["moment-timezone"],
-  "packageRules": [
-    {
-      "matchUpdateTypes": ["major"],
-      "automerge": false
-    }
-  ]
+  "packageRules": []
 }
