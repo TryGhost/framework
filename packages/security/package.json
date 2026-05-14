@@ -23,7 +23,7 @@
     "lint": "oxlint -c ../../.oxlintrc.json ."
   },
   "dependencies": {
-    "@tryghost/string": "0.3.3",
+    "@tryghost/string": "0.3.4",
     "bcryptjs": "3.0.3"
   },
   "devDependencies": {
