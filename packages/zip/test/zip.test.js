@@ -176,7 +176,21 @@ describe('Extract zip', function () {
         await compress(themeFolder, zipDestination);
         await assert.rejects(
             () => extract(zipDestination, unzipDestination),
-            /File names in the zip folder must be shorter than 254 characters\./,
+            (err) => {
+                assert.equal(err.errorType, 'UnsupportedMediaTypeError');
+                assert.equal(
+                    err.message,
+                    'File names in the zip folder must be shorter than 254 characters.',
+                );
+                assert.equal(err.context, 'The zip contains a filename that is too long.');
+                assert.equal(err.code, 'FILENAME_TOO_LONG');
+                assert.deepEqual(err.errorDetails, {
+                    entryName: longFileName,
+                    observedBytes: 254,
+                    limitBytes: 254,
+                });
+                return true;
+            },
         );
     });
 
@@ -187,7 +201,16 @@ describe('Extract zip', function () {
 
         await assert.rejects(
             () => extract(zipDestination, unzipDestination),
-            /Symlinks are not allowed in the zip folder\./,
+            (err) => {
+                assert.equal(err.errorType, 'UnsupportedMediaTypeError');
+                assert.equal(err.message, 'Symlinks are not allowed in the zip folder.');
+                assert.equal(err.context, 'The zip contains a symlink entry.');
+                assert.equal(err.code, 'SYMLINK_NOT_ALLOWED');
+                assert.deepEqual(err.errorDetails, {
+                    entryName: 'themes/test-target',
+                });
+                return true;
+            },
         );
     });
 

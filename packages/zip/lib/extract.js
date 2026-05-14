@@ -116,14 +116,28 @@ function throwOnSymlinks(entry) {
     if (symlink) {
         throw new errors.UnsupportedMediaTypeError({
             message: 'Symlinks are not allowed in the zip folder.',
+            context: 'The zip contains a symlink entry.',
+            code: 'SYMLINK_NOT_ALLOWED',
+            errorDetails: {
+                entryName: entry.fileName,
+            },
         });
     }
 }
 
 function throwOnLargeFilenames(entry) {
-    if (Buffer.byteLength(entry.fileName, 'utf8') >= 254) {
+    const filenameBytes = Buffer.byteLength(entry.fileName, 'utf8');
+
+    if (filenameBytes >= 254) {
         throw new errors.UnsupportedMediaTypeError({
             message: 'File names in the zip folder must be shorter than 254 characters.',
+            context: 'The zip contains a filename that is too long.',
+            code: 'FILENAME_TOO_LONG',
+            errorDetails: {
+                entryName: entry.fileName,
+                observedBytes: filenameBytes,
+                limitBytes: 254,
+            },
         });
     }
 }
