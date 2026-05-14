@@ -20,7 +20,7 @@ Ghost errors separate human-readable messages from machine-readable codes and st
 const errors = require('@tryghost/errors');
 
 throw new errors.UnsupportedMediaTypeError({
-    message: 'Theme entry exceeds maximum uncompressed size.',
+    message: 'Zip entry exceeds maximum uncompressed size.',
     context: 'The zip contains an entry that exceeds the configured limit.',
     code: 'ENTRY_TOO_LARGE',
     errorDetails: {
@@ -49,7 +49,7 @@ Do not put structured metadata in `context`. `context` should be a string.
 ```js
 // Bad
 throw new errors.UnsupportedMediaTypeError({
-    message: 'Theme entry exceeds maximum uncompressed size.',
+    message: 'Zip entry exceeds maximum uncompressed size.',
     context: {
         reason: 'entry_too_large',
         observedBytes,
@@ -59,7 +59,7 @@ throw new errors.UnsupportedMediaTypeError({
 
 // Good
 throw new errors.UnsupportedMediaTypeError({
-    message: 'Theme entry exceeds maximum uncompressed size.',
+    message: 'Zip entry exceeds maximum uncompressed size.',
     context: 'The zip contains an entry that exceeds the configured limit.',
     code: 'ENTRY_TOO_LARGE',
     errorDetails: {
