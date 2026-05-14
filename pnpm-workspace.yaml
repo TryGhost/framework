@@ -11,5 +11,5 @@ onlyBuiltDependencies:
   - sqlite3
 minimumReleaseAge: 1440
 catalog:
-  sinon: 21.1.2
+  sinon: 22.0.0
   typescript: 5.9.3

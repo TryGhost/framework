@@ -7,8 +7,8 @@ settings:
 catalogs:
   default:
     sinon:
-      specifier: 21.1.2
-      version: 21.1.2
+      specifier: 22.0.0
+      version: 22.0.0
     typescript:
       specifier: 5.9.3
       version: 5.9.3
@@ -45,7 +45,7 @@ importers:
         version: 1.63.0
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
       vitest:
         specifier: 4.1.5
         version: 4.1.5(@opentelemetry/api@1.9.1)(@types/node@24.12.3)(@vitest/coverage-v8@4.1.5)(vite@8.0.11(@types/node@24.12.3)(esbuild@0.28.0)(yaml@2.8.4))
@@ -73,7 +73,7 @@ importers:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/bookshelf-collision:
     dependencies:
@@ -89,13 +89,13 @@ importers:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/bookshelf-custom-query:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/bookshelf-eager-load:
     dependencies:
@@ -108,7 +108,7 @@ importers:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/bookshelf-filter:
     dependencies:
@@ -127,7 +127,7 @@ importers:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/bookshelf-has-posts:
     dependencies:
@@ -140,7 +140,7 @@ importers:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/bookshelf-include-count:
     dependencies:
@@ -153,7 +153,7 @@ importers:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/bookshelf-order:
     dependencies:
@@ -163,7 +163,7 @@ importers:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/bookshelf-pagination:
     dependencies:
@@ -185,7 +185,7 @@ importers:
         version: 3.2.10(sqlite3@6.0.1)
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
       sqlite3:
         specifier: 6.0.1
         version: 6.0.1
@@ -225,19 +225,19 @@ importers:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/bookshelf-search:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/bookshelf-transaction-events:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/config:
     dependencies:
@@ -283,13 +283,13 @@ importers:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/email-mock-receiver:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/errors:
     devDependencies:
@@ -335,13 +335,13 @@ importers:
         version: 2.1.1
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/http-cache-utils:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/http-stream:
     dependencies:
@@ -357,7 +357,7 @@ importers:
         version: 5.2.1
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/jest-snapshot:
     dependencies:
@@ -376,7 +376,7 @@ importers:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/job-manager:
     dependencies:
@@ -416,7 +416,7 @@ importers:
         version: 9.0.1
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/logging:
     dependencies:
@@ -459,7 +459,7 @@ importers:
         version: link:../errors
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/metrics:
     dependencies:
@@ -481,7 +481,7 @@ importers:
         version: 9.0.1
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/mw-error-handler:
     dependencies:
@@ -506,7 +506,7 @@ importers:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/mw-vhost:
     devDependencies:
@@ -534,7 +534,7 @@ importers:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/pretty-cli:
     dependencies:
@@ -547,7 +547,7 @@ importers:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/pretty-stream:
     dependencies:
@@ -563,7 +563,7 @@ importers:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/prometheus-metrics:
     dependencies:
@@ -606,7 +606,7 @@ importers:
         version: 14.0.15
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
       supertest:
         specifier: 7.2.2
         version: 7.2.2
@@ -618,7 +618,7 @@ importers:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/request:
     dependencies:
@@ -649,7 +649,7 @@ importers:
         version: 9.0.1
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/root-utils:
     dependencies:
@@ -662,7 +662,7 @@ importers:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/security:
     dependencies:
@@ -675,7 +675,7 @@ importers:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/server:
     dependencies:
@@ -688,13 +688,13 @@ importers:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/tpl:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/validator:
     dependencies:
@@ -725,7 +725,7 @@ importers:
     devDependencies:
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/webhook-mock-receiver:
     dependencies:
@@ -738,7 +738,7 @@ importers:
         version: 14.6.6
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
   packages/zip:
     dependencies:
@@ -757,7 +757,7 @@ importers:
         version: 4.1.2
       sinon:
         specifier: 'catalog:'
-        version: 21.1.2
+        version: 22.0.0
 
 packages:
 
@@ -3394,8 +3394,8 @@ packages:
   dezalgo@1.0.4:
     resolution: {integrity: sha512-rXSP0bf+5n0Qonsb+SVVfNfIsimO4HEtmnIpPHY8Q1UCzKlQrDMfdobr8nJOOsRgWCyMRqeSBQzmWUMq7zvVig==}
 
-  diff@8.0.4:
-    resolution: {integrity: sha512-DPi0FmjiSU5EvQV0++GFDOJ9ASQUVFh5kD+OzOnYdi7n3Wpm9hWWGfB/O2blfHcMVTL5WkQXSnRiK9makhrcnw==}
+  diff@9.0.0:
+    resolution: {integrity: sha512-svtcdpS8CgJyqAjEQIXdb3OjhFVVYjzGAPO8WGCmRbrml64SPw/jJD4GoE98aR7r25A0XcgrK3F02yw9R/vhQw==}
     engines: {node: '>=0.3.1'}
 
   dotenv-expand@12.0.3:
@@ -4977,8 +4977,8 @@ packages:
   simple-get@4.0.1:
     resolution: {integrity: sha512-brv7p5WgH0jmQJr1ZDDfKDOSeWWg+OVypG99A/5vYGPqJ6pxiaHLy8nxtFjBA7oMa01ebA9gfh1uMCFqOuXxvA==}
 
-  sinon@21.1.2:
-    resolution: {integrity: sha512-FS6mN+/bx7e2ajpXkEmOcWB6xBzWiuNoAQT18/+a20SS4U7FSYl8Ms7N6VTUxN/1JAjkx7aXp+THMC8xdpp0gA==}
+  sinon@22.0.0:
+    resolution: {integrity: sha512-sq/6DpdXOrLyfbKlXLg/Usc7xu8YXPeLkOFZRvA3bNUSA2lhbrZ06yuXbH1fkzBPCbz9O10+7hznzUsjaYNm0Q==}
 
   slash@3.0.0:
     resolution: {integrity: sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==}
@@ -8312,7 +8312,7 @@ snapshots:
       asap: 2.0.6
       wrappy: 1.0.2
 
-  diff@8.0.4: {}
+  diff@9.0.0: {}
 
   dotenv-expand@12.0.3:
     dependencies:
@@ -10158,12 +10158,12 @@ snapshots:
       once: 1.4.0
       simple-concat: 1.0.1
 
-  sinon@21.1.2:
+  sinon@22.0.0:
     dependencies:
       '@sinonjs/commons': 3.0.1
       '@sinonjs/fake-timers': 15.4.0
       '@sinonjs/samsam': 10.0.2
-      diff: 8.0.4
+      diff: 9.0.0
 
   slash@3.0.0: {}
 
