@@ -62,6 +62,23 @@ function createZipWithEntries(zipPath, entries) {
     });
 }
 
+// Patches every central-directory file-header's uncompressedSize field (offset +24)
+// to make the zip lie about its actual decompressed size. Used to simulate
+// zip-bomb-style archives whose declared metadata is smaller than the real payload.
+function forgeCentralUncompressedSize(zipPath, fake) {
+    const buf = fs.readFileSync(zipPath);
+    const CENTRAL_DIR_SIG = 0x02014b50;
+    let patched = 0;
+    for (let i = 0; i < buf.length - 4; i++) {
+        if (buf.readUInt32LE(i) === CENTRAL_DIR_SIG) {
+            buf.writeUInt32LE(fake, i + 24);
+            patched += 1;
+        }
+    }
+    fs.writeFileSync(zipPath, buf);
+    return patched;
+}
+
 describe('Compress and Extract should be opposite functions', function () {
     let symlinkPath, themeFolder, zipDestination, unzipDestination;
 
@@ -204,38 +221,60 @@ describe('Extract zip', function () {
         assert.equal(called, true);
     });
 
-    it('preserves existing behaviour for entries without uncompressed size when no limits are configured', async function () {
+    function mockYauzlSingleEntry(entry) {
         const originalLoad = Module._load;
         Module._load = function (request, parent, isMain) {
-            if (request === 'extract-zip') {
-                return async (zipPath, opts) => {
-                    opts.onEntry({ fileName: 'missing-size.txt', externalFileAttributes: 0 }, {});
+            if (request === 'yauzl') {
+                return {
+                    open(zipPath, opts, cb) {
+                        const zipfile = new EventEmitter();
+                        let entryFired = false;
+                        zipfile.readEntry = () => {
+                            setImmediate(() => {
+                                if (!entryFired) {
+                                    entryFired = true;
+                                    zipfile.emit('entry', entry);
+                                } else {
+                                    zipfile.emit('end');
+                                }
+                            });
+                        };
+                        zipfile.close = () => {};
+                        cb(null, zipfile);
+                    },
                 };
             }
 
             return originalLoad(request, parent, isMain);
         };
+        return () => {
+            Module._load = originalLoad;
+        };
+    }
+
+    it('preserves existing behaviour for entries without uncompressed size when no limits are configured', async function () {
+        // Trailing slash marks this entry as a directory, so we don't need to mock openReadStream.
+        const restore = mockYauzlSingleEntry({
+            fileName: 'missing-size-dir/',
+            externalFileAttributes: 0,
+            versionMadeBy: 0,
+        });
 
         try {
             const result = await extract(zipDestination, unzipDestination);
 
             assert.equal(result.path, unzipDestination);
         } finally {
-            Module._load = originalLoad;
+            restore();
         }
     });
 
     it('throws when a limited entry has no uncompressed size', async function () {
-        const originalLoad = Module._load;
-        Module._load = function (request, parent, isMain) {
-            if (request === 'extract-zip') {
-                return async (zipPath, opts) => {
-                    opts.onEntry({ fileName: 'missing-size.txt', externalFileAttributes: 0 }, {});
-                };
-            }
-
-            return originalLoad(request, parent, isMain);
-        };
+        const restore = mockYauzlSingleEntry({
+            fileName: 'missing-size.txt',
+            externalFileAttributes: 0,
+            versionMadeBy: 0,
+        });
 
         try {
             await assert.rejects(
@@ -261,28 +300,40 @@ describe('Extract zip', function () {
                 },
             );
         } finally {
-            Module._load = originalLoad;
+            restore();
+        }
+    });
+
+    it('rejects an entry whose path escapes the destination directory', async function () {
+        // archiver normalizes ../ out of filenames, so we inject the malicious
+        // entry name via the yauzl mock — this is the same shape an attacker
+        // could ship in a hand-crafted zip.
+        const restore = mockYauzlSingleEntry({
+            fileName: '../escape.txt',
+            externalFileAttributes: 0,
+            versionMadeBy: 0,
+        });
+
+        try {
+            await assert.rejects(
+                () => extract(zipDestination, unzipDestination),
+                (err) => {
+                    assert.match(err.message, /Out of bound path/);
+                    return true;
+                },
+            );
+        } finally {
+            restore();
         }
     });
 
     it('throws when a limited entry has a non-numeric uncompressed size', async function () {
-        const originalLoad = Module._load;
-        Module._load = function (request, parent, isMain) {
-            if (request === 'extract-zip') {
-                return async (zipPath, opts) => {
-                    opts.onEntry(
-                        {
-                            fileName: 'invalid-size.txt',
-                            externalFileAttributes: 0,
-                            uncompressedSize: Number.NaN,
-                        },
-                        {},
-                    );
-                };
-            }
-
-            return originalLoad(request, parent, isMain);
-        };
+        const restore = mockYauzlSingleEntry({
+            fileName: 'invalid-size.txt',
+            externalFileAttributes: 0,
+            versionMadeBy: 0,
+            uncompressedSize: Number.NaN,
+        });
 
         try {
             await assert.rejects(
@@ -303,7 +354,7 @@ describe('Extract zip', function () {
                 },
             );
         } finally {
-            Module._load = originalLoad;
+            restore();
         }
     });
 
@@ -412,6 +463,83 @@ describe('Extract zip', function () {
 
         assert.equal(fs.existsSync(path.join(unzipDestination, 'first-file.txt')), true);
         assert.equal(fs.existsSync(path.join(unzipDestination, 'second-file.txt')), true);
+    });
+
+    it('rejects a zip whose central directory lies about uncompressed size (zip-bomb defence)', async function () {
+        // Build a zip with 1MB of content, then forge the central directory to declare 5 bytes.
+        // Without streaming enforcement, the pre-flight metadata check would pass with a high
+        // limit, and the underlying decompression would still expand the payload to disk.
+        const realContent = Buffer.alloc(1024 * 1024, 'a');
+        await createZipWithEntries(zipDestination, [{ name: 'lying.txt', content: realContent }]);
+        const patched = forgeCentralUncompressedSize(zipDestination, 5);
+        assert.equal(patched >= 1, true, 'expected to patch at least one central directory header');
+
+        // Pre-flight metadata check sees declared=5, limit=100 — allows through.
+        // Streaming counter must catch the actual size (1MB > 100) and reject cleanly.
+        await assert.rejects(
+            () =>
+                extract(zipDestination, unzipDestination, {
+                    limits: {
+                        perEntryUncompressedBytes: 100,
+                    },
+                }),
+            (err) => {
+                assert.equal(err.errorType, 'UnsupportedMediaTypeError');
+                assert.equal(err.code, 'ENTRY_TOO_LARGE');
+                assert.equal(err.errorDetails.entryName, 'lying.txt');
+                assert.equal(err.errorDetails.limitBytes, 100);
+                assert.equal(
+                    err.errorDetails.observedBytes > 100,
+                    true,
+                    `expected observedBytes > 100 (actual streaming bytes), got ${err.errorDetails.observedBytes}`,
+                );
+                return true;
+            },
+        );
+    });
+
+    it('rejects a zip whose cumulative actual bytes exceed the total limit', async function () {
+        // Two entries: each declares 5 bytes but actually contains 3KB.
+        // Cumulative actual = 6KB, well over the 100-byte total limit.
+        const realContent = Buffer.alloc(3 * 1024, 'b');
+        await createZipWithEntries(zipDestination, [
+            { name: 'first.txt', content: realContent },
+            { name: 'second.txt', content: realContent },
+        ]);
+        forgeCentralUncompressedSize(zipDestination, 5);
+
+        await assert.rejects(
+            () =>
+                extract(zipDestination, unzipDestination, {
+                    limits: {
+                        totalUncompressedBytes: 100,
+                    },
+                }),
+            (err) => {
+                assert.equal(err.errorType, 'UnsupportedMediaTypeError');
+                assert.equal(
+                    err.code === 'TOTAL_TOO_LARGE' || err.code === 'ENTRY_TOO_LARGE',
+                    true,
+                    `expected TOTAL_TOO_LARGE or ENTRY_TOO_LARGE, got ${err.code}`,
+                );
+                return true;
+            },
+        );
+    });
+
+    it('extracts a lying zip when no limits are configured (no streaming enforcement)', async function () {
+        // With no limits, the streaming counter has nothing to enforce; the underlying
+        // decompression should write the real bytes and the call should resolve cleanly
+        // (this is the previously-hanging case under extract-zip + yauzl).
+        const realContent = Buffer.alloc(1024, 'a');
+        await createZipWithEntries(zipDestination, [{ name: 'lying.txt', content: realContent }]);
+        forgeCentralUncompressedSize(zipDestination, 5);
+
+        await extract(zipDestination, unzipDestination);
+
+        const extracted = path.join(unzipDestination, 'lying.txt');
+        assert.equal(fs.existsSync(extracted), true);
+        assert.equal(fs.statSync(extracted).size, realContent.length);
     });
 
     it('throws when configured size limits are invalid', async function () {

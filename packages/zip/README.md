@@ -26,6 +26,19 @@ let res = await zip.compress('path/to/a/folder', 'path/to/archive.zip', [options
 let res = await zip.extract('path/to/archive.zip', 'path/to/files', [options])
 ```
 
+`extract` accepts optional uncompressed size limits:
+
+```js
+await zip.extract('path/to/archive.zip', 'path/to/files', {
+    limits: {
+        perEntryUncompressedBytes: 536870912,
+        totalUncompressedBytes: 4294967296,
+    },
+});
+```
+
+Limits default to `Infinity` to preserve existing behaviour when omitted. They are enforced against _actual_ decompressed bytes during streaming, not just the declared central-directory metadata — so a zip whose header lies about its uncompressed size is still caught.
+
 ## Develop
 
 This is a mono repository, managed with [Nx](https://nx.dev).
