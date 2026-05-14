@@ -90,6 +90,18 @@ function permissionBits(targetPath) {
     return fs.statSync(targetPath).mode & 0o777;
 }
 
+// Rewrite every central-directory header's uncompressedSize field to simulate
+// a zip whose declared metadata understates the real payload.
+function forgeCentralUncompressedSize(zipPath, fake) {
+    const buf = fs.readFileSync(zipPath);
+    for (let i = 0; i < buf.length - 4; i++) {
+        if (buf.readUInt32LE(i) === 0x02014b50) {
+            buf.writeUInt32LE(fake, i + 24);
+        }
+    }
+    fs.writeFileSync(zipPath, buf);
+}
+
 describe('Compress and Extract should be opposite functions', function () {
     let symlinkPath, themeFolder, zipDestination, unzipDestination;
 
@@ -246,38 +258,56 @@ describe('Extract zip', function () {
         assert.equal(called, true);
     });
 
-    it('preserves existing behaviour for entries without uncompressed size when no limits are configured', async function () {
+    function mockYauzlSingleEntry(entry) {
         const originalLoad = Module._load;
         Module._load = function (request, parent, isMain) {
-            if (request === 'extract-zip') {
-                return async (zipPath, opts) => {
-                    opts.onEntry({ fileName: 'missing-size.txt', externalFileAttributes: 0 }, {});
+            if (request === 'yauzl') {
+                return {
+                    open(_zipPath, _opts, cb) {
+                        const zipfile = new EventEmitter();
+                        let emitted = false;
+                        zipfile.readEntry = () => {
+                            setImmediate(() => {
+                                if (emitted) return zipfile.emit('end');
+                                emitted = true;
+                                zipfile.emit('entry', entry);
+                            });
+                        };
+                        zipfile.close = () => {};
+                        cb(null, zipfile);
+                    },
                 };
             }
-
             return originalLoad(request, parent, isMain);
         };
+        return () => {
+            Module._load = originalLoad;
+        };
+    }
+
+    it('preserves existing behaviour for entries without uncompressed size when no limits are configured', async function () {
+        // Trailing slash → treated as directory, so we don't need a mock openReadStream.
+        const restore = mockYauzlSingleEntry({
+            fileName: 'missing-size-dir/',
+            externalFileAttributes: 0,
+            versionMadeBy: 0,
+        });
 
         try {
             const result = await extract(zipDestination, unzipDestination);
 
             assert.equal(result.path, unzipDestination);
         } finally {
-            Module._load = originalLoad;
+            restore();
         }
     });
 
     it('throws when a limited entry has no uncompressed size', async function () {
-        const originalLoad = Module._load;
-        Module._load = function (request, parent, isMain) {
-            if (request === 'extract-zip') {
-                return async (zipPath, opts) => {
-                    opts.onEntry({ fileName: 'missing-size.txt', externalFileAttributes: 0 }, {});
-                };
-            }
-
-            return originalLoad(request, parent, isMain);
-        };
+        const restore = mockYauzlSingleEntry({
+            fileName: 'missing-size.txt',
+            externalFileAttributes: 0,
+            versionMadeBy: 0,
+        });
 
         try {
             await assert.rejects(
@@ -303,28 +333,17 @@ describe('Extract zip', function () {
                 },
             );
         } finally {
-            Module._load = originalLoad;
+            restore();
         }
     });
 
     it('throws when a limited entry has a non-numeric uncompressed size', async function () {
-        const originalLoad = Module._load;
-        Module._load = function (request, parent, isMain) {
-            if (request === 'extract-zip') {
-                return async (zipPath, opts) => {
-                    opts.onEntry(
-                        {
-                            fileName: 'invalid-size.txt',
-                            externalFileAttributes: 0,
-                            uncompressedSize: Number.NaN,
-                        },
-                        {},
-                    );
-                };
-            }
-
-            return originalLoad(request, parent, isMain);
-        };
+        const restore = mockYauzlSingleEntry({
+            fileName: 'invalid-size.txt',
+            externalFileAttributes: 0,
+            versionMadeBy: 0,
+            uncompressedSize: Number.NaN,
+        });
 
         try {
             await assert.rejects(
@@ -345,8 +364,31 @@ describe('Extract zip', function () {
                 },
             );
         } finally {
-            Module._load = originalLoad;
+            restore();
         }
+    });
+
+    it('rejects a zip whose central directory understates an entry size (streaming defence)', async function () {
+        // The metadata-only pre-flight check sees a tiny declared size and lets it
+        // through; the streaming counter sees the real 1 MB payload and rejects.
+        await createZipWithEntries(zipDestination, [
+            { name: 'lying.txt', content: Buffer.alloc(1024 * 1024, 'a') },
+        ]);
+        forgeCentralUncompressedSize(zipDestination, 5);
+
+        await assert.rejects(
+            () =>
+                extract(zipDestination, unzipDestination, {
+                    limits: { perEntryUncompressedBytes: 100 },
+                }),
+            (err) => {
+                assert.equal(err.code, 'ENTRY_TOO_LARGE');
+                assert.equal(err.errorDetails.entryName, 'lying.txt');
+                assert.equal(err.errorDetails.limitBytes, 100);
+                assert.equal(err.errorDetails.observedBytes > 100, true);
+                return true;
+            },
+        );
     });
 
     it('throws when an entry exceeds the per-entry uncompressed size limit', async function () {
@@ -620,7 +662,7 @@ describe('ensureOwnerPermissions', function () {
     });
 
     it('leaves entries without POSIX mode bits untouched when defaults already grant owner access', function () {
-        // No POSIX mode bits and no custom defaults: extract-zip applies its own
+        // No POSIX mode bits and no custom defaults: extractZip() applies its own
         // owner-accessible defaults (0o755/0o644), so the entry is left as-is.
         const entry = { fileName: 'no-mode.txt', externalFileAttributes: 0 };
 
@@ -655,7 +697,7 @@ describe('ensureOwnerPermissions', function () {
 
     it('normalizes a zero-mode directory to the owner-accessible default when no defaults are supplied', function () {
         // A Windows-style directory entry with no POSIX mode bits and no caller
-        // defaults: extract-zip would fall back to 0o755, which already grants
+        // defaults: extractZip() would fall back to 0o755, which already grants
         // owner rwx, but we still stamp the directory type bit so it round-trips.
         const dirEntry = { fileName: 'win-dir/', externalFileAttributes: 0, versionMadeBy: 0 };
 
