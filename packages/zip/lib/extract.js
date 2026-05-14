@@ -1,4 +1,10 @@
+const fs = require('fs');
+const path = require('path');
+const { promisify } = require('util');
+const { pipeline, Transform } = require('stream');
 const errors = require('@tryghost/errors');
+
+const pipelineAsync = promisify(pipeline);
 
 const defaultOptions = {};
 
@@ -163,8 +169,6 @@ module.exports = async (zipToExtract, destination, options) => {
     let totalUncompressedBytes = 0;
     let entriesProcessed = 0;
 
-    const extract = require('extract-zip');
-
     opts.dir = destination;
 
     const originalOnEntry = opts.onEntry;
@@ -190,7 +194,130 @@ module.exports = async (zipToExtract, destination, options) => {
         }
     };
 
-    await extract(zipToExtract, opts);
+    await extractZip(zipToExtract, opts, limits);
 
     return { path: destination };
 };
+
+// Minimal yauzl-based replacement for extract-zip. Two reasons we don't use
+// extract-zip directly:
+//   1. extract-zip is unmaintained (no release since 2020).
+//   2. yauzl's built-in `AssertByteCountStream` is supposed to error when an
+//      entry's actual decompressed bytes exceed its declared `uncompressedSize`,
+//      but yauzl overrides that stream's `destroy` so the error never surfaces
+//      to `extract-zip`'s pipeline — which then hangs forever. We open yauzl
+//      with `validateEntrySizes: false` and run our own size guard below.
+async function extractZip(zipPath, opts, limits) {
+    const yauzl = require('yauzl');
+    await fs.promises.mkdir(opts.dir, { recursive: true });
+    const dir = await fs.promises.realpath(opts.dir);
+
+    const zipfile = await new Promise((resolve, reject) => {
+        yauzl.open(zipPath, { lazyEntries: true, validateEntrySizes: false }, (err, z) => {
+            if (err) return reject(err);
+            resolve(z);
+        });
+    });
+
+    try {
+        await new Promise((resolve, reject) => {
+            let settled = false;
+            const fail = (err) => {
+                if (settled) return;
+                settled = true;
+                reject(err);
+            };
+
+            zipfile.on('error', fail);
+            zipfile.on('end', () => {
+                if (settled) return;
+                settled = true;
+                resolve();
+            });
+            zipfile.on('entry', (entry) => {
+                if (settled) return;
+                extractEntry(entry, zipfile, opts, limits, dir)
+                    .then(() => settled || zipfile.readEntry())
+                    .catch(fail);
+            });
+
+            zipfile.readEntry();
+        });
+    } finally {
+        try {
+            zipfile.close();
+        } catch {
+            // best-effort
+        }
+    }
+}
+
+async function extractEntry(entry, zipfile, opts, limits, dir) {
+    // Skip macOS resource-fork entries — extract-zip did the same.
+    if (entry.fileName.startsWith('__MACOSX/')) return;
+
+    // Existing pre-flight checks (size, symlinks, filename length, onEntry hook).
+    opts.onEntry(entry, zipfile);
+
+    // Stat the entry: mode bits, directory marker, filesystem-mode resolution.
+    // Mirrors extract-zip's logic verbatim so behaviour is preserved.
+    const rawMode = (entry.externalFileAttributes >> 16) & 0xffff;
+    const IFMT = 61440;
+    const IFDIR = 16384;
+    const isDir =
+        (rawMode & IFMT) === IFDIR ||
+        entry.fileName.endsWith('/') ||
+        (entry.versionMadeBy >> 8 === 0 && entry.externalFileAttributes === 16);
+    const defaultMode = isDir
+        ? (opts.defaultDirMode && parseInt(opts.defaultDirMode, 10)) || 0o755
+        : (opts.defaultFileMode && parseInt(opts.defaultFileMode, 10)) || 0o644;
+    const mode = (rawMode === 0 ? defaultMode : rawMode) & 0o777;
+
+    // Path-traversal guard — port of extract-zip's realpath/relative check.
+    const entryPath = path.join(dir, entry.fileName);
+    const containerDir = isDir ? entryPath : path.dirname(entryPath);
+    await fs.promises.mkdir(containerDir, { recursive: true });
+    const canonicalContainerDir = await fs.promises.realpath(containerDir);
+    if (path.relative(dir, canonicalContainerDir).split(path.sep).includes('..')) {
+        throw new Error(
+            `Out of bound path "${canonicalContainerDir}" found while processing file ${entry.fileName}`,
+        );
+    }
+
+    if (isDir) {
+        await fs.promises.chmod(entryPath, mode).catch(() => {});
+        return;
+    }
+
+    const readStream = await new Promise((resolve, reject) => {
+        zipfile.openReadStream(entry, (err, s) => (err ? reject(err) : resolve(s)));
+    });
+
+    // Streaming size enforcement on ACTUAL decompressed bytes. The pre-flight
+    // check above bounds declared metadata; this catches archives whose central
+    // directory lies about its uncompressed size (zip-bomb shape).
+    let entryActualBytes = 0;
+    const counter = new Transform({
+        transform(chunk, _encoding, cb) {
+            entryActualBytes += chunk.length;
+            if (entryActualBytes > limits.perEntryUncompressedBytes) {
+                return cb(
+                    new errors.UnsupportedMediaTypeError({
+                        message: 'Zip entry exceeds maximum uncompressed size.',
+                        context:
+                            'The zip contains an entry that exceeds the maximum uncompressed size.',
+                        code: 'ENTRY_TOO_LARGE',
+                        errorDetails: {
+                            entryName: entry.fileName,
+                            observedBytes: entryActualBytes,
+                            limitBytes: limits.perEntryUncompressedBytes,
+                        },
+                    }),
+                );
+            }
+            cb(null, chunk);
+        },
+    });
+
+    await pipelineAsync(readStream, counter, fs.createWriteStream(entryPath, { mode }));
+}
