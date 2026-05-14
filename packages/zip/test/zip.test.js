@@ -62,6 +62,18 @@ function createZipWithEntries(zipPath, entries) {
     });
 }
 
+// Rewrite every central-directory header's uncompressedSize field to simulate
+// a zip whose declared metadata understates its real payload.
+function forgeCentralUncompressedSize(zipPath, fake) {
+    const buf = fs.readFileSync(zipPath);
+    for (let i = 0; i < buf.length - 4; i++) {
+        if (buf.readUInt32LE(i) === 0x02014b50) {
+            buf.writeUInt32LE(fake, i + 24);
+        }
+    }
+    fs.writeFileSync(zipPath, buf);
+}
+
 describe('Compress and Extract should be opposite functions', function () {
     let symlinkPath, themeFolder, zipDestination, unzipDestination;
 
@@ -328,6 +340,29 @@ describe('Extract zip', function () {
         } finally {
             Module._load = originalLoad;
         }
+    });
+
+    it('rejects a zip whose central directory understates an entry size (streaming defence)', async function () {
+        // The metadata pre-flight check sees a tiny declared size and lets it
+        // through; the streaming counter sees the real 1 MB payload and rejects.
+        await createZipWithEntries(zipDestination, [
+            { name: 'lying.txt', content: Buffer.alloc(1024 * 1024, 'a') },
+        ]);
+        forgeCentralUncompressedSize(zipDestination, 5);
+
+        await assert.rejects(
+            () =>
+                extract(zipDestination, unzipDestination, {
+                    limits: { perEntryUncompressedBytes: 100 },
+                }),
+            (err) => {
+                assert.equal(err.code, 'ENTRY_TOO_LARGE');
+                assert.equal(err.errorDetails.entryName, 'lying.txt');
+                assert.equal(err.errorDetails.limitBytes, 100);
+                assert.equal(err.errorDetails.observedBytes > 100, true);
+                return true;
+            },
+        );
     });
 
     it('throws when an entry exceeds the per-entry uncompressed size limit', async function () {
