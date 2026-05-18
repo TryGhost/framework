@@ -23,12 +23,11 @@ class GhostLogger {
      * mode:            Is used to print short or long log.
      * level:           The level defines the default level of all transports except of stderr.
      * logBody:         Disable or enable if the body of a request should be logged to the target stream.
-     * transports:      An array of comma separated transports (e.g. stdout, stderr, geld, loggly, file)
+     * transports:      An array of comma separated transports (e.g. stdout, stderr, gelf, file)
      * rotation:        Enable or disable file rotation.
      * path:            Path where to store log files.
      * filename:        Optional filename template for log files. Supports {env} and {domain} placeholders.
      *                  If not provided, defaults to {domain}_{env} format.
-     * loggly:          Loggly transport configuration.
      * elasticsearch:   Elasticsearch transport configuration
      * gelf:            Gelf transport configuration.
      * http:            HTTP transport configuration
@@ -48,7 +47,6 @@ class GhostLogger {
         this.mode = process.env.MODE || options.mode || 'short';
         this.path = options.path || process.cwd();
         this.filename = options.filename || '{domain}_{env}';
-        this.loggly = options.loggly || {};
         this.elasticsearch = options.elasticsearch || {};
         this.gelf = options.gelf || {};
         this.http = options.http || {};
@@ -172,35 +170,6 @@ class GhostLogger {
                         type: 'raw',
                         stream: bunyanStream,
                         level: this.level,
-                    },
-                ],
-                serializers: this.serializers,
-            }),
-        };
-    }
-
-    /**
-     * @description Setup loggly.
-     */
-    setLogglyStream() {
-        const Bunyan2Loggly = require('bunyan-loggly');
-
-        const logglyStream = new Bunyan2Loggly({
-            token: this.loggly.token,
-            subdomain: this.loggly.subdomain,
-            tags: this.loggly.tags,
-        });
-
-        this.streams.loggly = {
-            name: 'loggly',
-            match: this.loggly.match,
-            log: bunyan.createLogger({
-                name: this.name,
-                streams: [
-                    {
-                        type: 'raw',
-                        stream: logglyStream,
-                        level: 'error',
                     },
                 ],
                 serializers: this.serializers,
@@ -599,37 +568,7 @@ class GhostLogger {
                 return;
             }
 
-            /**
-             * @NOTE
-             * Only `loggly` offers the `match` option.
-             * And currently `loggly` is by default configured to only send errors (not configureable).
-             * e.g. level info would get ignored.
-             *
-             * @NOTE
-             * The `match` feature is not completed. We hardcode checking if the level/type is `error` for now.
-             * Otherwise each `level:info` would has to run through the matching logic.
-             *
-             * @NOTE
-             * Matching a string in the whole req/res object massively slows down the process, because it's a sync
-             * operation.
-             *
-             * If we want to extend the feature, we can only offer matching certain keys e.g. status code, headers.
-             * If we want to extend the feature, we have to do proper performance testing.
-             *
-             * `jsonStringifySafe` can match a string in an object, which has circular dependencies.
-             * https://github.com/moll/json-stringify-safe
-             */
-            if (logger.match && type === 'error') {
-                if (
-                    new RegExp(logger.match).test(
-                        jsonStringifySafe(modifiedArguments[0].err || null).replace(/"/g, ''),
-                    )
-                ) {
-                    logger.log[type](...modifiedArguments);
-                }
-            } else {
-                logger.log[type](...modifiedArguments);
-            }
+            logger.log[type](...modifiedArguments);
         });
     }
 

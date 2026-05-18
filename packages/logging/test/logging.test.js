@@ -6,7 +6,6 @@ const includes = require('lodash/includes');
 const errors = require('@tryghost/errors');
 const sinon = require('sinon');
 const assert = require('assert/strict');
-const Bunyan2Loggly = require('bunyan-loggly');
 const GelfStream = require('gelf-stream').GelfStream;
 const ElasticSearch = require('@tryghost/elasticsearch').BunyanStream;
 const HttpStream = require('@tryghost/http-stream');
@@ -249,201 +248,6 @@ describe('Logging', function () {
 
         ghostLogger.info('testing');
         assert.equal(GelfStream.prototype._write.called, false);
-    });
-
-    it('loggly does only stream certain errors', async function () {
-        await new Promise((resolve) => {
-            sandbox.stub(Bunyan2Loggly.prototype, 'write').callsFake(function (data) {
-                assert.notEqual(data.err, null);
-                resolve();
-            });
-
-            var ghostLogger = new GhostLogger({
-                transports: ['loggly'],
-                loggly: {
-                    token: 'invalid',
-                    subdomain: 'invalid',
-                    match: 'level:critical',
-                },
-            });
-
-            ghostLogger.error(new errors.InternalServerError());
-            assert.equal(Bunyan2Loggly.prototype.write.called, true);
-        });
-    });
-
-    it('loggly does not stream non-critical errors when matching critical', function () {
-        sandbox.spy(Bunyan2Loggly.prototype, 'write');
-
-        var ghostLogger = new GhostLogger({
-            transports: ['loggly'],
-            loggly: {
-                token: 'invalid',
-                subdomain: 'invalid',
-                match: 'level:critical',
-            },
-        });
-
-        ghostLogger.error(new errors.NotFoundError());
-        assert.equal(Bunyan2Loggly.prototype.write.called, false);
-    });
-
-    it('loggly does not stream errors that do not match regex', function () {
-        sandbox.spy(Bunyan2Loggly.prototype, 'write');
-
-        var ghostLogger = new GhostLogger({
-            transports: ['loggly'],
-            loggly: {
-                token: 'invalid',
-                subdomain: 'invalid',
-                match: '^((?!statusCode:4\\d{2}).)*$',
-            },
-        });
-
-        ghostLogger.error(new errors.NotFoundError());
-        assert.equal(Bunyan2Loggly.prototype.write.called, false);
-    });
-
-    it('loggly does not stream errors when not nested correctly', function () {
-        sandbox.spy(Bunyan2Loggly.prototype, 'write');
-
-        var ghostLogger = new GhostLogger({
-            transports: ['loggly'],
-            loggly: {
-                token: 'invalid',
-                subdomain: 'invalid',
-                match: '^((?!statusCode:4\\d{2}).)*$',
-            },
-        });
-
-        ghostLogger.error(new errors.NoPermissionError());
-        assert.equal(Bunyan2Loggly.prototype.write.called, false);
-    });
-
-    it('loggly does stream errors that match regex', function () {
-        sandbox.stub(Bunyan2Loggly.prototype, 'write').callsFake(function () {});
-
-        var ghostLogger = new GhostLogger({
-            transports: ['loggly'],
-            loggly: {
-                token: 'invalid',
-                subdomain: 'invalid',
-                match: '^((?!statusCode:4\\d{2}).)*$',
-            },
-        });
-
-        ghostLogger.error(new errors.InternalServerError());
-        assert.equal(Bunyan2Loggly.prototype.write.called, true);
-    });
-
-    it('loggly does stream errors that match normal level', async function () {
-        await new Promise((resolve) => {
-            sandbox.stub(Bunyan2Loggly.prototype, 'write').callsFake(function (data) {
-                assert.notEqual(data.err, null);
-                resolve();
-            });
-
-            var ghostLogger = new GhostLogger({
-                transports: ['loggly'],
-                loggly: {
-                    token: 'invalid',
-                    subdomain: 'invalid',
-                    match: 'level:normal',
-                },
-            });
-
-            ghostLogger.error(new errors.NotFoundError());
-            assert.equal(Bunyan2Loggly.prototype.write.called, true);
-        });
-    });
-
-    it('loggly match can evaluate with null err payload', function () {
-        sandbox.stub(Bunyan2Loggly.prototype, 'write').callsFake(function () {});
-
-        const ghostLogger = new GhostLogger({
-            transports: ['loggly'],
-            loggly: {
-                token: 'invalid',
-                subdomain: 'invalid',
-                match: '^null$',
-            },
-        });
-
-        ghostLogger.error('plain error message');
-        assert.equal(Bunyan2Loggly.prototype.write.called, true);
-    });
-
-    it('loggly does stream errors that match an one of multiple match statements', async function () {
-        await new Promise((resolve) => {
-            sandbox.stub(Bunyan2Loggly.prototype, 'write').callsFake(function (data) {
-                assert.notEqual(data.err, null);
-                resolve();
-            });
-
-            var ghostLogger = new GhostLogger({
-                transports: ['loggly'],
-                loggly: {
-                    token: 'invalid',
-                    subdomain: 'invalid',
-                    match: 'level:critical|statusCode:404',
-                },
-            });
-
-            ghostLogger.error(new errors.NotFoundError());
-            assert.equal(Bunyan2Loggly.prototype.write.called, true);
-        });
-    });
-
-    it('loggly does stream errors that match status code: full example', async function () {
-        await new Promise((resolve) => {
-            sandbox.stub(Bunyan2Loggly.prototype, 'write').callsFake(function (data) {
-                assert.notEqual(data.err, null);
-                assert.notEqual(data.req, null);
-                assert.notEqual(data.res, null);
-                resolve();
-            });
-
-            var ghostLogger = new GhostLogger({
-                transports: ['loggly'],
-                loggly: {
-                    token: 'invalid',
-                    subdomain: 'invalid',
-                    match: 'statusCode:404',
-                },
-            });
-
-            ghostLogger.error({
-                err: new errors.NotFoundError(),
-                req: {
-                    body: {
-                        password: '12345678',
-                        data: { attributes: { pin: '1234', test: 'ja' } },
-                    },
-                },
-                res: { getHeaders: () => ({}) },
-            });
-            assert.equal(Bunyan2Loggly.prototype.write.called, true);
-        });
-    });
-
-    it('loggly does only stream certain errors: match is not defined -> log everything', async function () {
-        await new Promise((resolve) => {
-            sandbox.stub(Bunyan2Loggly.prototype, 'write').callsFake(function (data) {
-                assert.notEqual(data.err, null);
-                resolve();
-            });
-
-            var ghostLogger = new GhostLogger({
-                transports: ['loggly'],
-                loggly: {
-                    token: 'invalid',
-                    subdomain: 'invalid',
-                },
-            });
-
-            ghostLogger.error(new errors.NotFoundError());
-            assert.equal(Bunyan2Loggly.prototype.write.called, true);
-        });
     });
 
     it('elasticsearch should make a stream', function () {
@@ -751,7 +555,7 @@ describe('Logging', function () {
             await new Promise((resolve) => {
                 const err = new errors.NotFoundError();
 
-                sandbox.stub(Bunyan2Loggly.prototype, 'write').callsFake(function (data) {
+                sandbox.stub(HttpStream.prototype, 'write').callsFake(function (data) {
                     assert.notEqual(data.err, null);
                     assert.equal(data.err.id, err.id);
                     assert.equal(data.err.domain, 'localhost');
@@ -769,23 +573,22 @@ describe('Logging', function () {
                 });
 
                 const ghostLogger = new GhostLogger({
-                    transports: ['loggly'],
-                    loggly: {
-                        token: 'invalid',
-                        subdomain: 'invalid',
+                    transports: ['http'],
+                    http: {
+                        url: 'http://localhost',
                     },
                 });
                 ghostLogger.error({
                     err,
                 });
 
-                assert.equal(Bunyan2Loggly.prototype.write.called, true);
+                assert.equal(HttpStream.prototype.write.called, true);
             });
         });
 
         it('stringifies meta properties', async function () {
             await new Promise((resolve) => {
-                sandbox.stub(Bunyan2Loggly.prototype, 'write').callsFake(function (data) {
+                sandbox.stub(HttpStream.prototype, 'write').callsFake(function (data) {
                     assert.notEqual(data.err, null);
                     assert.equal(data.err.context, '{"a":"b"}');
                     assert.equal(data.err.errorDetails, '{"c":"d"}');
@@ -794,10 +597,9 @@ describe('Logging', function () {
                 });
 
                 const ghostLogger = new GhostLogger({
-                    transports: ['loggly'],
-                    loggly: {
-                        token: 'invalid',
-                        subdomain: 'invalid',
+                    transports: ['http'],
+                    http: {
+                        url: 'http://localhost',
                     },
                 });
                 ghostLogger.error({
@@ -814,7 +616,7 @@ describe('Logging', function () {
                     }),
                 });
 
-                assert.equal(Bunyan2Loggly.prototype.write.called, true);
+                assert.equal(HttpStream.prototype.write.called, true);
             });
         });
 
