@@ -749,8 +749,8 @@ importers:
         version: 2.0.1
     devDependencies:
       folder-hash:
-        specifier: 4.1.2
-        version: 4.1.2
+        specifier: 4.1.3
+        version: 4.1.3
       sinon:
         specifier: 'catalog:'
         version: 22.0.0
@@ -3542,8 +3542,8 @@ packages:
   flatted@3.4.2:
     resolution: {integrity: sha512-PjDse7RzhcPkIJwy5t7KPWQSZ9cAbzQXcafsetQoD7sOJRQlGikNbx7yZp2OotDnJyrDcbyRq3Ttb18iYOqkxA==}
 
-  folder-hash@4.1.2:
-    resolution: {integrity: sha512-rjdiHw3ShVonhMZZXvD/I28boUkbJFT/RBsg5MbQQd8e61PhevIwFwmL218/AscBEsW/blH4BC4A+kFeIqHVfw==}
+  folder-hash@4.1.3:
+    resolution: {integrity: sha512-94fj+fXj1XHT8zGumUy/VlyFARc/yrslKJ2+vjrP/U6ftTdL7u68+gQhvSBjz9wrwTuty6BpZ7JsbEK5OU9RNw==}
     engines: {node: '>=10.10.0'}
     hasBin: true
 
@@ -8208,7 +8208,7 @@ snapshots:
 
   flatted@3.4.2: {}
 
-  folder-hash@4.1.2:
+  folder-hash@4.1.3:
     dependencies:
       debug: 4.4.0
       minimatch: 7.4.9
