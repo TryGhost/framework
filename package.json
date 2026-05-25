@@ -25,11 +25,11 @@
     "ship:first-release": "pnpm ship patch --first-release"
   },
   "devDependencies": {
-    "@nx/js": "22.7.2",
+    "@nx/js": "22.7.3",
     "@vitest/coverage-v8": "4.1.7",
     "husky": "9.1.7",
     "lint-staged": "17.0.5",
-    "nx": "22.7.2",
+    "nx": "22.7.3",
     "oxfmt": "0.51.0",
     "oxlint": "1.66.0",
     "sinon": "catalog:",
