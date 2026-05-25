@@ -54,6 +54,22 @@ describe('Job Manager', function () {
         assert.notEqual(jobManager.inlineJobHandler, undefined);
     });
 
+    it('passes default worker options to Bree', function () {
+        const worker = {
+            execArgv: ['--import', 'file:///tmp/loader.mjs'],
+            resourceLimits: {
+                maxOldGenerationSizeMb: 256,
+            },
+        };
+
+        jobManager = new JobManager({
+            config: stubConfig,
+            worker,
+        });
+
+        assert.deepEqual(jobManager.bree.config.worker, worker);
+    });
+
     describe('Add a job', function () {
         describe('Inline jobs', function () {
             it('adds a job to a queue', async function () {

@@ -44,8 +44,15 @@ class JobManager {
      * @param {Function} [options.workerMessageHandler] - custom message handler coming from workers
      * @param {Object} [options.JobModel] - a model which can persist job data in the storage
      * @param {Object} [options.domainEvents] - domain events emitter
+     * @param {Object} [options.worker] - default Bree worker options
      */
-    constructor({ errorHandler, workerMessageHandler, JobModel, domainEvents }) {
+    constructor({
+        errorHandler,
+        workerMessageHandler,
+        JobModel,
+        domainEvents,
+        worker: workerOptions,
+    }) {
         this.inlineQueue = fastq(this, worker, 3);
         this._jobMessageHandler = this._jobMessageHandler.bind(this);
         this._jobErrorHandler = this._jobErrorHandler.bind(this);
@@ -72,6 +79,7 @@ class JobManager {
             logger: logging,
             errorHandler: combinedErrorHandler,
             workerMessageHandler: combinedMessageHandler,
+            worker: workerOptions,
         });
 
         this.bree.on('worker created', (name) => {
