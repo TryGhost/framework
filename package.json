@@ -6,7 +6,7 @@
   },
   "author": "Ghost Foundation",
   "license": "MIT",
-  "packageManager": "pnpm@11.1.2",
+  "packageManager": "pnpm@11.2.2",
   "scripts": {
     "dev": "echo \"Implement me!\"",
     "main": "git checkout main && git pull && pnpm install",
@@ -26,14 +26,14 @@
   },
   "devDependencies": {
     "@nx/js": "22.7.2",
-    "@vitest/coverage-v8": "4.1.6",
+    "@vitest/coverage-v8": "4.1.7",
     "husky": "9.1.7",
-    "lint-staged": "17.0.4",
+    "lint-staged": "17.0.5",
     "nx": "22.7.2",
-    "oxfmt": "0.49.0",
-    "oxlint": "1.64.0",
+    "oxfmt": "0.51.0",
+    "oxlint": "1.66.0",
     "sinon": "catalog:",
-    "vitest": "4.1.6"
+    "vitest": "4.1.7"
   },
   "lint-staged": {
     "packages/**/*.{js,ts,json,md}": "oxfmt -c .oxfmtrc.json"
