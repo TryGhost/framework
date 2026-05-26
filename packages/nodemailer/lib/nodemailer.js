@@ -52,7 +52,7 @@ module.exports = function (transport, options = {}) {
             transportOptions.sendmail = true;
             break;
         case 'ses':
-            const { SESv2Client, SendRawEmailCommand } = require('@aws-sdk/client-sesv2');
+            const { SESv2Client, SendEmailCommand } = require('@aws-sdk/client-sesv2');
 
             const pattern = /(.*)email(.*)\.(.*).amazonaws.com/i;
             const result = pattern.exec(options.ServiceUrl);
@@ -69,7 +69,7 @@ module.exports = function (transport, options = {}) {
             });
 
             transportOptions = {
-                SES: { sesClient, SendRawEmailCommand },
+                SES: { sesClient, SendEmailCommand },
             };
 
             break;
