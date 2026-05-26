@@ -71,8 +71,30 @@ jobs:
           npm config get registry
           npm config get @tryghost:registry
 
+      - name: Determine packages to publish
+        id: pubs
+        run: |
+          to_publish=()
+          for pkg in packages/*/package.json; do
+            name=$(jq -r .name "$pkg")
+            version=$(jq -r .version "$pkg")
+            if [ -n "$(npm view "$name@$version" version 2>/dev/null)" ]; then
+              echo "skip $name@$version (already published)"
+            else
+              echo "queue $name@$version"
+              to_publish+=("$name")
+            fi
+          done
+          if [ ${#to_publish[@]} -eq 0 ]; then
+            echo "nothing to publish"
+            echo "projects=" >> "$GITHUB_OUTPUT"
+          else
+            (IFS=,; echo "projects=${to_publish[*]}") >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish to npm
-        run: npx nx release publish ${{ (github.event.inputs['dry-run'] == 'true' && '--dry-run') || '' }}
+        if: steps.pubs.outputs.projects != ''
+        run: npx nx release publish --projects=${{ steps.pubs.outputs.projects }} ${{ (github.event.inputs['dry-run'] == 'true' && '--dry-run') || '' }}
 
       - uses: tryghost/actions/actions/slack-build@128d496a57fb11e44e97d690f0d5381c58e52489 # main
         if: failure()
