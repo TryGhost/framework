@@ -520,8 +520,8 @@ importers:
         specifier: workspace:*
         version: link:../errors
       nodemailer:
-        specifier: 8.0.8
-        version: 8.0.8
+        specifier: 8.0.10
+        version: 8.0.10
       nodemailer-mailgun-transport:
         specifier: 2.1.5
         version: 2.1.5(lodash@4.18.1)
@@ -4342,8 +4342,8 @@ packages:
   nodemailer-stub-transport@1.1.0:
     resolution: {integrity: sha512-4fwl2f+647IIyuNuf6wuEMqK4oEU9FMJSYme8kPckVSr1rXIXcmI6BNcIWO+1cAK8XeexYKxYoFztam0jAwjkA==}
 
-  nodemailer@8.0.8:
-    resolution: {integrity: sha512-p+XsnzXGdtIHXUu2ugxdfG+eX2nehsGhMjW9h0CWj1BhE30hrFz0kh0yIM0/VjUgVsRrDj+80ZO+I1nSkGE4tA==}
+  nodemailer@8.0.10:
+    resolution: {integrity: sha512-BLFuSth7QtHOkBzyqTehWWyub0NTRDuK2Q2SQfnGLsrJnzyU+Yeh4WpV1eZGuARFj1xQJHIdnTuJZLP+b9R1GQ==}
     engines: {node: '>=6.0.0'}
 
   nopt@9.0.0:
@@ -9051,7 +9051,7 @@ snapshots:
 
   nodemailer-stub-transport@1.1.0: {}
 
-  nodemailer@8.0.8: {}
+  nodemailer@8.0.10: {}
 
   nopt@9.0.0:
     dependencies:
