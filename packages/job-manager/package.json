@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@sinonjs/fake-timers": "15.4.0",
-    "date-fns": "4.3.0",
+    "date-fns": "4.4.0",
     "rewire": "9.0.1",
     "sinon": "catalog:"
   }
