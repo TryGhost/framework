@@ -31,7 +31,7 @@
     "lint-staged": "17.0.7",
     "nx": "22.7.5",
     "oxfmt": "0.53.0",
-    "oxlint": "1.67.0",
+    "oxlint": "1.68.0",
     "sinon": "catalog:",
     "vitest": "4.1.8"
   },
