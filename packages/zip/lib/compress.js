@@ -1,4 +1,5 @@
 const fs = require('fs');
+const createArchive = require('./create-archive');
 
 const defaultOptions = {
     type: 'zip',
@@ -24,9 +25,8 @@ const defaultOptions = {
 module.exports = (folderToZip, destination, options = {}) => {
     const opts = Object.assign({}, defaultOptions, options);
 
-    const archiver = require('archiver');
     const output = fs.createWriteStream(destination);
-    const archive = archiver.create(opts.type);
+    const archive = createArchive(opts.type);
 
     return new Promise((resolve, reject) => {
         // If folder to zip is a symlink, we want to get the target
