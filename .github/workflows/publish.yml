@@ -38,7 +38,7 @@ jobs:
       NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org'
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
       - uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6
 
@@ -96,7 +96,7 @@ jobs:
         if: steps.pubs.outputs.projects != ''
         run: npx nx release publish --projects=${{ steps.pubs.outputs.projects }} ${{ (github.event.inputs['dry-run'] == 'true' && '--dry-run') || '' }}
 
-      - uses: tryghost/actions/actions/slack-build@c352790b00033d10a63fda1e0632dead2f410c78 # main
+      - uses: tryghost/actions/actions/slack-build@f5d907bc4e3e2193905b7e6e5af8bf3bf706b2ff # main
         if: failure()
         with:
           status: ${{ job.status }}
