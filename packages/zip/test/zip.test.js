@@ -2,9 +2,9 @@ const assert = require('assert/strict');
 const path = require('path');
 const fs = require('fs');
 const { hashElement } = require('folder-hash');
-const archiver = require('archiver');
 const EventEmitter = require('events');
 const Module = require('module');
+const createArchive = require('../lib/create-archive');
 
 // Mimic how we expect this to be required
 const { compress, extract } = require('../');
@@ -12,7 +12,7 @@ const { compress, extract } = require('../');
 function createZip(zipPath, addEntries) {
     return new Promise((resolve, reject) => {
         const output = fs.createWriteStream(zipPath);
-        const archive = archiver('zip');
+        const archive = createArchive('zip');
         let settled = false;
 
         const cleanup = () => {
@@ -107,14 +107,14 @@ describe('Compress and Extract should be opposite functions', function () {
         Module._load = function (request, parent, isMain) {
             if (request === 'archiver') {
                 return {
-                    create() {
-                        const fake = new EventEmitter();
-                        fake.glob = function () {};
-                        fake.pipe = function () {};
-                        fake.finalize = function () {
-                            setTimeout(() => fake.emit('error', new Error('archive failed')), 0);
-                        };
-                        return fake;
+                    ZipArchive: class extends EventEmitter {
+                        glob() {}
+
+                        pipe() {}
+
+                        finalize() {
+                            setTimeout(() => this.emit('error', new Error('archive failed')), 0);
+                        }
                     },
                 };
             }
