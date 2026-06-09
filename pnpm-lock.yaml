@@ -664,8 +664,8 @@ importers:
   packages/security:
     dependencies:
       '@tryghost/string':
-        specifier: 0.3.4
-        version: 0.3.4
+        specifier: 0.3.5
+        version: 0.3.5
       bcryptjs:
         specifier: 3.0.3
         version: 3.0.3
@@ -2319,8 +2319,8 @@ packages:
   '@tryghost/nql@0.12.11':
     resolution: {integrity: sha512-8Cb10OpQWT+v0Xvfrov9IkBwzyPlARsjF1EIC8f3ET/JZD3G+ARoQ3GEBQ7XeW6YcUd7MIh3zqJTv5ST+aDjZA==}
 
-  '@tryghost/string@0.3.4':
-    resolution: {integrity: sha512-eI8B3lEgfv8RQFbQnP7H4KnlhrDkqrh+lAcNLXHyUAoqb5MwqlrHAIAQZxpl5CLW9agBJ8w1UO7ZrcseHEL8Ww==}
+  '@tryghost/string@0.3.5':
+    resolution: {integrity: sha512-Ov2UYOuU5QutDo/UECtkhHR3jdT4R/aNxzKFk0iaH0yiwxLnlqEB4QBBVnYYIN8zECNAazRzkygtdFSlSkuaoA==}
 
   '@tybys/wasm-util@0.10.2':
     resolution: {integrity: sha512-RoBvJ2X0wuKlWFIjrwffGw1IqZHKQqzIchKaadZZfnNpsAYp2mM0h36JtPCjNDAHGgYez/15uMBpfGwchhiMgg==}
@@ -7031,7 +7031,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@tryghost/string@0.3.4':
+  '@tryghost/string@0.3.5':
     dependencies:
       unidecode: 1.1.0
 
