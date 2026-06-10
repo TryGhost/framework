@@ -1,0 +1,6 @@
+index.js
+index.d.ts
+index.js.map
+lib/*.js
+lib/*.d.ts
+lib/*.js.map
