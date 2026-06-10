@@ -689,9 +689,12 @@ importers:
 
   packages/tpl:
     devDependencies:
-      sinon:
+      '@types/node':
+        specifier: 24.13.1
+        version: 24.13.1
+      typescript:
         specifier: 'catalog:'
-        version: 22.0.0
+        version: 6.0.3
 
   packages/validator:
     dependencies:
