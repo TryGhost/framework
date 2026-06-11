@@ -28,7 +28,7 @@
     "@tryghost/http-cache-utils": "workspace:*",
     "@tryghost/tpl": "workspace:*",
     "lodash": "4.18.1",
-    "semver": "7.8.2"
+    "semver": "7.8.3"
   },
   "devDependencies": {
     "sinon": "catalog:"
