@@ -25,7 +25,7 @@
   "dependencies": {
     "@tryghost/debug": "workspace:*",
     "@tryghost/errors": "workspace:*",
-    "@tryghost/nql": "0.12.11",
+    "@tryghost/nql": "0.13.0",
     "@tryghost/tpl": "workspace:*"
   },
   "devDependencies": {
