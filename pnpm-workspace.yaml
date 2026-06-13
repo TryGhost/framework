@@ -13,6 +13,8 @@ minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   - '@tryghost/mongo-knex'
   - '@tryghost/nql'
+  # Renovate security update: esbuild@0.28.1
+  - esbuild@0.28.1
 catalog:
   sinon: 22.0.0
   typescript: 6.0.3
