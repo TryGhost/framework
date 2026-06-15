@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/errors",
-  "version": "3.2.3",
+  "version": "3.2.4",
   "license": "MIT",
   "author": "Ghost Foundation",
   "repository": {
@@ -37,8 +37,8 @@
   "dependencies": {},
   "devDependencies": {
     "@types/lodash": "4.17.24",
-    "@types/node": "24.13.1",
-    "esbuild": "0.28.0",
+    "@types/node": "24.13.2",
+    "esbuild": "0.28.1",
     "lodash": "4.18.1",
     "typescript": "catalog:"
   }

@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/nodemailer",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "license": "MIT",
   "author": "Ghost Foundation",
   "repository": {
@@ -23,9 +23,9 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@aws-sdk/client-sesv2": "3.1063.0",
+    "@aws-sdk/client-sesv2": "3.1067.0",
     "@tryghost/errors": "workspace:*",
-    "nodemailer": "8.0.10",
+    "nodemailer": "8.0.11",
     "nodemailer-mailgun-transport": "2.1.5",
     "nodemailer-stub-transport": "1.1.0"
   },

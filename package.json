@@ -6,7 +6,7 @@
   },
   "author": "Ghost Foundation",
   "license": "MIT",
-  "packageManager": "pnpm@11.5.2",
+  "packageManager": "pnpm@11.6.0",
   "scripts": {
     "dev": "echo \"Implement me!\"",
     "main": "git checkout main && git pull && pnpm install",
@@ -30,8 +30,8 @@
     "husky": "9.1.7",
     "lint-staged": "17.0.7",
     "nx": "22.7.5",
-    "oxfmt": "0.53.0",
-    "oxlint": "1.68.0",
+    "oxfmt": "0.54.0",
+    "oxlint": "1.69.0",
     "sinon": "catalog:",
     "vitest": "4.1.8"
   },
