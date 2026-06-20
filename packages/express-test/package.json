@@ -31,7 +31,7 @@
   "devDependencies": {
     "express": "5.2.1",
     "express-session": "1.19.0",
-    "multer": "2.1.1",
+    "multer": "2.2.0",
     "sinon": "catalog:"
   },
   "peerDependencies": {
