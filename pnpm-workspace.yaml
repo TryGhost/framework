@@ -17,6 +17,8 @@ minimumReleaseAgeExclude:
   - esbuild@0.28.1
   # Renovate security update: multer@2.2.0
   - multer@2.2.0
+  # Renovate security update: form-data@4.0.6
+  - form-data@4.0.6
 catalog:
   sinon: 22.0.0
   typescript: 6.0.3
