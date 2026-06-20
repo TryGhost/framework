@@ -25,7 +25,7 @@
   "dependencies": {
     "@aws-sdk/client-sesv2": "3.1067.0",
     "@tryghost/errors": "workspace:*",
-    "nodemailer": "8.0.11",
+    "nodemailer": "9.0.1",
     "nodemailer-mailgun-transport": "2.1.5",
     "nodemailer-stub-transport": "1.1.0"
   },
