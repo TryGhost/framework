@@ -1,3 +1,4 @@
+const { Transform } = require('stream');
 const errors = require('@tryghost/errors');
 
 const defaultOptions = {};
@@ -70,12 +71,8 @@ function getEntryUncompressedSize(entry, limits) {
     return entry.uncompressedSize;
 }
 
-function throwOnEntryTooLarge(entry, observedBytes, limitBytes) {
-    if (observedBytes <= limitBytes) {
-        return;
-    }
-
-    throw new errors.UnsupportedMediaTypeError({
+function entryTooLargeError(entry, observedBytes, limitBytes) {
+    return new errors.UnsupportedMediaTypeError({
         message: 'Zip entry exceeds maximum uncompressed size.',
         context: 'The zip contains an entry that exceeds the maximum uncompressed size.',
         code: 'ENTRY_TOO_LARGE',
@@ -85,6 +82,12 @@ function throwOnEntryTooLarge(entry, observedBytes, limitBytes) {
             limitBytes,
         },
     });
+}
+
+function throwOnEntryTooLarge(entry, observedBytes, limitBytes) {
+    if (observedBytes > limitBytes) {
+        throw entryTooLargeError(entry, observedBytes, limitBytes);
+    }
 }
 
 function throwOnTotalTooLarge(entry, observedBytes, limitBytes, entriesProcessed) {
@@ -185,6 +188,9 @@ module.exports = async (zipToExtract, destination, options) => {
 
         throwOnSymlinks(entry);
         throwOnLargeFilenames(entry);
+
+        installStreamingCounter(zipfile, limits);
+
         if (originalOnEntry) {
             originalOnEntry(entry, zipfile);
         }
@@ -194,3 +200,49 @@ module.exports = async (zipToExtract, destination, options) => {
 
     return { path: destination };
 };
+
+// Enforce `limits.perEntryUncompressedBytes` against the actual decompressed
+// bytes streamed for each entry, not just the central-directory metadata —
+// otherwise an archive whose header lies about its uncompressed size slips
+// past the pre-flight check above and (worse) hangs `extract()` indefinitely:
+// yauzl's built-in `AssertByteCountStream` overrides its own `destroy` so the
+// mid-stream error never surfaces to extract-zip's `pipeline()`.
+//
+// We turn yauzl's broken counter off (`validateEntrySizes = false`) and wrap
+// the read stream with our own counter, whose errors propagate cleanly.
+function installStreamingCounter(zipfile, limits) {
+    if (zipfile.__streamingCounterInstalled || typeof zipfile.openReadStream !== 'function') {
+        return;
+    }
+    zipfile.__streamingCounterInstalled = true;
+    zipfile.validateEntrySizes = false;
+
+    const originalOpenReadStream = zipfile.openReadStream.bind(zipfile);
+    zipfile.openReadStream = function (entry, optsOrCb, maybeCb) {
+        const cb = typeof optsOrCb === 'function' ? optsOrCb : maybeCb;
+        const readOpts = typeof optsOrCb === 'function' ? {} : optsOrCb;
+        originalOpenReadStream(entry, readOpts, (err, readStream) => {
+            if (err) {
+                return cb(err);
+            }
+            let observedBytes = 0;
+            const counter = new Transform({
+                transform(chunk, _encoding, transformCb) {
+                    observedBytes += chunk.length;
+                    if (observedBytes > limits.perEntryUncompressedBytes) {
+                        return transformCb(
+                            entryTooLargeError(
+                                entry,
+                                observedBytes,
+                                limits.perEntryUncompressedBytes,
+                            ),
+                        );
+                    }
+                    transformCb(null, chunk);
+                },
+            });
+            readStream.on('error', (readErr) => counter.destroy(readErr));
+            cb(null, readStream.pipe(counter));
+        });
+    };
+}
