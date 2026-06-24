@@ -1,5 +1,5 @@
-const assert = require('assert/strict');
-const tpl = require('../');
+import assert from 'assert/strict';
+import tpl from '../';
 
 describe('tpl', function () {
     it('Can handle a plain string', function () {
@@ -13,7 +13,20 @@ describe('tpl', function () {
         const string = 'Go visit {url}';
         const data = { url: 'https://example.com' };
 
-        let result = tpl(string, data);
+        const result = tpl(string, data);
+
+        assert.equal(result, 'Go visit https://example.com');
+    });
+
+    it('Can handle typed data objects', function () {
+        interface TemplateData {
+            url: string;
+        }
+
+        const string = 'Go visit {url}';
+        const data: TemplateData = { url: 'https://example.com' };
+
+        const result = tpl(string, data);
 
         assert.equal(result, 'Go visit https://example.com');
     });
@@ -24,7 +37,7 @@ describe('tpl', function () {
             totalMs: '500',
         };
 
-        let result = tpl(string, data);
+        const result = tpl(string, data);
         assert.equal(result, '{{#get}} helper took 500ms to complete');
     });
 
@@ -36,7 +49,7 @@ describe('tpl', function () {
             totalMs: '500',
         };
 
-        let result = tpl(string, data);
+        const result = tpl(string, data);
         assert.equal(result, '{{#get}} helper took 500ms to complete');
     });
 
@@ -46,7 +59,7 @@ describe('tpl', function () {
             helperName: 'get',
             totalMs: '500',
         };
-        let result = tpl(string, data);
+        const result = tpl(string, data);
         assert.equal(result, 'The {{{helperName}}} helper is not available.');
     });
 
@@ -56,7 +69,7 @@ describe('tpl', function () {
             helperName: 'get',
             totalMs: '500',
         };
-        let result = tpl(string, data);
+        const result = tpl(string, data);
         assert.equal(result, 'The {{get}} helper is not available.');
     });
 
@@ -66,7 +79,7 @@ describe('tpl', function () {
             helperName: 'get',
             totalMs: '500',
         };
-        let result = tpl(string, data);
+        const result = tpl(string, data);
         assert.equal(result, 'The {{get}} helper is not available.');
     });
 
@@ -76,7 +89,7 @@ describe('tpl', function () {
             helperName: 'get',
             totalMs: '500',
         };
-        let result = tpl(string, data);
+        const result = tpl(string, data);
         assert.equal(result, 'The {{get}} helper is not available.');
     });
 
@@ -86,7 +99,7 @@ describe('tpl', function () {
             totalMs: '500',
         };
 
-        let resultFn = () => {
+        const resultFn = () => {
             tpl(string, data);
         };
         assert.throws(resultFn, /helperName is not defined/);

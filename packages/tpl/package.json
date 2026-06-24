@@ -10,20 +10,28 @@
   },
   "files": [
     "index.js",
-    "lib"
+    "index.d.ts",
+    "lib/*.js",
+    "lib/*.d.ts"
   ],
   "main": "index.js",
+  "types": "index.d.ts",
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "dev": "echo \"Implement me!\"",
-    "test": "NODE_ENV=testing vitest run --coverage",
+    "dev": "tsc --watch --preserveWatchOutput --sourceMap",
+    "build": "tsc",
+    "prepare": "tsc",
+    "pretest": "pnpm run build",
+    "test": "pnpm run test:types && NODE_ENV=testing vitest run --coverage",
+    "test:types": "tsc -p tsconfig.test.json --noEmit",
     "lint": "oxlint -c ../../.oxlintrc.json .",
     "posttest": "pnpm run lint"
   },
   "dependencies": {},
   "devDependencies": {
-    "sinon": "catalog:"
+    "@types/node": "24.13.1",
+    "typescript": "catalog:"
   }
 }

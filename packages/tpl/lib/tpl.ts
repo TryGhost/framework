@@ -6,13 +6,8 @@ const interpolate = /(?<!{){([^{]+?)}/g;
  * Will ignore double or triple braces like {{get}} or {{{helpername}}}
  * Can handle escaped braces e.g. \\{\\{{helpername}\\}\\}
  * But there's a simple bare minimum escaping needed to make {{{helpername}}} work e.g. {\\{{helpername}}}
- *
- *
- * @param {String} string - string with optional {data properties}
- * @param {Object} [data] - optional data to interpolate
- * @returns {string} the interpolated string
  */
-module.exports = (string, data) => {
+function tpl(string: string, data?: object | null): string {
     if (!data) {
         return string;
     }
@@ -25,8 +20,10 @@ module.exports = (string, data) => {
         if (!(trimmed in data)) {
             throw new ReferenceError(`${trimmed} is not defined`);
         }
-        return data[trimmed];
+        return String((data as Record<string, unknown>)[trimmed]);
     });
     // Replace our swapped out left braces and any escaped right braces
     return processedString.replace(/\\U\+007B/g, '{').replace(/\\}/g, '}');
-};
+}
+
+export = tpl;
