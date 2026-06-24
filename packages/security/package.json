@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/security",
-  "version": "3.3.0",
+  "version": "3.3.1",
   "description": "Security primitives for token generation, password hashing, and safe identifiers",
   "license": "MIT",
   "author": "Ghost Foundation",
