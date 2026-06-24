@@ -45,6 +45,23 @@ describe('DatabaseInfo', function () {
         assert.equal(databaseInfo.getVersion(), '3.45.0');
     });
 
+    it('init recognises better-sqlite3 and sets sqlite details', async function () {
+        const knex = buildKnex({ client: 'better-sqlite3', version: '12.11.1' });
+        const databaseInfo = new DatabaseInfo(knex);
+        const details = await databaseInfo.init();
+
+        assert.deepEqual(details, {
+            driver: 'better-sqlite3',
+            database: 'SQLite',
+            engine: 'sqlite3',
+            version: '12.11.1',
+        });
+        assert.equal(databaseInfo.getDriver(), 'better-sqlite3');
+        assert.equal(databaseInfo.getDatabase(), 'SQLite');
+        assert.equal(databaseInfo.getEngine(), 'sqlite3');
+        assert.equal(databaseInfo.getVersion(), '12.11.1');
+    });
+
     it('init recognises mysql2 and maps MariaDB version', async function () {
         const knex = buildKnex({
             client: 'mysql2',

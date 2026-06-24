@@ -26,6 +26,7 @@ module.exports = class DatabaseInfo {
     async init() {
         switch (this._driver) {
             case 'sqlite3':
+            case 'better-sqlite3':
                 this._databaseDetails.database = 'SQLite';
                 this._databaseDetails.engine = 'sqlite3';
                 this._databaseDetails.version = this._client.driver.VERSION;
