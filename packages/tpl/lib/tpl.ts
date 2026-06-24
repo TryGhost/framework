@@ -7,7 +7,7 @@ const interpolate = /(?<!{){([^{]+?)}/g;
  * Can handle escaped braces e.g. \\{\\{{helpername}\\}\\}
  * But there's a simple bare minimum escaping needed to make {{{helpername}}} work e.g. {\\{{helpername}}}
  */
-function tpl(string: string, data?: Readonly<Record<string, unknown>>): string {
+function tpl(string: string, data?: object | null): string {
     if (!data) {
         return string;
     }
@@ -20,7 +20,7 @@ function tpl(string: string, data?: Readonly<Record<string, unknown>>): string {
         if (!(trimmed in data)) {
             throw new ReferenceError(`${trimmed} is not defined`);
         }
-        return String(data[trimmed]);
+        return String((data as Record<string, unknown>)[trimmed]);
     });
     // Replace our swapped out left braces and any escaped right braces
     return processedString.replace(/\\U\+007B/g, '{').replace(/\\}/g, '}');

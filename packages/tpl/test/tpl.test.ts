@@ -18,6 +18,19 @@ describe('tpl', function () {
         assert.equal(result, 'Go visit https://example.com');
     });
 
+    it('Can handle typed data objects', function () {
+        interface TemplateData {
+            url: string;
+        }
+
+        const string = 'Go visit {url}';
+        const data: TemplateData = { url: 'https://example.com' };
+
+        const result = tpl(string, data);
+
+        assert.equal(result, 'Go visit https://example.com');
+    });
+
     it('Can mix interpolation handlebars in the same message', function () {
         const string = '{{#get}} helper took {totalMs}ms to complete';
         const data = {
