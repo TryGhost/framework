@@ -1,4 +1,6 @@
 const errors = require('@tryghost/errors');
+const { S_IFMT, S_IFLNK, getEntryMode } = require('./entry-mode');
+const ensureOwnerPermissions = require('./ensure-owner-permissions');
 
 const defaultOptions = {};
 
@@ -106,12 +108,9 @@ function throwOnTotalTooLarge(entry, observedBytes, limitBytes, entriesProcessed
 }
 
 function throwOnSymlinks(entry) {
-    // Check if symlink
-    const mode = (entry.externalFileAttributes >> 16) & 0xffff;
-    // check if it's a symlink or dir (using stat mode constants)
-    const IFMT = 61440;
-    const IFLNK = 40960;
-    const symlink = (mode & IFMT) === IFLNK;
+    // Check if symlink (using stat mode constants)
+    const mode = getEntryMode(entry);
+    const symlink = (mode & S_IFMT) === S_IFLNK;
 
     if (symlink) {
         throw new errors.UnsupportedMediaTypeError({
@@ -150,12 +149,16 @@ function throwOnLargeFilenames(entry) {
  * @param {String} zipToExtract - full path to zip file that should be extracted
  * @param {String} destination - full path of the extraction target
  * @param {Object} [options]
- * @param {Integer} options.defaultDirMode - Directory Mode (permissions), defaults to 0o755
- * @param {Integer} options.defaultFileMode - File Mode (permissions), defaults to 0o644
- * @param {Function} options.onEntry - if present, will be called with (entry, zipfile) for every entry in the zip
+ * @param {Integer} [options.defaultDirMode] - Directory Mode (permissions), defaults to 0o755
+ * @param {Integer} [options.defaultFileMode] - File Mode (permissions), defaults to 0o644
+ * @param {Function} [options.onEntry] - if present, will be called with (entry, zipfile) for every entry in the zip
  * @param {Object} [options.limits] - if present, sets maximum uncompressed sizes
- * @param {Integer} options.limits.perEntryUncompressedBytes - maximum uncompressed size of each entry
- * @param {Integer} options.limits.totalUncompressedBytes - maximum total uncompressed size across all entries
+ * @param {Integer} [options.limits.perEntryUncompressedBytes] - maximum uncompressed size of each entry
+ * @param {Integer} [options.limits.totalUncompressedBytes] - maximum total uncompressed size across all entries
+ * @param {Boolean} [options.ensureOwnerPermissions] - when true, normalizes extracted entry permissions so the
+ *   owner can always read/move/remove the result: directories gain at least owner rwx and files at least owner rw,
+ *   while existing execute/group/world bits are preserved. The source zip is never modified. Defaults to false.
+ *   Intended for trusted temporary extraction of user-supplied archives (e.g. theme zips with read-only directories).
  */
 module.exports = async (zipToExtract, destination, options) => {
     const opts = Object.assign({}, defaultOptions, options);
@@ -167,6 +170,7 @@ module.exports = async (zipToExtract, destination, options) => {
 
     opts.dir = destination;
 
+    const shouldEnsureOwnerPermissions = opts.ensureOwnerPermissions === true;
     const originalOnEntry = opts.onEntry;
     opts.onEntry = (entry, zipfile) => {
         const entryUncompressedBytes = getEntryUncompressedSize(entry, limits);
@@ -187,6 +191,12 @@ module.exports = async (zipToExtract, destination, options) => {
         throwOnLargeFilenames(entry);
         if (originalOnEntry) {
             originalOnEntry(entry, zipfile);
+        }
+
+        // Normalize permissions last, immediately before extract-zip writes the
+        // entry. Do not add async work here: extract-zip does not await onEntry.
+        if (shouldEnsureOwnerPermissions) {
+            ensureOwnerPermissions(entry, opts);
         }
     };
 
