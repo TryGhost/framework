@@ -62,6 +62,33 @@ function createZipWithEntries(zipPath, entries) {
     });
 }
 
+// Builds a zip where each entry can carry an explicit `mode` and `type`
+// (e.g. a read-only `0o555` directory). Only defined keys are forwarded so that
+// archiver applies its own defaults for the rest. A `null` source produces an
+// empty entry, which is what directory entries need.
+function createZipWithModedEntries(zipPath, entries) {
+    return createZip(zipPath, (archive) => {
+        for (const entry of entries) {
+            const data = { name: entry.name };
+
+            if (entry.type) {
+                data.type = entry.type;
+            }
+
+            if (typeof entry.mode === 'number') {
+                data.mode = entry.mode;
+            }
+
+            archive.append(entry.content === undefined ? null : entry.content, data);
+        }
+    });
+}
+
+// Reads the permission bits (lowest 9 bits) of a path's mode.
+function permissionBits(targetPath) {
+    return fs.statSync(targetPath).mode & 0o777;
+}
+
 describe('Compress and Extract should be opposite functions', function () {
     let symlinkPath, themeFolder, zipDestination, unzipDestination;
 
@@ -467,5 +494,174 @@ describe('Extract zip', function () {
                 },
             );
         }
+    });
+});
+
+describe('Extract zip with ensureOwnerPermissions', function () {
+    let zipDestination, unzipDestination;
+
+    beforeAll(function () {
+        zipDestination = path.join(__dirname, 'fixtures', 'perms-theme.zip');
+        unzipDestination = path.join(__dirname, 'fixtures', 'perms-theme-unzipped');
+    });
+
+    afterEach(function () {
+        if (fs.existsSync(zipDestination)) {
+            fs.rmSync(zipDestination, { recursive: true, force: true });
+        }
+
+        if (fs.existsSync(unzipDestination)) {
+            // chmod the tree back to writable first so a read-only directory left
+            // behind by a default-mode extraction can still be removed.
+            for (const entry of fs.readdirSync(unzipDestination, { recursive: true })) {
+                fs.chmodSync(path.join(unzipDestination, entry), 0o755);
+            }
+
+            fs.rmSync(unzipDestination, { recursive: true, force: true });
+        }
+    });
+
+    it('preserves default read-only directory permissions when the option is omitted', async function () {
+        await createZipWithModedEntries(zipDestination, [
+            { name: 'readonly-dir/', type: 'directory', mode: 0o555 },
+        ]);
+
+        await extract(zipDestination, unzipDestination);
+
+        const dirPath = path.join(unzipDestination, 'readonly-dir');
+        assert.equal(fs.existsSync(dirPath), true);
+        // Default behaviour is unchanged: the owner write bit is not added.
+        assert.equal(permissionBits(dirPath) & 0o200, 0);
+    });
+
+    it('extracts an archive with a read-only directory and read-only files', async function () {
+        await createZipWithModedEntries(zipDestination, [
+            { name: 'readonly-dir/', type: 'directory', mode: 0o555 },
+            { name: 'readonly-dir/nested.txt', content: 'nested content', mode: 0o444 },
+            { name: 'readonly-file.txt', content: 'top-level content', mode: 0o444 },
+            { name: 'writable-file.txt', content: 'already writable', mode: 0o644 },
+        ]);
+
+        await extract(zipDestination, unzipDestination, { ensureOwnerPermissions: true });
+
+        const dirPath = path.join(unzipDestination, 'readonly-dir');
+        const nestedPath = path.join(dirPath, 'nested.txt');
+        const filePath = path.join(unzipDestination, 'readonly-file.txt');
+        const writablePath = path.join(unzipDestination, 'writable-file.txt');
+
+        // The directory gains owner rwx so the nested file can be written into it.
+        assert.equal((permissionBits(dirPath) & 0o700) === 0o700, true);
+        // Existing group/world read+execute bits are preserved.
+        assert.equal(permissionBits(dirPath) & 0o055, 0o055);
+
+        // The nested file is extracted and readable.
+        assert.equal(fs.readFileSync(nestedPath, 'utf8'), 'nested content');
+
+        // Read-only files gain owner write while keeping group/world read.
+        assert.equal(permissionBits(filePath) & 0o600, 0o600);
+        assert.equal(permissionBits(filePath) & 0o044, 0o044);
+        assert.equal(fs.readFileSync(filePath, 'utf8'), 'top-level content');
+
+        // Files that already grant owner write are left untouched.
+        assert.equal(permissionBits(writablePath), 0o644);
+        assert.equal(fs.readFileSync(writablePath, 'utf8'), 'already writable');
+    });
+
+    it('keeps execute bits on executable files while adding owner write', async function () {
+        await createZipWithModedEntries(zipDestination, [
+            { name: 'script.sh', content: '#!/bin/sh\necho hi\n', mode: 0o555 },
+        ]);
+
+        await extract(zipDestination, unzipDestination, { ensureOwnerPermissions: true });
+
+        const scriptPath = path.join(unzipDestination, 'script.sh');
+        const bits = permissionBits(scriptPath);
+
+        // Owner gains write...
+        assert.equal(bits & 0o200, 0o200);
+        // ...without losing any of the original r-xr-xr-x execute/read bits.
+        assert.equal(bits & 0o555, 0o555);
+    });
+
+    it('sets the directory type bit on inferred directories that lack POSIX type bits', async function () {
+        // A directory recognised only by its trailing slash, carrying 0o555
+        // permission bits but no POSIX directory type bit, plus a low DOS bit.
+        const entry = {
+            fileName: 'inferred-dir/',
+            externalFileAttributes: (((0o555 << 16) >>> 0) | 0x10) >>> 0,
+            versionMadeBy: 0x0300, // unix host, so the Windows directory rule does not apply
+        };
+
+        const originalLoad = Module._load;
+        Module._load = function (request, parent, isMain) {
+            if (request === 'extract-zip') {
+                return async (zipPath, opts) => {
+                    opts.onEntry(entry, {});
+                };
+            }
+
+            return originalLoad(request, parent, isMain);
+        };
+
+        try {
+            await extract(zipDestination, unzipDestination, { ensureOwnerPermissions: true });
+        } finally {
+            Module._load = originalLoad;
+        }
+
+        const normalizedMode = (entry.externalFileAttributes >> 16) & 0xffff;
+        // The directory type bit is now present...
+        assert.equal(normalizedMode & 0o170000, 0o040000);
+        // ...owner gains rwx while the original r-x bits are preserved.
+        assert.equal(normalizedMode & 0o777, 0o755);
+        // Low DOS attribute bits are preserved.
+        assert.equal(entry.externalFileAttributes & 0xffff, 0x10);
+    });
+
+    it('leaves entries without POSIX mode bits untouched', async function () {
+        // No POSIX mode bits at all: extract-zip applies its own defaults, so the
+        // entry must be left exactly as-is.
+        const entry = { fileName: 'no-mode.txt', externalFileAttributes: 0 };
+
+        const originalLoad = Module._load;
+        Module._load = function (request, parent, isMain) {
+            if (request === 'extract-zip') {
+                return async (zipPath, opts) => {
+                    opts.onEntry(entry, {});
+                };
+            }
+
+            return originalLoad(request, parent, isMain);
+        };
+
+        try {
+            await extract(zipDestination, unzipDestination, { ensureOwnerPermissions: true });
+        } finally {
+            Module._load = originalLoad;
+        }
+
+        assert.equal(entry.externalFileAttributes, 0);
+    });
+
+    it('still rejects symlink entries when ensureOwnerPermissions is enabled', async function () {
+        await createZip(zipDestination, (archive) => {
+            archive.symlink('themes/test-target', 'symlink-entry');
+        });
+
+        await assert.rejects(
+            () =>
+                extract(zipDestination, unzipDestination, {
+                    ensureOwnerPermissions: true,
+                }),
+            (err) => {
+                assert.equal(err.errorType, 'UnsupportedMediaTypeError');
+                assert.equal(err.message, 'Symlinks are not allowed in the zip folder.');
+                assert.equal(err.code, 'SYMLINK_NOT_ALLOWED');
+                assert.deepEqual(err.errorDetails, {
+                    entryName: 'themes/test-target',
+                });
+                return true;
+            },
+        );
     });
 });

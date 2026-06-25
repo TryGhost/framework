@@ -26,6 +26,18 @@ let res = await zip.compress('path/to/a/folder', 'path/to/archive.zip', [options
 let res = await zip.extract('path/to/archive.zip', 'path/to/files', [options])
 ```
 
+### `extract` options
+
+- `limits.perEntryUncompressedBytes` / `limits.totalUncompressedBytes` — reject archives whose entries exceed the given uncompressed sizes.
+- `onEntry(entry, zipfile)` — called for every entry before it is written.
+- `ensureOwnerPermissions` (default `false`) — when `true`, normalizes extracted entry permissions so the owner can always read, move and remove the result. Directories gain at least owner `rwx` and files gain at least owner `rw`, while existing execute/group/world bits are preserved. The source zip is never modified.
+
+    This fixes archives that contain read-only directories (for example a `dr-xr-xr-x` / `0555` folder), which otherwise fail to extract because nested files cannot be written into them. It is intended for **trusted temporary extraction** of user-supplied archives (such as theme zips) where the caller must be able to read, move and remove the extracted tree.
+
+    ```
+    let res = await zip.extract('path/to/upload.zip', 'path/to/tmp', {ensureOwnerPermissions: true})
+    ```
+
 ## Develop
 
 This is a mono repository, managed with [Nx](https://nx.dev).

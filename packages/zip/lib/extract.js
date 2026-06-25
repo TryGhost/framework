@@ -2,6 +2,73 @@ const errors = require('@tryghost/errors');
 
 const defaultOptions = {};
 
+// POSIX `stat` mode constants, matching the ones extract-zip uses internally
+// when it derives an entry's type and permissions from its external attributes.
+const S_IFMT = 0o170000; // bit mask for the file type bit fields
+const S_IFDIR = 0o040000; // directory
+const S_IFLNK = 0o120000; // symbolic link
+
+// Owner permission bits we guarantee when `ensureOwnerPermissions` is enabled.
+const OWNER_DIR_BITS = 0o700; // rwx, so the tree can be traversed, written and removed
+const OWNER_FILE_BITS = 0o600; // rw, so files can be read and rewritten/removed
+
+// Reads the POSIX mode an entry carries in the high 16 bits of its external
+// file attributes, exactly as extract-zip does when extracting.
+function getEntryMode(entry) {
+    return (entry.externalFileAttributes >> 16) & 0xffff;
+}
+
+// Mirrors extract-zip's directory detection: POSIX directory type bit, a
+// trailing slash, or the Windows directory attribute.
+function isDirectoryEntry(entry, mode) {
+    if ((mode & S_IFMT) === S_IFDIR) {
+        return true;
+    }
+
+    if (entry.fileName.endsWith('/')) {
+        return true;
+    }
+
+    // Windows' way of specifying a directory
+    // https://github.com/maxogden/extract-zip/issues/13#issuecomment-154494566
+    const madeBy = entry.versionMadeBy >> 8;
+    return madeBy === 0 && entry.externalFileAttributes === 16;
+}
+
+// Normalises an entry's permissions in place so the extracting user can always
+// read, move and remove the result. Only the in-memory entry handed to
+// extract-zip is changed; the original zip file is never rewritten.
+function ensureOwnerPermissions(entry) {
+    const mode = getEntryMode(entry);
+
+    // No POSIX mode bits are present. extract-zip falls back to its own default
+    // dir/file modes (0o755/0o644), which already grant the owner full access,
+    // so leave the entry untouched to preserve default behaviour.
+    if (mode === 0) {
+        return;
+    }
+
+    const isDir = isDirectoryEntry(entry, mode);
+    const ownerBits = isDir ? OWNER_DIR_BITS : OWNER_FILE_BITS;
+    let nextMode = mode | ownerBits;
+
+    // A directory that was only inferred (trailing slash / Windows attribute)
+    // may lack the POSIX directory type bit. Set it so extract-zip still
+    // classifies the rewritten mode as a directory.
+    if (isDir && (nextMode & S_IFMT) !== S_IFDIR) {
+        nextMode = (nextMode & ~S_IFMT) | S_IFDIR;
+    }
+
+    if (nextMode === mode) {
+        return;
+    }
+
+    // Write the new POSIX mode back into the high 16 bits while preserving the
+    // low 16 bits (DOS attributes and other zip-specific flags).
+    const lowBits = entry.externalFileAttributes & 0xffff;
+    entry.externalFileAttributes = (((nextMode & 0xffff) << 16) | lowBits) >>> 0;
+}
+
 function normalizeLimit(value, fieldName) {
     if (value === undefined || value === null || value === Infinity) {
         return Infinity;
@@ -106,12 +173,9 @@ function throwOnTotalTooLarge(entry, observedBytes, limitBytes, entriesProcessed
 }
 
 function throwOnSymlinks(entry) {
-    // Check if symlink
-    const mode = (entry.externalFileAttributes >> 16) & 0xffff;
-    // check if it's a symlink or dir (using stat mode constants)
-    const IFMT = 61440;
-    const IFLNK = 40960;
-    const symlink = (mode & IFMT) === IFLNK;
+    // Check if symlink (using stat mode constants)
+    const mode = getEntryMode(entry);
+    const symlink = (mode & S_IFMT) === S_IFLNK;
 
     if (symlink) {
         throw new errors.UnsupportedMediaTypeError({
@@ -156,6 +220,10 @@ function throwOnLargeFilenames(entry) {
  * @param {Object} [options.limits] - if present, sets maximum uncompressed sizes
  * @param {Integer} options.limits.perEntryUncompressedBytes - maximum uncompressed size of each entry
  * @param {Integer} options.limits.totalUncompressedBytes - maximum total uncompressed size across all entries
+ * @param {Boolean} [options.ensureOwnerPermissions] - when true, normalizes extracted entry permissions so the
+ *   owner can always read/move/remove the result: directories gain at least owner rwx and files at least owner rw,
+ *   while existing execute/group/world bits are preserved. The source zip is never modified. Defaults to false.
+ *   Intended for trusted temporary extraction of user-supplied archives (e.g. theme zips with read-only directories).
  */
 module.exports = async (zipToExtract, destination, options) => {
     const opts = Object.assign({}, defaultOptions, options);
@@ -167,6 +235,7 @@ module.exports = async (zipToExtract, destination, options) => {
 
     opts.dir = destination;
 
+    const shouldEnsureOwnerPermissions = opts.ensureOwnerPermissions === true;
     const originalOnEntry = opts.onEntry;
     opts.onEntry = (entry, zipfile) => {
         const entryUncompressedBytes = getEntryUncompressedSize(entry, limits);
@@ -187,6 +256,12 @@ module.exports = async (zipToExtract, destination, options) => {
         throwOnLargeFilenames(entry);
         if (originalOnEntry) {
             originalOnEntry(entry, zipfile);
+        }
+
+        // Normalize permissions last, immediately before extract-zip writes the
+        // entry. Do not add async work here: extract-zip does not await onEntry.
+        if (shouldEnsureOwnerPermissions) {
+            ensureOwnerPermissions(entry);
         }
     };
 
