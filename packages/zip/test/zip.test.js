@@ -618,9 +618,9 @@ describe('Extract zip with ensureOwnerPermissions', function () {
         assert.equal(entry.externalFileAttributes & 0xffff, 0x10);
     });
 
-    it('leaves entries without POSIX mode bits untouched', async function () {
-        // No POSIX mode bits at all: extract-zip applies its own defaults, so the
-        // entry must be left exactly as-is.
+    it('leaves entries without POSIX mode bits untouched when defaults already grant owner access', async function () {
+        // No POSIX mode bits and no custom defaults: extract-zip applies its own
+        // owner-accessible defaults (0o755/0o644), so the entry is left as-is.
         const entry = { fileName: 'no-mode.txt', externalFileAttributes: 0 };
 
         const originalLoad = Module._load;
@@ -641,6 +641,76 @@ describe('Extract zip with ensureOwnerPermissions', function () {
         }
 
         assert.equal(entry.externalFileAttributes, 0);
+    });
+
+    it('guarantees owner permissions for zero-mode entries even when defaultDirMode/defaultFileMode omit them', async function () {
+        // Zero-mode entries (e.g. Windows / no-POSIX archives) whose mode would
+        // otherwise be synthesised from owner-less caller defaults.
+        const dirEntry = { fileName: 'win-dir/', externalFileAttributes: 0, versionMadeBy: 0 };
+        const fileEntry = { fileName: 'win-file.txt', externalFileAttributes: 0, versionMadeBy: 0 };
+
+        const originalLoad = Module._load;
+        Module._load = function (request, parent, isMain) {
+            if (request === 'extract-zip') {
+                return async (zipPath, opts) => {
+                    opts.onEntry(dirEntry, {});
+                    opts.onEntry(fileEntry, {});
+                };
+            }
+
+            return originalLoad(request, parent, isMain);
+        };
+
+        try {
+            await extract(zipDestination, unzipDestination, {
+                ensureOwnerPermissions: true,
+                defaultDirMode: 0o555,
+                defaultFileMode: 0o444,
+            });
+        } finally {
+            Module._load = originalLoad;
+        }
+
+        const dirMode = (dirEntry.externalFileAttributes >> 16) & 0xffff;
+        const fileMode = (fileEntry.externalFileAttributes >> 16) & 0xffff;
+
+        // Directory: owner rwx is guaranteed, the default r-x bits are preserved,
+        // and the POSIX directory type bit is set.
+        assert.equal(dirMode & 0o700, 0o700);
+        assert.equal(dirMode & 0o055, 0o055);
+        assert.equal(dirMode & 0o170000, 0o040000);
+
+        // File: owner rw is guaranteed while the default read bits are preserved.
+        assert.equal(fileMode & 0o600, 0o600);
+        assert.equal(fileMode & 0o044, 0o044);
+    });
+
+    it('normalizes a zero-mode directory to the owner-accessible default when no defaults are supplied', async function () {
+        // A Windows-style directory entry with no POSIX mode bits and no caller
+        // defaults: extract-zip would fall back to 0o755, which already grants
+        // owner rwx, but we still stamp the directory type bit so it round-trips.
+        const dirEntry = { fileName: 'win-dir/', externalFileAttributes: 0, versionMadeBy: 0 };
+
+        const originalLoad = Module._load;
+        Module._load = function (request, parent, isMain) {
+            if (request === 'extract-zip') {
+                return async (zipPath, opts) => {
+                    opts.onEntry(dirEntry, {});
+                };
+            }
+
+            return originalLoad(request, parent, isMain);
+        };
+
+        try {
+            await extract(zipDestination, unzipDestination, { ensureOwnerPermissions: true });
+        } finally {
+            Module._load = originalLoad;
+        }
+
+        const dirMode = (dirEntry.externalFileAttributes >> 16) & 0xffff;
+        assert.equal(dirMode & 0o170000, 0o040000);
+        assert.equal(dirMode & 0o777, 0o755);
     });
 
     it('still rejects symlink entries when ensureOwnerPermissions is enabled', async function () {

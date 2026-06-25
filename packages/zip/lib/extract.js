@@ -35,20 +35,48 @@ function isDirectoryEntry(entry, mode) {
     return madeBy === 0 && entry.externalFileAttributes === 16;
 }
 
+// Resolves the mode extract-zip would synthesise for an entry that carries no
+// POSIX mode bits, mirroring its getExtractedMode() fallback: the caller's
+// defaultDirMode/defaultFileMode, or 0o755/0o644 when those are not set.
+function resolveDefaultMode(isDir, opts) {
+    let mode = 0;
+
+    if (isDir) {
+        if (opts.defaultDirMode) {
+            mode = parseInt(opts.defaultDirMode, 10);
+        }
+
+        if (!mode) {
+            mode = 0o755;
+        }
+    } else {
+        if (opts.defaultFileMode) {
+            mode = parseInt(opts.defaultFileMode, 10);
+        }
+
+        if (!mode) {
+            mode = 0o644;
+        }
+    }
+
+    return mode;
+}
+
 // Normalises an entry's permissions in place so the extracting user can always
 // read, move and remove the result. Only the in-memory entry handed to
 // extract-zip is changed; the original zip file is never rewritten.
-function ensureOwnerPermissions(entry) {
-    const mode = getEntryMode(entry);
+function ensureOwnerPermissions(entry, opts) {
+    let mode = getEntryMode(entry);
+    const isDir = isDirectoryEntry(entry, mode);
 
-    // No POSIX mode bits are present. extract-zip falls back to its own default
-    // dir/file modes (0o755/0o644), which already grant the owner full access,
-    // so leave the entry untouched to preserve default behaviour.
+    // No POSIX mode bits are present, so extract-zip would synthesise the mode
+    // from defaultDirMode/defaultFileMode (falling back to 0o755/0o644). Resolve
+    // that same default here so the owner bits below are guaranteed even when the
+    // caller-supplied defaults omit them.
     if (mode === 0) {
-        return;
+        mode = resolveDefaultMode(isDir, opts);
     }
 
-    const isDir = isDirectoryEntry(entry, mode);
     const ownerBits = isDir ? OWNER_DIR_BITS : OWNER_FILE_BITS;
     let nextMode = mode | ownerBits;
 
@@ -59,6 +87,8 @@ function ensureOwnerPermissions(entry) {
         nextMode = (nextMode & ~S_IFMT) | S_IFDIR;
     }
 
+    // The mode extract-zip would already produce grants the owner the required
+    // access and needs no type-bit fix, so leave the entry untouched.
     if (nextMode === mode) {
         return;
     }
@@ -261,7 +291,7 @@ module.exports = async (zipToExtract, destination, options) => {
         // Normalize permissions last, immediately before extract-zip writes the
         // entry. Do not add async work here: extract-zip does not await onEntry.
         if (shouldEnsureOwnerPermissions) {
-            ensureOwnerPermissions(entry);
+            ensureOwnerPermissions(entry, opts);
         }
     };
 
