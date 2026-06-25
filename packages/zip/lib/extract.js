@@ -244,12 +244,12 @@ function throwOnLargeFilenames(entry) {
  * @param {String} zipToExtract - full path to zip file that should be extracted
  * @param {String} destination - full path of the extraction target
  * @param {Object} [options]
- * @param {Integer} options.defaultDirMode - Directory Mode (permissions), defaults to 0o755
- * @param {Integer} options.defaultFileMode - File Mode (permissions), defaults to 0o644
- * @param {Function} options.onEntry - if present, will be called with (entry, zipfile) for every entry in the zip
+ * @param {Integer} [options.defaultDirMode] - Directory Mode (permissions), defaults to 0o755
+ * @param {Integer} [options.defaultFileMode] - File Mode (permissions), defaults to 0o644
+ * @param {Function} [options.onEntry] - if present, will be called with (entry, zipfile) for every entry in the zip
  * @param {Object} [options.limits] - if present, sets maximum uncompressed sizes
- * @param {Integer} options.limits.perEntryUncompressedBytes - maximum uncompressed size of each entry
- * @param {Integer} options.limits.totalUncompressedBytes - maximum total uncompressed size across all entries
+ * @param {Integer} [options.limits.perEntryUncompressedBytes] - maximum uncompressed size of each entry
+ * @param {Integer} [options.limits.totalUncompressedBytes] - maximum total uncompressed size across all entries
  * @param {Boolean} [options.ensureOwnerPermissions] - when true, normalizes extracted entry permissions so the
  *   owner can always read/move/remove the result: directories gain at least owner rwx and files at least owner rw,
  *   while existing execute/group/world bits are preserved. The source zip is never modified. Defaults to false.
