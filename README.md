@@ -36,7 +36,7 @@ To add a new package to the repo:
     - `pnpm ship:minor`
     - `pnpm ship:major`
     - for initial Nx bootstrap in long-unreleased repos: `pnpm ship:first-release`
-    - by default these bump **every** package in `packages/*` to the same level. To scope a release to specific packages, append `--projects=` with comma-separated directory names (not npm names), e.g. `pnpm ship:minor --projects=api-framework,domain-events`
+    - by default these bump **every** package in `packages/*` to the same level. To scope a release to specific packages, append `--projects=` with comma-separated npm package names (not directory names), e.g. `pnpm ship:minor --projects=@tryghost/api-framework,@tryghost/domain-events`
     - append `--dry-run` to preview which packages would be bumped without committing
 2. this runs tests, versions packages, and creates/pushes release commit + tags
     - creates the version commit and pushes tags to `main`
