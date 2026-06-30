@@ -38,7 +38,7 @@
     "@types/sinon": "21.0.1",
     "@types/stoppable": "1.1.3",
     "@types/supertest": "7.2.0",
-    "knex": "3.2.10",
+    "knex": "3.3.0",
     "nock": "14.0.16",
     "sinon": "catalog:",
     "supertest": "7.2.2",
