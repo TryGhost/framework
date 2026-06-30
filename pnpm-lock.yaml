@@ -179,10 +179,10 @@ importers:
     devDependencies:
       bookshelf:
         specifier: 1.2.0
-        version: 1.2.0(knex@3.2.10(sqlite3@6.0.1))
+        version: 1.2.0(knex@3.3.0(sqlite3@6.0.1))
       knex:
-        specifier: 3.2.10
-        version: 3.2.10(sqlite3@6.0.1)
+        specifier: 3.3.0
+        version: 3.3.0(sqlite3@6.0.1)
       sinon:
         specifier: 'catalog:'
         version: 22.0.0
@@ -251,8 +251,8 @@ importers:
   packages/database-info:
     devDependencies:
       knex:
-        specifier: 3.2.10
-        version: 3.2.10(sqlite3@6.0.1)
+        specifier: 3.3.0
+        version: 3.3.0(sqlite3@6.0.1)
 
   packages/debug:
     dependencies:
@@ -599,8 +599,8 @@ importers:
         specifier: 7.2.0
         version: 7.2.0
       knex:
-        specifier: 3.2.10
-        version: 3.2.10(sqlite3@6.0.1)
+        specifier: 3.3.0
+        version: 3.3.0(sqlite3@6.0.1)
       nock:
         specifier: 14.0.16
         version: 14.0.16
@@ -3914,12 +3914,13 @@ packages:
   keyv@5.6.0:
     resolution: {integrity: sha512-CYDD3SOtsHtyXeEORYRx2qBtpDJFjRTGXUtmNEMGyzYOKj1TE3tycdlho7kA1Ufx9OYWZzg52QFBGALTirzDSw==}
 
-  knex@3.2.10:
-    resolution: {integrity: sha512-oypTHfrc9i72iyxaUQBKHOxhcr0xM65MPf6FpN02nimsftXwzXprIkLjfXdubvhbu4PMWLp023q8o8CYvHSuZw==}
+  knex@3.3.0:
+    resolution: {integrity: sha512-LgWl031hNuLv9Lhxdd9093zULa2aNcoP04Bk29e5NidgRcEr/T0rAr2WYi4BhjTiCDoQiRU56meUE5rppLKZzQ==}
     engines: {node: '>=16'}
     hasBin: true
     peerDependencies:
       better-sqlite3: '*'
+      mariadb: '*'
       mysql: '*'
       mysql2: '*'
       pg: '*'
@@ -3929,6 +3930,8 @@ packages:
       tedious: '*'
     peerDependenciesMeta:
       better-sqlite3:
+        optional: true
+      mariadb:
         optional: true
       mysql:
         optional: true
@@ -4920,8 +4923,8 @@ packages:
     resolution: {integrity: sha512-56adEpPMouktRlBLXiaYFFzZ/3+JXa8P9n7WbR+ibIjtviN55mEaOkiysCnPnWm+7kkui1Dn8J9l+g6zV8731w==}
     engines: {node: '>=18'}
 
-  tarn@3.0.2:
-    resolution: {integrity: sha512-51LAVKUSZSVfI05vjPESNc5vwqqZpbXCsU+/+wxlOrUjk2SnFTt97v9ZgQrD4YmxYW1Px6w2KjaDitCfkvgxMQ==}
+  tarn@3.1.0:
+    resolution: {integrity: sha512-QDihlHbXxQ4SnuQcRd1TPNBHUYo/hafDRDP82COYSVfRcx/3qnfGDkn1WFjozVl+AYr8ZyDKSQ/kIgHH1ri1yg==}
     engines: {node: '>=8.0.0'}
 
   tdigest@0.1.2:
@@ -7428,12 +7431,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  bookshelf@1.2.0(knex@3.2.10(sqlite3@6.0.1)):
+  bookshelf@1.2.0(knex@3.3.0(sqlite3@6.0.1)):
     dependencies:
       bluebird: 3.7.2
       create-error: 0.3.1
       inflection: 1.13.4
-      knex: 3.2.10(sqlite3@6.0.1)
+      knex: 3.3.0(sqlite3@6.0.1)
       lodash: 4.18.1
 
   bowser@2.14.1: {}
@@ -8549,7 +8552,7 @@ snapshots:
     dependencies:
       '@keyv/serialize': 1.1.1
 
-  knex@3.2.10(sqlite3@6.0.1):
+  knex@3.3.0(sqlite3@6.0.1):
     dependencies:
       colorette: 2.0.19
       commander: 10.0.1
@@ -8563,7 +8566,7 @@ snapshots:
       pg-connection-string: 2.6.2
       rechoir: 0.8.0
       resolve-from: 5.0.0
-      tarn: 3.0.2
+      tarn: 3.1.0
       tildify: 2.0.0
     optionalDependencies:
       sqlite3: 6.0.1
@@ -9768,7 +9771,7 @@ snapshots:
       minizlib: 3.1.0
       yallist: 5.0.0
 
-  tarn@3.0.2: {}
+  tarn@3.1.0: {}
 
   tdigest@0.1.2:
     dependencies:
