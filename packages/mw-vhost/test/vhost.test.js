@@ -157,6 +157,9 @@ describe('vhost(hostname, server)', function () {
         });
 
         it('should treat dot as a dot', async function () {
+            // `hostregexp` escapes string hostnames before constructing its
+            // RegExp; this test asserts literal dots stay literal.
+            // codeql[js/incomplete-hostname-regexp]
             const app = createServer('a.b.com', function (req, res) {
                 res.end('tobi');
             });

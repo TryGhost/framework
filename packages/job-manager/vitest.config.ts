@@ -1,14 +1,6 @@
-import { defineConfig, mergeConfig } from 'vitest/config';
 import rootConfig from '../../vitest.config';
 
-// Override: Bree spawns background workers that emit unhandled rejections
-// during cleanup after tests complete. These are expected and were silently
-// ignored by Mocha.
-export default mergeConfig(
-    rootConfig,
-    defineConfig({
-        test: {
-            dangerouslyIgnoreUnhandledErrors: true,
-        },
-    }),
-);
+// Keep unhandled errors fatal for this package. Worker fixtures should clean up
+// without leaking rejections, and CI should catch regressions instead of
+// matching Mocha's old silent behavior.
+export default rootConfig;
