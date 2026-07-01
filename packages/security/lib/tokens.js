@@ -45,6 +45,9 @@ module.exports.resetToken = {
 
         hash.update(String(expires));
         hash.update(email.toLocaleLowerCase());
+        // Reset tokens are not password storage; the current password hash is
+        // mixed in only to invalidate old tokens after password changes.
+        // codeql[js/insufficient-password-hash]
         hash.update(password);
         hash.update(String(dbHash));
 

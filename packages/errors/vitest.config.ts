@@ -9,6 +9,7 @@ export default mergeConfig(
         test: {
             coverage: {
                 include: ['src/**'],
+                exclude: [],
             },
         },
     }),

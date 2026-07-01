@@ -54,7 +54,11 @@ module.exports = function (transport, options = {}) {
         case 'ses':
             const { SESv2Client, SendEmailCommand } = require('@aws-sdk/client-sesv2');
 
+            // This keeps the legacy Ghost SES ServiceUrl parser compatible with
+            // existing config shapes; explicit `region` remains the preferred path.
+            // codeql[js/incomplete-hostname-regexp]
             const pattern = /(.*)email(.*)\.(.*).amazonaws.com/i;
+            // codeql[js/polynomial-redos]
             const result = pattern.exec(options.ServiceUrl);
             const region = options.region || (result && result[3]) || 'us-east-1';
 

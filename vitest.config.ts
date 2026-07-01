@@ -9,7 +9,7 @@ export default defineConfig({
         coverage: {
             provider: 'v8',
             include: ['**/lib/**'],
-            exclude: ['**/src/**', '**/build/**', '**/test/**'],
+            exclude: ['**/build/**', '**/test/**'],
             reporter: ['text', 'cobertura'],
             thresholds: {
                 lines: 90,

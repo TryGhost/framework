@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -43,6 +46,7 @@ jobs:
 
       - run: pnpm install --prefer-offline --frozen-lockfile
       - run: pnpm format:check
+      - run: pnpm lint
 
       - name: Test affected (PRs)
         if: github.event_name == 'pull_request'
@@ -63,7 +67,8 @@ jobs:
 
   test-results:
     runs-on: ubuntu-latest
-    name: All tests passed
+    name: All tests pass
+    permissions: {}
     needs: [test]
     if: always()
     steps:

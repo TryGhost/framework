@@ -25,6 +25,11 @@ const isLoggedIn = function (req, res, next) {
 app.use(express.json());
 
 app.use(
+    // This is a local test fixture, not a production app; it intentionally
+    // avoids HTTPS-only cookies and CSRF middleware so package tests can run
+    // against a plain in-memory HTTP server.
+    // codeql[js/missing-token-validation]
+    // codeql[js/clear-text-cookie]
     session({
         secret: 'verysecretstring',
         name: 'testauth',

@@ -1,12 +1,38 @@
 # Framework
 
+Framework is a monorepo of `@tryghost/*` packages used across Ghost services,
+apps, and tooling. Each package lives under `packages/*` and has its own README
+with package-specific usage examples.
+
 ## Install
+
+Use the repo-pinned package manager from the root of the checkout:
+
+```bash
+corepack pnpm install
+```
+
+For consumers, install the package you need from npm:
+
+```bash
+pnpm add @tryghost/<package-name>
+```
 
 ## Usage
 
+Read the package README for the package you are using. Common examples:
+
+- [`@tryghost/api-framework`](packages/api-framework/README.md) for API request
+  pipeline helpers.
+- [`@tryghost/errors`](packages/errors/README.md) for shared Ghost error types.
+- [`@tryghost/security`](packages/security/README.md) for token, password, and
+  identifier helpers.
+- [`@tryghost/express-test`](packages/express-test/README.md) for HTTP test
+  helpers.
+
 ## Develop
 
-This is a mono repository, managed with [Nx](https://nx.dev).
+This is a monorepo, managed with [Nx](https://nx.dev).
 
 1. `git clone` this repo & `cd` into it as usual
 2. run `pnpm setup` from the top-level:
@@ -20,14 +46,16 @@ To add a new package to the repo:
 
 ## Run
 
-- `pnpm dev`
+- `pnpm dev` is a placeholder at the workspace root. Run package-specific
+  scripts from the package directory when a package has a development workflow.
 
 ## Test
 
 - `pnpm lint` runs `oxlint` across all packages
 - `pnpm format` formats `js/ts/json/md` files with `oxfmt`
 - `pnpm format:check` checks formatting without writing
-- `pnpm test` runs tests (most packages also run lint in `posttest`)
+- `pnpm test` runs package tests through Nx
+- `pnpm test:ci` runs the full CI test target for every package
 
 ## Publish
 
