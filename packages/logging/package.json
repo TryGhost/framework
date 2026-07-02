@@ -29,7 +29,7 @@
     "@tryghost/pretty-stream": "workspace:*",
     "@tryghost/root-utils": "workspace:*",
     "bunyan": "1.8.15",
-    "fs-extra": "11.3.5",
+    "fs-extra": "11.3.6",
     "gelf-stream": "1.1.1",
     "json-stringify-safe": "5.0.1",
     "lodash": "4.18.1"
