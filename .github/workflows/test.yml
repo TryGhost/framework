@@ -65,17 +65,13 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
-  test-results:
+  required-checks-pass:
     runs-on: ubuntu-latest
-    name: All tests pass
+    name: Required checks pass
     permissions: {}
     needs: [test]
     if: always()
     steps:
-      - run: |
-          result="${{ needs.test.result }}"
-          if [[ $result == "success" || $result == "skipped" ]]; then
-            exit 0
-          else
-            exit 1
-          fi
+      - name: Verify all required jobs succeeded
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
