@@ -1,16 +1,17 @@
 {
-  "name": "@tryghost/logging",
-  "version": "5.1.1",
+  "name": "@tryghost/bunyan-rotating-filestream",
+  "version": "0.0.7",
   "license": "MIT",
   "author": "Ghost Foundation",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TryGhost/framework.git",
-    "directory": "packages/logging"
+    "directory": "packages/bunyan-rotating-filestream"
   },
   "files": [
     "index.js",
-    "lib"
+    "lib",
+    "util"
   ],
   "main": "index.js",
   "publishConfig": {
@@ -23,19 +24,10 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@tryghost/bunyan-rotating-filestream": "workspace:*",
-    "@tryghost/elasticsearch": "workspace:*",
-    "@tryghost/http-stream": "workspace:*",
-    "@tryghost/pretty-stream": "workspace:*",
-    "@tryghost/root-utils": "workspace:*",
-    "bunyan": "1.8.15",
-    "fs-extra": "11.3.6",
-    "gelf-stream": "1.1.1",
-    "json-stringify-safe": "5.0.1",
-    "lodash": "4.18.1"
+    "long-timeout": "0.1.1"
   },
   "devDependencies": {
-    "@tryghost/errors": "workspace:*",
+    "bunyan": "1.8.15",
     "sinon": "catalog:"
   }
 }
