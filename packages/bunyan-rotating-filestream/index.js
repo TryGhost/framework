@@ -29,6 +29,7 @@ class RotatingFileStream {
             this._triggers.push(thresholdTrigger);
         }
         this._rotatingLock = false;
+        this._closed = false;
         this._triggers.forEach((trigger) => {
             trigger.on(Rotate, () => {
                 this._rotate();
@@ -42,8 +43,8 @@ class RotatingFileStream {
     }
 
     async _rotate() {
-        if (this._rotatingLock) {
-            // Already rotating
+        if (this._rotatingLock || this._closed) {
+            // Already rotating or shutting down
             return;
         }
         this._rotatingLock = true;
@@ -61,6 +62,9 @@ class RotatingFileStream {
     }
 
     async end() {
+        // Block new rotations immediately - the threshold trigger has no timer
+        // to shut down and can still fire while the queue drains below
+        this._closed = true;
         await this._initialised;
         // Stop triggers first so no new rotation can start, then wait for any
         // in-flight rotation before closing the file handles
