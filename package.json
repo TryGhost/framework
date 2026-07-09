@@ -26,14 +26,14 @@
   },
   "devDependencies": {
     "@nx/js": "23.0.1",
-    "@vitest/coverage-v8": "4.1.9",
+    "@vitest/coverage-v8": "4.1.10",
     "husky": "9.1.7",
     "lint-staged": "17.0.8",
     "nx": "23.0.1",
     "oxfmt": "0.57.0",
     "oxlint": "1.72.0",
     "sinon": "catalog:",
-    "vitest": "4.1.9"
+    "vitest": "4.1.10"
   },
   "lint-staged": {
     "packages/**/*.{js,ts,json,md}": "oxfmt -c .oxfmtrc.json"
