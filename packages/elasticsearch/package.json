@@ -23,7 +23,7 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "8.19.1",
+    "@elastic/elasticsearch": "8.19.2",
     "@tryghost/debug": "workspace:*",
     "split2": "4.2.0"
   },
