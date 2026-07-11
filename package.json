@@ -30,7 +30,7 @@
     "husky": "9.1.7",
     "lint-staged": "17.0.8",
     "nx": "23.0.1",
-    "oxfmt": "0.57.0",
+    "oxfmt": "0.58.0",
     "oxlint": "1.72.0",
     "sinon": "catalog:",
     "vitest": "4.1.10"
