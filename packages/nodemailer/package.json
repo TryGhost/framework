@@ -23,7 +23,7 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@aws-sdk/client-sesv2": "3.1085.0",
+    "@aws-sdk/client-sesv2": "3.1086.0",
     "@tryghost/errors": "workspace:*",
     "@tryghost/tpl": "workspace:*",
     "nodemailer": "9.0.3",
