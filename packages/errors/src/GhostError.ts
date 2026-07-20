@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from './random-uuid';
 import { wrapStack } from './wrap-stack';
 
 export interface GhostErrorOptions {
