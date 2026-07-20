@@ -3,7 +3,7 @@ packages:
 overrides:
   axios: ^1.15.0
   fast-xml-parser: ^5.7.0
-  js-yaml@<3.15.0: 5.2.0
+  js-yaml@<3.15.0: 5.2.1
   yauzl: 3.4.0
 allowBuilds:
   dtrace-provider: true
