@@ -97,7 +97,7 @@ declare class GhostLogger {
     useLocalTime: boolean;
     metadata: Record<string, unknown>;
     rotation: RotationOptions;
-    streams: Record<string, { name: string; log: unknown }>;
+    streams: Record<string, { name: string; log: unknown; transport?: { flush(): Promise<void> } }>;
     serializers: Record<string, (input: any) => unknown>;
 
     constructor(options?: GhostLoggerOptions);
@@ -120,6 +120,13 @@ declare class GhostLogger {
     warn(...args: unknown[]): void;
     error(...args: unknown[]): void;
     fatal(...args: unknown[]): void;
+
+    /**
+     * Flush buffered logs on any transport that batches writes (e.g.
+     * ElasticSearch), forcing them out before the process exits. Resolves once
+     * every flushable transport has drained; failures are swallowed.
+     */
+    flush(): Promise<void>;
 
     /** Create a child logger with some properties bound to every log message. */
     child(boundProperties: Record<string, unknown>): GhostLogger;

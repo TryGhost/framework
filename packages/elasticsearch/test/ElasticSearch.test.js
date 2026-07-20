@@ -141,4 +141,80 @@ describe('ElasticSearch Bunyan', function () {
 
         assert.equal(bulkStub.callCount, 1);
     });
+
+    it('flush() ends the stream and awaits the bulk request', async function () {
+        const es = new ElasticSearchBunyan(
+            testClientConfig,
+            indexConfig.index,
+            indexConfig.pipeline,
+        );
+
+        let bulkResolved = false;
+        // Resolve the bulk promise only once the source stream has ended,
+        // mirroring how the real helper drains its buffer.
+        sandbox.stub(es.client.client.helpers, 'bulk').callsFake((data) => {
+            return (async () => {
+                // eslint-disable-next-line no-unused-vars
+                for await (const _chunk of data.datasource) {
+                    // drain the datasource
+                }
+                bulkResolved = true;
+            })();
+        });
+
+        const stream = es.getStream();
+        stream.write(JSON.stringify({ message: 'Test data' }));
+
+        await es.flush();
+
+        assert.equal(stream.writableEnded, true);
+        assert.equal(bulkResolved, true);
+    });
+
+    it('flush() can be called more than once without re-ending the stream', async function () {
+        const es = new ElasticSearchBunyan(
+            testClientConfig,
+            indexConfig.index,
+            indexConfig.pipeline,
+        );
+
+        sandbox.stub(es.client.client.helpers, 'bulk').resolves();
+
+        const stream = es.getStream();
+        const endSpy = sandbox.spy(stream, 'end');
+
+        await es.flush();
+        await es.flush();
+
+        assert.equal(stream.writableEnded, true);
+        assert.equal(endSpy.callCount, 1);
+    });
+
+    it('flush() is a no-op when no stream was created', async function () {
+        const es = new ElasticSearchBunyan(
+            testClientConfig,
+            indexConfig.index,
+            indexConfig.pipeline,
+        );
+
+        await assert.doesNotReject(async () => {
+            await es.flush();
+        });
+    });
+
+    it('flush() swallows a rejected bulk request', async function () {
+        const es = new ElasticSearchBunyan(
+            testClientConfig,
+            indexConfig.index,
+            indexConfig.pipeline,
+        );
+
+        sandbox.stub(es.client.client.helpers, 'bulk').returns(Promise.reject(new Error('boom')));
+
+        es.getStream();
+
+        await assert.doesNotReject(async () => {
+            await es.flush();
+        });
+    });
 });
