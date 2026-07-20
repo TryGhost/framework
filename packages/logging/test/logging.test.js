@@ -296,6 +296,70 @@ describe('Logging', function () {
         );
     });
 
+    it('flush drains flushable transports', async function () {
+        const flushStub = sandbox.stub(ElasticSearch.prototype, 'flush').resolves();
+
+        const ghostLogger = new GhostLogger({
+            transports: ['stdout', 'elasticsearch'],
+            elasticsearch: {
+                index: 'ghost-index',
+                username: 'example',
+                password: 'password',
+                host: 'elastic-search-host',
+            },
+        });
+
+        await ghostLogger.flush();
+
+        assert.equal(flushStub.calledOnce, true);
+    });
+
+    it('flush resolves when no flushable transports are configured', async function () {
+        const ghostLogger = new GhostLogger({
+            transports: ['stdout'],
+        });
+
+        await assert.doesNotReject(async () => {
+            await ghostLogger.flush();
+        });
+    });
+
+    it('flush swallows an async rejection from a transport', async function () {
+        sandbox.stub(ElasticSearch.prototype, 'flush').rejects(new Error('boom'));
+
+        const ghostLogger = new GhostLogger({
+            transports: ['stdout', 'elasticsearch'],
+            elasticsearch: {
+                index: 'ghost-index',
+                username: 'example',
+                password: 'password',
+                host: 'elastic-search-host',
+            },
+        });
+
+        await assert.doesNotReject(async () => {
+            await ghostLogger.flush();
+        });
+    });
+
+    it('flush swallows a synchronous throw from a transport', async function () {
+        sandbox.stub(ElasticSearch.prototype, 'flush').throws(new Error('boom'));
+
+        const ghostLogger = new GhostLogger({
+            transports: ['stdout', 'elasticsearch'],
+            elasticsearch: {
+                index: 'ghost-index',
+                username: 'example',
+                password: 'password',
+                host: 'elastic-search-host',
+            },
+        });
+
+        await assert.doesNotReject(async () => {
+            await ghostLogger.flush();
+        });
+    });
+
     it('http writes a log message', async function () {
         await new Promise((resolve) => {
             sandbox.stub(HttpStream.prototype, 'write').callsFake(function (data) {

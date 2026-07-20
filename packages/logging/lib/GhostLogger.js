@@ -197,6 +197,9 @@ class GhostLogger {
 
         this.streams.elasticsearch = {
             name: 'elasticsearch',
+            // Keep a reference to the transport so `flush()` can force the
+            // buffered documents out before the process exits.
+            transport: elasticSearchInstance,
             log: bunyan.createLogger({
                 name: this.name,
                 streams: [
@@ -594,6 +597,38 @@ class GhostLogger {
 
     fatal() {
         this.log('fatal', toArray(arguments));
+    }
+
+    /**
+     * @description Flush buffered logs on any transport that batches writes.
+     *
+     * Asynchronous transports (e.g. ElasticSearch) buffer log lines and only
+     * ship them on a size/time threshold or when their stream ends. On a fatal
+     * boot error the process exits before that threshold is reached, so the
+     * crash reason is never shipped. Awaiting `flush()` before `process.exit()`
+     * forces those buffers out.
+     *
+     * Only transports exposing a `flush()` method are awaited; synchronous
+     * transports (stdout, stderr, file) have nothing to drain. Failures are
+     * swallowed so a broken transport can never block shutdown.
+     * @returns {Promise<void>}
+     */
+    async flush() {
+        const flushes = [];
+
+        each(this.streams, (stream) => {
+            if (stream.transport && typeof stream.transport.flush === 'function') {
+                // Defer the call into the promise chain so a synchronous throw
+                // is caught by the same `.catch()` as an async rejection.
+                flushes.push(
+                    Promise.resolve()
+                        .then(() => stream.transport.flush())
+                        .catch(() => {}),
+                );
+            }
+        });
+
+        await Promise.all(flushes);
     }
 
     /**
