@@ -28,7 +28,7 @@
     "@nx/js": "23.1.0",
     "@vitest/coverage-v8": "4.1.10",
     "husky": "9.1.7",
-    "lint-staged": "17.0.8",
+    "lint-staged": "17.1.0",
     "nx": "23.1.0",
     "oxfmt": "0.59.0",
     "oxlint": "1.74.0",
