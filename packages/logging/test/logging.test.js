@@ -782,3 +782,66 @@ describe('Logging', function () {
         });
     });
 });
+
+describe('singleton reuse across module copies', function () {
+    const indexPath = require.resolve('../index');
+    const loggingPath = require.resolve('../lib/logging');
+    const { version } = require('../package.json');
+    const registryKey = Symbol.for(`@tryghost/logging@${parseInt(version, 10)}`);
+
+    // Force `lib/logging.js` to re-execute as if a second physical copy of the
+    // package were loading. Node's require cache would otherwise short-circuit
+    // it; clearing the cache re-runs the module and exercises the globalThis
+    // guard, which is the whole point of the singleton.
+    function loadAsFreshCopy() {
+        delete require.cache[indexPath];
+        delete require.cache[loggingPath];
+        return require('../index');
+    }
+
+    afterEach(function () {
+        // Leave a valid cached instance behind so the rest of the process sees
+        // the module's normal (already-required) state.
+        delete globalThis[registryKey];
+        loadAsFreshCopy();
+    });
+
+    it('caches the constructed instance on globalThis under a major-version key', function () {
+        delete globalThis[registryKey];
+
+        const logging = loadAsFreshCopy();
+
+        assert.equal(globalThis[registryKey], logging);
+    });
+
+    it('reuses the same instance when a duplicate copy re-executes the module', function () {
+        delete globalThis[registryKey];
+
+        const first = loadAsFreshCopy();
+        const second = loadAsFreshCopy();
+
+        assert.equal(second, first);
+    });
+
+    it('resetForTesting() clears the cache so the next load builds a new instance', function () {
+        const first = loadAsFreshCopy();
+
+        first.resetForTesting();
+        assert.equal(globalThis[registryKey], undefined);
+
+        const second = loadAsFreshCopy();
+        assert.notEqual(second, first);
+    });
+
+    it('gates the cache key on major version only', function () {
+        const major = parseInt(version, 10);
+
+        // Same major -> same key (patch/minor duplicates share).
+        assert.equal(registryKey, Symbol.for(`@tryghost/logging@${major}`));
+        // Different major -> different key (incompatible majors do not share).
+        assert.notEqual(
+            Symbol.for(`@tryghost/logging@${major}`),
+            Symbol.for(`@tryghost/logging@${major + 1}`),
+        );
+    });
+});

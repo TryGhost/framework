@@ -6,6 +6,10 @@ import GhostLogger = require('./GhostLogger');
  */
 declare const logging: GhostLogger & {
     GhostLogger: typeof GhostLogger;
+    /**
+     * Clear the cached process-wide logger instance. Intended for tests only.
+     */
+    resetForTesting(): void;
 };
 
 declare namespace logging {
