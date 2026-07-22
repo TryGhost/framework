@@ -16,17 +16,20 @@ Ghost logging layer that configures logger instances, transports, and structured
 
 ## Shared singleton
 
-The package's default export is a single `GhostLogger` instance. To survive
-cases where the package fails to dedupe and more than one physical copy ends up
-in the `node_modules` tree, that instance is cached on `globalThis` and reused
-across every copy in the process. Without this, each copy would construct its
-own logger and each `RotatingFileStream` would open the same log file —
-multiple writers rotating one file corrupt it.
+The package's default export is a single `GhostLogger` instance per thread. To
+survive cases where the package fails to dedupe and more than one physical copy
+ends up in the `node_modules` tree, that instance is cached on `globalThis` and
+reused across every copy in the same thread. Without this, each copy would
+construct its own logger and each `RotatingFileStream` would open the same log
+file — multiple writers rotating one file corrupt it. Worker threads each have
+their own `globalThis`, so a worker builds its own instance (with the `parent`
+transport) rather than sharing the main thread's.
 
 The cache is keyed on the **major** version only (`Symbol.for('@tryghost/logging@<major>')`),
-so any `5.x` copies share one instance while an incompatible `6.x` gets its own.
-Whichever copy loads first constructs the instance; later copies of the same
-major reuse it as-is.
+so copies that share an installed major share one instance while copies on a
+different — and potentially incompatible — major each get their own. Whichever
+copy loads first constructs the instance; later copies of the same major reuse
+it as-is.
 
 ### ⚠️ Caution when adding methods
 
