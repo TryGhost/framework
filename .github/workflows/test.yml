@@ -58,7 +58,7 @@ jobs:
 
       - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
 
-      - uses: tryghost/actions/actions/slack-build@dc2cd3041a8b80b8792c47f1f647454a9302ac3b # main
+      - uses: tryghost/actions/actions/slack-build@483e476e0898faa00503cf209a0aada35102f001 # main
         if: failure() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           status: ${{ job.status }}
