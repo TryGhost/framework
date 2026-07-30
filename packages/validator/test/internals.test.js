@@ -46,7 +46,20 @@ describe('Validator internals', function () {
 
         it('isSlug validates slug format', function () {
             assert.equal(validator.isSlug('a-valid_slug-1'), true);
-            assert.equal(validator.isSlug('not valid slug'), false);
+            assert.equal(validator.isSlug('not? valid slug'), false);
+        });
+
+        it('isSlug rejects slugs with NFD combining marks, in this case U+0301', function () {
+            assert.equal(validator.isSlug('café'.normalize('NFC')), true);
+            assert.equal(validator.isSlug('café'.normalize('NFD')), false);
+        });
+
+        it('isSlug accepts foreign characters, in this case Japanese', function () {
+            assert.equal(validator.isSlug('に間違いがないか_再度確認してください_再読み込みしてください'), true);
+        });
+
+        it('isSlug rejects non-letter characters, like emojis', function () {
+            assert.equal(validator.isSlug('im-so-happy-today-🙃'), false);
         });
 
         it('custom validators enforce string input', function () {

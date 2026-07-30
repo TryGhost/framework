@@ -47,7 +47,9 @@ validators.isEmptyOrURL = function isEmptyOrURL(str) {
 
 validators.isSlug = function isSlug(str) {
     assertString(str);
-    return validators.matches(str, /^[a-z0-9\-_]+$/);
+    // Note that combining marks aren't included here (\p{M}). The slugs should always be normalized using
+    // NFC before being used, so if a slug contains a combining mark when getting here, it's invalid.
+    return validators.matches(str, /^[\p{L}\p{N} _-]+$/u);
 };
 
 validators.isEmail = function isEmail(str, options = { legacy: true }) {

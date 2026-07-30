@@ -15,7 +15,7 @@ describe('Lib: Security - String', function () {
             assert.equal(result, '');
         });
 
-        it('should remove non ascii characters', function () {
+        it('should remove non-letter characters', function () {
             const result = security.string.safe('howtowin✓', options);
             assert.equal(result, 'howtowin');
         });
@@ -37,9 +37,9 @@ describe('Lib: Security - String', function () {
             // note: This is missing the soft-hyphen char that isn't much-liked by linters/browsers/etc,
             // it passed the test before it was removed
             const result = security.string.safe(
-                '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿',
+                '!"#$%&\'()*+,-./:;<=>?@[\\]^`{|}~¡¢£¤¥¦§¨©ª«¬®¯°±²_³´µ¶·¸¹º»¼½¾¿',
             );
-            assert.equal(result, '_-c-y-ss-c-a-r-deg-23up-1o-1-41-23-4');
+            assert.equal(result, 'a-2_3u-1o-1-41-23-4');
         });
 
         it('should replace all of the foreign chars in ascii', function () {
@@ -48,7 +48,7 @@ describe('Lib: Security - String', function () {
             );
             assert.equal(
                 result,
-                'aaaaaaaeceeeeiiiidnoooooxouuuuythssaaaaaaaeceeeeiiiidnooooo-ouuuuythy',
+                'aaaaaaae-ceeeeiiiidnooooo-ouuuuythssaaaaaaaeceeeeiiiidnooooo-ouuuuythy',
             );
         });
 
@@ -83,14 +83,31 @@ describe('Lib: Security - String', function () {
         });
 
         it('should properly handle unicode punctuation conversion', function () {
+            // note: the previous unidecode transformation handled this differently than anyascii, so this is
+            // a compromise that's "good enough" and gives the most optimal results for most languages
+            // result using unidecode was: nijian-wei-iganaika-zai-du-que-ren-sitekudasai-zai-du-miip-misitekudasai
             const result = security.string.safe(
                 'に間違いがないか、再度確認してください。再読み込みしてください。',
                 options,
             );
             assert.equal(
                 result,
-                'nijian-wei-iganaika-zai-du-que-ren-sitekudasai-zai-du-miip-misitekudasai',
+                'ni-jian-weiiganaika-zai-du-que-renshitekudasai-zai-dumi-yumishitekudasai',
             );
+        });
+
+        it('should not transliterate the slugs if the unicodeSlugs flag is passed', function () {
+            let result = security.string.safe('Ett smörgåsbord från Sydkorea: 스뫼르고스보르드', {
+                unicodeSlugs: true,
+            });
+            assert.equal(result, 'ett-smörgåsbord-från-sydkorea-스뫼르고스보르드');
+        });
+
+        it('should not replace existing dashes and underscores when the slugSeparator is set to spaces', function () {
+            let result = security.string.safe('Herr./Klaus-Jürgen_44', {
+                slugSeparator: ' ',
+            });
+            assert.equal(result, 'herr klaus-jurgen_44');
         });
 
         it('should not lose or convert dashes if options are passed with truthy importing flag', function () {
@@ -104,7 +121,7 @@ describe('Lib: Security - String', function () {
             let result = security.string.safe("-slug-&with-✓-invalid-characters-に'", {
                 importing: true,
             });
-            assert.equal(result, '-slug--with--invalid-characters-ni');
+            assert.equal(result, '-slug--with---invalid-characters-ni');
         });
     });
 });
