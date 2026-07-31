@@ -49,9 +49,16 @@ describe('Validator internals', function () {
             assert.equal(validator.isSlug('not? valid slug'), false);
         });
 
-        it('isSlug rejects slugs with NFD combining marks, in this case U+0301', function () {
-            assert.equal(validator.isSlug('café'.normalize('NFC')), true);
-            assert.equal(validator.isSlug('café'.normalize('NFD')), false);
+        it('isSlug rejects slugs with too many combining marks, but accept some of them', function () {
+            // note that this might break some text editors, so it might need to be removed
+            assert.equal(validator.isSlug('ghost-blo̵̯͝ǵ'), true);
+            assert.equal(validator.isSlug('G̸̛̦̼̜̱̹̦̲̩̰̀̓̆̇̔̎̒̎h̸͕̹̤̿͌́͊͋̈̂͗̕o̶̠͑̍s̷̝̭̰̳̖̣͉̈́̌̐́̈́̒͂̚t̴̩̦̫̟̲̘̆̔̑̅͘̕͠͝͠ ̶̜̺͚̆̈ͅb̸̰͕͔͈̤̾̉͒̂̎ͅl̵̳͚̘̯̀̎o̵̯͝ǵ̴̨̛͍̞͙̲̦̗̖͍̂̈́͆͝'), false);
+        });
+
+        it('isSlug rejects slugs with combining marks in the beginning of a text', function () {
+            // note that this might break some text editors, so it might need to be removed
+            assert.equal(validator.isSlug('ผีในวัฒนธรรมไทย'), true);
+            assert.equal(validator.isSlug('\u0303\u0301\u0302ผีในวัฒนธรรมไทย'), false);
         });
 
         it('isSlug accepts foreign characters, in this case Japanese', function () {
