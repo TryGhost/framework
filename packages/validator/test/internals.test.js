@@ -49,6 +49,13 @@ describe('Validator internals', function () {
             assert.equal(validator.isSlug('not? valid slug'), false);
         });
 
+        it('isSlug accepts slugs generated without optional changes', function () {
+            assert.equal(validator.isSlug('-separator-in-beginning'), true);
+            assert.equal(validator.isSlug('-separator-in-beginning-and-end-'), true);
+            assert.equal(validator.isSlug('multiple---separators-in--use'), true);
+            assert.equal(validator.isSlug('different__kinds-of separator___in-the-same-text'), true);
+        });
+    
         it('isSlug rejects slugs with too many combining marks, but accept some of them', function () {
             // note that this might break some text editors, so it might need to be removed
             assert.equal(validator.isSlug('ghost-blo̵̯͝ǵ'), true);

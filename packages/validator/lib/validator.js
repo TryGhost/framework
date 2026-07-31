@@ -51,10 +51,7 @@ validators.isSlug = function isSlug(str) {
     // combining marks to create letters. To avoid misuse, the slugify() function only generates slugs
     // with a natural number of combining marks. Marks in the beginning of a word means they're invalid,
     // and in the rest of the slug a maximum of three combining marks is permitted to each letter.
-    return validators.matches(
-        str,
-        /^(?!\p{M})(?!.*[\p{Mn}\p{Mc}]{4,})[\p{L}\p{N}\p{Mn}\p{Mc} _-]+$/u
-    );
+    return validators.matches(str, /^(?:[\p{L}\p{N}][\p{Mn}\p{Mc}]{0,3}|[ _-])+$/u);
 };
 
 validators.isEmail = function isEmail(str, options = { legacy: true }) {
