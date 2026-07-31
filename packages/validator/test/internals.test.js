@@ -55,10 +55,11 @@ describe('Validator internals', function () {
             assert.equal(validator.isSlug('G̸̛̦̼̜̱̹̦̲̩̰̀̓̆̇̔̎̒̎h̸͕̹̤̿͌́͊͋̈̂͗̕o̶̠͑̍s̷̝̭̰̳̖̣͉̈́̌̐́̈́̒͂̚t̴̩̦̫̟̲̘̆̔̑̅͘̕͠͝͠ ̶̜̺͚̆̈ͅb̸̰͕͔͈̤̾̉͒̂̎ͅl̵̳͚̘̯̀̎o̵̯͝ǵ̴̨̛͍̞͙̲̦̗̖͍̂̈́͆͝'), false);
         });
 
-        it('isSlug rejects slugs with combining marks in the beginning of a text', function () {
+        it('isSlug rejects slugs with combining marks in the beginning of a text or a word', function () {
             // note that this might break some text editors, so it might need to be removed
             assert.equal(validator.isSlug('ผีในวัฒนธรรมไทย'), true);
             assert.equal(validator.isSlug('\u0303\u0301\u0302ผีในวัฒนธรรมไทย'), false);
+            assert.equal(validator.isSlug('ghost-\u0301\u0302blog'), false);
         });
 
         it('isSlug accepts foreign characters, in this case Japanese', function () {

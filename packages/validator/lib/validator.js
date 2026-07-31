@@ -49,9 +49,12 @@ validators.isSlug = function isSlug(str) {
     assertString(str);
     // The slugs should always be normalized with NFC before being used, but some languages rely on
     // combining marks to create letters. To avoid misuse, the slugify() function only generates slugs
-    // with a natural number of combining marks. Marks in the beginning of a slug means they're invalid,
+    // with a natural number of combining marks. Marks in the beginning of a word means they're invalid,
     // and in the rest of the slug a maximum of three combining marks is permitted to each letter.
-    return validators.matches(str, /^(?!\p{M})(?!.*[\p{Mn}\p{Mc}]{4,})[\p{L}\p{N}\p{Mn}\p{Mc} _-]+$/u);
+    return validators.matches(
+        str,
+        /^(?!\p{M})(?!.*[\p{Mn}\p{Mc}]{4,})[\p{L}\p{N}\p{Mn}\p{Mc} _-]+$/u
+    );
 };
 
 validators.isEmail = function isEmail(str, options = { legacy: true }) {
