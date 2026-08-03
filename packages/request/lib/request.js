@@ -34,7 +34,11 @@ module.exports = async function request(url, options = {}) {
         // DNS cache lookup has already been configured.
     }
 
-    if (_.isEmpty(url) || !validator.isURL(url)) {
+    const isUrlValid =
+        typeof url === 'string' &&
+        // `validator.isURL` doesn't let us express "any TLD or localhost", so we do two checks.
+        (validator.isURL(url) || validator.isURL(url, { host_whitelist: ['localhost'] }));
+    if (!isUrlValid) {
         return Promise.reject(
             new errors.InternalServerError({
                 message: 'URL empty or invalid.',
