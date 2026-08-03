@@ -25,5 +25,5 @@ minimumReleaseAgeExclude:
   # Renovate security update: js-yaml@5.2.2
   - js-yaml@5.2.2
 catalog:
-  sinon: 22.0.0
+  sinon: 22.1.0
   typescript: 6.0.3
