@@ -10,7 +10,9 @@ allowBuilds:
   esbuild: true
   nx: true
   sqlite3: true
-minimumReleaseAge: 1440
+trustPolicy: no-downgrade
+blockExoticSubdeps: true
+minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
   - '@tryghost/mongo-knex'
   - '@tryghost/nql'
