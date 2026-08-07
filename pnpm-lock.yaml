@@ -537,8 +537,8 @@ importers:
         specifier: workspace:*
         version: link:../tpl
       nodemailer:
-        specifier: 9.0.3
-        version: 9.0.3
+        specifier: 9.0.4
+        version: 9.0.4
       nodemailer-mailgun-transport:
         specifier: 2.1.5
         version: 2.1.5(debug@4.4.3(supports-color@7.2.0))(lodash@4.18.1)(supports-color@7.2.0)
@@ -4321,8 +4321,8 @@ packages:
   nodemailer-stub-transport@1.1.0:
     resolution: {integrity: sha512-4fwl2f+647IIyuNuf6wuEMqK4oEU9FMJSYme8kPckVSr1rXIXcmI6BNcIWO+1cAK8XeexYKxYoFztam0jAwjkA==}
 
-  nodemailer@9.0.3:
-    resolution: {integrity: sha512-n+YP+NKwR5zRWa60k3GiQ6Q3B4KXCoAw40dAKeCtYn020iNN74aWK2liXIC3ZEATeGql7we3tE3t8QwhY0eskw==}
+  nodemailer@9.0.4:
+    resolution: {integrity: sha512-LmJNRVRtfSCULxcZpy0Cpg4WWenlUZ9+zbmTO+S7v9wD6XreYLjXRFtDjtV/4F0HT5p1GyZfA0Ux/myxHb18CQ==}
     engines: {node: '>=6.0.0'}
 
   nopt@9.0.0:
@@ -8899,7 +8899,7 @@ snapshots:
 
   nodemailer-stub-transport@1.1.0: {}
 
-  nodemailer@9.0.3: {}
+  nodemailer@9.0.4: {}
 
   nopt@9.0.0:
     dependencies:
