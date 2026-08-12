@@ -167,11 +167,11 @@ function usesCountDistinct(sql) {
 }
 
 describe('fetchPage end-to-end against real bookshelf + sqlite', function () {
-    // These two tests are the only fetchPage scenarios where the choice of
-    // count aggregate actually changes the returned total (inner-join row
-    // duplication) or is the named regression the PR is about (subquery
-    // JOIN in WHERE). The remaining query shapes are covered by the direct
-    // `hasMultiTableSource` suite above, which is faster and more exhaustive.
+    // These tests cover the fetchPage scenarios where the choice of count
+    // aggregate actually changes the returned total (inner-join row
+    // duplication) or was a named regression (subquery JOIN in WHERE). The
+    // remaining query shapes are covered by the direct `hasMultiTableSource`
+    // suite above, which is faster and more exhaustive.
     let db;
     let Post;
     let queries;
@@ -197,7 +197,7 @@ describe('fetchPage end-to-end against real bookshelf + sqlite', function () {
                     'published',
                 );
             })
-            .fetchPage({ page: 1, limit: 10, useSmartCount: true });
+            .fetchPage({ page: 1, limit: 10 });
 
         const countSql = countQuerySql(queries);
         assert.ok(usesCountDistinct(countSql), `expected count(distinct), got: ${countSql}`);
@@ -215,7 +215,7 @@ describe('fetchPage end-to-end against real bookshelf + sqlite', function () {
                         .where('authors.name', 'Alice');
                 });
             })
-            .fetchPage({ page: 1, limit: 10, useSmartCount: true });
+            .fetchPage({ page: 1, limit: 10 });
 
         const countSql = countQuerySql(queries);
         assert.ok(usesCountStar(countSql), `expected count(*), got: ${countSql}`);
