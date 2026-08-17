@@ -23,16 +23,16 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@tryghost/bookshelf-collision": "workspace:*",
-    "@tryghost/bookshelf-custom-query": "workspace:*",
-    "@tryghost/bookshelf-eager-load": "workspace:*",
-    "@tryghost/bookshelf-filter": "workspace:*",
-    "@tryghost/bookshelf-has-posts": "workspace:*",
-    "@tryghost/bookshelf-include-count": "workspace:*",
-    "@tryghost/bookshelf-order": "workspace:*",
-    "@tryghost/bookshelf-pagination": "workspace:*",
-    "@tryghost/bookshelf-search": "workspace:*",
-    "@tryghost/bookshelf-transaction-events": "workspace:*"
+    "@tryghost/bookshelf-collision": "workspace:^",
+    "@tryghost/bookshelf-custom-query": "workspace:^",
+    "@tryghost/bookshelf-eager-load": "workspace:^",
+    "@tryghost/bookshelf-filter": "workspace:^",
+    "@tryghost/bookshelf-has-posts": "workspace:^",
+    "@tryghost/bookshelf-include-count": "workspace:^",
+    "@tryghost/bookshelf-order": "workspace:^",
+    "@tryghost/bookshelf-pagination": "workspace:^",
+    "@tryghost/bookshelf-search": "workspace:^",
+    "@tryghost/bookshelf-transaction-events": "workspace:^"
   },
   "devDependencies": {
     "sinon": "catalog:"

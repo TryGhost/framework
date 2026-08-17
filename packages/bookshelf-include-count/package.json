@@ -23,7 +23,7 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@tryghost/debug": "workspace:*",
+    "@tryghost/debug": "workspace:^",
     "lodash": "4.18.1"
   },
   "devDependencies": {

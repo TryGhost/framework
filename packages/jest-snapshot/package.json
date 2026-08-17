@@ -25,7 +25,7 @@
   "dependencies": {
     "@jest/expect": "30.4.1",
     "@jest/expect-utils": "30.4.1",
-    "@tryghost/errors": "workspace:*",
+    "@tryghost/errors": "workspace:^",
     "jest-snapshot": "30.4.1"
   },
   "devDependencies": {

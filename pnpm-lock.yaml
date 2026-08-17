@@ -54,19 +54,19 @@ importers:
   packages/api-framework:
     dependencies:
       '@tryghost/debug':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../debug
       '@tryghost/errors':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../errors
       '@tryghost/promise':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../promise
       '@tryghost/tpl':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../tpl
       '@tryghost/validator':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../validator
       lodash:
         specifier: 4.18.1
@@ -79,7 +79,7 @@ importers:
   packages/bookshelf-collision:
     dependencies:
       '@tryghost/errors':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../errors
       lodash:
         specifier: 4.18.1
@@ -101,7 +101,7 @@ importers:
   packages/bookshelf-eager-load:
     dependencies:
       '@tryghost/debug':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../debug
       lodash:
         specifier: 4.18.1
@@ -114,16 +114,16 @@ importers:
   packages/bookshelf-filter:
     dependencies:
       '@tryghost/debug':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../debug
       '@tryghost/errors':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../errors
       '@tryghost/nql':
         specifier: 0.13.2
         version: 0.13.2(supports-color@8.1.1)
       '@tryghost/tpl':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../tpl
     devDependencies:
       sinon:
@@ -133,7 +133,7 @@ importers:
   packages/bookshelf-has-posts:
     dependencies:
       '@tryghost/debug':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../debug
       lodash:
         specifier: 4.18.1
@@ -146,7 +146,7 @@ importers:
   packages/bookshelf-include-count:
     dependencies:
       '@tryghost/debug':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../debug
       lodash:
         specifier: 4.18.1
@@ -169,10 +169,10 @@ importers:
   packages/bookshelf-pagination:
     dependencies:
       '@tryghost/errors':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../errors
       '@tryghost/tpl':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../tpl
       lodash:
         specifier: 4.18.1
@@ -194,34 +194,34 @@ importers:
   packages/bookshelf-plugins:
     dependencies:
       '@tryghost/bookshelf-collision':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../bookshelf-collision
       '@tryghost/bookshelf-custom-query':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../bookshelf-custom-query
       '@tryghost/bookshelf-eager-load':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../bookshelf-eager-load
       '@tryghost/bookshelf-filter':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../bookshelf-filter
       '@tryghost/bookshelf-has-posts':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../bookshelf-has-posts
       '@tryghost/bookshelf-include-count':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../bookshelf-include-count
       '@tryghost/bookshelf-order':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../bookshelf-order
       '@tryghost/bookshelf-pagination':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../bookshelf-pagination
       '@tryghost/bookshelf-search':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../bookshelf-search
       '@tryghost/bookshelf-transaction-events':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../bookshelf-transaction-events
     devDependencies:
       sinon:
@@ -256,7 +256,7 @@ importers:
   packages/config:
     dependencies:
       '@tryghost/root-utils':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../root-utils
       nconf:
         specifier: 0.13.0
@@ -271,7 +271,7 @@ importers:
   packages/debug:
     dependencies:
       '@tryghost/root-utils':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../root-utils
       debug:
         specifier: 4.4.3
@@ -280,7 +280,7 @@ importers:
   packages/domain-events:
     dependencies:
       '@tryghost/logging':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../logging
 
   packages/elasticsearch:
@@ -289,7 +289,7 @@ importers:
         specifier: 8.19.2
         version: 8.19.2(supports-color@8.1.1)
       '@tryghost/debug':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../debug
       split2:
         specifier: 4.2.0
@@ -326,7 +326,7 @@ importers:
   packages/express-test:
     dependencies:
       '@tryghost/jest-snapshot':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../jest-snapshot
       cookiejar:
         specifier: 2.1.4
@@ -360,10 +360,10 @@ importers:
   packages/http-stream:
     dependencies:
       '@tryghost/errors':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../errors
       '@tryghost/request':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../request
     devDependencies:
       express:
@@ -382,7 +382,7 @@ importers:
         specifier: 30.4.1
         version: 30.4.1
       '@tryghost/errors':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../errors
       jest-snapshot:
         specifier: 30.4.1
@@ -398,10 +398,10 @@ importers:
         specifier: 4.2.0
         version: 4.2.0
       '@tryghost/errors':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../errors
       '@tryghost/logging':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../logging
       bree:
         specifier: 9.2.9
@@ -435,19 +435,19 @@ importers:
   packages/logging:
     dependencies:
       '@tryghost/bunyan-rotating-filestream':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../bunyan-rotating-filestream
       '@tryghost/elasticsearch':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../elasticsearch
       '@tryghost/http-stream':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../http-stream
       '@tryghost/pretty-stream':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../pretty-stream
       '@tryghost/root-utils':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../root-utils
       bunyan:
         specifier: 1.8.15
@@ -466,7 +466,7 @@ importers:
         version: 4.18.1
     devDependencies:
       '@tryghost/errors':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../errors
       sinon:
         specifier: 'catalog:'
@@ -475,13 +475,13 @@ importers:
   packages/metrics:
     dependencies:
       '@tryghost/elasticsearch':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../elasticsearch
       '@tryghost/pretty-stream':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../pretty-stream
       '@tryghost/root-utils':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../root-utils
       json-stringify-safe:
         specifier: 5.0.1
@@ -497,16 +497,16 @@ importers:
   packages/mw-error-handler:
     dependencies:
       '@tryghost/debug':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../debug
       '@tryghost/errors':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../errors
       '@tryghost/http-cache-utils':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../http-cache-utils
       '@tryghost/tpl':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../tpl
       lodash:
         specifier: 4.18.1
@@ -531,10 +531,10 @@ importers:
         specifier: 3.1110.0
         version: 3.1110.0
       '@tryghost/errors':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../errors
       '@tryghost/tpl':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../tpl
       nodemailer:
         specifier: 9.0.5
@@ -582,10 +582,10 @@ importers:
   packages/prometheus-metrics:
     dependencies:
       '@tryghost/debug':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../debug
       '@tryghost/logging':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../logging
       express:
         specifier: 5.2.1
@@ -637,13 +637,13 @@ importers:
   packages/request:
     dependencies:
       '@tryghost/errors':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../errors
       '@tryghost/validator':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../validator
       '@tryghost/version':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../version
       cacheable-lookup:
         specifier: 7.0.0
@@ -694,10 +694,10 @@ importers:
   packages/server:
     dependencies:
       '@tryghost/debug':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../debug
       '@tryghost/logging':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../logging
     devDependencies:
       sinon:
@@ -716,10 +716,10 @@ importers:
   packages/validator:
     dependencies:
       '@tryghost/errors':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../errors
       '@tryghost/tpl':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../tpl
       lodash:
         specifier: 4.18.1
@@ -734,7 +734,7 @@ importers:
   packages/version:
     dependencies:
       '@tryghost/root-utils':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../root-utils
       semver:
         specifier: 7.8.5
@@ -760,7 +760,7 @@ importers:
   packages/zip:
     dependencies:
       '@tryghost/errors':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../errors
       archiver:
         specifier: 8.0.0

@@ -23,8 +23,8 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@tryghost/errors": "workspace:*",
-    "@tryghost/request": "workspace:*"
+    "@tryghost/errors": "workspace:^",
+    "@tryghost/request": "workspace:^"
   },
   "devDependencies": {
     "express": "5.2.1",
