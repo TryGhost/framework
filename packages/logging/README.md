@@ -14,6 +14,54 @@ Ghost logging layer that configures logger instances, transports, and structured
 
 ## Usage
 
+The default export is a pre-configured `GhostLogger` instance, built from the
+`loggingrc` file at the process root if one exists. The `GhostLogger` class is
+attached to it for creating additional instances.
+
+```js
+const logging = require('@tryghost/logging');
+
+logging.info('server started');
+logging.error(new Error('boom'));
+
+const requestLogger = logging.child({ requestId: 'abc123' });
+requestLogger.warn('slow response');
+```
+
+### Types
+
+Types ship with the package. `GhostLogger` is exported as both a value (the
+class) and a type (an instance of it), alongside the options and transport types:
+
+```ts
+import logging, { GhostLogger } from '@tryghost/logging';
+import type {
+    GhostLogger as GhostLoggerInstance,
+    GhostLoggerOptions,
+    LogLevel,
+    Transport,
+} from '@tryghost/logging';
+
+const options: GhostLoggerOptions = {
+    name: 'my-service',
+    transports: ['stdout'] satisfies Transport[],
+};
+const custom: GhostLoggerInstance = new GhostLogger(options);
+
+function log(instance: GhostLoggerInstance, level: LogLevel, message: string) {
+    instance.log(level, [message]);
+}
+```
+
+In a CommonJS file the whole surface is reachable through a single import:
+
+```ts
+import logging = require('@tryghost/logging');
+
+const custom: logging.GhostLogger = new logging.GhostLogger({ name: 'my-service' });
+const options: logging.GhostLoggerOptions = {};
+```
+
 ## Shared singleton
 
 The package's default export is a single `GhostLogger` instance per thread. To
