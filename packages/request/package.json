@@ -23,9 +23,9 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@tryghost/errors": "workspace:*",
-    "@tryghost/validator": "workspace:*",
-    "@tryghost/version": "workspace:*",
+    "@tryghost/errors": "workspace:^",
+    "@tryghost/validator": "workspace:^",
+    "@tryghost/version": "workspace:^",
     "cacheable-lookup": "7.0.0",
     "got": "15.1.0",
     "lodash": "4.18.1"

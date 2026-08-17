@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@elastic/elasticsearch": "8.19.2",
-    "@tryghost/debug": "workspace:*",
+    "@tryghost/debug": "workspace:^",
     "split2": "4.2.0"
   },
   "devDependencies": {
