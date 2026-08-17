@@ -41,6 +41,7 @@
     "projects": ["packages/*"],
     "projectsRelationship": "independent",
     "version": {
+      "updateDependents": "never",
       "preserveMatchingDependencyRanges": false,
       "git": {
         "commit": true,
