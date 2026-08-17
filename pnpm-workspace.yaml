@@ -11,7 +11,7 @@ allowBuilds:
   # Permitted builds are version-scoped. Adding or updating a permitted version
   # requires an explicit Platform security review.
   'dtrace-provider@0.8.8': true
-  'esbuild@0.28.1': true
+  'esbuild@0.28.2': true
   'nx@23.1.1': true
   'sqlite3@6.0.1': true
 minimumReleaseAge: 4320
