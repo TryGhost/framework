@@ -16,5 +16,5 @@ allowBuilds:
   'sqlite3@6.0.1': true
 minimumReleaseAge: 4320
 catalog:
-  sinon: 22.0.0
+  sinon: 22.1.0
   typescript: 7.0.2
