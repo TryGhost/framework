@@ -14,7 +14,7 @@ const messages = {
 let defaults;
 let paginationUtils;
 
-// Smart count only uses count(*) for single-table queries. Multi-table shapes
+// fetchPage only uses count(*) for single-table queries. Multi-table shapes
 // — outer JOINs, UNIONs, derived/raw FROM sources, or comma-separated FROM
 // lists — can duplicate base rows, so fetchPage must use count(distinct id).
 //
@@ -226,8 +226,9 @@ const pagination = function pagination(bookshelf) {
 
                 countQuery.clear('select');
                 // Skipping distinct for simple queries where we know result rows are unique.
-                const queryHasMultiTableSource = hasMultiTableSource(countQuery);
-                if (options.useBasicCount || (options.useSmartCount && !queryHasMultiTableSource)) {
+                // useBasicCount forces count(*) even for multi-table queries, for callers
+                // that know their result set is unique.
+                if (options.useBasicCount || !hasMultiTableSource(countQuery)) {
                     countPromise = countQuery.select(bookshelf.knex.raw('count(*) as aggregate'));
                 } else {
                     countPromise = countQuery.select(
