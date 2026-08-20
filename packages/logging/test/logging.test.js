@@ -601,6 +601,107 @@ describe('Logging', function () {
             assert.notEqual(ghostLogger.streams['rotation-all'], undefined);
         });
 
+        it('flush writes buffered file logs to disk', async function () {
+            const tempDir = prepareTestLogDir('flush-file');
+
+            const ghostLogger = new GhostLogger({
+                domain: 'test.com',
+                env: 'production',
+                filename: '{env}',
+                transports: ['file'],
+                path: tempDir,
+            });
+
+            ghostLogger.error(new Error('boom'));
+
+            await ghostLogger.flush();
+
+            const errorLog = fs.readFileSync(path.join(tempDir, 'production.error.log'), 'utf8');
+            assert.equal(includes(errorLog, 'boom'), true);
+
+            fs.rmSync(tempDir, { recursive: true, force: true });
+        });
+
+        it('flush writes buffered logs from the rotation library to disk', async function () {
+            const tempDir = prepareTestLogDir('flush-rotation-library');
+
+            const ghostLogger = new GhostLogger({
+                domain: 'test.com',
+                env: 'production',
+                filename: '{env}',
+                transports: ['file'],
+                path: tempDir,
+                rotation: {
+                    enabled: true,
+                    useLibrary: true,
+                    period: '1d',
+                    threshold: '10m',
+                    count: 2,
+                },
+            });
+
+            ghostLogger.error(new Error('boom'));
+
+            await ghostLogger.flush();
+
+            const errorLog = fs.readFileSync(path.join(tempDir, 'production.error.log'), 'utf8');
+            assert.equal(includes(errorLog, 'boom'), true);
+
+            // The transports stay writable after a flush
+            await ghostLogger.streams['rotation-errors'].transport.end();
+            await ghostLogger.streams['rotation-all'].transport.end();
+            fs.rmSync(tempDir, { recursive: true, force: true });
+        });
+
+        it('flush writes buffered logs from the built-in rotation to disk', async function () {
+            const tempDir = prepareTestLogDir('flush-rotation-built-in');
+
+            const ghostLogger = new GhostLogger({
+                domain: 'test.com',
+                env: 'production',
+                filename: '{env}',
+                transports: ['file'],
+                path: tempDir,
+                rotation: {
+                    enabled: true,
+                    useLibrary: false,
+                    period: '1d',
+                    count: 2,
+                },
+            });
+
+            ghostLogger.error(new Error('boom'));
+
+            await ghostLogger.flush();
+
+            const errorLog = fs.readFileSync(path.join(tempDir, 'production.error.log'), 'utf8');
+            assert.equal(includes(errorLog, 'boom'), true);
+
+            fs.rmSync(tempDir, { recursive: true, force: true });
+        });
+
+        it('child loggers keep the flushable transports of their parent', async function () {
+            const tempDir = prepareTestLogDir('flush-child');
+
+            const ghostLogger = new GhostLogger({
+                domain: 'test.com',
+                env: 'production',
+                filename: '{env}',
+                transports: ['file'],
+                path: tempDir,
+            });
+
+            const child = ghostLogger.child({ requestId: 'abc123' });
+            child.error(new Error('boom'));
+
+            await child.flush();
+
+            const errorLog = fs.readFileSync(path.join(tempDir, 'production.error.log'), 'utf8');
+            assert.equal(includes(errorLog, 'abc123'), true);
+
+            fs.rmSync(tempDir, { recursive: true, force: true });
+        });
+
         it('file stream exits early when target directory does not exist', function () {
             const badPath = getTestLogDir('missing-dir');
             fs.rmSync(badPath, { recursive: true, force: true });

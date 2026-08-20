@@ -28,6 +28,27 @@ const requestLogger = logging.child({ requestId: 'abc123' });
 requestLogger.warn('slow response');
 ```
 
+### Flushing before exit
+
+Transports that batch writes — ElasticSearch (buffered bulk requests) and the
+file transports (queued disk writes) — can still be holding log lines when a
+process exits, which is exactly when the last lines matter most. Await
+`flush()` before `process.exit()`:
+
+```js
+try {
+    await boot();
+} catch (err) {
+    logging.error(err);
+    await logging.flush();
+    process.exit(1);
+}
+```
+
+`flush()` never rejects and never closes a transport, so the logger stays
+usable afterwards. Transports that write straight through (stdout, stderr) are
+skipped.
+
 ### Types
 
 Types ship with the package. `GhostLogger` is exported as both a value (the
