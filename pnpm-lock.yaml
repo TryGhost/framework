@@ -528,8 +528,8 @@ importers:
   packages/nodemailer:
     dependencies:
       '@aws-sdk/client-sesv2':
-        specifier: 3.1111.0
-        version: 3.1111.0
+        specifier: 3.1112.0
+        version: 3.1112.0
       '@tryghost/errors':
         specifier: workspace:^
         version: link:../errors
@@ -778,8 +778,8 @@ importers:
 
 packages:
 
-  '@aws-sdk/client-sesv2@3.1111.0':
-    resolution: {integrity: sha512-RLraobtxTBIGOVNQzf9q6Irsx6OUSdLgmRw6cGTCoRZ5o8xrHbxA8KUgXLnoDRnVobSfxJaarqd+dS4DQl11rA==}
+  '@aws-sdk/client-sesv2@3.1112.0':
+    resolution: {integrity: sha512-/adAWtVjwEbfClVtvgKvnnBMQ854pJiJkNneDkXIG+mYxOkdwCV/m9za6WAEjWs7Ta9JChP/Yn6QQwQhPf71Bw==}
     engines: {node: '>=20.0.0'}
 
   '@aws-sdk/core@3.977.8':
@@ -3396,6 +3396,7 @@ packages:
   eslint@9.39.5:
     resolution: {integrity: sha512-DgZS62aPLXKlnxILS/AYCoRvHaZeXceIzlXPkkGGzJWSow1aEk0lbTlxUSlyjC8jcaKxAdOnTDz+o1JFSBsyjw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
     peerDependencies:
       jiti: '*'
@@ -5277,7 +5278,7 @@ packages:
 
 snapshots:
 
-  '@aws-sdk/client-sesv2@3.1111.0':
+  '@aws-sdk/client-sesv2@3.1112.0':
     dependencies:
       '@aws-sdk/core': 3.977.8
       '@aws-sdk/credential-provider-node': 3.972.80
