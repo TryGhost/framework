@@ -161,6 +161,40 @@ describe('WriteQueue', function () {
         await queue.shutdown();
     });
 
+    it('Flushes pending events without closing the queue', async function () {
+        const written = [];
+        const queue = new WriteQueue();
+        queue.setFileHandle({
+            write: async (data) => {
+                written.push(data);
+                return { bytesWritten: data.length };
+            },
+        });
+
+        queue.push('first\n');
+        // Pushed while the first write is in flight, so it is not picked up by
+        // that write and needs the flush loop to reach disk
+        queue.push('second\n');
+        await queue.flush();
+
+        assert.strictEqual(written.join(''), 'first\nsecond\n');
+
+        // Still writable afterwards
+        queue.push('third\n');
+        await queue.shutdown();
+        assert.strictEqual(written.join(''), 'first\nsecond\nthird\n');
+    });
+
+    it('Flushing an empty or paused queue is a no-op', async function () {
+        const queue = new WriteQueue();
+        await queue.flush();
+
+        // Never given a file handle, so the queue stays paused
+        queue.push('data\n');
+        await queue.flush();
+        await queue.shutdown();
+    });
+
     it('Reports bytes written', async function () {
         const queue = new WriteQueue();
         const written = [];

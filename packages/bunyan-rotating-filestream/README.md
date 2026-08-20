@@ -37,6 +37,21 @@ const log = bunyan.createLogger({
 
 Other options include `startNewFile` to always open a new file on start-up.
 
+### Flushing
+
+Writes are queued and written asynchronously, so a process that exits right
+after logging can lose the last lines. `flush()` drains everything written so
+far to disk and leaves the stream open:
+
+```js
+log.error('fatal boot error');
+await stream.flush();
+process.exit(1);
+```
+
+Use `end()` instead when shutting the stream down for good — it also drains the
+queue, but closes the file handles and stops rotation.
+
 ## Develop
 
 This is a mono repository, managed with [Nx](https://nx.dev).

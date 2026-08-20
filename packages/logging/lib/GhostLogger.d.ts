@@ -122,9 +122,9 @@ declare class GhostLogger {
     fatal(...args: unknown[]): void;
 
     /**
-     * Flush buffered logs on any transport that batches writes (e.g.
-     * ElasticSearch), forcing them out before the process exits. Resolves once
-     * every flushable transport has drained; failures are swallowed.
+     * Flush buffered logs on any transport that batches writes (ElasticSearch,
+     * file), forcing them out before the process exits. Resolves once every
+     * flushable transport has drained; failures are swallowed.
      */
     flush(): Promise<void>;
 
