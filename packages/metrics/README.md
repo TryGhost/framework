@@ -29,6 +29,42 @@ const custom = new metrics.GhostMetrics({
 });
 ```
 
+### Sampling
+
+High-volume metrics can be sampled so only a proportion of them are shipped.
+`sampleRate` is a number between 0 and 1, and defaults to `1` (ship
+everything). Configure a default rate, per-metric rates, or both:
+
+```js
+const metrics = require('@tryghost/metrics');
+
+const sampled = new metrics.GhostMetrics({
+    metrics: {
+        transports: ['elasticsearch'],
+        sampleRate: 0.5,
+        sampleRates: {
+            'request-duration': 0.01,
+        },
+    },
+});
+```
+
+A rate can also be overridden per call, which takes precedence over both:
+
+```js
+await sampled.metric('request-duration', duration, { sampleRate: 0.001 });
+```
+
+Sampled metrics carry the rate they survived, so consumers can scale counts
+back up by dividing by it. The Elasticsearch shipper writes it as a
+`sampleRate` field, and the stdout shipper appends it to the log line. Metrics
+shipped at a rate of `1` are not tagged, so an absent `sampleRate` means the
+metric was not sampled.
+
+An invalid configured rate throws when the instance is constructed. An invalid
+per-call rate is ignored in favour of the configured rate, so a bad call site
+cannot break the code path it is measuring.
+
 ### Types
 
 Types ship with the package. `GhostMetrics` is exported as both a value (the
@@ -40,6 +76,7 @@ import type {
     GhostMetrics as GhostMetricsInstance,
     GhostMetricsOptions,
     MetricsOptions,
+    MetricOptions,
     ElasticsearchOptions,
     MetricShipper,
 } from '@tryghost/metrics';
