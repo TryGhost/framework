@@ -231,3 +231,197 @@ describe('Logging', function () {
         });
     });
 });
+
+describe('Sampling', function () {
+    afterEach(function () {
+        sandbox.restore();
+    });
+
+    function elasticsearchMetrics(metricsOptions) {
+        return new GhostMetrics({
+            metrics: {
+                transports: ['elasticsearch'],
+                ...metricsOptions,
+            },
+            elasticsearch: {
+                host: 'https://test-elasticsearch',
+                username: 'user',
+                password: 'pass',
+            },
+        });
+    }
+
+    it('defaults to shipping everything', function () {
+        assert.equal(new GhostMetrics().sampleRate, 1);
+        assert.deepEqual(Object.keys(new GhostMetrics().sampleRates), []);
+
+        const configured = new GhostMetrics({ metrics: {} });
+        assert.equal(configured.sampleRate, 1);
+        assert.deepEqual(Object.keys(configured.sampleRates), []);
+    });
+
+    it('treats a null metrics config as an absent one', function () {
+        const ghostMetrics = new GhostMetrics({ metrics: null });
+
+        assert.deepEqual(ghostMetrics.transports, []);
+        assert.deepEqual(ghostMetrics.metadata, {});
+        assert.equal(ghostMetrics.sampleRate, 1);
+        assert.deepEqual(Object.keys(ghostMetrics.sampleRates), []);
+    });
+
+    it('honours a rate configured for a metric named __proto__', async function () {
+        // Built without a literal, since `__proto__` in one sets the prototype instead of a key
+        const sampleRates = JSON.parse('{"__proto__": 0.5}');
+        const ghostMetrics = elasticsearchMetrics({ sampleRates });
+        const index = sandbox.stub(ElasticSearch.prototype, 'index').resolves();
+        sandbox.stub(Math, 'random').returns(0.9);
+
+        assert.equal(ghostMetrics.getSampleRate('__proto__'), 0.5);
+
+        await ghostMetrics.metric('__proto__', 101);
+        assert.equal(index.called, false);
+    });
+
+    it('does not treat a polluted prototype property as a configured rate', function () {
+        const ghostMetrics = elasticsearchMetrics({ sampleRate: 1 });
+
+        Object.prototype.pollutedMetric = 0;
+        try {
+            assert.equal(ghostMetrics.getSampleRate('pollutedMetric'), 1);
+        } finally {
+            delete Object.prototype.pollutedMetric;
+        }
+    });
+
+    it('ships at the default rate without consulting the random source', async function () {
+        const ghostMetrics = elasticsearchMetrics();
+        const index = sandbox.stub(ElasticSearch.prototype, 'index').resolves();
+        const random = sandbox.stub(Math, 'random').returns(0.999999);
+
+        await ghostMetrics.metric('unsampled-metric', 101);
+
+        assert.equal(index.calledOnce, true);
+        assert.equal(random.called, false);
+        // Unsampled documents keep their existing shape
+        assert.equal('sampleRate' in index.firstCall.args[0], false);
+    });
+
+    it('drops metrics that fall outside the sample rate', async function () {
+        const ghostMetrics = elasticsearchMetrics({ sampleRate: 0.1 });
+        const index = sandbox.stub(ElasticSearch.prototype, 'index').resolves();
+        sandbox.stub(Math, 'random').returns(0.5);
+
+        const result = await ghostMetrics.metric('sampled-metric', 101);
+
+        assert.equal(index.called, false);
+        assert.equal(result, null);
+    });
+
+    it('ships metrics that fall inside the sample rate, tagged with the rate', async function () {
+        const ghostMetrics = elasticsearchMetrics({ sampleRate: 0.1 });
+        const index = sandbox.stub(ElasticSearch.prototype, 'index').resolves();
+        sandbox.stub(Math, 'random').returns(0.05);
+
+        await ghostMetrics.metric('sampled-metric', 101);
+
+        assert.equal(index.calledOnce, true);
+        assert.equal(index.firstCall.args[0].value, 101);
+        assert.equal(index.firstCall.args[0].sampleRate, 0.1);
+    });
+
+    it('never ships at a sample rate of 0', async function () {
+        const ghostMetrics = elasticsearchMetrics({ sampleRate: 0 });
+        const index = sandbox.stub(ElasticSearch.prototype, 'index').resolves();
+        sandbox.stub(Math, 'random').returns(0);
+
+        await ghostMetrics.metric('disabled-metric', 101);
+
+        assert.equal(index.called, false);
+    });
+
+    it('prefers a per-metric rate over the default rate', async function () {
+        const ghostMetrics = elasticsearchMetrics({
+            sampleRate: 1,
+            sampleRates: { 'noisy-metric': 0.2 },
+        });
+        const index = sandbox.stub(ElasticSearch.prototype, 'index').resolves();
+        sandbox.stub(Math, 'random').returns(0.5);
+
+        await ghostMetrics.metric('noisy-metric', 101);
+        assert.equal(index.called, false);
+
+        await ghostMetrics.metric('quiet-metric', 101);
+        assert.equal(index.calledOnce, true);
+    });
+
+    it('prefers a per-call rate over configured rates', async function () {
+        const ghostMetrics = elasticsearchMetrics({
+            sampleRate: 0,
+            sampleRates: { 'noisy-metric': 0 },
+        });
+        const index = sandbox.stub(ElasticSearch.prototype, 'index').resolves();
+        sandbox.stub(Math, 'random').returns(0.5);
+
+        await ghostMetrics.metric('noisy-metric', 101, { sampleRate: 1 });
+
+        assert.equal(index.calledOnce, true);
+    });
+
+    it('ignores an invalid per-call rate rather than throwing', async function () {
+        const ghostMetrics = elasticsearchMetrics({ sampleRate: 0.1 });
+        const index = sandbox.stub(ElasticSearch.prototype, 'index').resolves();
+        sandbox.stub(Math, 'random').returns(0.05);
+
+        // Falls back to the configured rate of 0.1, which 0.05 survives
+        await ghostMetrics.metric('sampled-metric', 101, { sampleRate: 'half' });
+        await ghostMetrics.metric('sampled-metric', 102, { sampleRate: 42 });
+
+        assert.equal(index.calledTwice, true);
+        assert.equal(index.firstCall.args[0].sampleRate, 0.1);
+        assert.equal(index.secondCall.args[0].sampleRate, 0.1);
+    });
+
+    it('does not treat inherited object properties as sample rates', async function () {
+        const ghostMetrics = elasticsearchMetrics({ sampleRate: 0 });
+        const index = sandbox.stub(ElasticSearch.prototype, 'index').resolves();
+        sandbox.stub(Math, 'random').returns(0);
+
+        await ghostMetrics.metric('constructor', 101);
+
+        assert.equal(index.called, false);
+    });
+
+    it('throws for an invalid configured sample rate', function () {
+        for (const sampleRate of ['half', 1.5, -0.1, NaN, {}]) {
+            assert.throws(
+                () => new GhostMetrics({ metrics: { sampleRate } }),
+                /metrics\.sampleRate must be a number between 0 and 1/,
+            );
+        }
+    });
+
+    it('throws for an invalid per-metric sample rate', function () {
+        assert.throws(
+            () => new GhostMetrics({ metrics: { sampleRates: { 'noisy-metric': 2 } } }),
+            /metrics\.sampleRates\.noisy-metric must be a number between 0 and 1/,
+        );
+    });
+
+    it('reports the sample rate on stdout only when sampled', async function () {
+        const write = sandbox.stub(PrettyStream.prototype, 'write');
+        const ghostMetrics = new GhostMetrics({
+            metrics: {
+                transports: ['stdout'],
+                sampleRates: { 'sampled-metric': 0.5 },
+            },
+        });
+
+        sandbox.stub(Math, 'random').returns(0.1);
+
+        await ghostMetrics.metric('unsampled-metric', 101);
+        assert.equal(write.firstCall.args[0].msg, 'Metric unsampled-metric: 101');
+
+        await ghostMetrics.metric('sampled-metric', 101);
+        assert.equal(write.secondCall.args[0].msg, 'Metric sampled-metric: 101 (sample rate: 0.5)');
+    });
+});
