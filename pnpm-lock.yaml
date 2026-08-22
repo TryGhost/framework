@@ -120,8 +120,8 @@ importers:
         specifier: workspace:^
         version: link:../errors
       '@tryghost/nql':
-        specifier: 0.13.2
-        version: 0.13.2(supports-color@8.1.1)
+        specifier: 0.13.4
+        version: 0.13.4(supports-color@8.1.1)
       '@tryghost/tpl':
         specifier: workspace:^
         version: link:../tpl
@@ -2272,17 +2272,17 @@ packages:
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
-  '@tryghost/mongo-knex@0.11.0':
-    resolution: {integrity: sha512-OWNRZLAqgRDgW3FFFhsZksiDaUMcjgBQVAWM+PzZEB3JpamdqLq+60MWrbkDiI5WynrFHtYI/5rAOxDaz7HY/g==}
+  '@tryghost/mongo-knex@0.11.2':
+    resolution: {integrity: sha512-0l7L/J609p+12+rA15Muya1JoIeSfBxIUZRB2FfROtJ2U+FTEOzZ/c0HgxB8eAArJMW2VXECmLCAbNUwygRzfg==}
 
   '@tryghost/mongo-utils@0.6.6':
     resolution: {integrity: sha512-CeWSgFKfUhFqD/dk22zEugawFdzVpa9avRgzFExbogiIFmNOfMOuD4G12/GUwFYOGjyCRAdQyKp8xgWSF97SRg==}
 
-  '@tryghost/nql-lang@0.6.7':
-    resolution: {integrity: sha512-quholb52aCqHWCskYp1ZC2hY/E+BD8XmZtgsrp1TcTHm0si9O3DBV9NGX2GB1GEE1V+QHFL24gdp0j98TrhFIQ==}
+  '@tryghost/nql-lang@0.7.0':
+    resolution: {integrity: sha512-S3P66JRL7kiKhYR7VnYC5S5xnkKqS+A5aW60nCGi/lraAhk/G5+xmPisztQiJWbHxM1odIagt2GpDMbKCDXT2w==}
 
-  '@tryghost/nql@0.13.2':
-    resolution: {integrity: sha512-nlG3xMNJYUO5MvOtnSaYltFKRaSeBTalIAUbIyeGplY4YXlIPVH/KUzCIpM8HyJ5uncR8bXkUey0a29RqCFaeA==}
+  '@tryghost/nql@0.13.4':
+    resolution: {integrity: sha512-XE3lEpkqZM3ueOyKz5suwb2W4muWAM/YfYYpXHrnu0H7r46Xuo7FZm1s6Ga2Cut/STtuax5E6NfZ1AFv017X4w==}
 
   '@tryghost/string@0.3.5':
     resolution: {integrity: sha512-Ov2UYOuU5QutDo/UECtkhHR3jdT4R/aNxzKFk0iaH0yiwxLnlqEB4QBBVnYYIN8zECNAazRzkygtdFSlSkuaoA==}
@@ -3189,10 +3189,6 @@ packages:
 
   custom-error-instance@2.1.1:
     resolution: {integrity: sha512-p6JFxJc3M4OTD2li2qaHkDCw9SfMw82Ldr6OC9Je1aXiGfhx2W8p3GaoeaGrPJTUN9NirTM/KTxHWMUdR1rsUg==}
-
-  date-fns@2.30.0:
-    resolution: {integrity: sha512-fnULvOpxnC5/Vg3NCiWelDsLiUc9bRwAPs/+LfTLNvetFCtCTN+yQz15C/fs4AwX1R9K5GLtLfn8QW+dWisaAw==}
-    engines: {node: '>=0.11'}
 
   date-fns@4.4.0:
     resolution: {integrity: sha512-+1UMbeh68lH1SegH83CGWwpb6OHHbpSgr3+s5Eww5M4CAgswBpoWS0AjTOfEJ33HiYKz1hdj/KTFprzXHmq/6w==}
@@ -4128,6 +4124,10 @@ packages:
 
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
+
+  luxon@3.7.2:
+    resolution: {integrity: sha512-vtEhXh/gNjI9Yg1u4jX/0YVPMvxzHuGgCm6tC5kZyb08yjGWGnqAjGJvcXbqQR2P3MyMEFnRbpcdFS6PBcLqew==}
+    engines: {node: '>=12'}
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
@@ -6903,7 +6903,7 @@ snapshots:
 
   '@standard-schema/spec@1.1.0': {}
 
-  '@tryghost/mongo-knex@0.11.0(supports-color@8.1.1)':
+  '@tryghost/mongo-knex@0.11.2(supports-color@8.1.1)':
     dependencies:
       debug: 4.4.3(supports-color@8.1.1)
       lodash: 4.18.1
@@ -6914,15 +6914,15 @@ snapshots:
     dependencies:
       lodash: 4.18.1
 
-  '@tryghost/nql-lang@0.6.7':
+  '@tryghost/nql-lang@0.7.0':
     dependencies:
-      date-fns: 2.30.0
+      luxon: 3.7.2
 
-  '@tryghost/nql@0.13.2(supports-color@8.1.1)':
+  '@tryghost/nql@0.13.4(supports-color@8.1.1)':
     dependencies:
-      '@tryghost/mongo-knex': 0.11.0(supports-color@8.1.1)
+      '@tryghost/mongo-knex': 0.11.2(supports-color@8.1.1)
       '@tryghost/mongo-utils': 0.6.6
-      '@tryghost/nql-lang': 0.6.7
+      '@tryghost/nql-lang': 0.7.0
       lodash: 4.18.1
       mingo: 2.5.3
     transitivePeerDependencies:
@@ -7676,10 +7676,6 @@ snapshots:
       which: 2.0.2
 
   custom-error-instance@2.1.1: {}
-
-  date-fns@2.30.0:
-    dependencies:
-      '@babel/runtime': 7.29.7
 
   date-fns@4.4.0: {}
 
@@ -8658,6 +8654,8 @@ snapshots:
   lru-cache@5.1.1:
     dependencies:
       yallist: 3.1.1
+
+  luxon@3.7.2: {}
 
   magic-string@0.30.21:
     dependencies:
