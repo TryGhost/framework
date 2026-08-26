@@ -169,19 +169,10 @@ describe('Extract zip', function () {
     });
 
     afterEach(function () {
-        if (fs.existsSync(zipDestination)) {
-            fs.rmSync(zipDestination, { recursive: true, force: true });
-        }
-
-        if (fs.existsSync(unzipDestination)) {
-            fs.rmSync(unzipDestination, { recursive: true, force: true });
-        }
-
-        if (fs.existsSync(symLinkPath)) {
-            fs.rmSync(symLinkPath, { recursive: true, force: true });
-        }
-
-        if (fs.existsSync(longFilePath)) {
+        fs.rmSync(zipDestination, { recursive: true, force: true });
+        fs.rmSync(unzipDestination, { recursive: true, force: true });
+        fs.rmSync(symLinkPath, { recursive: true, force: true });
+        if (longFilePath) {
             fs.rmSync(longFilePath, { recursive: true, force: true });
         }
     });
