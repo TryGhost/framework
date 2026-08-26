@@ -120,6 +120,35 @@ describe('Request', function () {
         );
     });
 
+    it('[failure] rejects URL longer than 2084 characters', function () {
+        const url = `http://example.com/${'a'.repeat(2066)}`;
+
+        assert.equal(url.length, 2085);
+
+        return assert.rejects(request(url), {
+            message: 'URL empty or invalid.',
+        });
+    });
+
+    ['http://example.com/white space', 'http://example.com/<tag>'].forEach((url) => {
+        it(`[failure] rejects URL containing invalid characters: ${url}`, function () {
+            return assert.rejects(request(url), {
+                message: 'URL empty or invalid.',
+            });
+        });
+    });
+
+    it('[success] allows localhost URL', function () {
+        const url = 'http://localhost:2368/endpoint/';
+        const requestMock = nock('http://localhost:2368')
+            .get('/endpoint/')
+            .reply(200, 'Response body');
+
+        return request(url).then(function () {
+            assert.equal(requestMock.isDone(), true);
+        });
+    });
+
     it('[failure] can handle empty url', function () {
         const url = '';
         const options = {
