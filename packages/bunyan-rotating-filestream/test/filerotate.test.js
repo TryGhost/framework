@@ -52,6 +52,34 @@ describe('RotatingFileStream', function () {
         await stream.end();
     });
 
+    it('Flushes queued logs to disk and stays writable', async function () {
+        const logPath = 'logs/flush.log';
+        const stream = new RotatingFileStream({
+            ...testConfig,
+            path: logPath,
+        });
+        const logger = bunyan.createLogger({
+            name: 'foo',
+            streams: [
+                {
+                    stream,
+                },
+            ],
+        });
+
+        logger.info('before flush');
+        await stream.flush();
+        assert.ok((await fs.readFile(logPath, 'utf8')).includes('before flush'));
+
+        logger.info('after flush');
+        await stream.flush();
+        assert.ok((await fs.readFile(logPath, 'utf8')).includes('after flush'));
+
+        await stream.end();
+        // Flushing a closed stream is a no-op
+        await stream.flush();
+    });
+
     it('Sets up period correctly', async function () {
         const stream = new RotatingFileStream({
             period: '1w',

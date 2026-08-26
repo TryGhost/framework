@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/request",
-  "version": "3.3.6",
+  "version": "4.0.2",
   "license": "MIT",
   "author": "Ghost Foundation",
   "repository": {
@@ -23,11 +23,11 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@tryghost/errors": "workspace:*",
-    "@tryghost/validator": "workspace:*",
-    "@tryghost/version": "workspace:*",
+    "@tryghost/errors": "workspace:^",
+    "@tryghost/validator": "workspace:^",
+    "@tryghost/version": "workspace:^",
     "cacheable-lookup": "7.0.0",
-    "got": "14.6.6",
+    "got": "15.1.0",
     "lodash": "4.18.1"
   },
   "devDependencies": {

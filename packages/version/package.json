@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/version",
-  "version": "2.3.6",
+  "version": "2.3.9",
   "license": "MIT",
   "author": "Ghost Foundation",
   "repository": {
@@ -23,7 +23,7 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@tryghost/root-utils": "workspace:*",
+    "@tryghost/root-utils": "workspace:^",
     "semver": "7.8.5"
   },
   "devDependencies": {

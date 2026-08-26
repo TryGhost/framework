@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/domain-events",
-  "version": "3.3.6",
+  "version": "3.3.10",
   "license": "MIT",
   "author": "Ghost Foundation",
   "repository": {
@@ -23,6 +23,6 @@
     "lint": "oxlint -c ../../.oxlintrc.json ."
   },
   "dependencies": {
-    "@tryghost/logging": "workspace:*"
+    "@tryghost/logging": "workspace:^"
   }
 }

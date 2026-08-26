@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/job-manager",
-  "version": "4.1.6",
+  "version": "4.1.10",
   "license": "MIT",
   "author": "Ghost Foundation",
   "repository": {
@@ -23,8 +23,8 @@
   },
   "dependencies": {
     "@breejs/later": "4.2.0",
-    "@tryghost/errors": "workspace:*",
-    "@tryghost/logging": "workspace:*",
+    "@tryghost/errors": "workspace:^",
+    "@tryghost/logging": "workspace:^",
     "bree": "9.2.9",
     "cron-validate": "1.5.3",
     "fastq": "1.20.1",

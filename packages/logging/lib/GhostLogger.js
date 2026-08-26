@@ -9,6 +9,46 @@ const fs = require('fs');
 const jsonStringifySafe = require('json-stringify-safe');
 
 /**
+ * @description Wait for a Node writable stream to hand everything it has
+ * buffered to the OS.
+ *
+ * A zero-length chunk queues behind any pending writes, so its callback only
+ * fires once those have been flushed.
+ * @param {any} stream
+ * @returns {Promise<void>}
+ */
+function drainWritable(stream) {
+    // Bunyan's own rotating-file stream wraps the real WriteStream
+    let writable = stream;
+    while (writable && typeof writable.writableLength !== 'number' && writable.stream) {
+        writable = writable.stream;
+    }
+
+    if (!writable || typeof writable.write !== 'function' || writable.writableEnded) {
+        return Promise.resolve();
+    }
+
+    return new Promise((resolve) => {
+        writable.write('', () => resolve());
+    });
+}
+
+/**
+ * @description Build a flushable transport for a bunyan logger whose streams
+ * are managed by bunyan itself (the `file` and `rotating-file` types), which
+ * buffer in memory like any other Node writable.
+ * @param {any} logger
+ * @returns {{flush(): Promise<void>}}
+ */
+function bunyanFileTransport(logger) {
+    return {
+        async flush() {
+            await Promise.all(logger.streams.map((stream) => drainWritable(stream.stream)));
+        },
+    };
+}
+
+/**
  * @description Ghost's logger class.
  *
  * The logger handles any stdout/stderr logs and streams it into the configured transports.
@@ -323,17 +363,23 @@ class GhostLogger {
                             : true,
                 };
 
+                const errorRotatingStream = new RotatingFileStream(
+                    Object.assign({}, rotationConfig, {
+                        path: `${this.path}${baseFilename}.error.log`,
+                    }),
+                );
+                const allRotatingStream = new RotatingFileStream(rotationConfig);
+
                 this.streams['rotation-errors'] = {
                     name: 'rotation-errors',
+                    // Keep a reference to the transport so `flush()` can drain
+                    // its write queue before the process exits
+                    transport: errorRotatingStream,
                     log: bunyan.createLogger({
                         name: this.name,
                         streams: [
                             {
-                                stream: new RotatingFileStream(
-                                    Object.assign({}, rotationConfig, {
-                                        path: `${this.path}${baseFilename}.error.log`,
-                                    }),
-                                ),
+                                stream: errorRotatingStream,
                                 level: 'error',
                             },
                         ],
@@ -343,11 +389,12 @@ class GhostLogger {
 
                 this.streams['rotation-all'] = {
                     name: 'rotation-all',
+                    transport: allRotatingStream,
                     log: bunyan.createLogger({
                         name: this.name,
                         streams: [
                             {
-                                stream: new RotatingFileStream(rotationConfig),
+                                stream: allRotatingStream,
                                 level: this.level,
                             },
                         ],
@@ -356,67 +403,77 @@ class GhostLogger {
                 };
             } else {
                 // TODO: Remove this when confidence is high in the external library for rotation
-                this.streams['rotation-errors'] = {
-                    name: 'rotation-errors',
-                    log: bunyan.createLogger({
-                        name: this.name,
-                        streams: [
-                            {
-                                type: 'rotating-file',
-                                path: `${this.path}${baseFilename}.error.log`,
-                                period: this.rotation.period,
-                                count: this.rotation.count,
-                                level: 'error',
-                            },
-                        ],
-                        serializers: this.serializers,
-                    }),
-                };
-
-                this.streams['rotation-all'] = {
-                    name: 'rotation-all',
-                    log: bunyan.createLogger({
-                        name: this.name,
-                        streams: [
-                            {
-                                type: 'rotating-file',
-                                path: `${this.path}${baseFilename}.log`,
-                                period: this.rotation.period,
-                                count: this.rotation.count,
-                                level: this.level,
-                            },
-                        ],
-                        serializers: this.serializers,
-                    }),
-                };
-            }
-        } else {
-            this.streams['file-errors'] = {
-                name: 'file',
-                log: bunyan.createLogger({
+                const errorRotatingLog = bunyan.createLogger({
                     name: this.name,
                     streams: [
                         {
+                            type: 'rotating-file',
                             path: `${this.path}${baseFilename}.error.log`,
+                            period: this.rotation.period,
+                            count: this.rotation.count,
                             level: 'error',
                         },
                     ],
                     serializers: this.serializers,
-                }),
-            };
-
-            this.streams['file-all'] = {
-                name: 'file',
-                log: bunyan.createLogger({
+                });
+                const allRotatingLog = bunyan.createLogger({
                     name: this.name,
                     streams: [
                         {
+                            type: 'rotating-file',
                             path: `${this.path}${baseFilename}.log`,
+                            period: this.rotation.period,
+                            count: this.rotation.count,
                             level: this.level,
                         },
                     ],
                     serializers: this.serializers,
-                }),
+                });
+
+                this.streams['rotation-errors'] = {
+                    name: 'rotation-errors',
+                    transport: bunyanFileTransport(errorRotatingLog),
+                    log: errorRotatingLog,
+                };
+
+                this.streams['rotation-all'] = {
+                    name: 'rotation-all',
+                    transport: bunyanFileTransport(allRotatingLog),
+                    log: allRotatingLog,
+                };
+            }
+        } else {
+            const errorFileLog = bunyan.createLogger({
+                name: this.name,
+                streams: [
+                    {
+                        path: `${this.path}${baseFilename}.error.log`,
+                        level: 'error',
+                    },
+                ],
+                serializers: this.serializers,
+            });
+            const allFileLog = bunyan.createLogger({
+                name: this.name,
+                streams: [
+                    {
+                        path: `${this.path}${baseFilename}.log`,
+                        level: this.level,
+                    },
+                ],
+                serializers: this.serializers,
+            });
+
+            this.streams['file-errors'] = {
+                name: 'file',
+                transport: bunyanFileTransport(errorFileLog),
+                log: errorFileLog,
+            };
+
+            this.streams['file-all'] = {
+                name: 'file',
+                transport: bunyanFileTransport(allFileLog),
+                log: allFileLog,
             };
         }
     }
@@ -602,15 +659,16 @@ class GhostLogger {
     /**
      * @description Flush buffered logs on any transport that batches writes.
      *
-     * Asynchronous transports (e.g. ElasticSearch) buffer log lines and only
-     * ship them on a size/time threshold or when their stream ends. On a fatal
-     * boot error the process exits before that threshold is reached, so the
-     * crash reason is never shipped. Awaiting `flush()` before `process.exit()`
-     * forces those buffers out.
+     * Asynchronous transports buffer log lines and only write them out on a
+     * size/time threshold, when their stream ends, or on the next tick. On a
+     * fatal boot error the process exits before that happens, so the crash
+     * reason is never persisted. Awaiting `flush()` before `process.exit()`
+     * forces those buffers out. This covers ElasticSearch (buffered bulk
+     * requests) and the file transports (queued/buffered disk writes).
      *
-     * Only transports exposing a `flush()` method are awaited; synchronous
-     * transports (stdout, stderr, file) have nothing to drain. Failures are
-     * swallowed so a broken transport can never block shutdown.
+     * Only transports exposing a `flush()` method are awaited; transports that
+     * write straight through (stdout, stderr) have nothing to drain. Failures
+     * are swallowed so a broken transport can never block shutdown.
      * @returns {Promise<void>}
      */
     async flush() {
@@ -648,6 +706,8 @@ class GhostLogger {
         result.streams = Object.keys(this.streams).reduce((acc, id) => {
             acc[id] = {
                 name: this.streams[id].name,
+                // Same underlying transport, so `flush()` works on children too
+                transport: this.streams[id].transport,
                 log: this.streams[id].log.child(boundProperties),
             };
             return acc;

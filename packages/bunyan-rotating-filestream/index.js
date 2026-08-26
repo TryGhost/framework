@@ -61,6 +61,22 @@ class RotatingFileStream {
         this._queue.push(data);
     }
 
+    /**
+     * Force everything written into this stream so far out to disk, without
+     * closing it. The stream stays writable afterwards, unlike `end()`.
+     * @returns {Promise<void>}
+     */
+    async flush() {
+        if (this._closed) {
+            return;
+        }
+        await this._initialised;
+        // A rotation in progress owns the file handle - wait for it to hand
+        // the new one to the queue before draining
+        await this._rotating;
+        await this._queue.flush();
+    }
+
     async end() {
         // Block new rotations immediately - the threshold trigger has no timer
         // to shut down and can still fire while the queue drains below

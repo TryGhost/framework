@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/elasticsearch",
-  "version": "5.4.3",
+  "version": "5.4.6",
   "license": "MIT",
   "author": "Ghost Foundation",
   "repository": {
@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@elastic/elasticsearch": "8.19.2",
-    "@tryghost/debug": "workspace:*",
+    "@tryghost/debug": "workspace:^",
     "split2": "4.2.0"
   },
   "devDependencies": {

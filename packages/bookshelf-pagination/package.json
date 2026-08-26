@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/bookshelf-pagination",
-  "version": "2.3.6",
+  "version": "2.4.3",
   "license": "MIT",
   "author": "Ghost Foundation",
   "repository": {
@@ -23,8 +23,8 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@tryghost/errors": "workspace:*",
-    "@tryghost/tpl": "workspace:*",
+    "@tryghost/errors": "workspace:^",
+    "@tryghost/tpl": "workspace:^",
     "lodash": "4.18.1"
   },
   "devDependencies": {

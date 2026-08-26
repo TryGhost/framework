@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/zip",
-  "version": "3.5.5",
+  "version": "3.5.8",
   "license": "MIT",
   "author": "Ghost Foundation",
   "repository": {
@@ -23,7 +23,7 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@tryghost/errors": "workspace:*",
+    "@tryghost/errors": "workspace:^",
     "archiver": "8.0.0",
     "extract-zip": "2.0.1"
   },

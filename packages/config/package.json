@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/config",
-  "version": "2.3.6",
+  "version": "2.3.9",
   "license": "MIT",
   "author": "Ghost Foundation",
   "repository": {
@@ -23,7 +23,7 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@tryghost/root-utils": "workspace:*",
+    "@tryghost/root-utils": "workspace:^",
     "nconf": "0.13.0"
   }
 }
