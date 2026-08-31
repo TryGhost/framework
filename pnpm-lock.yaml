@@ -528,8 +528,8 @@ importers:
   packages/nodemailer:
     dependencies:
       '@aws-sdk/client-sesv2':
-        specifier: 3.1120.0
-        version: 3.1120.0
+        specifier: 3.1121.0
+        version: 3.1121.0
       '@tryghost/errors':
         specifier: workspace:^
         version: link:../errors
@@ -778,8 +778,8 @@ importers:
 
 packages:
 
-  '@aws-sdk/client-sesv2@3.1120.0':
-    resolution: {integrity: sha512-bG2J+6PAQd7rgHvrJTLT+oGbK1P16Xq5LvaauL9kUyPPIbCjPL9HfmVtUXiLDPEllzxozbHVuk0sn9+Iuce7kw==}
+  '@aws-sdk/client-sesv2@3.1121.0':
+    resolution: {integrity: sha512-Vk7tHo7TPBlR5MmvpfR4XXNL5uld/5uWHNBceUArtQrzhwNaxt/5ANp45JETZfLH9VDoaX3bTmoHeSMOWc0Ldg==}
     engines: {node: '>=20.0.0'}
 
   '@aws-sdk/core@3.977.9':
@@ -5285,7 +5285,7 @@ packages:
 
 snapshots:
 
-  '@aws-sdk/client-sesv2@3.1120.0':
+  '@aws-sdk/client-sesv2@3.1121.0':
     dependencies:
       '@aws-sdk/core': 3.977.9
       '@aws-sdk/credential-provider-node': 3.972.81
