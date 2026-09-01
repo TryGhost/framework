@@ -3,37 +3,23 @@ const validator = require('@tryghost/validator');
 const errors = require('@tryghost/errors');
 const ghostVersion = require('@tryghost/version');
 
-const gotPromise = import('got');
-const cacheableLookupPromise = import('cacheable-lookup');
+let got = require('got').default;
+const CacheableLookup = require('cacheable-lookup').default;
 
-let got;
-let cacheableLookup;
+const cacheableLookup = new CacheableLookup({
+    lookup: false,
+});
 
 const defaultOptions = {
     headers: {
         'user-agent': 'Ghost/' + ghostVersion.safe + ' (https://github.com/TryGhost/Ghost)',
     },
     method: 'GET',
+    // Ensure OS-level name resolution is not used
+    dnsLookup: cacheableLookup.lookup,
 };
 
 module.exports = async function request(url, options = {}) {
-    // Initialise ES6 imports
-    if (!got) {
-        got = (await gotPromise).default;
-    } else {
-        // Already initialized from a prior request in this process.
-    }
-    if (!defaultOptions.dnsLookup) {
-        // Ensure OS-level name resolution is not used
-        const CacheableLookup = (await cacheableLookupPromise).default;
-        cacheableLookup = new CacheableLookup({
-            lookup: false,
-        });
-        defaultOptions.dnsLookup = cacheableLookup.lookup;
-    } else {
-        // DNS cache lookup has already been configured.
-    }
-
     const isUrlValid =
         typeof url === 'string' &&
         // `validator.isURL` doesn't let us express "any TLD or localhost", so we do two checks.
