@@ -2,15 +2,14 @@ const assert = require('assert/strict');
 const sinon = require('sinon');
 
 const WebhookMockReceiver = require('../');
+const got = require('got').default;
 
 describe('Webhook Mock Receiver', function () {
     let snapshotManager;
     let webhookMockReceiver;
-    let got;
     const webhookURL = 'https://test-webhook-receiver.com/webhook';
 
-    beforeAll(async function () {
-        got = (await import('got')).default;
+    beforeAll(function () {
         snapshotManager = {
             assertSnapshot: sinon.spy(),
         };
