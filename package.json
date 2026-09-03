@@ -14,11 +14,12 @@
     "prepare": "husky",
     "test": "nx run-many -t test --parallel=10 --outputStyle=dynamic-legacy",
     "test:ci": "nx run-many -t test --outputStyle=static",
-    "lint": "oxlint -c .oxlintrc.json packages",
-    "format": "oxfmt -c .oxfmtrc.json \"packages/**/*.{js,ts,json,md}\"",
-    "format:check": "oxfmt -c .oxfmtrc.json --check \"packages/**/*.{js,ts,json,md}\"",
+    "lint": "oxlint -c .oxlintrc.json packages scripts",
+    "format": "oxfmt -c .oxfmtrc.json \"{packages,scripts}/**/*.{js,mjs,ts,json,md}\"",
+    "format:check": "oxfmt -c .oxfmtrc.json --check \"{packages,scripts}/**/*.{js,mjs,ts,json,md}\"",
     "preship": "git diff --quiet && git diff --cached --quiet || (echo 'Error: working tree must be clean before shipping' && exit 1) && pnpm test",
-    "ship": "nx release version --git-push --git-remote ${GHOST_UPSTREAM:-origin}",
+    "ship": "node scripts/ship.mjs",
+    "ship:list": "node scripts/ship.mjs --list",
     "ship:patch": "pnpm ship patch",
     "ship:minor": "pnpm ship minor",
     "ship:major": "pnpm ship major",
@@ -36,6 +37,6 @@
     "vitest": "4.1.11"
   },
   "lint-staged": {
-    "packages/**/*.{js,ts,json,md}": "oxfmt -c .oxfmtrc.json"
+    "{packages,scripts}/**/*.{js,mjs,ts,json,md}": "oxfmt -c .oxfmtrc.json"
   }
 }

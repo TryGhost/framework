@@ -49,6 +49,19 @@ Publishing is handled by `.github/workflows/publish.yml` after Nx release
 commits. Use the root `pnpm ship:*` scripts for versioning; they run the
 pre-ship test gate before creating release commits and tags.
 
+The ship scripts release only the packages that changed. `scripts/ship.mjs`
+compares each package against the git tag for its own current version and
+passes the changed set to `nx release version --projects=...`; dependents are
+pulled in by Nx's own `updateDependents: "auto"`. Run `pnpm ship:list` to see
+what a ship would release without touching anything, or set `SHIP_ALL=1` to
+force every package.
+
+Do not hand `nx release version <bump>` an explicit specifier without
+`--projects`. An explicit specifier disables change detection and bumps every
+package in scope. `nx affected` is not a substitute here either: Nx treats any
+`pnpm-lock.yaml` change as invalidating the whole graph, and renovate touches
+the lockfile on every dependency PR.
+
 ## Cleanup Boundaries
 
 Keep package-specific usage detail in the relevant package README. Add a root
