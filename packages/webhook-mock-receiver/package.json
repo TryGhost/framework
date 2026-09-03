@@ -26,7 +26,7 @@
     "p-wait-for": "6.0.0"
   },
   "devDependencies": {
-    "got": "15.1.0",
+    "got": "16.0.0",
     "sinon": "catalog:"
   },
   "engines": {
