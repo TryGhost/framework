@@ -24,6 +24,6 @@
   },
   "dependencies": {
     "@tryghost/root-utils": "workspace:^",
-    "nconf": "0.13.0"
+    "nconf": "^0.13.0"
   }
 }

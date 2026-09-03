@@ -23,12 +23,12 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "@aws-sdk/client-sesv2": "3.1122.0",
+    "@aws-sdk/client-sesv2": "^3.1122.0",
     "@tryghost/errors": "workspace:^",
     "@tryghost/tpl": "workspace:^",
-    "nodemailer": "9.1.0",
-    "nodemailer-mailgun-transport": "2.1.5",
-    "nodemailer-stub-transport": "1.1.0"
+    "nodemailer": "^9.1.0",
+    "nodemailer-mailgun-transport": "^2.1.5",
+    "nodemailer-stub-transport": "^1.1.0"
   },
   "devDependencies": {
     "sinon": "catalog:"

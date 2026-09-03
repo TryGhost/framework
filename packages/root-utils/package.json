@@ -23,8 +23,8 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "caller": "1.1.0",
-    "find-root": "1.1.0"
+    "caller": "^1.1.0",
+    "find-root": "^1.1.0"
   },
   "devDependencies": {
     "sinon": "catalog:"

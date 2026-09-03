@@ -25,9 +25,9 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "date-format": "4.0.14",
-    "lodash": "4.18.1",
-    "prettyjson": "1.2.5"
+    "date-format": "^4.0.14",
+    "lodash": "^4.18.1",
+    "prettyjson": "^1.2.5"
   },
   "devDependencies": {
     "sinon": "catalog:"

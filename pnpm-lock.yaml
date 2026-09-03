@@ -69,7 +69,7 @@ importers:
         specifier: workspace:^
         version: link:../validator
       lodash:
-        specifier: 4.18.1
+        specifier: ^4.18.1
         version: 4.18.1
     devDependencies:
       sinon:
@@ -82,7 +82,7 @@ importers:
         specifier: workspace:^
         version: link:../errors
       lodash:
-        specifier: 4.18.1
+        specifier: ^4.18.1
         version: 4.18.1
       moment-timezone:
         specifier: ^0.5.33
@@ -104,7 +104,7 @@ importers:
         specifier: workspace:^
         version: link:../debug
       lodash:
-        specifier: 4.18.1
+        specifier: ^4.18.1
         version: 4.18.1
     devDependencies:
       sinon:
@@ -120,7 +120,7 @@ importers:
         specifier: workspace:^
         version: link:../errors
       '@tryghost/nql':
-        specifier: 0.13.4
+        specifier: ^0.13.4
         version: 0.13.4(supports-color@8.1.1)
       '@tryghost/tpl':
         specifier: workspace:^
@@ -136,7 +136,7 @@ importers:
         specifier: workspace:^
         version: link:../debug
       lodash:
-        specifier: 4.18.1
+        specifier: ^4.18.1
         version: 4.18.1
     devDependencies:
       sinon:
@@ -149,7 +149,7 @@ importers:
         specifier: workspace:^
         version: link:../debug
       lodash:
-        specifier: 4.18.1
+        specifier: ^4.18.1
         version: 4.18.1
     devDependencies:
       sinon:
@@ -159,7 +159,7 @@ importers:
   packages/bookshelf-order:
     dependencies:
       lodash:
-        specifier: 4.18.1
+        specifier: ^4.18.1
         version: 4.18.1
     devDependencies:
       sinon:
@@ -175,7 +175,7 @@ importers:
         specifier: workspace:^
         version: link:../tpl
       lodash:
-        specifier: 4.18.1
+        specifier: ^4.18.1
         version: 4.18.1
     devDependencies:
       bookshelf:
@@ -243,7 +243,7 @@ importers:
   packages/bunyan-rotating-filestream:
     dependencies:
       long-timeout:
-        specifier: 0.1.1
+        specifier: ^0.1.1
         version: 0.1.1
     devDependencies:
       bunyan:
@@ -259,7 +259,7 @@ importers:
         specifier: workspace:^
         version: link:../root-utils
       nconf:
-        specifier: 0.13.0
+        specifier: ^0.13.0
         version: 0.13.0
 
   packages/database-info:
@@ -274,7 +274,7 @@ importers:
         specifier: workspace:^
         version: link:../root-utils
       debug:
-        specifier: 4.4.3
+        specifier: ^4.4.3
         version: 4.4.3(supports-color@8.1.1)
 
   packages/domain-events:
@@ -286,13 +286,13 @@ importers:
   packages/elasticsearch:
     dependencies:
       '@elastic/elasticsearch':
-        specifier: 8.19.2
+        specifier: ^8.19.2
         version: 8.19.2(supports-color@8.1.1)
       '@tryghost/debug':
         specifier: workspace:^
         version: link:../debug
       split2:
-        specifier: 4.2.0
+        specifier: ^4.2.0
         version: 4.2.0
     devDependencies:
       sinon:
@@ -329,13 +329,13 @@ importers:
         specifier: workspace:^
         version: link:../jest-snapshot
       cookiejar:
-        specifier: 2.1.4
+        specifier: ^2.1.4
         version: 2.1.4
       form-data:
-        specifier: 4.0.6
+        specifier: ^4.0.6
         version: 4.0.6
       mime-types:
-        specifier: 3.0.2
+        specifier: ^3.0.2
         version: 3.0.2
     devDependencies:
       express:
@@ -376,16 +376,16 @@ importers:
   packages/jest-snapshot:
     dependencies:
       '@jest/expect':
-        specifier: 30.4.1
+        specifier: ^30.4.1
         version: 30.4.1(supports-color@8.1.1)
       '@jest/expect-utils':
-        specifier: 30.4.1
+        specifier: ^30.4.1
         version: 30.4.1
       '@tryghost/errors':
         specifier: workspace:^
         version: link:../errors
       jest-snapshot:
-        specifier: 30.4.1
+        specifier: ^30.4.1
         version: 30.4.1(supports-color@8.1.1)
     devDependencies:
       sinon:
@@ -395,7 +395,7 @@ importers:
   packages/job-manager:
     dependencies:
       '@breejs/later':
-        specifier: 4.2.0
+        specifier: ^4.2.0
         version: 4.2.0
       '@tryghost/errors':
         specifier: workspace:^
@@ -404,19 +404,19 @@ importers:
         specifier: workspace:^
         version: link:../logging
       bree:
-        specifier: 9.2.9
+        specifier: ^9.2.9
         version: 9.2.9
       cron-validate:
-        specifier: 1.5.3
+        specifier: ^1.5.3
         version: 1.5.3
       fastq:
-        specifier: 1.20.3
+        specifier: ^1.20.3
         version: 1.20.3
       p-wait-for:
-        specifier: 6.0.0
+        specifier: ^6.0.0
         version: 6.0.0
       workerpool:
-        specifier: 10.0.3
+        specifier: ^10.0.3
         version: 10.0.3
     devDependencies:
       '@sinonjs/fake-timers':
@@ -450,19 +450,19 @@ importers:
         specifier: workspace:^
         version: link:../root-utils
       bunyan:
-        specifier: 1.8.15
+        specifier: ^1.8.15
         version: 1.8.15
       fs-extra:
-        specifier: 11.4.0
+        specifier: ^11.4.0
         version: 11.4.0
       gelf-stream:
-        specifier: 1.1.1
+        specifier: ^1.1.1
         version: 1.1.1
       json-stringify-safe:
-        specifier: 5.0.1
+        specifier: ^5.0.1
         version: 5.0.1
       lodash:
-        specifier: 4.18.1
+        specifier: ^4.18.1
         version: 4.18.1
     devDependencies:
       '@tryghost/errors':
@@ -484,7 +484,7 @@ importers:
         specifier: workspace:^
         version: link:../root-utils
       json-stringify-safe:
-        specifier: 5.0.1
+        specifier: ^5.0.1
         version: 5.0.1
     devDependencies:
       rewire:
@@ -509,10 +509,10 @@ importers:
         specifier: workspace:^
         version: link:../tpl
       lodash:
-        specifier: 4.18.1
+        specifier: ^4.18.1
         version: 4.18.1
       semver:
-        specifier: 7.8.5
+        specifier: ^7.8.5
         version: 7.8.5
     devDependencies:
       sinon:
@@ -528,7 +528,7 @@ importers:
   packages/nodemailer:
     dependencies:
       '@aws-sdk/client-sesv2':
-        specifier: 3.1122.0
+        specifier: ^3.1122.0
         version: 3.1122.0
       '@tryghost/errors':
         specifier: workspace:^
@@ -537,13 +537,13 @@ importers:
         specifier: workspace:^
         version: link:../tpl
       nodemailer:
-        specifier: 9.1.0
+        specifier: ^9.1.0
         version: 9.1.0
       nodemailer-mailgun-transport:
-        specifier: 2.1.5
+        specifier: ^2.1.5
         version: 2.1.5(debug@4.4.3(supports-color@7.2.0))(lodash@4.18.1)(supports-color@7.2.0)
       nodemailer-stub-transport:
-        specifier: 1.1.0
+        specifier: ^1.1.0
         version: 1.1.0
     devDependencies:
       sinon:
@@ -553,10 +553,10 @@ importers:
   packages/pretty-cli:
     dependencies:
       chalk:
-        specifier: 6.0.0
+        specifier: ^6.0.0
         version: 6.0.0
       sywac:
-        specifier: 1.3.0
+        specifier: ^1.3.0
         version: 1.3.0
     devDependencies:
       sinon:
@@ -566,13 +566,13 @@ importers:
   packages/pretty-stream:
     dependencies:
       date-format:
-        specifier: 4.0.14
+        specifier: ^4.0.14
         version: 4.0.14
       lodash:
-        specifier: 4.18.1
+        specifier: ^4.18.1
         version: 4.18.1
       prettyjson:
-        specifier: 1.2.5
+        specifier: ^1.2.5
         version: 1.2.5
     devDependencies:
       sinon:
@@ -588,13 +588,13 @@ importers:
         specifier: workspace:^
         version: link:../logging
       express:
-        specifier: 5.2.1
+        specifier: ^5.2.1
         version: 5.2.1(supports-color@8.1.1)
       prom-client:
-        specifier: 15.1.3
+        specifier: ^15.1.3
         version: 15.1.3
       stoppable:
-        specifier: 1.1.0
+        specifier: ^1.1.0
         version: 1.1.0
     devDependencies:
       '@types/express':
@@ -646,13 +646,13 @@ importers:
         specifier: workspace:^
         version: link:../version
       cacheable-lookup:
-        specifier: 7.0.0
+        specifier: ^7.0.0
         version: 7.0.0
       got:
-        specifier: 16.0.0
+        specifier: ^16.0.0
         version: 16.0.0
       lodash:
-        specifier: 4.18.1
+        specifier: ^4.18.1
         version: 4.18.1
     devDependencies:
       nock:
@@ -668,10 +668,10 @@ importers:
   packages/root-utils:
     dependencies:
       caller:
-        specifier: 1.1.0
+        specifier: ^1.1.0
         version: 1.1.0
       find-root:
-        specifier: 1.1.0
+        specifier: ^1.1.0
         version: 1.1.0
     devDependencies:
       sinon:
@@ -681,10 +681,10 @@ importers:
   packages/security:
     dependencies:
       '@tryghost/string':
-        specifier: 0.3.5
+        specifier: ^0.3.5
         version: 0.3.5
       bcryptjs:
-        specifier: 3.0.3
+        specifier: ^3.0.3
         version: 3.0.3
     devDependencies:
       sinon:
@@ -722,13 +722,13 @@ importers:
         specifier: workspace:^
         version: link:../tpl
       lodash:
-        specifier: 4.18.1
+        specifier: ^4.18.1
         version: 4.18.1
       moment-timezone:
         specifier: ^0.5.23
         version: 0.5.48
       validator:
-        specifier: 13.15.35
+        specifier: ^13.15.35
         version: 13.15.35
 
   packages/version:
@@ -737,7 +737,7 @@ importers:
         specifier: workspace:^
         version: link:../root-utils
       semver:
-        specifier: 7.8.5
+        specifier: ^7.8.5
         version: 7.8.5
     devDependencies:
       sinon:
@@ -747,7 +747,7 @@ importers:
   packages/webhook-mock-receiver:
     dependencies:
       p-wait-for:
-        specifier: 6.0.0
+        specifier: ^6.0.0
         version: 6.0.0
     devDependencies:
       got:
@@ -763,10 +763,10 @@ importers:
         specifier: workspace:^
         version: link:../errors
       archiver:
-        specifier: 8.0.0
+        specifier: ^8.0.0
         version: 8.0.0
       extract-zip:
-        specifier: 2.0.1
+        specifier: ^2.0.1
         version: 2.0.1(supports-color@8.1.1)
     devDependencies:
       folder-hash:

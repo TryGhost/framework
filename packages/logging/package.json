@@ -30,11 +30,11 @@
     "@tryghost/http-stream": "workspace:^",
     "@tryghost/pretty-stream": "workspace:^",
     "@tryghost/root-utils": "workspace:^",
-    "bunyan": "1.8.15",
-    "fs-extra": "11.4.0",
-    "gelf-stream": "1.1.1",
-    "json-stringify-safe": "5.0.1",
-    "lodash": "4.18.1"
+    "bunyan": "^1.8.15",
+    "fs-extra": "^11.4.0",
+    "gelf-stream": "^1.1.1",
+    "json-stringify-safe": "^5.0.1",
+    "lodash": "^4.18.1"
   },
   "devDependencies": {
     "@tryghost/errors": "workspace:^",
