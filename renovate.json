@@ -2,5 +2,11 @@
   "extends": ["github>tryghost/renovate-config"],
   "assignees": ["9larsons"],
   "ignoreDeps": ["moment-timezone"],
-  "packageRules": []
+  "packageRules": [
+    {
+      "description": "Runtime deps ship to npm, so keep them as caret ranges. Exact pins in every package force duplicate installs downstream (e.g. multiple lodash copies in Ghost core). Only bump the manifest when a release falls outside the existing range.",
+      "matchDepTypes": ["dependencies"],
+      "rangeStrategy": "replace"
+    }
+  ]
 }
