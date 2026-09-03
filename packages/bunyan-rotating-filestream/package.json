@@ -24,7 +24,7 @@
     "posttest": "pnpm run lint"
   },
   "dependencies": {
-    "long-timeout": "0.1.1"
+    "long-timeout": "^0.1.1"
   },
   "devDependencies": {
     "bunyan": "1.8.15",

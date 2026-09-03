@@ -24,8 +24,8 @@
   },
   "dependencies": {
     "@tryghost/errors": "workspace:^",
-    "archiver": "8.0.0",
-    "extract-zip": "2.0.1"
+    "archiver": "^8.0.0",
+    "extract-zip": "^2.0.1"
   },
   "devDependencies": {
     "folder-hash": "4.1.3",

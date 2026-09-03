@@ -28,7 +28,7 @@
     "@tryghost/elasticsearch": "workspace:^",
     "@tryghost/pretty-stream": "workspace:^",
     "@tryghost/root-utils": "workspace:^",
-    "json-stringify-safe": "5.0.1"
+    "json-stringify-safe": "^5.0.1"
   },
   "devDependencies": {
     "rewire": "9.0.1",
