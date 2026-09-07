@@ -632,8 +632,8 @@ importers:
         specifier: workspace:^
         version: link:../tpl
       nodemailer:
-        specifier: ^9.1.0
-        version: 9.1.0
+        specifier: ^10.0.0
+        version: 10.0.0
       nodemailer-mailgun-transport:
         specifier: ^2.1.5
         version: 2.1.5(debug@4.4.3(supports-color@7.2.0))(lodash@4.18.1)(supports-color@7.2.0)
@@ -4398,9 +4398,9 @@ packages:
   nodemailer-stub-transport@1.1.0:
     resolution: {integrity: sha512-4fwl2f+647IIyuNuf6wuEMqK4oEU9FMJSYme8kPckVSr1rXIXcmI6BNcIWO+1cAK8XeexYKxYoFztam0jAwjkA==}
 
-  nodemailer@9.1.0:
-    resolution: {integrity: sha512-xj1Ri5Sau3qpPffHJwi2bY0oWVVWYq62Ph17l+2v1xXpxjqTls3YPc3L8dub9mcJpxj+1ucNnuYVqLlgh4pmDA==}
-    engines: {node: '>=6.0.0'}
+  nodemailer@10.0.0:
+    resolution: {integrity: sha512-wdv+hXBg0iIPIOf108FaZyTxqjQpCvQeAJt9pHHTooPy/y3vQtI9eiImM9AIVKR3e/0FeMA1oueNfBjFJcaK+Q==}
+    engines: {node: '>=20.0.0'}
 
   nopt@9.0.0:
     resolution: {integrity: sha512-Zhq3a+yFKrYwSBluL4H9XP3m3y5uvQkB/09CwDruCiRmR/UJYnn9W4R48ry0uGC70aeTPKLynBtscP9efFFcPw==}
@@ -5525,7 +5525,7 @@ snapshots:
       '@babel/code-frame': 7.29.7
       '@babel/generator': 7.29.8
       '@babel/helper-compilation-targets': 7.29.7
-      '@babel/helper-module-transforms': 7.29.7(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1)
+      '@babel/helper-module-transforms': 7.29.7(@babel/core@7.29.7(supports-color@7.2.0))(supports-color@8.1.1)
       '@babel/helpers': 7.29.7
       '@babel/parser': 7.29.8
       '@babel/template': 7.29.7
@@ -5623,9 +5623,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@babel/helper-module-transforms@7.29.7(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1)':
+  '@babel/helper-module-transforms@7.29.7(@babel/core@7.29.7(supports-color@7.2.0))(supports-color@8.1.1)':
     dependencies:
-      '@babel/core': 7.29.7(supports-color@8.1.1)
+      '@babel/core': 7.29.7(supports-color@7.2.0)
       '@babel/helper-module-imports': 7.29.7(supports-color@8.1.1)
       '@babel/helper-validator-identifier': 7.29.7
       '@babel/traverse': 7.29.8(supports-color@8.1.1)
@@ -5742,24 +5742,24 @@ snapshots:
     dependencies:
       '@babel/core': 7.29.7(supports-color@7.2.0)
 
-  '@babel/plugin-syntax-async-generators@7.8.4(@babel/core@7.29.7(supports-color@8.1.1))':
+  '@babel/plugin-syntax-async-generators@7.8.4(@babel/core@7.29.7(supports-color@7.2.0))':
     dependencies:
-      '@babel/core': 7.29.7(supports-color@8.1.1)
+      '@babel/core': 7.29.7(supports-color@7.2.0)
       '@babel/helper-plugin-utils': 7.29.7
 
-  '@babel/plugin-syntax-bigint@7.8.3(@babel/core@7.29.7(supports-color@8.1.1))':
+  '@babel/plugin-syntax-bigint@7.8.3(@babel/core@7.29.7(supports-color@7.2.0))':
     dependencies:
-      '@babel/core': 7.29.7(supports-color@8.1.1)
+      '@babel/core': 7.29.7(supports-color@7.2.0)
       '@babel/helper-plugin-utils': 7.29.7
 
-  '@babel/plugin-syntax-class-properties@7.12.13(@babel/core@7.29.7(supports-color@8.1.1))':
+  '@babel/plugin-syntax-class-properties@7.12.13(@babel/core@7.29.7(supports-color@7.2.0))':
     dependencies:
-      '@babel/core': 7.29.7(supports-color@8.1.1)
+      '@babel/core': 7.29.7(supports-color@7.2.0)
       '@babel/helper-plugin-utils': 7.29.7
 
-  '@babel/plugin-syntax-class-static-block@7.14.5(@babel/core@7.29.7(supports-color@8.1.1))':
+  '@babel/plugin-syntax-class-static-block@7.14.5(@babel/core@7.29.7(supports-color@7.2.0))':
     dependencies:
-      '@babel/core': 7.29.7(supports-color@8.1.1)
+      '@babel/core': 7.29.7(supports-color@7.2.0)
       '@babel/helper-plugin-utils': 7.29.7
 
   '@babel/plugin-syntax-decorators@7.29.7(@babel/core@7.29.7(supports-color@7.2.0))':
@@ -5777,19 +5777,14 @@ snapshots:
       '@babel/core': 7.29.7(supports-color@7.2.0)
       '@babel/helper-plugin-utils': 7.29.7
 
-  '@babel/plugin-syntax-import-attributes@7.29.7(@babel/core@7.29.7(supports-color@8.1.1))':
+  '@babel/plugin-syntax-import-meta@7.10.4(@babel/core@7.29.7(supports-color@7.2.0))':
     dependencies:
-      '@babel/core': 7.29.7(supports-color@8.1.1)
+      '@babel/core': 7.29.7(supports-color@7.2.0)
       '@babel/helper-plugin-utils': 7.29.7
 
-  '@babel/plugin-syntax-import-meta@7.10.4(@babel/core@7.29.7(supports-color@8.1.1))':
+  '@babel/plugin-syntax-json-strings@7.8.3(@babel/core@7.29.7(supports-color@7.2.0))':
     dependencies:
-      '@babel/core': 7.29.7(supports-color@8.1.1)
-      '@babel/helper-plugin-utils': 7.29.7
-
-  '@babel/plugin-syntax-json-strings@7.8.3(@babel/core@7.29.7(supports-color@8.1.1))':
-    dependencies:
-      '@babel/core': 7.29.7(supports-color@8.1.1)
+      '@babel/core': 7.29.7(supports-color@7.2.0)
       '@babel/helper-plugin-utils': 7.29.7
 
   '@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7(supports-color@7.2.0))':
@@ -5797,59 +5792,49 @@ snapshots:
       '@babel/core': 7.29.7(supports-color@7.2.0)
       '@babel/helper-plugin-utils': 7.29.7
 
-  '@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7(supports-color@8.1.1))':
+  '@babel/plugin-syntax-logical-assignment-operators@7.10.4(@babel/core@7.29.7(supports-color@7.2.0))':
     dependencies:
-      '@babel/core': 7.29.7(supports-color@8.1.1)
+      '@babel/core': 7.29.7(supports-color@7.2.0)
       '@babel/helper-plugin-utils': 7.29.7
 
-  '@babel/plugin-syntax-logical-assignment-operators@7.10.4(@babel/core@7.29.7(supports-color@8.1.1))':
+  '@babel/plugin-syntax-nullish-coalescing-operator@7.8.3(@babel/core@7.29.7(supports-color@7.2.0))':
     dependencies:
-      '@babel/core': 7.29.7(supports-color@8.1.1)
+      '@babel/core': 7.29.7(supports-color@7.2.0)
       '@babel/helper-plugin-utils': 7.29.7
 
-  '@babel/plugin-syntax-nullish-coalescing-operator@7.8.3(@babel/core@7.29.7(supports-color@8.1.1))':
+  '@babel/plugin-syntax-numeric-separator@7.10.4(@babel/core@7.29.7(supports-color@7.2.0))':
     dependencies:
-      '@babel/core': 7.29.7(supports-color@8.1.1)
+      '@babel/core': 7.29.7(supports-color@7.2.0)
       '@babel/helper-plugin-utils': 7.29.7
 
-  '@babel/plugin-syntax-numeric-separator@7.10.4(@babel/core@7.29.7(supports-color@8.1.1))':
+  '@babel/plugin-syntax-object-rest-spread@7.8.3(@babel/core@7.29.7(supports-color@7.2.0))':
     dependencies:
-      '@babel/core': 7.29.7(supports-color@8.1.1)
+      '@babel/core': 7.29.7(supports-color@7.2.0)
       '@babel/helper-plugin-utils': 7.29.7
 
-  '@babel/plugin-syntax-object-rest-spread@7.8.3(@babel/core@7.29.7(supports-color@8.1.1))':
+  '@babel/plugin-syntax-optional-catch-binding@7.8.3(@babel/core@7.29.7(supports-color@7.2.0))':
     dependencies:
-      '@babel/core': 7.29.7(supports-color@8.1.1)
+      '@babel/core': 7.29.7(supports-color@7.2.0)
       '@babel/helper-plugin-utils': 7.29.7
 
-  '@babel/plugin-syntax-optional-catch-binding@7.8.3(@babel/core@7.29.7(supports-color@8.1.1))':
+  '@babel/plugin-syntax-optional-chaining@7.8.3(@babel/core@7.29.7(supports-color@7.2.0))':
     dependencies:
-      '@babel/core': 7.29.7(supports-color@8.1.1)
+      '@babel/core': 7.29.7(supports-color@7.2.0)
       '@babel/helper-plugin-utils': 7.29.7
 
-  '@babel/plugin-syntax-optional-chaining@7.8.3(@babel/core@7.29.7(supports-color@8.1.1))':
+  '@babel/plugin-syntax-private-property-in-object@7.14.5(@babel/core@7.29.7(supports-color@7.2.0))':
     dependencies:
-      '@babel/core': 7.29.7(supports-color@8.1.1)
+      '@babel/core': 7.29.7(supports-color@7.2.0)
       '@babel/helper-plugin-utils': 7.29.7
 
-  '@babel/plugin-syntax-private-property-in-object@7.14.5(@babel/core@7.29.7(supports-color@8.1.1))':
+  '@babel/plugin-syntax-top-level-await@7.14.5(@babel/core@7.29.7(supports-color@7.2.0))':
     dependencies:
-      '@babel/core': 7.29.7(supports-color@8.1.1)
-      '@babel/helper-plugin-utils': 7.29.7
-
-  '@babel/plugin-syntax-top-level-await@7.14.5(@babel/core@7.29.7(supports-color@8.1.1))':
-    dependencies:
-      '@babel/core': 7.29.7(supports-color@8.1.1)
+      '@babel/core': 7.29.7(supports-color@7.2.0)
       '@babel/helper-plugin-utils': 7.29.7
 
   '@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7(supports-color@7.2.0))':
     dependencies:
       '@babel/core': 7.29.7(supports-color@7.2.0)
-      '@babel/helper-plugin-utils': 7.29.7
-
-  '@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7(supports-color@8.1.1))':
-    dependencies:
-      '@babel/core': 7.29.7(supports-color@8.1.1)
       '@babel/helper-plugin-utils': 7.29.7
 
   '@babel/plugin-syntax-unicode-sets-regex@7.18.6(@babel/core@7.29.7(supports-color@7.2.0))':
@@ -7402,24 +7387,24 @@ snapshots:
     optionalDependencies:
       '@babel/traverse': 7.29.8(supports-color@7.2.0)
 
-  babel-preset-current-node-syntax@1.2.0(@babel/core@7.29.7(supports-color@8.1.1)):
+  babel-preset-current-node-syntax@1.2.0(@babel/core@7.29.7(supports-color@7.2.0)):
     dependencies:
-      '@babel/core': 7.29.7(supports-color@8.1.1)
-      '@babel/plugin-syntax-async-generators': 7.8.4(@babel/core@7.29.7(supports-color@8.1.1))
-      '@babel/plugin-syntax-bigint': 7.8.3(@babel/core@7.29.7(supports-color@8.1.1))
-      '@babel/plugin-syntax-class-properties': 7.12.13(@babel/core@7.29.7(supports-color@8.1.1))
-      '@babel/plugin-syntax-class-static-block': 7.14.5(@babel/core@7.29.7(supports-color@8.1.1))
-      '@babel/plugin-syntax-import-attributes': 7.29.7(@babel/core@7.29.7(supports-color@8.1.1))
-      '@babel/plugin-syntax-import-meta': 7.10.4(@babel/core@7.29.7(supports-color@8.1.1))
-      '@babel/plugin-syntax-json-strings': 7.8.3(@babel/core@7.29.7(supports-color@8.1.1))
-      '@babel/plugin-syntax-logical-assignment-operators': 7.10.4(@babel/core@7.29.7(supports-color@8.1.1))
-      '@babel/plugin-syntax-nullish-coalescing-operator': 7.8.3(@babel/core@7.29.7(supports-color@8.1.1))
-      '@babel/plugin-syntax-numeric-separator': 7.10.4(@babel/core@7.29.7(supports-color@8.1.1))
-      '@babel/plugin-syntax-object-rest-spread': 7.8.3(@babel/core@7.29.7(supports-color@8.1.1))
-      '@babel/plugin-syntax-optional-catch-binding': 7.8.3(@babel/core@7.29.7(supports-color@8.1.1))
-      '@babel/plugin-syntax-optional-chaining': 7.8.3(@babel/core@7.29.7(supports-color@8.1.1))
-      '@babel/plugin-syntax-private-property-in-object': 7.14.5(@babel/core@7.29.7(supports-color@8.1.1))
-      '@babel/plugin-syntax-top-level-await': 7.14.5(@babel/core@7.29.7(supports-color@8.1.1))
+      '@babel/core': 7.29.7(supports-color@7.2.0)
+      '@babel/plugin-syntax-async-generators': 7.8.4(@babel/core@7.29.7(supports-color@7.2.0))
+      '@babel/plugin-syntax-bigint': 7.8.3(@babel/core@7.29.7(supports-color@7.2.0))
+      '@babel/plugin-syntax-class-properties': 7.12.13(@babel/core@7.29.7(supports-color@7.2.0))
+      '@babel/plugin-syntax-class-static-block': 7.14.5(@babel/core@7.29.7(supports-color@7.2.0))
+      '@babel/plugin-syntax-import-attributes': 7.29.7(@babel/core@7.29.7(supports-color@7.2.0))
+      '@babel/plugin-syntax-import-meta': 7.10.4(@babel/core@7.29.7(supports-color@7.2.0))
+      '@babel/plugin-syntax-json-strings': 7.8.3(@babel/core@7.29.7(supports-color@7.2.0))
+      '@babel/plugin-syntax-logical-assignment-operators': 7.10.4(@babel/core@7.29.7(supports-color@7.2.0))
+      '@babel/plugin-syntax-nullish-coalescing-operator': 7.8.3(@babel/core@7.29.7(supports-color@7.2.0))
+      '@babel/plugin-syntax-numeric-separator': 7.10.4(@babel/core@7.29.7(supports-color@7.2.0))
+      '@babel/plugin-syntax-object-rest-spread': 7.8.3(@babel/core@7.29.7(supports-color@7.2.0))
+      '@babel/plugin-syntax-optional-catch-binding': 7.8.3(@babel/core@7.29.7(supports-color@7.2.0))
+      '@babel/plugin-syntax-optional-chaining': 7.8.3(@babel/core@7.29.7(supports-color@7.2.0))
+      '@babel/plugin-syntax-private-property-in-object': 7.14.5(@babel/core@7.29.7(supports-color@7.2.0))
+      '@babel/plugin-syntax-top-level-await': 7.14.5(@babel/core@7.29.7(supports-color@7.2.0))
 
   balanced-match@1.0.2: {}
 
@@ -8471,15 +8456,15 @@ snapshots:
     dependencies:
       '@babel/core': 7.29.7(supports-color@8.1.1)
       '@babel/generator': 7.29.8
-      '@babel/plugin-syntax-jsx': 7.29.7(@babel/core@7.29.7(supports-color@8.1.1))
-      '@babel/plugin-syntax-typescript': 7.29.7(@babel/core@7.29.7(supports-color@8.1.1))
+      '@babel/plugin-syntax-jsx': 7.29.7(@babel/core@7.29.7(supports-color@7.2.0))
+      '@babel/plugin-syntax-typescript': 7.29.7(@babel/core@7.29.7(supports-color@7.2.0))
       '@babel/types': 7.29.8
       '@jest/expect-utils': 30.4.1
       '@jest/get-type': 30.1.0
       '@jest/snapshot-utils': 30.4.1
       '@jest/transform': 30.4.1(supports-color@8.1.1)
       '@jest/types': 30.4.1
-      babel-preset-current-node-syntax: 1.2.0(@babel/core@7.29.7(supports-color@8.1.1))
+      babel-preset-current-node-syntax: 1.2.0(@babel/core@7.29.7(supports-color@7.2.0))
       chalk: 4.1.2
       expect: 30.4.1
       graceful-fs: 4.2.11
@@ -8935,7 +8920,7 @@ snapshots:
 
   nodemailer-stub-transport@1.1.0: {}
 
-  nodemailer@9.1.0: {}
+  nodemailer@10.0.0: {}
 
   nopt@9.0.0:
     dependencies:
