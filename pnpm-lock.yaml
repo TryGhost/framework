@@ -152,31 +152,6 @@ importers:
         specifier: 4.1.11
         version: 4.1.11(@opentelemetry/api@1.9.1)(@types/node@25.9.5)(@vitest/coverage-v8@4.1.11)(vite@8.2.2(@types/node@25.9.5)(esbuild@0.28.2)(yaml@2.9.0))
 
-  packages/api-framework:
-    dependencies:
-      '@tryghost/debug':
-        specifier: workspace:^
-        version: link:../debug
-      '@tryghost/errors':
-        specifier: workspace:^
-        version: link:../errors
-      '@tryghost/promise':
-        specifier: workspace:^
-        version: link:../promise
-      '@tryghost/tpl':
-        specifier: workspace:^
-        version: link:../tpl
-      '@tryghost/validator':
-        specifier: workspace:^
-        version: link:../validator
-      lodash:
-        specifier: ^4.18.1
-        version: 4.18.1
-    devDependencies:
-      sinon:
-        specifier: 'catalog:'
-        version: 22.1.0
-
   packages/bookshelf-collision:
     dependencies:
       '@tryghost/errors':
