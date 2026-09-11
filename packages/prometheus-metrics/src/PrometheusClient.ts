@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import http from 'http';
 import client from 'prom-client';
 import type { Metric, MetricObjectWithValues, MetricValue } from 'prom-client';

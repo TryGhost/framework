@@ -1,5 +1,5 @@
 import assert from 'assert/strict';
-import { MetricsServer } from '../src';
+import { MetricsServer } from '../src/server';
 import express from 'express';
 import * as sinon from 'sinon';
 
