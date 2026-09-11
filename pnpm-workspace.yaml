@@ -12,7 +12,7 @@ allowBuilds:
   # requires an explicit Platform security review.
   'dtrace-provider@0.8.8': true
   'esbuild@0.28.2': true
-  'nx@23.1.1': true
+  'nx@23.2.0': true
   'better-sqlite3@13.0.3': true
   sqlite3: false
 minimumReleaseAge: 4320
