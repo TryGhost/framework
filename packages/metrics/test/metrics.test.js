@@ -425,3 +425,350 @@ describe('Sampling', function () {
         assert.equal(write.secondCall.args[0].msg, 'Metric sampled-metric: 101 (sample rate: 0.5)');
     });
 });
+
+describe('Batching', function () {
+    afterEach(function () {
+        sandbox.restore();
+    });
+
+    function batchedMetrics(batch, metricsOptions) {
+        return new GhostMetrics({
+            metrics: {
+                transports: ['elasticsearch'],
+                batch,
+                ...metricsOptions,
+            },
+            elasticsearch: {
+                host: 'https://test-elasticsearch',
+                username: 'user',
+                password: 'pass',
+            },
+        });
+    }
+
+    it('is off by default', async function () {
+        const ghostMetrics = new GhostMetrics({ metrics: {} });
+        assert.equal(ghostMetrics.batch, null);
+        assert.deepEqual(ghostMetrics.batches, []);
+        assert.equal(new GhostMetrics().batch, null);
+        assert.equal(new GhostMetrics({ metrics: null }).batch, null);
+
+        // A no-op, so shutdown handlers can call it unconditionally
+        await assert.doesNotReject(() => new GhostMetrics().flush());
+    });
+
+    it('fills in defaults when enabled with `true`', function () {
+        assert.deepEqual(batchedMetrics(true).batch, {
+            size: 100,
+            maxWaitMs: 5000,
+            maxBufferSize: 1000,
+        });
+    });
+
+    it('accepts partial config, defaulting the buffer cap from the size', function () {
+        assert.deepEqual(batchedMetrics({ size: 10 }).batch, {
+            size: 10,
+            maxWaitMs: 5000,
+            maxBufferSize: 100,
+        });
+    });
+
+    it('treats false and an `enabled: false` bag as off', function () {
+        assert.equal(batchedMetrics(false).batch, null);
+        assert.equal(batchedMetrics({ enabled: false, size: 10 }).batch, null);
+    });
+
+    it('throws for invalid batch config', function () {
+        assert.throws(() => batchedMetrics('yes'), /metrics\.batch must be a boolean or an object/);
+        assert.throws(() => batchedMetrics([1]), /metrics\.batch must be a boolean or an object/);
+
+        for (const size of ['10', 0, -1, 1.5, NaN]) {
+            assert.throws(
+                () => batchedMetrics({ size }),
+                /metrics\.batch\.size must be a positive whole number/,
+            );
+        }
+
+        assert.throws(
+            () => batchedMetrics({ maxWaitMs: 0 }),
+            /metrics\.batch\.maxWaitMs must be a positive whole number/,
+        );
+        assert.throws(
+            () => batchedMetrics({ maxBufferSize: 0 }),
+            /metrics\.batch\.maxBufferSize must be a positive whole number/,
+        );
+        assert.throws(
+            () => batchedMetrics({ size: 10, maxBufferSize: 5 }),
+            /metrics\.batch\.maxBufferSize must be at least metrics\.batch\.size \(10\), got 5/,
+        );
+    });
+
+    it('buffers metrics and ships them in one bulk request', async function () {
+        const ghostMetrics = batchedMetrics({ size: 3 }, { metadata: { id: '123123' } });
+        const index = sandbox.stub(ElasticSearch.prototype, 'index').resolves();
+        const bulk = sandbox.stub(ElasticSearch.prototype, 'bulk').resolves();
+
+        await ghostMetrics.metric('cache-hit', 1);
+        await ghostMetrics.metric('cache-miss', 2);
+
+        // Nothing shipped yet, and never one request per metric
+        assert.equal(bulk.called, false);
+        assert.equal(index.called, false);
+
+        await ghostMetrics.metric('cache-hit', 3);
+        await ghostMetrics.flush();
+
+        assert.equal(bulk.calledOnce, true);
+
+        const operations = bulk.firstCall.args[0];
+        assert.equal(operations.length, 3);
+        assert.deepEqual(
+            operations.map((operation) => operation.index),
+            ['metrics-cache-hit', 'metrics-cache-miss', 'metrics-cache-hit'],
+        );
+        assert.deepEqual(
+            operations.map((operation) => operation.document.value),
+            [1, 2, 3],
+        );
+        assert.equal(operations[0].document.metadata.id, '123123');
+        assert.notEqual(operations[0].document['@timestamp'], undefined);
+    });
+
+    it('ships a partial buffer on flush', async function () {
+        const ghostMetrics = batchedMetrics({ size: 100 });
+        const bulk = sandbox.stub(ElasticSearch.prototype, 'bulk').resolves();
+
+        await ghostMetrics.metric('cache-hit', 1);
+        await ghostMetrics.flush();
+
+        assert.equal(bulk.calledOnce, true);
+        assert.equal(bulk.firstCall.args[0].length, 1);
+
+        // Nothing left to ship
+        await ghostMetrics.flush();
+        assert.equal(bulk.calledOnce, true);
+    });
+
+    it('ships the buffer once the max wait elapses', async function () {
+        const clock = sandbox.useFakeTimers();
+        const ghostMetrics = batchedMetrics({ size: 100, maxWaitMs: 1000 });
+        const bulk = sandbox.stub(ElasticSearch.prototype, 'bulk').resolves();
+
+        await ghostMetrics.metric('cache-hit', 1);
+        assert.equal(bulk.called, false);
+
+        await clock.tickAsync(999);
+        assert.equal(bulk.called, false);
+
+        await clock.tickAsync(1);
+        assert.equal(bulk.calledOnce, true);
+        assert.equal(bulk.firstCall.args[0].length, 1);
+
+        // The timer isn't rearmed until the next metric arrives
+        await clock.tickAsync(5000);
+        assert.equal(bulk.calledOnce, true);
+
+        await ghostMetrics.metric('cache-hit', 2);
+        await clock.tickAsync(1000);
+        assert.equal(bulk.calledTwice, true);
+    });
+
+    it('does not rearm the max wait timer for every metric', async function () {
+        const clock = sandbox.useFakeTimers();
+        const ghostMetrics = batchedMetrics({ size: 100, maxWaitMs: 1000 });
+        const bulk = sandbox.stub(ElasticSearch.prototype, 'bulk').resolves();
+
+        await ghostMetrics.metric('cache-hit', 1);
+        await clock.tickAsync(900);
+        await ghostMetrics.metric('cache-hit', 2);
+        await clock.tickAsync(100);
+
+        // The second metric didn't push the first one's deadline out
+        assert.equal(bulk.calledOnce, true);
+        assert.equal(bulk.firstCall.args[0].length, 2);
+    });
+
+    it('drops metrics once the buffer cap is reached', async function () {
+        const ghostMetrics = batchedMetrics({ size: 2, maxBufferSize: 4 });
+        // Never settles, so nothing can drain behind the first batch
+        sandbox.stub(ElasticSearch.prototype, 'bulk').returns(new Promise(() => {}));
+
+        for (let i = 0; i < 10; i += 1) {
+            await ghostMetrics.metric('cache-hit', i);
+        }
+
+        const [batch] = ghostMetrics.batches;
+        // Two metrics are in flight, four are buffered, the rest are shed
+        assert.equal(batch.buffer.length, 4);
+        assert.equal(batch.dropped, 4);
+    });
+
+    it('keeps only one bulk request in flight', async function () {
+        const ghostMetrics = batchedMetrics({ size: 2 });
+        let resolveFirst;
+        const bulk = sandbox
+            .stub(ElasticSearch.prototype, 'bulk')
+            .onFirstCall()
+            .returns(
+                new Promise((resolve) => {
+                    resolveFirst = resolve;
+                }),
+            )
+            .onSecondCall()
+            .resolves();
+
+        await ghostMetrics.metric('cache-hit', 1);
+        await ghostMetrics.metric('cache-hit', 2);
+        assert.equal(bulk.calledOnce, true);
+
+        await ghostMetrics.metric('cache-hit', 3);
+        await ghostMetrics.metric('cache-hit', 4);
+
+        // The second batch waits behind the first
+        assert.equal(bulk.calledOnce, true);
+
+        resolveFirst();
+        await ghostMetrics.flush();
+
+        assert.equal(bulk.calledTwice, true);
+        assert.equal(bulk.secondCall.args[0].length, 2);
+    });
+
+    it('queues a full buffer while another bulk request is in flight', async function () {
+        const clock = sandbox.useFakeTimers();
+        const ghostMetrics = batchedMetrics({ size: 2, maxWaitMs: 1000 });
+        let resolveFirst;
+        const bulk = sandbox
+            .stub(ElasticSearch.prototype, 'bulk')
+            .onFirstCall()
+            .returns(
+                new Promise((resolve) => {
+                    resolveFirst = resolve;
+                }),
+            )
+            .onSecondCall()
+            .resolves();
+
+        await ghostMetrics.metric('cache-hit', 1);
+        await ghostMetrics.metric('cache-hit', 2);
+        await ghostMetrics.metric('cache-hit', 3);
+        await ghostMetrics.metric('cache-hit', 4);
+
+        assert.equal(bulk.calledOnce, true);
+
+        resolveFirst();
+        await ghostMetrics.flush();
+
+        // The full second buffer is already queued; it does not wait for its timer.
+        assert.equal(clock.now, 0);
+        assert.equal(bulk.calledTwice, true);
+        assert.equal(bulk.secondCall.args[0].length, 2);
+    });
+
+    it('keeps shipping after a failed batch', async function () {
+        const ghostMetrics = batchedMetrics({ size: 1 });
+        const bulk = sandbox.stub(ElasticSearch.prototype, 'bulk');
+        bulk.onFirstCall().rejects(new Error('boom'));
+        bulk.onSecondCall().resolves();
+
+        await assert.doesNotReject(() => ghostMetrics.metric('cache-hit', 1));
+        await ghostMetrics.flush();
+
+        await ghostMetrics.metric('cache-hit', 2);
+        await ghostMetrics.flush();
+
+        assert.equal(bulk.calledTwice, true);
+    });
+
+    it('drops batched metrics that fall outside the sample rate', async function () {
+        const ghostMetrics = batchedMetrics({ size: 1 }, { sampleRate: 0.1 });
+        const bulk = sandbox.stub(ElasticSearch.prototype, 'bulk').resolves();
+        sandbox.stub(Math, 'random').returns(0.5);
+
+        await ghostMetrics.metric('cache-hit', 1);
+        await ghostMetrics.flush();
+
+        assert.equal(bulk.called, false);
+    });
+
+    it('tags batched documents with the sample rate they survived', async function () {
+        const ghostMetrics = batchedMetrics({ size: 1 }, { sampleRate: 0.5 });
+        const bulk = sandbox.stub(ElasticSearch.prototype, 'bulk').resolves();
+        sandbox.stub(Math, 'random').returns(0.1);
+
+        await ghostMetrics.metric('cache-hit', 1);
+        await ghostMetrics.flush();
+
+        assert.equal(bulk.firstCall.args[0][0].document.sampleRate, 0.5);
+    });
+
+    it('copies object values so a buffered document cannot be mutated', async function () {
+        const metadata = { site: { id: 'original' } };
+        const ghostMetrics = batchedMetrics({ size: 100 }, { metadata });
+        const bulk = sandbox.stub(ElasticSearch.prototype, 'bulk').resolves();
+
+        const value = { operation: 'get', result: { source: 'cache' } };
+        await ghostMetrics.metric('cache-error', value);
+        value.operation = 'set';
+        value.result.source = 'database';
+        metadata.site.id = 'changed';
+
+        await ghostMetrics.flush();
+
+        assert.equal(bulk.firstCall.args[0][0].document.operation, 'get');
+        assert.equal(bulk.firstCall.args[0][0].document.result.source, 'cache');
+        assert.equal(bulk.firstCall.args[0][0].document.metadata.site.id, 'original');
+        // The caller's object is left alone
+        assert.deepEqual(Object.keys(value), ['operation', 'result']);
+    });
+
+    it('honours a pre-set timestamp and shipping without metadata', async function () {
+        const ghostMetrics = batchedMetrics({ size: 1 });
+        ghostMetrics.metadata = null;
+        const bulk = sandbox.stub(ElasticSearch.prototype, 'bulk').resolves();
+
+        await ghostMetrics.metric('object-metric', { value: 101, '@timestamp': 12345 });
+        await ghostMetrics.flush();
+
+        assert.deepEqual(bulk.firstCall.args[0][0].document, { value: 101, '@timestamp': 12345 });
+    });
+
+    it('wraps non-object values, including null and arrays', async function () {
+        const ghostMetrics = batchedMetrics({ size: 100 });
+        const bulk = sandbox.stub(ElasticSearch.prototype, 'bulk').resolves();
+
+        await ghostMetrics.metric('null-metric', null);
+        await ghostMetrics.metric('array-metric', [1, 2]);
+        await ghostMetrics.flush();
+
+        const [nullOperation, arrayOperation] = bulk.firstCall.args[0];
+        assert.equal(nullOperation.document.value, null);
+        assert.deepEqual(arrayOperation.document.value, [1, 2]);
+    });
+
+    it('does not throw when a metric value cannot be deeply cloned', async function () {
+        const ghostMetrics = batchedMetrics({ size: 1 });
+        const bulk = sandbox.stub(ElasticSearch.prototype, 'bulk').resolves();
+        const value = { callback: () => 'not cloneable' };
+
+        await assert.doesNotReject(() => ghostMetrics.metric('callback-metric', value));
+        await ghostMetrics.flush();
+
+        assert.equal(bulk.firstCall.args[0][0].document.callback, value.callback);
+    });
+
+    it('leaves the stdout transport unbatched', async function () {
+        const write = sandbox.stub(PrettyStream.prototype, 'write');
+        const ghostMetrics = new GhostMetrics({
+            metrics: {
+                transports: ['stdout'],
+                batch: { size: 100 },
+            },
+        });
+
+        await ghostMetrics.metric('cache-hit', 1);
+
+        assert.equal(write.calledOnce, true);
+        assert.deepEqual(ghostMetrics.batches, []);
+    });
+});

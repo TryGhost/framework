@@ -65,6 +65,75 @@ An invalid configured rate throws when the instance is constructed. An invalid
 per-call rate is ignored in favour of the configured rate, so a bad call site
 cannot break the code path it is measuring.
 
+### Batching
+
+Sampling reduces how many metrics are shipped; batching reduces how many
+requests they take. With batching on, the Elasticsearch transport buffers
+documents and ships them with the bulk API, so a hot code path costs one
+request per batch instead of one per metric. It is off by default:
+
+```js
+const metrics = require('@tryghost/metrics');
+
+const batched = new metrics.GhostMetrics({
+    metrics: {
+        transports: ['elasticsearch'],
+        batch: true,
+    },
+});
+```
+
+`batch: true` uses the defaults; pass an object to override them:
+
+| Option          | Default     | Meaning                                                         |
+| --------------- | ----------- | --------------------------------------------------------------- |
+| `enabled`       | `true`      | Set to `false` to turn batching off without dropping the config |
+| `size`          | `100`       | Buffered documents that trigger a bulk request                  |
+| `maxWaitMs`     | `5000`      | How long a document may sit in the buffer before it is shipped  |
+| `maxBufferSize` | `size * 10` | Hard cap on buffered documents; further metrics are dropped     |
+
+```js
+const batched = new metrics.GhostMetrics({
+    metrics: {
+        transports: ['elasticsearch'],
+        batch: {
+            size: 500,
+            maxWaitMs: 2000,
+        },
+    },
+});
+```
+
+Documents for different metric names can share a batch, because each bulk
+operation carries its own index. Sampling still applies first, so only metrics
+that survive their sample rate are buffered.
+
+Batching changes two things worth knowing about:
+
+- `metric()` resolves once the metric is **buffered**, not once it has been
+  shipped. It was already fire-and-forget for most callers, but a caller that
+  awaited delivery no longer gets it.
+- Buffered metrics are lost if the process exits without draining them. Call
+  `flush()` from your shutdown handler; it is a no-op when batching is off, so
+  it is always safe to call.
+
+```js
+process.on('SIGTERM', async () => {
+    await batched.flush();
+    process.exit(0);
+});
+```
+
+The buffer is bounded: once it holds `maxBufferSize` documents, further metrics
+are dropped rather than growing the heap while Elasticsearch is slow or down.
+Only one bulk request is ever in flight, and a failed batch is dropped without
+rejecting, so a metric call can never break the code path it is measuring.
+
+Invalid batch config throws when the instance is constructed.
+
+The stdout transport is unaffected - it writes locally, so there is nothing to
+batch.
+
 ### Types
 
 Types ship with the package. `GhostMetrics` is exported as both a value (the
@@ -77,6 +146,7 @@ import type {
     GhostMetricsOptions,
     MetricsOptions,
     MetricOptions,
+    BatchOptions,
     ElasticsearchOptions,
     MetricShipper,
 } from '@tryghost/metrics';

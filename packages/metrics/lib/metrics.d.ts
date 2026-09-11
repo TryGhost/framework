@@ -17,6 +17,8 @@ declare namespace metrics {
     export type ElasticsearchOptions = GhostMetricsClass.ElasticsearchOptions;
     export type MetricsOptions = GhostMetricsClass.MetricsOptions;
     export type MetricOptions = GhostMetricsClass.MetricOptions;
+    export type BatchOptions = GhostMetricsClass.BatchOptions;
+    export type ResolvedBatchOptions = GhostMetricsClass.ResolvedBatchOptions;
     export type GhostMetricsOptions = GhostMetricsClass.GhostMetricsOptions;
     export type MetricShipper = GhostMetricsClass.MetricShipper;
 }

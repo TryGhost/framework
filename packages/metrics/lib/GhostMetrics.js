@@ -1,4 +1,10 @@
 const jsonStringifySafe = require('json-stringify-safe');
+const MetricsBatch = require('./MetricsBatch');
+
+const DEFAULT_BATCH_SIZE = 100;
+const DEFAULT_BATCH_MAX_WAIT_MS = 5000;
+// Ten batches' worth of headroom before the buffer starts shedding load
+const DEFAULT_BATCH_BUFFER_FACTOR = 10;
 
 /**
  * @description Check a value is usable as a sample rate: a number between 0 and 1 inclusive
@@ -28,6 +34,126 @@ function normalizeSampleRate(rate, key) {
 }
 
 /**
+ * @description Validate a batching config value that must be a positive whole number
+ * @param {any} value Candidate value
+ * @param {number} fallback Value to use when unset
+ * @param {string} key Config key used in the error message
+ * @returns {number}
+ */
+function normalizePositiveInteger(value, fallback, key) {
+    if (value === undefined || value === null) {
+        return fallback;
+    }
+
+    if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < 1) {
+        throw new Error(`${key} must be a positive whole number, got ${jsonStringifySafe(value)}`);
+    }
+
+    return value;
+}
+
+/**
+ * @description Validate the batching config, returning null when batching is off
+ * @param {any} batch Candidate batch config: absent/false for off, true or a property bag for on
+ * @returns {{size: number, maxWaitMs: number, maxBufferSize: number} | null}
+ */
+function normalizeBatch(batch) {
+    if (batch === undefined || batch === null || batch === false) {
+        return null;
+    }
+
+    if (batch === true) {
+        batch = {};
+    }
+
+    if (typeof batch !== 'object' || Array.isArray(batch)) {
+        throw new Error(
+            `metrics.batch must be a boolean or an object, got ${jsonStringifySafe(batch)}`,
+        );
+    }
+
+    // `enabled` lets a deployment turn batching off without discarding the rest
+    // of the config, which matters when it is layered from config files
+    if (batch.enabled === false) {
+        return null;
+    }
+
+    const size = normalizePositiveInteger(batch.size, DEFAULT_BATCH_SIZE, 'metrics.batch.size');
+    const maxWaitMs = normalizePositiveInteger(
+        batch.maxWaitMs,
+        DEFAULT_BATCH_MAX_WAIT_MS,
+        'metrics.batch.maxWaitMs',
+    );
+    const maxBufferSize = normalizePositiveInteger(
+        batch.maxBufferSize,
+        size * DEFAULT_BATCH_BUFFER_FACTOR,
+        'metrics.batch.maxBufferSize',
+    );
+
+    if (maxBufferSize < size) {
+        throw new Error(
+            `metrics.batch.maxBufferSize must be at least metrics.batch.size (${size}), got ${maxBufferSize}`,
+        );
+    }
+
+    return { size, maxWaitMs, maxBufferSize };
+}
+
+/**
+ * @description Clone structured metric data without allowing unusual values
+ * to make instrumentation throw.
+ * @param {any} value Value to clone
+ * @returns {any}
+ */
+function cloneMetricValue(value) {
+    if (typeof value !== 'object' || value === null) {
+        return value;
+    }
+
+    try {
+        return structuredClone(value);
+    } catch {
+        // Keep instrumentation from throwing for unusual non-cloneable values.
+        return Array.isArray(value) ? [...value] : { ...value };
+    }
+}
+
+/**
+ * @description Build the document shipped for a metric value
+ * The value is copied rather than mutated, so a batched document can't be
+ * changed by the caller after it has been buffered.
+ * @param {any} value Value of the metric
+ * @param {object} metadata Metadata to ship alongside the value
+ * @param {number} sampleRate Rate the metric survived
+ * @returns {object}
+ */
+function buildDocument(value, metadata, sampleRate) {
+    // Metrics are expected to be structured data. Clone them synchronously so
+    // callers can safely reuse or mutate nested values after `metric()` returns.
+    const clonedValue = cloneMetricValue(value);
+    const document =
+        typeof clonedValue === 'object' && clonedValue !== null && !Array.isArray(clonedValue)
+            ? clonedValue
+            : { value: clonedValue };
+
+    if (!('@timestamp' in document)) {
+        document['@timestamp'] = Date.now();
+    }
+
+    if (metadata) {
+        document.metadata = cloneMetricValue(metadata);
+    }
+
+    // Sampled documents carry their rate so consumers can scale counts back up.
+    // An absent sampleRate means the metric was not sampled (i.e. a rate of 1).
+    if (sampleRate < 1) {
+        document.sampleRate = sampleRate;
+    }
+
+    return document;
+}
+
+/**
  * @description Metric shipper class built on the loggingrc config used in Ghost projects
  */
 class GhostMetrics {
@@ -40,6 +166,7 @@ class GhostMetrics {
      * metrics.metadata:    A property bag of metadata values to be shipped alongside the metric value
      * metrics.sampleRate:  Default proportion of metrics to ship, between 0 and 1 (defaults to 1, ship everything)
      * metrics.sampleRates: Per-metric sample rate overrides, keyed by metric name
+     * metrics.batch:       Batch shipping config for network transports; absent or false to ship one metric per request
      * elasticsearch:       Elasticsearch transport configuration
      * @param {object} options Bag of options
      */
@@ -56,6 +183,7 @@ class GhostMetrics {
             this.transports = options.metrics.transports || [];
             this.metadata = options.metrics.metadata || {};
             this.sampleRate = normalizeSampleRate(options.metrics.sampleRate, 'metrics.sampleRate');
+            this.batch = normalizeBatch(options.metrics.batch);
 
             for (const [name, rate] of Object.entries(options.metrics.sampleRates || {})) {
                 this.sampleRates[name] = normalizeSampleRate(rate, `metrics.sampleRates.${name}`);
@@ -64,6 +192,7 @@ class GhostMetrics {
             this.transports = [];
             this.metadata = {};
             this.sampleRate = 1;
+            this.batch = null;
         }
 
         // CASE: special env variable to enable long mode and level info
@@ -72,6 +201,8 @@ class GhostMetrics {
         }
 
         this.shippers = {};
+        // Populated by transports that buffer, so `flush()` can drain them
+        this.batches = [];
 
         this.transports.forEach((transport) => {
             let transportFn = `setup${transport[0].toUpperCase()}${transport.substr(1)}Shipper`;
@@ -126,27 +257,47 @@ class GhostMetrics {
             proxy: 'proxy' in this.elasticsearch ? this.elasticsearch.proxy : null,
         });
 
+        if (!this.batch) {
+            this.shippers.elasticsearch = (name, value, sampleRate) => {
+                return elasticSearch.index(
+                    buildDocument(value, this.metadata, sampleRate),
+                    `metrics-${name}`,
+                );
+            };
+
+            return;
+        }
+
+        // Batched metrics are shipped with the bulk API, so a hot code path
+        // costs one request per batch instead of one per metric. Documents for
+        // different metric names can share a batch because each operation
+        // carries its own index.
+        const batch = new MetricsBatch({
+            ...this.batch,
+            ship: (operations) => elasticSearch.bulk(operations),
+        });
+
+        this.batches.push(batch);
+
         this.shippers.elasticsearch = (name, value, sampleRate) => {
-            if (typeof value !== 'object') {
-                value = { value };
-            }
+            batch.add({
+                index: `metrics-${name}`,
+                document: buildDocument(value, this.metadata, sampleRate),
+            });
 
-            if (!('@timestamp' in value)) {
-                value['@timestamp'] = Date.now();
-            }
-
-            if (this.metadata) {
-                value.metadata = this.metadata;
-            }
-
-            // Sampled documents carry their rate so consumers can scale counts back up.
-            // An absent sampleRate means the metric was not sampled (i.e. a rate of 1).
-            if (sampleRate < 1) {
-                value.sampleRate = sampleRate;
-            }
-
-            return elasticSearch.index(value, `metrics-${name}`);
+            // Resolves once the metric is buffered, not once it is shipped
+            return Promise.resolve();
         };
+    }
+
+    /**
+     * @description Ship anything buffered by batching transports
+     * A no-op when batching is off, so callers (e.g. a shutdown handler) can
+     * always call it without knowing how the instance is configured.
+     * @returns {Promise<void>}
+     */
+    async flush() {
+        await Promise.allSettled(this.batches.map((batch) => batch.flush()));
     }
 
     /**

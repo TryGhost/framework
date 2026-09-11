@@ -115,6 +115,78 @@ describe('ElasticSearch', function () {
             await es.index({ message: 'Test data' }, indexConfig);
         });
     });
+
+    it('Ships a batch of events in a single bulk request', async function () {
+        const es = new ElasticSearch(testClientConfig);
+        const bulkStub = sandbox.stub(Client.prototype, 'bulk').resolves({ errors: false });
+
+        await es.bulk([
+            { index: 'metrics-cache-hit', document: { value: 1 } },
+            { index: 'metrics-cache-miss', document: { value: 2 } },
+        ]);
+
+        assert.equal(bulkStub.callCount, 1);
+        assert.deepEqual(bulkStub.firstCall.args[0].operations, [
+            { create: { _index: 'metrics-cache-hit' } },
+            { value: 1 },
+            { create: { _index: 'metrics-cache-miss' } },
+            { value: 2 },
+        ]);
+    });
+
+    it('Does not send a bulk request for an empty or invalid batch', async function () {
+        const es = new ElasticSearch(testClientConfig);
+        const bulkStub = sandbox.stub(Client.prototype, 'bulk');
+
+        await es.bulk([]);
+        await es.bulk(undefined);
+        await es.bulk([
+            { index: 'metrics-test', document: 'not an object' },
+            { index: 'metrics-test', document: null },
+        ]);
+
+        assert.equal(bulkStub.callCount, 0);
+    });
+
+    it('Skips invalid documents but ships the rest of the batch', async function () {
+        const es = new ElasticSearch(testClientConfig);
+        const bulkStub = sandbox.stub(Client.prototype, 'bulk').resolves({ errors: false });
+
+        await es.bulk([
+            { index: 'metrics-test', document: 'not an object' },
+            { index: 'metrics-test', document: { value: 1 } },
+        ]);
+
+        assert.equal(bulkStub.callCount, 1);
+        assert.deepEqual(bulkStub.firstCall.args[0].operations, [
+            { create: { _index: 'metrics-test' } },
+            { value: 1 },
+        ]);
+    });
+
+    it('Catches bulk failures without throwing', async function () {
+        const es = new ElasticSearch(testClientConfig);
+        sandbox.stub(Client.prototype, 'bulk').rejects(new Error('boom'));
+
+        await assert.doesNotReject(async () => {
+            await es.bulk([{ index: 'metrics-test', document: { value: 1 } }]);
+        });
+    });
+
+    it('Does not throw on partial bulk failures', async function () {
+        const es = new ElasticSearch(testClientConfig);
+        sandbox.stub(Client.prototype, 'bulk').resolves({
+            errors: true,
+            items: [{ create: { error: { reason: 'mapper_parsing_exception' } } }, { create: {} }],
+        });
+
+        await assert.doesNotReject(async () => {
+            await es.bulk([
+                { index: 'metrics-test', document: { value: 'a' } },
+                { index: 'metrics-test', document: { value: 1 } },
+            ]);
+        });
+    });
 });
 
 describe('ElasticSearch Bunyan', function () {
