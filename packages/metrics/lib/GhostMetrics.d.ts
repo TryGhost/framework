@@ -1,3 +1,5 @@
+import MetricsBatch = require('./MetricsBatch');
+
 /**
  * Elasticsearch transport configuration.
  */
@@ -10,6 +12,29 @@ interface ElasticsearchOptions {
     password?: string;
     /** Optional proxy URL; when absent no proxy is used. */
     proxy?: string;
+}
+
+/**
+ * Batch shipping configuration for network transports.
+ */
+interface BatchOptions {
+    /** Set to `false` to turn batching off while keeping the rest of the config. @default true */
+    enabled?: boolean;
+    /** Buffered documents that trigger a bulk request. @default 100 */
+    size?: number;
+    /** How long a document may sit in the buffer before it is shipped, in milliseconds. @default 5000 */
+    maxWaitMs?: number;
+    /** Hard cap on buffered documents; further metrics are dropped. @default `size * 10` */
+    maxBufferSize?: number;
+}
+
+/**
+ * Resolved batch configuration, with every value filled in.
+ */
+interface ResolvedBatchOptions {
+    size: number;
+    maxWaitMs: number;
+    maxBufferSize: number;
 }
 
 /**
@@ -27,6 +52,12 @@ interface MetricsOptions {
     sampleRate?: number;
     /** Per-metric sample rate overrides, keyed by metric name. Same validation as `sampleRate`. */
     sampleRates?: Record<string, number>;
+    /**
+     * Ship metrics in batches rather than one request per metric. `true` uses the defaults,
+     * an object overrides them, absent or `false` keeps one request per metric. Throws at
+     * construction time for values that aren't positive whole numbers.
+     */
+    batch?: boolean | BatchOptions;
 }
 
 /**
@@ -71,7 +102,11 @@ declare class GhostMetrics {
     metadata: Record<string, unknown>;
     sampleRate: number;
     sampleRates: Record<string, number>;
+    /** Resolved batch config, or `null` when batching is off. */
+    batch: ResolvedBatchOptions | null;
     shippers: Record<string, MetricShipper>;
+    /** Buffers belonging to batching transports, drained by {@link GhostMetrics.flush}. */
+    batches: MetricsBatch[];
 
     constructor(options?: GhostMetricsOptions);
 
@@ -82,9 +117,15 @@ declare class GhostMetrics {
 
     /**
      * Setup ElasticSearch metric shipper. Metrics are shipped to a per-metric
-     * index named `metrics-<name>`; the metric name should be sluggified.
+     * index named `metrics-<name>`; the metric name should be sluggified. With
+     * batching on, documents are buffered and shipped with the bulk API.
      */
     setupElasticsearchShipper(): void;
+
+    /**
+     * Ship anything buffered by batching transports. A no-op when batching is off.
+     */
+    flush(): Promise<void>;
 
     /**
      * Resolve the sample rate for a metric: per-call override, then per-metric config,
@@ -94,6 +135,8 @@ declare class GhostMetrics {
 
     /**
      * Ship a metric through every configured transport, unless it is dropped by sampling.
+     * With batching on, the returned promise resolves once the metric is buffered rather
+     * than once it has been shipped.
      * @param name Metric name, should be slugified for back-end compatibility (e.g. `"memory-usage"`).
      * @param value Metric value; coerced to an object before being shipped.
      * @param options Per-call options, e.g. a `sampleRate` override.
@@ -106,6 +149,8 @@ declare namespace GhostMetrics {
         ElasticsearchOptions,
         MetricsOptions,
         MetricOptions,
+        BatchOptions,
+        ResolvedBatchOptions,
         GhostMetricsOptions,
         MetricShipper,
     };

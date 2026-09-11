@@ -115,6 +115,132 @@ describe('ElasticSearch', function () {
             await es.index({ message: 'Test data' }, indexConfig);
         });
     });
+
+    it('Ships a batch of events in a single bulk request', async function () {
+        const es = new ElasticSearch(testClientConfig);
+        const bulkStub = sandbox.stub(Client.prototype, 'bulk').resolves({ errors: false });
+
+        await es.bulk([
+            { index: 'metrics-cache-hit', document: { value: 1 } },
+            { index: 'metrics-cache-miss', document: { value: 2 } },
+        ]);
+
+        assert.equal(bulkStub.callCount, 1);
+        assert.deepEqual(bulkStub.firstCall.args[0].operations, [
+            { create: { _index: 'metrics-cache-hit' } },
+            { value: 1 },
+            { create: { _index: 'metrics-cache-miss' } },
+            { value: 2 },
+        ]);
+    });
+
+    it('Does not send a bulk request for an empty or invalid batch', async function () {
+        const es = new ElasticSearch(testClientConfig);
+        const bulkStub = sandbox.stub(Client.prototype, 'bulk');
+
+        await es.bulk([]);
+        await es.bulk(undefined);
+        await es.bulk([
+            { index: 'metrics-test', document: 'not an object' },
+            { index: 'metrics-test', document: null },
+        ]);
+
+        assert.equal(bulkStub.callCount, 0);
+    });
+
+    it('Skips invalid documents but ships the rest of the batch', async function () {
+        const es = new ElasticSearch(testClientConfig);
+        const bulkStub = sandbox.stub(Client.prototype, 'bulk').resolves({ errors: false });
+
+        await es.bulk([
+            { index: 'metrics-test', document: 'not an object' },
+            { index: 'metrics-test', document: { value: 1 } },
+        ]);
+
+        assert.equal(bulkStub.callCount, 1);
+        assert.deepEqual(bulkStub.firstCall.args[0].operations, [
+            { create: { _index: 'metrics-test' } },
+            { value: 1 },
+        ]);
+    });
+
+    it('Splits bulk requests by serialized size and skips oversized documents', async function () {
+        const es = new ElasticSearch(testClientConfig);
+        const bulkStub = sandbox.stub(Client.prototype, 'bulk').resolves({ errors: false });
+        const originalByteLength = Buffer.byteLength;
+
+        sandbox.stub(Buffer, 'byteLength').callsFake((value) => {
+            if (value.includes('"size":"large"')) {
+                return 60 * 1024 * 1024;
+            }
+
+            if (value.includes('"size":"oversized"')) {
+                return 100 * 1024 * 1024;
+            }
+
+            return originalByteLength(value);
+        });
+
+        await es.bulk([
+            { index: 'metrics-test', document: { size: 'large', value: 1 } },
+            { index: 'metrics-test', document: { size: 'large', value: 2 } },
+            { index: 'metrics-test', document: { size: 'oversized' } },
+            { index: 'metrics-test', document: { value: 3 } },
+        ]);
+
+        assert.equal(bulkStub.callCount, 2);
+        assert.deepEqual(
+            bulkStub.firstCall.args[0].operations.filter((_, index) => index % 2 === 1),
+            [{ size: 'large', value: 1 }],
+        );
+        assert.deepEqual(
+            bulkStub.secondCall.args[0].operations.filter((_, index) => index % 2 === 1),
+            [{ size: 'large', value: 2 }, { value: 3 }],
+        );
+    });
+
+    it('Skips an unserializable bulk document without dropping its neighbours', async function () {
+        const es = new ElasticSearch(testClientConfig);
+        const bulkStub = sandbox.stub(Client.prototype, 'bulk').resolves({ errors: false });
+        const circular = {};
+        circular.self = circular;
+
+        await es.bulk([
+            { index: 'metrics-test', document: { value: 1 } },
+            { index: 'metrics-test', document: circular },
+            { index: 'metrics-test', document: { value: 2 } },
+        ]);
+
+        assert.equal(bulkStub.callCount, 1);
+        assert.deepEqual(
+            bulkStub.firstCall.args[0].operations.filter((_, index) => index % 2 === 1),
+            [{ value: 1 }, { value: 2 }],
+        );
+    });
+
+    it('Catches bulk failures without throwing', async function () {
+        const es = new ElasticSearch(testClientConfig);
+        sandbox.stub(Client.prototype, 'bulk').rejects(new Error('boom'));
+
+        await assert.doesNotReject(async () => {
+            await es.bulk([{ index: 'metrics-test', document: { value: 1 } }]);
+        });
+    });
+
+    it('Does not throw on partial bulk failures', async function () {
+        const es = new ElasticSearch(testClientConfig);
+        sandbox.stub(Client.prototype, 'bulk').resolves({
+            errors: true,
+            items: [{ create: { error: { reason: 'mapper_parsing_exception' } } }, { create: {} }],
+        });
+
+        await assert.doesNotReject(async () => {
+            await es.bulk([
+                { index: 'metrics-test', document: { value: 'a' } },
+                { index: 'metrics-test', document: { value: 1 } },
+            ]);
+        });
+    });
 });
 
 describe('ElasticSearch Bunyan', function () {
