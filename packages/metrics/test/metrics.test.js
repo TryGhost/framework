@@ -481,6 +481,10 @@ describe('Batching', function () {
     it('throws for invalid batch config', function () {
         assert.throws(() => batchedMetrics('yes'), /metrics\.batch must be a boolean or an object/);
         assert.throws(() => batchedMetrics([1]), /metrics\.batch must be a boolean or an object/);
+        assert.throws(
+            () => batchedMetrics({ enabled: 'false' }),
+            /metrics\.batch\.enabled must be a boolean/,
+        );
 
         for (const size of ['10', 0, -1, 1.5, NaN]) {
             assert.throws(
@@ -749,12 +753,30 @@ describe('Batching', function () {
     it('does not throw when a metric value cannot be deeply cloned', async function () {
         const ghostMetrics = batchedMetrics({ size: 1 });
         const bulk = sandbox.stub(ElasticSearch.prototype, 'bulk').resolves();
-        const value = { callback: () => 'not cloneable' };
+        const callback = () => 'not cloneable';
+        const leaf = new WeakMap();
+        const nullPrototype = Object.assign(Object.create(null), { state: 'before' });
+        const value = {
+            nested: { callback, state: 'before' },
+            list: [{ state: 'before' }],
+            nullPrototype,
+            leaf,
+        };
+        value.self = value;
 
         await assert.doesNotReject(() => ghostMetrics.metric('callback-metric', value));
+        value.nested.state = 'after';
+        value.list[0].state = 'after';
+        nullPrototype.state = 'after';
         await ghostMetrics.flush();
 
-        assert.equal(bulk.firstCall.args[0][0].document.callback, value.callback);
+        const document = bulk.firstCall.args[0][0].document;
+        assert.equal(document.nested.callback, callback);
+        assert.equal(document.nested.state, 'before');
+        assert.equal(document.list[0].state, 'before');
+        assert.equal(document.nullPrototype.state, 'before');
+        assert.equal(document.leaf, leaf);
+        assert.equal(document.self, document);
     });
 
     it('leaves the stdout transport unbatched', async function () {

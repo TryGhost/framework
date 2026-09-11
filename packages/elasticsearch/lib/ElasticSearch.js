@@ -1,6 +1,10 @@
 const { Client } = require('@elastic/elasticsearch');
 const debug = require('@tryghost/debug')('logging:elasticsearch');
 
+// Elasticsearch defaults http.max_content_length to 100 MB. Keep every bulk
+// request strictly below that limit, including the newline after each NDJSON line.
+const MAX_BULK_REQUEST_BYTES = 100 * 1024 * 1024;
+
 // Singleton client - multiple children made from it for a single connection pool
 let client;
 
@@ -53,6 +57,30 @@ class ElasticSearch {
         }
 
         const body = [];
+        let bodyBytes = 0;
+
+        const ship = async () => {
+            if (body.length === 0) {
+                return;
+            }
+
+            try {
+                const result = await this.client.bulk({ operations: body.splice(0) });
+
+                // Partial failures don't reject, so they'd otherwise be invisible
+                if (result?.errors) {
+                    const failed = result.items.filter((item) => item.create?.error);
+                    debug(
+                        `Failed to ship ${failed.length} of ${result.items.length} logs`,
+                        failed[0]?.create?.error?.reason,
+                    );
+                }
+            } catch (error) {
+                debug('Failed to ship logs', error.message);
+            }
+
+            bodyBytes = 0;
+        };
 
         for (const operation of operations) {
             if (typeof operation?.document !== 'object' || operation.document === null) {
@@ -60,28 +88,33 @@ class ElasticSearch {
                 continue;
             }
 
-            body.push({ create: { _index: operation.index } });
-            body.push(operation.document);
-        }
+            const action = { create: { _index: operation.index } };
+            let operationBytes;
 
-        if (body.length === 0) {
-            return;
-        }
-
-        try {
-            const result = await this.client.bulk({ operations: body });
-
-            // Partial failures don't reject, so they'd otherwise be invisible
-            if (result?.errors) {
-                const failed = result.items.filter((item) => item.create?.error);
-                debug(
-                    `Failed to ship ${failed.length} of ${result.items.length} logs`,
-                    failed[0]?.create?.error?.reason,
-                );
+            try {
+                operationBytes =
+                    Buffer.byteLength(JSON.stringify(action)) +
+                    Buffer.byteLength(JSON.stringify(operation.document)) +
+                    2;
+            } catch (error) {
+                debug('Failed to serialize log for bulk shipping', error.message);
+                continue;
             }
-        } catch (error) {
-            debug('Failed to ship logs', error.message);
+
+            if (operationBytes >= MAX_BULK_REQUEST_BYTES) {
+                debug('Log is too large for Elasticsearch bulk shipping');
+                continue;
+            }
+
+            if (bodyBytes + operationBytes >= MAX_BULK_REQUEST_BYTES) {
+                await ship();
+            }
+
+            body.push(action, operation.document);
+            bodyBytes += operationBytes;
         }
+
+        await ship();
     }
 }
 

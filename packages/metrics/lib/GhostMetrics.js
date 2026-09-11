@@ -74,6 +74,12 @@ function normalizeBatch(batch) {
 
     // `enabled` lets a deployment turn batching off without discarding the rest
     // of the config, which matters when it is layered from config files
+    if ('enabled' in batch && typeof batch.enabled !== 'boolean') {
+        throw new Error(
+            `metrics.batch.enabled must be a boolean, got ${jsonStringifySafe(batch.enabled)}`,
+        );
+    }
+
     if (batch.enabled === false) {
         return null;
     }
@@ -105,6 +111,30 @@ function normalizeBatch(batch) {
  * @param {any} value Value to clone
  * @returns {any}
  */
+function cloneMetricValueFallback(value, seen = new WeakMap()) {
+    if (typeof value !== 'object' || value === null) {
+        return value;
+    }
+
+    if (seen.has(value)) {
+        return seen.get(value);
+    }
+
+    const prototype = Object.getPrototypeOf(value);
+    if (!Array.isArray(value) && prototype !== Object.prototype && prototype !== null) {
+        return value;
+    }
+
+    const clone = Array.isArray(value) ? [] : Object.create(prototype);
+    seen.set(value, clone);
+
+    for (const [key, nestedValue] of Object.entries(value)) {
+        clone[key] = cloneMetricValueFallback(nestedValue, seen);
+    }
+
+    return clone;
+}
+
 function cloneMetricValue(value) {
     if (typeof value !== 'object' || value === null) {
         return value;
@@ -114,7 +144,7 @@ function cloneMetricValue(value) {
         return structuredClone(value);
     } catch {
         // Keep instrumentation from throwing for unusual non-cloneable values.
-        return Array.isArray(value) ? [...value] : { ...value };
+        return cloneMetricValueFallback(value);
     }
 }
 
