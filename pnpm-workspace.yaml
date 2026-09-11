@@ -13,7 +13,8 @@ allowBuilds:
   'dtrace-provider@0.8.8': true
   'esbuild@0.28.2': true
   'nx@23.1.1': true
-  'sqlite3@6.0.1': true
+  'better-sqlite3@13.0.3': true
+  sqlite3: false
 minimumReleaseAge: 4320
 catalog:
   sinon: 22.1.0

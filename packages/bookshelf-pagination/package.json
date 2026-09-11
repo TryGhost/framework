@@ -28,9 +28,9 @@
     "lodash": "^4.18.1"
   },
   "devDependencies": {
+    "better-sqlite3": "13.0.3",
     "bookshelf": "1.2.0",
     "knex": "3.3.0",
-    "sinon": "catalog:",
-    "sqlite3": "6.0.1"
+    "sinon": "catalog:"
   }
 }
