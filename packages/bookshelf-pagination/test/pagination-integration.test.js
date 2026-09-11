@@ -12,9 +12,9 @@ const { hasMultiTableSource } = paginationPlugin.paginationUtils;
 
 async function setupDatabase() {
     const db = knex({
-        client: 'sqlite3',
+        client: 'better-sqlite3',
         useNullAsDefault: true,
-        connection: ':memory:',
+        connection: { filename: ':memory:' },
     });
 
     await db.schema.createTable('authors', (t) => {
@@ -86,7 +86,7 @@ describe('hasMultiTableSource against real knex builders', function () {
     let db;
 
     beforeEach(function () {
-        db = knex({ client: 'sqlite3', useNullAsDefault: true });
+        db = knex({ client: 'better-sqlite3', useNullAsDefault: true });
     });
 
     afterEach(async function () {
