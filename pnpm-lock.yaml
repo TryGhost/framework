@@ -737,7 +737,7 @@ importers:
         specifier: 7.2.1
         version: 7.2.1
       express:
-        specifier: ^5.2.1
+        specifier: 5.2.1
         version: 5.2.1(supports-color@8.1.1)
       knex:
         specifier: 3.3.0
