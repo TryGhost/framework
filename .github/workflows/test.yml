@@ -56,7 +56,7 @@ jobs:
         if: github.event_name == 'push'
         run: pnpm test:ci
 
-      - uses: codecov/codecov-action@0b35c9ecc4f0529d0eb674914510c22f85b196b4 # v7
+      - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
 
       - uses: tryghost/actions/actions/slack-build@bc540bb47a121a022a2d5c71774d2da6ccad02e6 # main
         if: failure() && github.event_name == 'push' && github.ref == 'refs/heads/main'
