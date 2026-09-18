@@ -96,7 +96,7 @@ jobs:
         if: steps.pubs.outputs.projects != ''
         run: npx nx release publish --projects=${{ steps.pubs.outputs.projects }} ${{ (github.event.inputs['dry-run'] == 'true' && '--dry-run') || '' }}
 
-      - uses: tryghost/actions/actions/slack-build@470d6b8a9ee6244de1de7179c5007c88133a0184 # main
+      - uses: tryghost/actions/actions/slack-build@38a76329e3d573e193f80e3d0107f57799b25a80 # main
         if: failure()
         with:
           status: ${{ job.status }}
