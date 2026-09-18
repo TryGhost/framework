@@ -441,8 +441,8 @@ importers:
   packages/errors:
     devDependencies:
       '@types/node':
-        specifier: 24.13.4
-        version: 24.13.4
+        specifier: 24.13.5
+        version: 24.13.5
       esbuild:
         specifier: 0.28.2
         version: 0.28.2
@@ -725,8 +725,8 @@ importers:
         specifier: 5.0.6
         version: 5.0.6
       '@types/node':
-        specifier: 24.13.4
-        version: 24.13.4
+        specifier: 24.13.5
+        version: 24.13.5
       '@types/sinon':
         specifier: 22.0.0
         version: 22.0.0
@@ -834,8 +834,8 @@ importers:
   packages/tpl:
     devDependencies:
       '@types/node':
-        specifier: 24.13.4
-        version: 24.13.4
+        specifier: 24.13.5
+        version: 24.13.5
       typescript:
         specifier: 'catalog:'
         version: 7.0.2
@@ -2475,8 +2475,8 @@ packages:
   '@types/node@24.13.3':
     resolution: {integrity: sha512-Dh8vAsV36ig5wa9OX4pXvMc9D3Veibfw2wix0CUwYODLD8nkj9UsLjASr49nPg+2eKzxhBV+v7L8pXvT4e639Q==}
 
-  '@types/node@24.13.4':
-    resolution: {integrity: sha512-YJ7EqCstVTzIr0fMr7qul/977en+pQHrfmuKIo6Zr9i75Be21dr3MovcfvGtyvi2HAUrRerWps5sMO9I7WaxDw==}
+  '@types/node@24.13.5':
+    resolution: {integrity: sha512-TXyindR+lBr22aJIdMQzCFHPHR6cR4js838mRDCSz5hOKWZvZwsXSSiXDmjRj4iJmgl+sR9O+1mkoVBSMadNug==}
 
   '@types/node@25.9.5':
     resolution: {integrity: sha512-OScDchr2fwuUmWdf4kZ9h7PcJiYDVInhJizG/biAq3cAvqwYktuy/TYGGdZNMtNTFUP7rnb0NU4TUdm82kt4Rg==}
@@ -7107,7 +7107,7 @@ snapshots:
     dependencies:
       undici-types: 7.18.2
 
-  '@types/node@24.13.4':
+  '@types/node@24.13.5':
     dependencies:
       undici-types: 7.18.2
 
@@ -7140,7 +7140,7 @@ snapshots:
 
   '@types/stoppable@1.1.3':
     dependencies:
-      '@types/node': 24.13.4
+      '@types/node': 24.13.5
 
   '@types/superagent@8.1.11':
     dependencies:
