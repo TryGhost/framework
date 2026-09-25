@@ -44,6 +44,19 @@ describe('Validator internals', function () {
             assert.equal(validator.isTimezone('Not/AZone'), false);
         });
 
+        it('isTimezone accepts aliases and case-insensitive names', function () {
+            assert.equal(validator.isTimezone('europe/london'), true);
+            assert.equal(validator.isTimezone('US/Eastern'), true);
+            assert.equal(validator.isTimezone('UTC'), true);
+            assert.equal(validator.isTimezone('Etc/GMT+5'), true);
+        });
+
+        it('isTimezone rejects UTC offsets and empty strings', function () {
+            assert.equal(validator.isTimezone('+01:00'), false);
+            assert.equal(validator.isTimezone('-0500'), false);
+            assert.equal(validator.isTimezone(''), false);
+        });
+
         it('isSlug validates slug format', function () {
             assert.equal(validator.isSlug('a-valid_slug-1'), true);
             assert.equal(validator.isSlug('not valid slug'), false);

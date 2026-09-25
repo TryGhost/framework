@@ -183,6 +183,33 @@ describe('@tryghost/bookshelf-collision', function () {
         assert.equal(parentUpdate.calledOnce, true);
     });
 
+    it('wrapped update compares Date, millisecond and ISO timestamps by instant', async function () {
+        const Model = Bookshelf.Model;
+        const model = new Model();
+        model.tableName = 'posts';
+        model.serverData = { updated_at: new Date('2024-01-01T00:00:00.000Z') };
+        model.clientData = { updated_at: Date.parse('2024-01-01T00:00:00.000Z') };
+        model._changed = { title: 'changed' };
+
+        const result = await model.sync({ method: 'update' }).update();
+
+        assert.equal(result, 'UPDATED');
+    });
+
+    it('wrapped update parses SQL datetime strings', async function () {
+        const Model = Bookshelf.Model;
+        const model = new Model();
+        model.tableName = 'posts';
+        model.serverData = { updated_at: '2024-01-01 00:00:00' };
+        model.clientData = { updated_at: '2024-01-02 00:00:00' };
+        model._changed = { title: 'changed' };
+
+        await assert.rejects(
+            model.sync({ method: 'update' }).update(),
+            errors.UpdateCollisionError,
+        );
+    });
+
     it('falls back to current date when no timestamps are present and no fields changed', async function () {
         const Model = Bookshelf.Model;
         const model = new Model();

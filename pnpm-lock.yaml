@@ -217,9 +217,9 @@ importers:
       lodash:
         specifier: ^4.18.1
         version: 4.18.1
-      moment-timezone:
-        specifier: ^0.5.33
-        version: 0.5.48
+      luxon:
+        specifier: ^3.7.2
+        version: 3.7.2
     devDependencies:
       sinon:
         specifier: 'catalog:'
@@ -851,9 +851,6 @@ importers:
       lodash:
         specifier: ^4.18.1
         version: 4.18.1
-      moment-timezone:
-        specifier: ^0.5.23
-        version: 0.5.48
       validator:
         specifier: ^13.15.35
         version: 13.15.35
@@ -4358,9 +4355,6 @@ packages:
   mkdirp@0.5.6:
     resolution: {integrity: sha512-FP+p8RB8OWpF3YZBCrP5gtADmtXApB5AMLn+vdyA+PyxCjrCs00mjyUozssO33cwDeT3wNGdLxJ5M//YqtHAJw==}
     hasBin: true
-
-  moment-timezone@0.5.48:
-    resolution: {integrity: sha512-f22b8LV1gbTO2ms2j2z13MuPogNoh5UzxL3nzNAYKGraILnbGc9NEE6dyiiiLv46DGRb8A4kg8UKWLjPthxBHw==}
 
   moment@2.30.1:
     resolution: {integrity: sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==}
@@ -8847,11 +8841,8 @@ snapshots:
       minimist: 1.2.8
     optional: true
 
-  moment-timezone@0.5.48:
-    dependencies:
-      moment: 2.30.1
-
-  moment@2.30.1: {}
+  moment@2.30.1:
+    optional: true
 
   ms@2.0.0: {}
 
