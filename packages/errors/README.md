@@ -71,6 +71,41 @@ throw new errors.UnsupportedMediaTypeError({
 
 Do not use lowercase strings like `entry_too_large` as `context`. Use an UPPER_SNAKE_CASE `code` for programmatic handling and keep `context` human-readable.
 
+### Zod errors
+
+`utils.fromZodError` wraps a zod (v3 or v4) error in a Ghost error. This package does not depend on zod; errors are matched structurally.
+
+```js
+const errors = require('@tryghost/errors');
+
+const result = schema.safeParse(input);
+if (!result.success) {
+    throw errors.utils.fromZodError(result.error);
+}
+// ValidationError (422)
+//   message:      'email: Invalid email; tags[0].name: Required'
+//   property:     'email' (path of the first issue)
+//   errorDetails: [{path: 'email', message: 'Invalid email', code: 'invalid_string'}, ...]
+```
+
+Default is `ValidationError`. Pass an error class as the second argument when another class fits better, such as `IncorrectUsageError` when the invalid input came from calling code (config, function arguments) rather than a user request. Options, passed last, override the derived fields:
+
+```js
+// Different class
+throw errors.utils.fromZodError(result.error, errors.IncorrectUsageError);
+
+// Different class with options
+throw errors.utils.fromZodError(result.error, errors.IncorrectUsageError, {
+    message: 'Invalid adapter config.',
+    code: 'INVALID_ADAPTER_CONFIG',
+});
+
+// Default ValidationError with options
+throw errors.utils.fromZodError(result.error, { code: 'INVALID_POST_INPUT' });
+```
+
+Related helpers: `utils.isZodError(err)`, `utils.formatZodIssues(issues)`, and `utils.getZodErrorDetails(issues)`.
+
 ## Develop
 
 This is a mono repository, managed with [Nx](https://nx.dev).

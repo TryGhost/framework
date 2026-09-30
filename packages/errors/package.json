@@ -34,10 +34,10 @@
     "lint": "oxlint -c ../../.oxlintrc.json .",
     "posttest": "pnpm run lint"
   },
-  "dependencies": {},
   "devDependencies": {
     "@types/node": "24.19.0",
     "esbuild": "0.28.2",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "zod": "4.6.5"
   }
 }
