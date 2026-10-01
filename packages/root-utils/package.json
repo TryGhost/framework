@@ -25,8 +25,5 @@
   "dependencies": {
     "caller": "^1.1.0",
     "find-root": "^1.1.0"
-  },
-  "devDependencies": {
-    "sinon": "catalog:"
   }
 }

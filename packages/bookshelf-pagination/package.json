@@ -30,7 +30,6 @@
   "devDependencies": {
     "better-sqlite3": "13.0.3",
     "bookshelf": "1.2.0",
-    "knex": "3.3.0",
-    "sinon": "catalog:"
+    "knex": "3.3.0"
   }
 }

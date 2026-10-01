@@ -31,7 +31,6 @@
     "json-stringify-safe": "^5.0.1"
   },
   "devDependencies": {
-    "rewire": "9.0.1",
     "sinon": "catalog:"
   }
 }
