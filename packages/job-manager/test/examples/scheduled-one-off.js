@@ -1,6 +1,5 @@
 const path = require('path');
-const addSeconds = require('date-fns/addSeconds');
-const JobManager = require('../../lib/job-manager');
+const JobManager = require('../../lib/JobManager');
 
 const jobManager = new JobManager(console);
 
@@ -13,7 +12,7 @@ const isJobQueueEmpty = (bree) => {
 };
 
 (async () => {
-    const dateInTenSeconds = addSeconds(new Date(), 10);
+    const dateInTenSeconds = new Date(Date.now() + 10 * 1000);
 
     jobManager.addJob({
         at: dateInTenSeconds,

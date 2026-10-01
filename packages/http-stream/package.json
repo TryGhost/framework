@@ -27,7 +27,6 @@
     "@tryghost/request": "workspace:^"
   },
   "devDependencies": {
-    "express": "5.2.1",
     "sinon": "catalog:"
   }
 }

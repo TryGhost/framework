@@ -24,8 +24,5 @@
   },
   "dependencies": {
     "lodash": "^4.18.1"
-  },
-  "devDependencies": {
-    "sinon": "catalog:"
   }
 }

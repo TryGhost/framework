@@ -2,7 +2,7 @@
 
 const path = require('path');
 const setTimeoutPromise = require('util').promisify(setTimeout);
-const JobManager = require('../../lib/job-manager');
+const JobManager = require('../../lib/JobManager');
 
 const jobManager = new JobManager({
     info: console.log,

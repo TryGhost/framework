@@ -33,8 +33,5 @@
     "@tryghost/bookshelf-pagination": "workspace:^",
     "@tryghost/bookshelf-search": "workspace:^",
     "@tryghost/bookshelf-transaction-events": "workspace:^"
-  },
-  "devDependencies": {
-    "sinon": "catalog:"
   }
 }
