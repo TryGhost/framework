@@ -474,6 +474,9 @@ importers:
 
   packages/http-stream:
     dependencies:
+      '@tryghost/debug':
+        specifier: workspace:^
+        version: link:../debug
       '@tryghost/errors':
         specifier: workspace:^
         version: link:../errors
@@ -831,6 +834,9 @@ importers:
       got:
         specifier: 16.0.0
         version: 16.0.0
+      nock:
+        specifier: 14.0.17
+        version: 14.0.17
       sinon:
         specifier: 'catalog:'
         version: 22.1.0

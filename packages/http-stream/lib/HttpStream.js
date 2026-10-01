@@ -1,5 +1,5 @@
 const request = require('@tryghost/request');
-const debug = require('debug')('@tryghost/http-stream');
+const debug = require('@tryghost/debug')('logging:http-stream');
 const GhostError = require('@tryghost/errors');
 
 class HttpStream {
