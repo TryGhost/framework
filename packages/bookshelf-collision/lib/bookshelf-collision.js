@@ -1,6 +1,24 @@
-const moment = require('moment-timezone');
 const _ = require('lodash');
 const errors = require('@tryghost/errors');
+const { DateTime } = require('luxon');
+
+/**
+ * Normalise an updated_at value, which may be a Date or an ISO/SQL datetime string
+ * @param {Date|string|number} value
+ * @returns {DateTime}
+ */
+function toDateTime(value) {
+    if (value instanceof Date) {
+        return DateTime.fromJSDate(value);
+    }
+
+    if (typeof value === 'number') {
+        return DateTime.fromMillis(value);
+    }
+
+    const iso = DateTime.fromISO(value);
+    return iso.isValid ? iso : DateTime.fromSQL(value);
+}
 
 /**
  * @param {import('bookshelf')} Bookshelf
@@ -61,15 +79,17 @@ module.exports = function (Bookshelf) {
                     'plaintext',
                 ]);
 
-                const clientUpdatedAt = moment(
+                const clientUpdatedAt = toDateTime(
                     self.clientData.updated_at || self.serverData.updated_at || new Date(),
                 );
-                const serverUpdatedAt = moment(self.serverData.updated_at || clientUpdatedAt);
+                const serverUpdatedAt = self.serverData.updated_at
+                    ? toDateTime(self.serverData.updated_at)
+                    : clientUpdatedAt;
 
                 const changedFields = Object.keys(changed);
 
                 if (changedFields.length) {
-                    if (clientUpdatedAt.diff(serverUpdatedAt) !== 0) {
+                    if (clientUpdatedAt.toMillis() !== serverUpdatedAt.toMillis()) {
                         // @NOTE: This will rollback the update. We cannot know if relations were updated before doing the update.
                         throw new errors.UpdateCollisionError({
                             message: 'Saving failed! Someone else is editing this post.',
