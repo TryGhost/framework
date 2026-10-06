@@ -1,7 +1,6 @@
 const _ = require('lodash');
 
 const baseValidator = require('validator');
-const moment = require('moment-timezone');
 const assert = require('assert');
 
 const isEmailCustom = require('./is-email');
@@ -34,7 +33,17 @@ allowedValidators.forEach((name) => {
 
 validators.isTimezone = function isTimezone(str) {
     assertString(str);
-    return moment.tz.zone(str) ? true : false;
+    // Intl also accepts UTC offsets like "+01:00"; only IANA zone names are valid here
+    if (!str || /^[+-]/.test(str)) {
+        return false;
+    }
+
+    try {
+        new Intl.DateTimeFormat('en-US', { timeZone: str });
+        return true;
+    } catch {
+        return false;
+    }
 };
 
 validators.isEmptyOrURL = function isEmptyOrURL(str) {
