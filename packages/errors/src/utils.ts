@@ -21,6 +21,9 @@ function deepCloneValue(value: any): any {
     if (Array.isArray(value)) {
         return value.map(deepCloneValue);
     }
+    if (value instanceof Date) {
+        return new Date(value.getTime());
+    }
     const clone: AnyObject = {};
     for (const key of Object.keys(value)) {
         clone[key] = deepCloneValue(value[key]);
