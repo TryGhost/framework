@@ -54,6 +54,26 @@ describe('Error Utils', function () {
             assert.equal(processedError.errorDetails[0].id, 1);
         });
 
+        it('preserves Date values in errorDetails', function () {
+            const serverUpdatedAt = new Date('2026-10-09T10:00:00.000Z');
+            const ghostError = new errors.UpdateCollisionError({
+                message: 'Saving failed! Someone else is editing this post.',
+                errorDetails: {
+                    serverUpdatedAt,
+                },
+            });
+
+            const processedError = utils.prepareStackForUser(ghostError);
+            const clonedDate = processedError.errorDetails.serverUpdatedAt;
+
+            assert.ok(clonedDate instanceof Date);
+            assert.notEqual(clonedDate, serverUpdatedAt);
+            assert.equal(clonedDate.getTime(), serverUpdatedAt.getTime());
+            assert.deepEqual(JSON.parse(JSON.stringify(processedError.errorDetails)), {
+                serverUpdatedAt: '2026-10-09T10:00:00.000Z',
+            });
+        });
+
         it('Preserves the stack trace', function () {
             const errorCreatingFunction = () => {
                 return new Error('Original error');
