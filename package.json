@@ -29,7 +29,7 @@
     "@vitest/coverage-v8": "4.1.11",
     "husky": "9.1.7",
     "lint-staged": "17.6.0",
-    "nx": "23.2.0",
+    "nx": "23.2.1",
     "oxfmt": "0.72.0",
     "oxlint": "1.87.0",
     "sinon": "catalog:",
