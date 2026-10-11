@@ -25,7 +25,7 @@
     "ship:first-release": "pnpm ship patch --first-release"
   },
   "devDependencies": {
-    "@nx/js": "23.2.0",
+    "@nx/js": "23.3.0",
     "@vitest/coverage-v8": "4.1.11",
     "husky": "9.1.7",
     "lint-staged": "17.6.0",
