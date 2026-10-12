@@ -29,14 +29,18 @@ const custom = new metrics.GhostMetrics({
 });
 ```
 
-### Proxying Elasticsearch requests
+### Elasticsearch client implementation
 
-The Elasticsearch transport uses Node's built-in `fetch`, so it follows Node's
-proxy environment variables rather than a config option. Set `HTTP_PROXY` or
-`HTTPS_PROXY` to match the Elasticsearch URL's scheme (and `NO_PROXY` as
-needed), and enable them with `NODE_USE_ENV_PROXY=1` or `--use-env-proxy`.
-This needs Node 22.21.0+ on the 22.x line, or Node 24+. This applies to every request the process makes. The old
-`elasticsearch.proxy` option is ignored with a warning.
+`elasticsearch.implementation` picks how the Elasticsearch transport talks to
+the cluster. `legacy` (the default) uses the official `@elastic/elasticsearch`
+client; `fetch` uses Node's built-in `fetch`. The `fetch` implementation will
+become the only one in the next major version.
+
+`elasticsearch.proxy` only works with `legacy`. With `fetch`, it's ignored with
+a warning: set `HTTP_PROXY` or `HTTPS_PROXY` to match the Elasticsearch URL's
+scheme (and `NO_PROXY` as needed), and enable them with `NODE_USE_ENV_PROXY=1`
+or `--use-env-proxy`. This needs Node 22.21.0+ on the 22.x line, or Node 24+,
+and applies to every request the process makes.
 
 ### Sampling
 

@@ -23,6 +23,11 @@ interface ElasticsearchOptions {
     index?: string;
     pipeline?: string;
     level?: LogLevel;
+    /**
+     * Client implementation: `legacy` uses the official Elasticsearch client,
+     * `fetch` uses Node's built-in fetch. @default 'legacy'
+     */
+    implementation?: 'legacy' | 'fetch';
 }
 
 interface GelfOptions {

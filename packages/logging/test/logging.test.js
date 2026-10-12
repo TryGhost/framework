@@ -267,6 +267,24 @@ describe('Logging', function () {
         assert.equal(typeof stream.write, 'function');
     });
 
+    it('elasticsearch passes the configured implementation through', function () {
+        const FetchElasticSearchBunyan = require('@tryghost/elasticsearch/lib/fetch/ElasticSearchBunyan');
+
+        const ghostLogger = new GhostLogger({
+            transports: ['elasticsearch'],
+            elasticsearch: {
+                implementation: 'fetch',
+                index: 'ghost-index',
+                host: 'http://elastic-search-host',
+            },
+        });
+
+        assert.ok(
+            ghostLogger.streams.elasticsearch.transport.implementation instanceof
+                FetchElasticSearchBunyan,
+        );
+    });
+
     it('elasticsearch should receive a single object', async function () {
         sandbox.stub(ElasticSearch.prototype, 'getStream').returns({
             write: function (jsonData) {

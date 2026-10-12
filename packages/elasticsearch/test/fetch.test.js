@@ -4,8 +4,8 @@ const sinon = require('sinon');
 const debugBase = require('@tryghost/debug')._base;
 const sandbox = sinon.createSandbox();
 
-const ElasticSearch = require('../index');
-const ElasticSearchBunyan = require('../lib/ElasticSearchBunyan');
+const ElasticSearch = require('../lib/fetch/ElasticSearch');
+const ElasticSearchBunyan = require('../lib/fetch/ElasticSearchBunyan');
 
 const indexConfig = {
     index: 'test-index',

@@ -225,6 +225,7 @@ class GhostLogger {
 
         const elasticSearchInstance = new ElasticSearch(
             {
+                implementation: this.elasticsearch.implementation,
                 node: this.elasticsearch.host,
                 auth: {
                     username: this.elasticsearch.username,

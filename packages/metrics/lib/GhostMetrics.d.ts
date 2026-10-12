@@ -11,11 +11,16 @@ interface ElasticsearchOptions {
     /** Basic-auth password. */
     password?: string;
     /**
-     * No longer supported and ignored. Set `HTTP_PROXY`/`HTTPS_PROXY` and
-     * `NODE_USE_ENV_PROXY=1` (Node 22.21.0+ or 24+) to proxy Elasticsearch requests.
-     * @deprecated
+     * Optional proxy URL; when absent no proxy is used. Only supported by the
+     * `legacy` implementation; with `fetch`, set `HTTP_PROXY`/`HTTPS_PROXY` and
+     * `NODE_USE_ENV_PROXY=1` (Node 22.21.0+ or 24+) instead.
      */
     proxy?: string;
+    /**
+     * Client implementation: `legacy` uses the official Elasticsearch client,
+     * `fetch` uses Node's built-in fetch. @default 'legacy'
+     */
+    implementation?: 'legacy' | 'fetch';
 }
 
 /**
