@@ -13,9 +13,16 @@ allowBuilds:
   'dtrace-provider@0.8.8': true
   'esbuild@0.28.2': true
   'nx@23.2.0': true
+  # Nx uses its prebuilt platform package; leave the new postinstall disabled.
+  'nx@23.2.1': false
+  'nx@23.3.0': false
   'better-sqlite3@13.0.3': true
   sqlite3: false
 minimumReleaseAge: 4320
 catalog:
   sinon: 22.1.0
   typescript: 7.0.2
+minimumReleaseAgeExclude:
+  # Renovate security update: nx@23.2.1
+  - nx@23.2.1
+  - '@nx/js@23.2.1'
