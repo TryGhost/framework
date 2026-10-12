@@ -1,6 +1,7 @@
 const { AssertionError } = require('assert');
 const { URL } = require('url');
-const nock = require('nock');
+const nockModule = require('nock');
+const nock = nockModule.default || nockModule;
 const pWaitFor = require('p-wait-for').default;
 class WebhookMockReceiver {
     constructor({ snapshotManager }) {
@@ -28,12 +29,33 @@ class WebhookMockReceiver {
         const recordRequest = this.recordRequest;
 
         this._receiver = nock(parsedURL.origin)
-            .post(parsedURL.pathname, function (body) {
-                recordRequest(body, this);
-                // let the nock continue with the response
-                return true;
-            })
-            .reply(200, { status: 'OK' });
+            .post(parsedURL.pathname)
+            .reply(
+                200,
+                async function (...args) {
+                    if (args.length === 1) {
+                        // Nock 15 passes a Fetch Request; older versions pass URI and body.
+                        const request = args[0];
+                        const text = await request.text();
+                        let body = text;
+                        if (
+                            text &&
+                            request.headers.get('content-type')?.includes('application/json')
+                        ) {
+                            try {
+                                body = JSON.parse(text);
+                            } catch {
+                                // Preserve non-JSON payloads, as Nock's body matcher does.
+                            }
+                        }
+                        recordRequest(body, { headers: Object.fromEntries(request.headers) });
+                    } else {
+                        recordRequest(args[1], this.req);
+                    }
+                    return { status: 'OK' };
+                },
+                { 'Content-Length': '15' },
+            );
 
         return this;
     }
