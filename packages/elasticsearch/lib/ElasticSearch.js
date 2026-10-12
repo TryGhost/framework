@@ -1,4 +1,12 @@
-const { withHeaders, withRetry, withTimeout } = require('fetch-extras');
+const {
+    pipeline,
+    withBaseUrl,
+    withHeaders,
+    withHttpError,
+    withJsonResponse,
+    withRetry,
+    withTimeout,
+} = require('fetch-extras');
 const debug = require('@tryghost/debug')('logging:elasticsearch');
 
 // Elasticsearch defaults http.max_content_length to 100 MB. Keep every bulk
@@ -9,29 +17,27 @@ const DEFAULT_REQUEST_TIMEOUT = 30 * 1000;
 const DEFAULT_MAX_RETRIES = 3;
 
 /**
- * Normalise the configured node into a base URL and Basic auth credentials.
- * `fetch` refuses URLs that carry credentials, so any embedded in the node URL
- * are moved into the auth header instead.
+ * Split the configured node into a credential-free base URL and Basic auth
+ * header. `fetch` refuses URLs that carry credentials, so any embedded in the
+ * node URL are moved into the header instead.
  * @param {string} node
  * @param {{username?: string, password?: string}} [auth]
+ * @returns {{baseUrl: URL, headers: Record<string, string>}}
  */
 function parseNode(node, auth) {
-    const url = new URL(node);
-    let username = auth?.username;
-    let password = auth?.password;
+    const baseUrl = new URL(node);
+    const username = auth?.username ?? decodeURIComponent(baseUrl.username);
+    const password = auth?.password ?? decodeURIComponent(baseUrl.password);
 
-    if (url.username || url.password) {
-        username ??= decodeURIComponent(url.username);
-        password ??= decodeURIComponent(url.password);
-        url.username = '';
-        url.password = '';
+    baseUrl.username = '';
+    baseUrl.password = '';
+
+    const headers = {};
+    if (username || password) {
+        headers.authorization = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
     }
 
-    return {
-        baseUrl: url.href.replace(/\/+$/, ''),
-        username,
-        password,
-    };
+    return { baseUrl, headers };
 }
 
 class ElasticSearch {
@@ -43,61 +49,41 @@ class ElasticSearch {
      * @param {number} [clientConfig.maxRetries] Retries for network errors and retryable status codes
      */
     constructor(clientConfig) {
-        const { baseUrl, username, password } = parseNode(clientConfig.node, clientConfig.auth);
+        const { baseUrl, headers } = parseNode(clientConfig.node, clientConfig.auth);
 
-        this.baseUrl = baseUrl;
-
-        const headers = {};
-        if (username || password) {
-            headers.authorization = `Basic ${Buffer.from(`${username ?? ''}:${password ?? ''}`).toString('base64')}`;
-        }
-
-        // Every Elasticsearch write is a POST, which fetch-extras does not
-        // retry by default. Bodies are always strings so they can be replayed.
-        this.fetch = withHeaders(headers)(
+        this.fetch = pipeline(
+            fetch,
+            withTimeout(clientConfig.requestTimeout ?? DEFAULT_REQUEST_TIMEOUT),
+            withBaseUrl(baseUrl),
+            withHeaders(headers),
+            // Every Elasticsearch write is a POST, which isn't retried by
+            // default. Bodies are always strings so they can be replayed.
             withRetry({
                 retries: clientConfig.maxRetries ?? DEFAULT_MAX_RETRIES,
                 methods: ['POST'],
-            })(withTimeout(clientConfig.requestTimeout ?? DEFAULT_REQUEST_TIMEOUT)(fetch)),
+            }),
+            withHttpError(),
+            withJsonResponse(),
         );
     }
 
     /**
      * @param {string} path Path relative to the node URL
-     * @param {object} params Query string parameters
+     * @param {Record<string, string | undefined>} params Query string parameters; unset values are left out
      * @param {string} body Request body
      * @param {string} contentType
      * @returns {Promise<any>} Parsed JSON response
      */
-    async request(path, params, body, contentType) {
-        const query = new URLSearchParams();
-        for (const [key, value] of Object.entries(params)) {
-            if (value !== undefined && value !== null) {
-                query.set(key, String(value));
-            }
-        }
+    post(path, params, body, contentType) {
+        const query = new URLSearchParams(
+            Object.entries(params).filter(([, value]) => value != null),
+        );
 
-        const search = query.size > 0 ? `?${query}` : '';
-        const response = await this.fetch(`${this.baseUrl}/${path}${search}`, {
+        return this.fetch(query.size > 0 ? `${path}?${query}` : path, {
             method: 'POST',
             headers: { 'content-type': contentType },
             body,
         });
-
-        const text = await response.text();
-
-        if (!response.ok) {
-            let reason = text;
-            try {
-                reason = JSON.parse(text).error?.reason ?? text;
-            } catch {
-                // Not JSON, use the raw body
-            }
-
-            throw new Error(`Elasticsearch responded with ${response.status}: ${reason}`);
-        }
-
-        return text ? JSON.parse(text) : {};
     }
 
     /**
@@ -118,7 +104,7 @@ class ElasticSearch {
         const { index: indexName, ...params } = index;
 
         try {
-            await this.request(
+            await this.post(
                 `${encodeURIComponent(indexName)}/_doc`,
                 params,
                 JSON.stringify(data),
@@ -141,7 +127,7 @@ class ElasticSearch {
         }
 
         try {
-            const result = await this.request(
+            const result = await this.post(
                 '_bulk',
                 params,
                 `${lines.join('\n')}\n`,
