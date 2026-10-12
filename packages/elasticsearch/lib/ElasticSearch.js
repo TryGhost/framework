@@ -40,6 +40,31 @@ function parseNode(node, auth) {
     return { baseUrl, headers };
 }
 
+/**
+ * Describe a failed request, including Elasticsearch's reason from the
+ * response body when there is one
+ * @param {Error & {response?: Response}} error
+ * @returns {Promise<string>}
+ */
+async function describeError(error) {
+    if (!error.response) {
+        return error.message;
+    }
+
+    try {
+        const text = await error.response.text();
+        let reason = text;
+        try {
+            reason = JSON.parse(text).error?.reason ?? text;
+        } catch {
+            // Not JSON, use the raw body
+        }
+        return reason ? `${error.message} (${reason})` : error.message;
+    } catch {
+        return error.message;
+    }
+}
+
 class ElasticSearch {
     /**
      * @param {object} clientConfig
@@ -111,7 +136,7 @@ class ElasticSearch {
                 'application/json',
             );
         } catch (error) {
-            debug('Failed to ship log', error.message);
+            debug('Failed to ship log', await describeError(error));
         }
     }
 
@@ -143,7 +168,7 @@ class ElasticSearch {
                 );
             }
         } catch (error) {
-            debug('Failed to ship logs', error.message);
+            debug('Failed to ship logs', await describeError(error));
         }
     }
 

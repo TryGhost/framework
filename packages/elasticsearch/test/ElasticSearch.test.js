@@ -1,6 +1,7 @@
 const assert = require('assert/strict');
 const http = require('http');
 const sinon = require('sinon');
+const debugBase = require('@tryghost/debug')._base;
 const sandbox = sinon.createSandbox();
 
 const ElasticSearch = require('../index');
@@ -54,6 +55,27 @@ async function startServer() {
             return new Promise((resolve) => server.close(resolve));
         },
     };
+}
+
+/**
+ * Capture this package's debug output while running `fn`
+ */
+async function captureDebug(fn) {
+    const messages = [];
+    const logStub = sinon
+        .stub(debugBase, 'log')
+        .callsFake((...args) => messages.push(args.join(' ')));
+    const previous = debugBase.disable();
+    debugBase.enable('*:logging:elasticsearch');
+
+    try {
+        await fn();
+    } finally {
+        debugBase.enable(previous);
+        logStub.restore();
+    }
+
+    return messages.join('\n');
 }
 
 function parseNdjson(body) {
@@ -152,6 +174,49 @@ describe('ElasticSearch', function () {
         await assert.doesNotReject(async () => {
             await es.index({ message: 'Test data' }, indexConfig);
         });
+    });
+
+    it("Includes Elasticsearch's error reason in debug output", async function () {
+        const es = new ElasticSearch(clientConfig);
+        server.respond({ status: 400, body: { error: { reason: 'mapper_parsing_exception' } } });
+
+        const output = await captureDebug(() => es.index({ message: 'Test data' }, indexConfig));
+
+        assert.match(output, /Failed to ship log/);
+        assert.match(output, /400/);
+        assert.match(output, /mapper_parsing_exception/);
+    });
+
+    it('Includes a non-JSON error body in debug output', async function () {
+        const es = new ElasticSearch(clientConfig);
+        server.respond({ status: 502, body: 'Bad gateway' });
+
+        const output = await captureDebug(() =>
+            es.bulk([{ index: 'metrics-test', document: { value: 1 } }]),
+        );
+
+        assert.match(output, /Failed to ship logs/);
+        assert.match(output, /Bad gateway/);
+    });
+
+    it('Uses the error message alone when the error body is empty or unreadable', async function () {
+        const es = new ElasticSearch(clientConfig);
+        server.respond({ status: 500, body: '' });
+
+        const emptyOutput = await captureDebug(() =>
+            es.index({ message: 'Test data' }, indexConfig),
+        );
+        assert.match(emptyOutput, /500/);
+        assert.doesNotMatch(emptyOutput, /\(\)/);
+
+        server.respond({ status: 500, body: 'consumed' });
+        sandbox.stub(Response.prototype, 'text').rejects(new Error('body used'));
+
+        const unreadableOutput = await captureDebug(() =>
+            es.index({ message: 'Test data' }, indexConfig),
+        );
+        assert.match(unreadableOutput, /500/);
+        assert.doesNotMatch(unreadableOutput, /consumed/);
     });
 
     it('Catches network failures without throwing', async function () {
