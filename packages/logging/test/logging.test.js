@@ -283,7 +283,7 @@ describe('Logging', function () {
                 index: 'ghost-index',
                 username: 'example',
                 password: 'password',
-                host: 'elastic-search-host',
+                host: 'http://elastic-search-host',
             },
         });
 
@@ -305,7 +305,7 @@ describe('Logging', function () {
                 index: 'ghost-index',
                 username: 'example',
                 password: 'password',
-                host: 'elastic-search-host',
+                host: 'http://elastic-search-host',
             },
         });
 
@@ -333,7 +333,7 @@ describe('Logging', function () {
                 index: 'ghost-index',
                 username: 'example',
                 password: 'password',
-                host: 'elastic-search-host',
+                host: 'http://elastic-search-host',
             },
         });
 
@@ -351,7 +351,7 @@ describe('Logging', function () {
                 index: 'ghost-index',
                 username: 'example',
                 password: 'password',
-                host: 'elastic-search-host',
+                host: 'http://elastic-search-host',
             },
         });
 

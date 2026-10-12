@@ -179,9 +179,10 @@ describe('Logging', function () {
         await assert.doesNotReject(() => ghostMetrics.metric(name, value));
     });
 
-    it('passes configured proxy to elasticsearch', function () {
+    it('warns that a configured elasticsearch proxy is ignored', function () {
         const name = 'proxy-metric';
         const value = 2;
+        const emitWarningStub = sandbox.stub(process, 'emitWarning');
 
         const ghostMetrics = new GhostMetrics({
             metrics: {
@@ -194,6 +195,9 @@ describe('Logging', function () {
                 proxy: 'https://proxy.example.com',
             },
         });
+
+        assert.equal(emitWarningStub.calledOnce, true);
+        assert.match(emitWarningStub.firstCall.args[0], /NODE_USE_ENV_PROXY/);
 
         sandbox.stub(ElasticSearch.prototype, 'index').resolves();
         ghostMetrics.metric(name, value);

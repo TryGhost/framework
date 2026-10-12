@@ -29,6 +29,14 @@ const custom = new metrics.GhostMetrics({
 });
 ```
 
+### Proxying Elasticsearch requests
+
+The Elasticsearch transport uses Node's built-in `fetch`, so it follows Node's
+proxy environment variables rather than a config option. Set `HTTPS_PROXY`
+(and `NO_PROXY` as needed) and enable them with `NODE_USE_ENV_PROXY=1` or
+`--use-env-proxy`. This applies to every request the process makes. The old
+`elasticsearch.proxy` option is ignored with a warning.
+
 ### Sampling
 
 High-volume metrics can be sampled so only a proportion of them are shipped.

@@ -2,7 +2,12 @@ const ElasticSearch = require('./ElasticSearch');
 const { PassThrough } = require('stream');
 const split = require('split2');
 
-// Create a writable stream which pipes data written into it, into the bulk helper
+// Ship a batch once it reaches this size, or once its oldest log is this old
+const FLUSH_BYTES = 5 * 1000 * 1000;
+const FLUSH_INTERVAL = 30 * 1000;
+
+// Create a writable stream whose newline-delimited JSON logs are shipped in
+// batched bulk requests
 
 class ElasticSearchBunyan {
     constructor(clientConfig, index, pipeline) {
@@ -10,36 +15,80 @@ class ElasticSearchBunyan {
         this.index = index;
         this.pipeline = pipeline;
         this.stream = null;
-        this.bulk = null;
+        this.done = null;
+
+        this.action = JSON.stringify({ create: { _index: index } });
+        this.lines = [];
+        this.bytes = 0;
+        this.timer = null;
+        // Batches ship one at a time so a slow cluster can't pile up requests
+        this.shipping = Promise.resolve();
     }
 
     getStream() {
-        const index = this.index;
-        const pipeline = this.pipeline;
         const stream = new PassThrough();
-        // `helpers.bulk` batches documents and only ships them on a size/time
-        // threshold (30s flush interval by default) or when the source stream
-        // ends. It returns a thenable that resolves once the datasource is
-        // exhausted, which is what `flush()` awaits.
-        this.bulk = this.client.client.helpers.bulk({
-            datasource: stream.pipe(split()),
-            onDocument() {
-                return {
-                    create: { _index: index },
-                };
-            },
-            pipeline,
+        const lines = stream.pipe(split());
+
+        lines.on('data', (line) => this.add(line));
+
+        // Resolves once the source stream has ended and every batch has
+        // shipped, which is what `flush()` awaits
+        this.done = new Promise((resolve) => {
+            lines.on('end', resolve);
+        }).then(() => {
+            this.ship();
+            return this.shipping;
         });
+
         this.stream = stream;
 
         return stream;
     }
 
     /**
+     * @param {string} line Serialised log document
+     */
+    add(line) {
+        if (line.trim() === '') {
+            return;
+        }
+
+        const bytes = Buffer.byteLength(this.action) + Buffer.byteLength(line) + 2;
+
+        if (this.bytes + bytes >= FLUSH_BYTES) {
+            this.ship();
+        }
+
+        this.lines.push(this.action, line);
+        this.bytes += bytes;
+
+        if (!this.timer) {
+            this.timer = setTimeout(() => this.ship(), FLUSH_INTERVAL);
+            this.timer.unref();
+        }
+    }
+
+    ship() {
+        clearTimeout(this.timer);
+        this.timer = null;
+
+        if (this.lines.length === 0) {
+            return;
+        }
+
+        const batch = this.lines;
+        this.lines = [];
+        this.bytes = 0;
+
+        this.shipping = this.shipping.then(() =>
+            this.client.bulkLines(batch, { pipeline: this.pipeline }),
+        );
+    }
+
+    /**
      * Force any buffered documents to ship, then wait for the in-flight bulk
-     * request to resolve. Ending the source stream flushes the bulk helper's
-     * buffer immediately instead of waiting for the flush interval, so callers
-     * can guarantee logs are shipped before the process exits.
+     * requests to resolve, so callers can guarantee logs are shipped before
+     * the process exits.
      *
      * After a flush the stream is ended and can no longer be written to; this
      * is intended as a shutdown step.
@@ -54,11 +103,7 @@ class ElasticSearchBunyan {
             this.stream.end();
         }
 
-        try {
-            await this.bulk;
-        } catch {
-            // Best-effort: never let a failed flush block shutdown.
-        }
+        await this.done;
     }
 }
 

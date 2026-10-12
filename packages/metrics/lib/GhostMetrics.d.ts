@@ -10,7 +10,11 @@ interface ElasticsearchOptions {
     username?: string;
     /** Basic-auth password. */
     password?: string;
-    /** Optional proxy URL; when absent no proxy is used. */
+    /**
+     * No longer supported and ignored. Set `HTTPS_PROXY` and
+     * `NODE_USE_ENV_PROXY=1` to proxy Elasticsearch requests.
+     * @deprecated
+     */
     proxy?: string;
 }
 

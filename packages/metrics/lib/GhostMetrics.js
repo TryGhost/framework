@@ -277,6 +277,13 @@ class GhostMetrics {
     setupElasticsearchShipper() {
         const ElasticSearch = require('@tryghost/elasticsearch');
 
+        if (this.elasticsearch.proxy) {
+            process.emitWarning(
+                'elasticsearch.proxy is no longer supported and is ignored. Set HTTPS_PROXY and NODE_USE_ENV_PROXY=1 to proxy Elasticsearch requests.',
+                { code: 'GHOST_METRICS_ELASTICSEARCH_PROXY' },
+            );
+        }
+
         const elasticSearch = new ElasticSearch({
             node: this.elasticsearch.host,
             auth: {
@@ -284,7 +291,6 @@ class GhostMetrics {
                 password: this.elasticsearch.password,
             },
             requestTimeout: 5000,
-            proxy: 'proxy' in this.elasticsearch ? this.elasticsearch.proxy : null,
         });
 
         if (!this.batch) {
