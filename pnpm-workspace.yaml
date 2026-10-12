@@ -15,6 +15,8 @@ allowBuilds:
   'nx@23.2.0': true
   'better-sqlite3@13.0.3': true
   sqlite3: false
+  # The watcher ships platform binaries; do not run its unreviewed install script.
+  '@parcel/watcher@2.6.0': false
 minimumReleaseAge: 4320
 catalog:
   sinon: 22.1.0
