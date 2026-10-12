@@ -11,8 +11,8 @@ interface ElasticsearchOptions {
     /** Basic-auth password. */
     password?: string;
     /**
-     * No longer supported and ignored. Set `HTTPS_PROXY` and
-     * `NODE_USE_ENV_PROXY=1` to proxy Elasticsearch requests.
+     * No longer supported and ignored. Set `HTTP_PROXY`/`HTTPS_PROXY` and
+     * `NODE_USE_ENV_PROXY=1` (Node 22.21.0+ or 24+) to proxy Elasticsearch requests.
      * @deprecated
      */
     proxy?: string;

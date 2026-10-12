@@ -35,7 +35,8 @@ that batches logs into bulk requests, shipping every 5 MB or 30 seconds, and
 Requests use Node's built-in `fetch` and are best-effort: failures are
 reported via `debug` and never thrown. Network errors and 408/429/5xx
 responses are retried with backoff. To send requests through a proxy, set
-`HTTPS_PROXY` and `NODE_USE_ENV_PROXY=1`.
+`HTTP_PROXY` or `HTTPS_PROXY` (matching the node URL's scheme) and
+`NODE_USE_ENV_PROXY=1`, which needs Node 22.21.0+ or 24+.
 
 ## Develop
 

@@ -279,7 +279,7 @@ class GhostMetrics {
 
         if (this.elasticsearch.proxy) {
             process.emitWarning(
-                'elasticsearch.proxy is no longer supported and is ignored. Set HTTPS_PROXY and NODE_USE_ENV_PROXY=1 to proxy Elasticsearch requests.',
+                'elasticsearch.proxy is no longer supported and is ignored. Set HTTP_PROXY/HTTPS_PROXY and NODE_USE_ENV_PROXY=1 (Node 22.21.0+ or 24+) to proxy Elasticsearch requests.',
                 { code: 'GHOST_METRICS_ELASTICSEARCH_PROXY' },
             );
         }
