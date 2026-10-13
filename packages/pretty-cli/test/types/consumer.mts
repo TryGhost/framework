@@ -23,6 +23,11 @@ fresh.command({
         });
     }
 });
+fresh.string({ aliases: 'name' });
+fresh.command({ aliases: 'run', run() {} });
+fresh.version('--version', { version: () => '1.0.0' });
+const deferredVersion: cli.Context['versionRequested'] = { version: () => '1.0.0' };
+cli.ui.log(deferredVersion);
 const result: cli.ParseResult = await fresh.parse(['--help']);
 const code: number = result.code;
 const output: string = result.output;

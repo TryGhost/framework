@@ -5,6 +5,7 @@ declare namespace prettyCli {
     /** Parsed arguments are dynamic; narrow values before using them. */
     type Args = Record<string, unknown>;
     type Flags = string | string[];
+    type Version = string | (() => string);
     type Style = (text: string, details?: unknown) => string;
     type Styles = Partial<
         Record<
@@ -46,7 +47,7 @@ declare namespace prettyCli {
     };
     type OptionOptions = {
         flags?: string;
-        aliases?: string[];
+        aliases?: Flags;
         type?: string;
         desc?: string;
         description?: string;
@@ -57,7 +58,7 @@ declare namespace prettyCli {
         hints?: string;
         group?: string;
         choices?: unknown[];
-        version?: string;
+        version?: Version;
         mustExist?: boolean;
         dirAllowed?: boolean;
         fileAllowed?: boolean;
@@ -79,7 +80,7 @@ declare namespace prettyCli {
         setup?: (api: Api) => void;
         run?: CommandHandler;
     };
-    type CommandDefinition = CommandOptions & ({ flags: string } | { aliases: string[] });
+    type CommandDefinition = CommandOptions & ({ flags: string } | { aliases: Flags });
     type ExampleOptions = { flags?: string; desc?: string; description?: string; group?: string };
     type UsageOptions = {
         usage?: string;
@@ -99,7 +100,7 @@ declare namespace prettyCli {
     type Context = ParseResult & {
         commandHandlerRun: boolean;
         helpRequested: boolean | OutputSettings;
-        versionRequested: boolean | { version?: string };
+        versionRequested: boolean | { version?: Version };
         cliMessage(message: unknown, ...args: unknown[]): void;
         deferHelp(options?: OutputSettings): Context;
     };
