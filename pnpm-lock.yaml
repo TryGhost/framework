@@ -661,6 +661,9 @@ importers:
       sinon:
         specifier: 'catalog:'
         version: 22.1.0
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
 
   packages/pretty-stream:
     dependencies:

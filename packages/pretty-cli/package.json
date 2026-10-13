@@ -11,23 +11,27 @@
   },
   "files": [
     "index.js",
+    "index.d.ts",
     "lib"
   ],
   "main": "index.js",
+  "types": "index.d.ts",
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
     "dev": "echo \"Implement me!\"",
-    "test": "NODE_ENV=testing vitest run --config ../../vitest.config.ts --root . --coverage",
+    "test": "pnpm test:types && NODE_ENV=testing vitest run --config ../../vitest.config.ts --root . --coverage",
     "lint": "oxlint -c ../../.oxlintrc.json .",
-    "posttest": "pnpm run lint"
+    "posttest": "pnpm run lint",
+    "test:types": "tsc --noEmit -p test/types/tsconfig.json"
   },
   "dependencies": {
     "chalk": "^6.0.0",
     "sywac": "^1.3.0"
   },
   "devDependencies": {
-    "sinon": "catalog:"
+    "sinon": "catalog:",
+    "typescript": "catalog:"
   }
 }
