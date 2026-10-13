@@ -23,6 +23,11 @@ Provides pre-configured transport options for common transport services.
 
 4. `ses` - [Send via AWS SES](https://ghost.org/docs/config/#amazon-ses).
 
+- Set `region` explicitly (preferred), or use a legacy `ServiceUrl` containing an
+  `email`, `email-smtp`, `email-fips`, or `email-smtp-fips` hostname in the form
+  `<service>.<region>.amazonaws.com`, with or without an HTTP(S) URL scheme.
+- Defaults to `us-east-1` when no region is set and `ServiceUrl` is missing or invalid.
+
 5. `direct` - Attempt to connect directly to remote SMTP servers. This is the default and requires no configuration, but is more likely to be blocked by remote mail services.
 
 6. `stub` - For testing and development. Doesn't actually send mail.
