@@ -80,6 +80,64 @@ describe('Transporter', function () {
         });
     });
 
+    for (const ServiceUrl of [
+        'email.eu-west-2.amazonaws.com',
+        'https://email.eu-west-2.amazonaws.com/',
+        'http://email.eu-west-2.amazonaws.com:80/',
+        'EMAIL-SMTP.EU-WEST-2.AMAZONAWS.COM',
+        'https://email-smtp.eu-west-2.amazonaws.com:443/',
+        'https://email-fips.eu-west-2.amazonaws.com/',
+        'email-smtp-fips.eu-west-2.amazonaws.com',
+        'email.eu-west-2.amazonaws.com/?redirect=https://example.com',
+        '  https://email.eu-west-2.amazonaws.com/  ',
+    ]) {
+        it(`parses the SES region from ${ServiceUrl}`, function () {
+            const sesStub = sandbox.stub(aws, 'SESv2Client').callsFake(function SESv2Client() {});
+
+            nodemailer('SES', { ServiceUrl });
+
+            assert.equal(sesStub.args[0][0].region, 'eu-west-2');
+        });
+    }
+
+    for (const [description, ServiceUrl] of [
+        ['missing URL', undefined],
+        ['non-string URL', {}],
+        ['invalid URL', 'https://['],
+        ['unsupported protocol', 'ftp://email.eu-west-2.amazonaws.com'],
+        ['lookalike domain separator', 'email.eu-west-2Xamazonaws.com'],
+        ['lookalike top-level domain', 'email.eu-west-2.amazonawsXcom'],
+        ['domain suffix', 'email.eu-west-2.amazonaws.com.evil.test'],
+        ['service prefix', 'notemail.eu-west-2.amazonaws.com'],
+        ['nested region', 'email.extra.eu-west-2.amazonaws.com'],
+        ['endpoint in path', 'https://evil.test/email.eu-west-2.amazonaws.com'],
+        ['endpoint in user info', 'https://email.eu-west-2.amazonaws.com@evil.test'],
+        ['long repeated input', `email.${'a'.repeat(100000)}!`],
+        ['long repeated service', 'emaila'.repeat(20000)],
+        ['long repeated labels', `email.${'.a'.repeat(20000)}`],
+    ]) {
+        it(`defaults the SES region for ${description}`, function () {
+            const sesStub = sandbox.stub(aws, 'SESv2Client').callsFake(function SESv2Client() {});
+
+            nodemailer('SES', { ServiceUrl });
+
+            assert.equal(sesStub.args[0][0].region, 'us-east-1');
+        });
+    }
+
+    it('does not inspect ServiceUrl when an explicit SES region is supplied', function () {
+        const sesStub = sandbox.stub(aws, 'SESv2Client').callsFake(function SESv2Client() {});
+
+        nodemailer('SES', {
+            region: 'eu-central-1',
+            get ServiceUrl() {
+                throw new Error('ServiceUrl should not be read');
+            },
+        });
+
+        assert.equal(sesStub.args[0][0].region, 'eu-central-1');
+    });
+
     it('can create a Direct transporter', function () {
         const transporter = nodemailer('direct', {});
         assert.equal(transporter.transporter.name, 'SMTP');
