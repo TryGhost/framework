@@ -144,6 +144,20 @@ describe('Webhook Mock Receiver', function () {
             assert.deepEqual(webhookMockReceiver.headers, { headers: { foo: 'bar' } });
             assert.deepEqual(webhookMockReceiver.body, { body: { avocado: 'toast' } });
         });
+
+        it('ignores requests recorded by a superseded mock', async function () {
+            webhookMockReceiver.mock(webhookURL);
+            const staleReply = webhookMockReceiver._receiver.interceptors[0].replyFunction;
+            webhookMockReceiver.mock(webhookURL);
+
+            // Simulate the first mock's reply callback finishing after it was replaced
+            await staleReply.call({ req: { headers: { stale: 'true' } } }, '/webhook', {
+                stale: true,
+            });
+
+            assert.equal(webhookMockReceiver.headers, undefined);
+            assert.equal(webhookMockReceiver.body, undefined);
+        });
     });
 
     describe('matchBodySnapshot', function () {

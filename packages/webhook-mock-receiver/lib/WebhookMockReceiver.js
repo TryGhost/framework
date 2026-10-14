@@ -6,6 +6,9 @@ const pWaitFor = require('p-wait-for').default;
 class WebhookMockReceiver {
     constructor({ snapshotManager }) {
         this.snapshotManager = snapshotManager;
+        // Bumped by mock() and reset() so reply callbacks from a superseded
+        // mock can't record into the current one
+        this._mockGeneration = 0;
         this.recordRequest = this.recordRequest.bind(this);
     }
 
@@ -28,7 +31,12 @@ class WebhookMockReceiver {
      */
     mock(url) {
         const parsedURL = new URL(url);
-        const recordRequest = this.recordRequest;
+        const mockGeneration = ++this._mockGeneration;
+        const recordRequest = (...args) => {
+            if (mockGeneration === this._mockGeneration) {
+                this.recordRequest(...args);
+            }
+        };
         this.body = undefined;
         this.headers = undefined;
 
@@ -66,6 +74,7 @@ class WebhookMockReceiver {
 
     reset() {
         nock.cleanAll();
+        this._mockGeneration += 1;
         this._receiver = undefined;
         this.body = undefined;
         this.headers = undefined;
