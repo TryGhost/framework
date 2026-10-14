@@ -6,7 +6,6 @@ const includes = require('lodash/includes');
 const errors = require('@tryghost/errors');
 const sinon = require('sinon');
 const assert = require('assert/strict');
-const GelfStream = require('gelf-stream').GelfStream;
 const HttpStream = require('@tryghost/http-stream');
 const sandbox = sinon.createSandbox();
 const { Worker } = require('worker_threads');
@@ -204,64 +203,22 @@ describe('Logging', function () {
         });
     });
 
-    it('gelf writes a log message', async function () {
-        await new Promise((resolve) => {
-            sandbox.stub(GelfStream.prototype, '_write').callsFake(function (data) {
-                assert.notEqual(data.err, null);
-                resolve();
-            });
-
-            var ghostLogger = new GhostLogger({
-                transports: ['gelf'],
-                gelf: {
-                    host: 'localhost',
-                    port: 12201,
-                },
-            });
-
-            ghostLogger.error(new errors.NotFoundError());
-            assert.equal(GelfStream.prototype._write.called, true);
-        });
-    });
-
-    it('gelf uses default host and port when not provided', function () {
-        const ghostLogger = new GhostLogger({
-            transports: ['gelf'],
-            gelf: {},
-        });
-
-        assert.notEqual(ghostLogger.streams.gelf, undefined);
-    });
-
-    it('gelf does not write a log message', function () {
-        sandbox.spy(GelfStream.prototype, '_write');
-
-        var ghostLogger = new GhostLogger({
-            transports: ['gelf'],
-            level: 'warn',
-            gelf: {
-                host: 'localhost',
-                port: 12201,
-            },
-        });
-
-        ghostLogger.info('testing');
-        assert.equal(GelfStream.prototype._write.called, false);
-    });
-
-    it('ignores the removed elasticsearch transport with a warning', function () {
+    it('ignores removed transports with one warning per transport', function () {
         const emitWarningStub = sandbox.stub(process, 'emitWarning');
+        const options = {
+            transports: ['stdout', 'gelf', 'elasticsearch', 'gelf'],
+            gelf: { host: 'localhost', port: 12201 },
+            elasticsearch: { host: 'http://elastic-search-host' },
+        };
 
-        const ghostLogger = new GhostLogger({
-            transports: ['stdout', 'elasticsearch'],
-            elasticsearch: {
-                host: 'http://elastic-search-host',
-            },
-        });
+        const ghostLogger = new GhostLogger(options);
+        new GhostLogger({ ...options, transports: [...options.transports] });
 
-        assert.equal(emitWarningStub.calledOnce, true);
-        assert.match(emitWarningStub.firstCall.args[0], /elasticsearch logging transport/);
         assert.deepEqual(Object.keys(ghostLogger.streams), ['stdout']);
+        assert.equal(emitWarningStub.callCount, 2);
+        assert.match(emitWarningStub.firstCall.args[0], /gelf logging transport/);
+        assert.match(emitWarningStub.secondCall.args[0], /elasticsearch logging transport/);
+        assert.equal(emitWarningStub.firstCall.args[1].code, 'GHOST_LOGGING_TRANSPORT_REMOVED');
     });
 
     it('flush drains flushable transports', async function () {
