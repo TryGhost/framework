@@ -68,7 +68,6 @@ class GhostLogger {
      * path:            Path where to store log files.
      * filename:        Optional filename template for log files. Supports {env} and {domain} placeholders.
      *                  If not provided, defaults to {domain}_{env} format.
-     * elasticsearch:   Elasticsearch transport configuration
      * gelf:            Gelf transport configuration.
      * http:            HTTP transport configuration
      * useLocalTime:    Use local time instead of UTC.
@@ -87,7 +86,6 @@ class GhostLogger {
         this.mode = process.env.MODE || options.mode || 'short';
         this.path = options.path || process.cwd();
         this.filename = options.filename || '{domain}_{env}';
-        this.elasticsearch = options.elasticsearch || {};
         this.gelf = options.gelf || {};
         this.http = options.http || {};
         this.useLocalTime = options.useLocalTime || false;
@@ -124,6 +122,16 @@ class GhostLogger {
         }
 
         this.transports.forEach((transport) => {
+            // CASE: the Elasticsearch transport was removed; skip it rather
+            // than failing to boot with an existing config
+            if (transport === 'elasticsearch') {
+                process.emitWarning(
+                    'The elasticsearch logging transport has been removed and is ignored.',
+                    { code: 'GHOST_LOGGING_ELASTICSEARCH_REMOVED' },
+                );
+                return;
+            }
+
             let transportFn = `set${upperFirst(transport)}Stream`;
 
             if (!this[transportFn]) {
@@ -210,44 +218,6 @@ class GhostLogger {
                         type: 'raw',
                         stream: bunyanStream,
                         level: this.level,
-                    },
-                ],
-                serializers: this.serializers,
-            }),
-        };
-    }
-
-    /**
-     * @description Setup ElasticSearch.
-     */
-    setElasticsearchStream() {
-        const ElasticSearch = require('@tryghost/elasticsearch').BunyanStream;
-
-        const elasticSearchInstance = new ElasticSearch(
-            {
-                implementation: this.elasticsearch.implementation,
-                node: this.elasticsearch.host,
-                auth: {
-                    username: this.elasticsearch.username,
-                    password: this.elasticsearch.password,
-                },
-            },
-            this.elasticsearch.index,
-            this.elasticsearch.pipeline,
-        );
-
-        this.streams.elasticsearch = {
-            name: 'elasticsearch',
-            // Keep a reference to the transport so `flush()` can force the
-            // buffered documents out before the process exits.
-            transport: elasticSearchInstance,
-            log: bunyan.createLogger({
-                name: this.name,
-                streams: [
-                    {
-                        type: 'stream',
-                        stream: elasticSearchInstance.getStream(),
-                        level: this.elasticsearch.level,
                     },
                 ],
                 serializers: this.serializers,
@@ -664,8 +634,8 @@ class GhostLogger {
      * size/time threshold, when their stream ends, or on the next tick. On a
      * fatal boot error the process exits before that happens, so the crash
      * reason is never persisted. Awaiting `flush()` before `process.exit()`
-     * forces those buffers out. This covers ElasticSearch (buffered bulk
-     * requests) and the file transports (queued/buffered disk writes).
+     * forces those buffers out. This covers the file transports
+     * (queued/buffered disk writes).
      *
      * Only transports exposing a `flush()` method are awaited; transports that
      * write straight through (stdout, stderr) have nothing to drain. Failures

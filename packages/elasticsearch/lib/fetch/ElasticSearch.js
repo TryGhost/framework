@@ -141,38 +141,6 @@ class ElasticSearch {
     }
 
     /**
-     * Ship pre-serialised NDJSON lines in a single bulk request
-     * @param {string[]} lines Action and document lines, without trailing newlines
-     * @param {{pipeline?: string}} [params] Bulk request query parameters
-     * @returns {Promise<void>}
-     */
-    async bulkLines(lines, params = {}) {
-        if (lines.length === 0) {
-            return;
-        }
-
-        try {
-            const result = await this.post(
-                '_bulk',
-                params,
-                `${lines.join('\n')}\n`,
-                'application/x-ndjson',
-            );
-
-            // Partial failures don't reject, so they'd otherwise be invisible
-            if (result?.errors) {
-                const failed = result.items.filter((item) => item.create?.error);
-                debug(
-                    `Failed to ship ${failed.length} of ${result.items.length} logs`,
-                    failed[0]?.create?.error?.reason,
-                );
-            }
-        } catch (error) {
-            debug('Failed to ship logs', await describeError(error));
-        }
-    }
-
-    /**
      * Write a batch of events to ElasticSearch in a single bulk request
      *
      * Uses the `create` action rather than `index` so the same call works
@@ -190,10 +158,28 @@ class ElasticSearch {
         let bodyBytes = 0;
 
         const ship = async () => {
-            const batch = lines;
+            if (lines.length === 0) {
+                return;
+            }
+
+            const body = `${lines.join('\n')}\n`;
             lines = [];
             bodyBytes = 0;
-            await this.bulkLines(batch);
+
+            try {
+                const result = await this.post('_bulk', {}, body, 'application/x-ndjson');
+
+                // Partial failures don't reject, so they'd otherwise be invisible
+                if (result?.errors) {
+                    const failed = result.items.filter((item) => item.create?.error);
+                    debug(
+                        `Failed to ship ${failed.length} of ${result.items.length} logs`,
+                        failed[0]?.create?.error?.reason,
+                    );
+                }
+            } catch (error) {
+                debug('Failed to ship logs', await describeError(error));
+            }
         };
 
         for (const operation of operations) {

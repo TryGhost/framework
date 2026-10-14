@@ -416,9 +416,6 @@ importers:
       fetch-extras:
         specifier: ^3.2.1
         version: 3.2.1
-      split2:
-        specifier: ^4.2.0
-        version: 4.2.0
     devDependencies:
       sinon:
         specifier: 'catalog:'
@@ -549,9 +546,6 @@ importers:
       '@tryghost/bunyan-rotating-filestream':
         specifier: workspace:^
         version: link:../bunyan-rotating-filestream
-      '@tryghost/elasticsearch':
-        specifier: workspace:^
-        version: link:../elasticsearch
       '@tryghost/http-stream':
         specifier: workspace:^
         version: link:../http-stream
@@ -4821,10 +4815,6 @@ packages:
   source-map@0.6.1:
     resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==}
     engines: {node: '>=0.10.0'}
-
-  split2@4.2.0:
-    resolution: {integrity: sha512-UcjcJOWknrNkF6PLX83qcHM6KHgVKNkV62Y8a5uYDVv9ydGQVwAHMKqHdJje1VTWpljG0WYpCDhrCdAOYH4TWg==}
-    engines: {node: '>= 10.x'}
 
   sqlite3@6.0.1:
     resolution: {integrity: sha512-X0czUUMG2tmSqJpEQa3tCuZSHKIx8PwM53vLZzKp/o6Rpy25fiVfjdbnZ988M8+O3ZWR1ih0K255VumCb3MAnQ==}
@@ -9479,8 +9469,6 @@ snapshots:
       source-map: 0.6.1
 
   source-map@0.6.1: {}
-
-  split2@4.2.0: {}
 
   sqlite3@6.0.1:
     dependencies:
