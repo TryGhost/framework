@@ -21,7 +21,6 @@ declare namespace logging {
     export type LogLevel = GhostLoggerClass.LogLevel;
     export type Transport = GhostLoggerClass.Transport;
     export type RotationOptions = GhostLoggerClass.RotationOptions;
-    export type ElasticsearchOptions = GhostLoggerClass.ElasticsearchOptions;
     export type GelfOptions = GhostLoggerClass.GelfOptions;
     export type HttpOptions = GhostLoggerClass.HttpOptions;
     export type GhostLoggerOptions = GhostLoggerClass.GhostLoggerOptions;

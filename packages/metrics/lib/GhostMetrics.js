@@ -277,7 +277,17 @@ class GhostMetrics {
     setupElasticsearchShipper() {
         const ElasticSearch = require('@tryghost/elasticsearch');
 
+        const implementation = this.elasticsearch.implementation;
+
+        if (implementation === 'fetch' && this.elasticsearch.proxy) {
+            process.emitWarning(
+                'elasticsearch.proxy is not supported by the fetch implementation and is ignored. Set HTTP_PROXY/HTTPS_PROXY and NODE_USE_ENV_PROXY=1 (Node 22.21.0+ or 24+) to proxy Elasticsearch requests.',
+                { code: 'GHOST_METRICS_ELASTICSEARCH_PROXY' },
+            );
+        }
+
         const elasticSearch = new ElasticSearch({
+            implementation,
             node: this.elasticsearch.host,
             auth: {
                 username: this.elasticsearch.username,

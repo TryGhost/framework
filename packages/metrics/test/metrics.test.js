@@ -179,9 +179,8 @@ describe('Logging', function () {
         await assert.doesNotReject(() => ghostMetrics.metric(name, value));
     });
 
-    it('passes configured proxy to elasticsearch', function () {
-        const name = 'proxy-metric';
-        const value = 2;
+    it('passes configured proxy to the legacy elasticsearch implementation', function () {
+        const emitWarningStub = sandbox.stub(process, 'emitWarning');
 
         const ghostMetrics = new GhostMetrics({
             metrics: {
@@ -195,8 +194,53 @@ describe('Logging', function () {
             },
         });
 
+        assert.equal(emitWarningStub.called, false);
+
         sandbox.stub(ElasticSearch.prototype, 'index').resolves();
-        ghostMetrics.metric(name, value);
+        ghostMetrics.metric('proxy-metric', 2);
+        assert.equal(ElasticSearch.prototype.index.calledOnce, true);
+    });
+
+    it('passes the configured implementation through to elasticsearch', async function () {
+        const FetchElasticSearch = require('@tryghost/elasticsearch/lib/fetch/ElasticSearch');
+
+        const ghostMetrics = new GhostMetrics({
+            metrics: {
+                transports: ['elasticsearch'],
+            },
+            elasticsearch: {
+                implementation: 'fetch',
+                host: 'https://test-elasticsearch',
+            },
+        });
+
+        const indexStub = sandbox.stub(ElasticSearch.prototype, 'index').resolves();
+        await ghostMetrics.metric('implementation-metric', 1);
+
+        assert.ok(indexStub.firstCall.thisValue.implementation instanceof FetchElasticSearch);
+    });
+
+    it('warns that a configured proxy is ignored by the fetch elasticsearch implementation', function () {
+        const emitWarningStub = sandbox.stub(process, 'emitWarning');
+
+        const ghostMetrics = new GhostMetrics({
+            metrics: {
+                transports: ['elasticsearch'],
+            },
+            elasticsearch: {
+                implementation: 'fetch',
+                host: 'https://test-elasticsearch',
+                username: 'user',
+                password: 'pass',
+                proxy: 'https://proxy.example.com',
+            },
+        });
+
+        assert.equal(emitWarningStub.calledOnce, true);
+        assert.match(emitWarningStub.firstCall.args[0], /NODE_USE_ENV_PROXY/);
+
+        sandbox.stub(ElasticSearch.prototype, 'index').resolves();
+        ghostMetrics.metric('proxy-metric', 2);
         assert.equal(ElasticSearch.prototype.index.calledOnce, true);
     });
 

@@ -30,9 +30,8 @@ requestLogger.warn('slow response');
 
 ### Flushing before exit
 
-Transports that batch writes — ElasticSearch (buffered bulk requests) and the
-file transports (queued disk writes) — can still be holding log lines when a
-process exits, which is exactly when the last lines matter most. Await
+Transports that batch writes, like the file transports (queued disk writes),
+can still be holding log lines when a process exits, which is exactly when the last lines matter most. Await
 `flush()` before `process.exit()`:
 
 ```js

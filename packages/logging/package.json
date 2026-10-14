@@ -26,7 +26,6 @@
   },
   "dependencies": {
     "@tryghost/bunyan-rotating-filestream": "workspace:^",
-    "@tryghost/elasticsearch": "workspace:^",
     "@tryghost/http-stream": "workspace:^",
     "@tryghost/pretty-stream": "workspace:^",
     "@tryghost/root-utils": "workspace:^",

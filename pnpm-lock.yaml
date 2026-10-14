@@ -413,9 +413,9 @@ importers:
       '@tryghost/debug':
         specifier: workspace:^
         version: link:../debug
-      split2:
-        specifier: ^4.2.0
-        version: 4.2.0
+      fetch-extras:
+        specifier: ^3.2.1
+        version: 3.2.1
     devDependencies:
       sinon:
         specifier: 'catalog:'
@@ -546,9 +546,6 @@ importers:
       '@tryghost/bunyan-rotating-filestream':
         specifier: workspace:^
         version: link:../bunyan-rotating-filestream
-      '@tryghost/elasticsearch':
-        specifier: workspace:^
-        version: link:../elasticsearch
       '@tryghost/http-stream':
         specifier: workspace:^
         version: link:../http-stream
@@ -3590,6 +3587,10 @@ packages:
       picomatch:
         optional: true
 
+  fetch-extras@3.2.1:
+    resolution: {integrity: sha512-MuxNR+WUQiu6i4xEDrtoSzSwoqDR2QhN8KU5jlFdAyM3aJmPYwOVC/PwkL5tqyzFMoxz9aGzYyPKRrnSkJQsEA==}
+    engines: {node: '>=22'}
+
   figures@3.2.0:
     resolution: {integrity: sha512-yaduQFRKLXYOGgEn6AZau90j3ggSOyiqXU0F9JZfeXYhNa+Jk4X+s45A2zg5jns87GAFa34BBm2kXw4XpNcbdg==}
     engines: {node: '>=8'}
@@ -4785,10 +4786,6 @@ packages:
   source-map@0.6.1:
     resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==}
     engines: {node: '>=0.10.0'}
-
-  split2@4.2.0:
-    resolution: {integrity: sha512-UcjcJOWknrNkF6PLX83qcHM6KHgVKNkV62Y8a5uYDVv9ydGQVwAHMKqHdJje1VTWpljG0WYpCDhrCdAOYH4TWg==}
-    engines: {node: '>= 10.x'}
 
   stack-utils@2.0.6:
     resolution: {integrity: sha512-XlkWvfIm6RmsWtNJx+uqtKLS8eqFbxUg0ZzLXqY0caEy9l7hruX8IpiDnjsLavoBgqCCR71TqWO8MaXYheJ3RQ==}
@@ -7937,6 +7934,8 @@ snapshots:
     optionalDependencies:
       picomatch: 4.0.7
 
+  fetch-extras@3.2.1: {}
+
   figures@3.2.0:
     dependencies:
       escape-string-regexp: 1.0.5
@@ -9302,8 +9301,6 @@ snapshots:
       source-map: 0.6.1
 
   source-map@0.6.1: {}
-
-  split2@4.2.0: {}
 
   stack-utils@2.0.6:
     dependencies:

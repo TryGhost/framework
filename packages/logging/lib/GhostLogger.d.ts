@@ -1,6 +1,6 @@
 type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
 
-type Transport = 'stdout' | 'stderr' | 'parent' | 'file' | 'gelf' | 'http' | 'elasticsearch';
+type Transport = 'stdout' | 'stderr' | 'parent' | 'file' | 'gelf' | 'http';
 
 interface RotationOptions {
     enabled?: boolean;
@@ -14,15 +14,6 @@ interface RotationOptions {
     threshold?: string | number;
     gzip?: boolean;
     rotateExisting?: boolean;
-}
-
-interface ElasticsearchOptions {
-    host?: string;
-    username?: string;
-    password?: string;
-    index?: string;
-    pipeline?: string;
-    level?: LogLevel;
 }
 
 interface GelfOptions {
@@ -63,8 +54,6 @@ interface GhostLoggerOptions {
      * placeholders. Defaults to `{domain}_{env}`.
      */
     filename?: string;
-    /** Elasticsearch transport configuration. */
-    elasticsearch?: ElasticsearchOptions;
     /** Gelf transport configuration. */
     gelf?: GelfOptions;
     /** HTTP transport configuration. */
@@ -91,7 +80,6 @@ declare class GhostLogger {
     mode: string;
     path: string;
     filename: string;
-    elasticsearch: ElasticsearchOptions;
     gelf: GelfOptions;
     http: HttpOptions;
     useLocalTime: boolean;
@@ -122,8 +110,8 @@ declare class GhostLogger {
     fatal(...args: unknown[]): void;
 
     /**
-     * Flush buffered logs on any transport that batches writes (ElasticSearch,
-     * file), forcing them out before the process exits. Resolves once every
+     * Flush buffered logs on any transport that batches writes (file),
+     * forcing them out before the process exits. Resolves once every
      * flushable transport has drained; failures are swallowed.
      */
     flush(): Promise<void>;
@@ -133,15 +121,7 @@ declare class GhostLogger {
 }
 
 declare namespace GhostLogger {
-    export {
-        LogLevel,
-        Transport,
-        RotationOptions,
-        ElasticsearchOptions,
-        GelfOptions,
-        HttpOptions,
-        GhostLoggerOptions,
-    };
+    export { LogLevel, Transport, RotationOptions, GelfOptions, HttpOptions, GhostLoggerOptions };
 }
 
 export = GhostLogger;
