@@ -28,10 +28,17 @@ const requestLogger = logging.child({ requestId: 'abc123' });
 requestLogger.warn('slow response');
 ```
 
+### Deprecated transports
+
+The `elasticsearch` and `gelf` transports are deprecated and will be removed in
+a future major version. They still work, but emit a `DeprecationWarning`
+(`GHOST_LOGGING_TRANSPORT_DEPRECATED`) once per process when configured.
+
 ### Flushing before exit
 
-Transports that batch writes, like the file transports (queued disk writes),
-can still be holding log lines when a process exits, which is exactly when the last lines matter most. Await
+Transports that batch writes — ElasticSearch (buffered bulk requests) and the
+file transports (queued disk writes) — can still be holding log lines when a
+process exits, which is exactly when the last lines matter most. Await
 `flush()` before `process.exit()`:
 
 ```js

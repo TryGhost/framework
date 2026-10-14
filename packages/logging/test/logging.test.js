@@ -6,6 +6,8 @@ const includes = require('lodash/includes');
 const errors = require('@tryghost/errors');
 const sinon = require('sinon');
 const assert = require('assert/strict');
+const GelfStream = require('gelf-stream').GelfStream;
+const ElasticSearch = require('@tryghost/elasticsearch').BunyanStream;
 const HttpStream = require('@tryghost/http-stream');
 const sandbox = sinon.createSandbox();
 const { Worker } = require('worker_threads');
@@ -203,30 +205,156 @@ describe('Logging', function () {
         });
     });
 
-    it('ignores removed transports with one warning per transport', function () {
+    it('gelf writes a log message', async function () {
+        await new Promise((resolve) => {
+            sandbox.stub(GelfStream.prototype, '_write').callsFake(function (data) {
+                assert.notEqual(data.err, null);
+                resolve();
+            });
+
+            var ghostLogger = new GhostLogger({
+                transports: ['gelf'],
+                gelf: {
+                    host: 'localhost',
+                    port: 12201,
+                },
+            });
+
+            ghostLogger.error(new errors.NotFoundError());
+            assert.equal(GelfStream.prototype._write.called, true);
+        });
+    });
+
+    it('gelf uses default host and port when not provided', function () {
+        const ghostLogger = new GhostLogger({
+            transports: ['gelf'],
+            gelf: {},
+        });
+
+        assert.notEqual(ghostLogger.streams.gelf, undefined);
+    });
+
+    it('gelf does not write a log message', function () {
+        sandbox.spy(GelfStream.prototype, '_write');
+
+        var ghostLogger = new GhostLogger({
+            transports: ['gelf'],
+            level: 'warn',
+            gelf: {
+                host: 'localhost',
+                port: 12201,
+            },
+        });
+
+        ghostLogger.info('testing');
+        assert.equal(GelfStream.prototype._write.called, false);
+    });
+
+    it('warns once per process for each deprecated transport', function () {
+        // Load a fresh copy so earlier tests haven't already used up the warnings
+        const modulePath = require.resolve('../lib/GhostLogger');
+        delete require.cache[modulePath];
+        const FreshGhostLogger = require('../lib/GhostLogger');
         const emitWarningStub = sandbox.stub(process, 'emitWarning');
         const options = {
-            transports: ['stdout', 'gelf', 'elasticsearch', 'gelf'],
+            transports: ['gelf', 'elasticsearch'],
             gelf: { host: 'localhost', port: 12201 },
-            elasticsearch: { host: 'http://elastic-search-host' },
+            elasticsearch: { host: 'http://elastic-search-host', index: 'ghost-index' },
         };
 
-        const ghostLogger = new GhostLogger(options);
-        new GhostLogger({ ...options, transports: [...options.transports] });
+        const ghostLogger = new FreshGhostLogger(options);
+        new FreshGhostLogger({ ...options, transports: [...options.transports] });
 
-        assert.deepEqual(Object.keys(ghostLogger.streams), ['stdout']);
+        assert.ok(ghostLogger.streams.gelf);
+        assert.ok(ghostLogger.streams.elasticsearch);
         assert.equal(emitWarningStub.callCount, 2);
-        assert.match(emitWarningStub.firstCall.args[0], /gelf logging transport/);
-        assert.match(emitWarningStub.secondCall.args[0], /elasticsearch logging transport/);
-        assert.equal(emitWarningStub.firstCall.args[1].code, 'GHOST_LOGGING_TRANSPORT_REMOVED');
+        assert.match(emitWarningStub.firstCall.args[0], /gelf logging transport is deprecated/);
+        assert.match(
+            emitWarningStub.secondCall.args[0],
+            /elasticsearch logging transport is deprecated/,
+        );
+        assert.deepEqual(emitWarningStub.firstCall.args[1], {
+            type: 'DeprecationWarning',
+            code: 'GHOST_LOGGING_TRANSPORT_DEPRECATED',
+        });
+    });
+
+    it('elasticsearch should make a stream', function () {
+        const es = new ElasticSearch(
+            {
+                node: 'http://test-elastic-client',
+                auth: {
+                    username: 'user',
+                    password: 'pass',
+                },
+            },
+            'index',
+            'pipeline',
+        );
+
+        const stream = es.getStream();
+        assert.equal(typeof stream.write, 'function');
+    });
+
+    it('elasticsearch passes the configured implementation through', function () {
+        const FetchElasticSearchBunyan = require('@tryghost/elasticsearch/lib/fetch/ElasticSearchBunyan');
+
+        const ghostLogger = new GhostLogger({
+            transports: ['elasticsearch'],
+            elasticsearch: {
+                implementation: 'fetch',
+                index: 'ghost-index',
+                host: 'http://elastic-search-host',
+            },
+        });
+
+        assert.ok(
+            ghostLogger.streams.elasticsearch.transport.implementation instanceof
+                FetchElasticSearchBunyan,
+        );
+    });
+
+    it('elasticsearch should receive a single object', async function () {
+        sandbox.stub(ElasticSearch.prototype, 'getStream').returns({
+            write: function (jsonData) {
+                assert.equal(arguments.length, 1);
+                const data = JSON.parse(jsonData);
+                assert.equal(data.msg, 'hello 1');
+                assert.equal(data.prop, 'prop val');
+            },
+        });
+
+        var ghostLogger = new GhostLogger({
+            transports: ['elasticsearch'],
+            elasticsearch: {
+                index: 'ghost-index',
+                username: 'example',
+                password: 'password',
+                host: 'http://elastic-search-host',
+            },
+        });
+
+        await ghostLogger.info(
+            {
+                prop: 'prop val',
+            },
+            'hello',
+            1,
+        );
     });
 
     it('flush drains flushable transports', async function () {
+        const flushStub = sandbox.stub(ElasticSearch.prototype, 'flush').resolves();
+
         const ghostLogger = new GhostLogger({
-            transports: ['stdout'],
+            transports: ['stdout', 'elasticsearch'],
+            elasticsearch: {
+                index: 'ghost-index',
+                username: 'example',
+                password: 'password',
+                host: 'http://elastic-search-host',
+            },
         });
-        const flushStub = sinon.stub().resolves();
-        ghostLogger.streams.flushable = { name: 'flushable', transport: { flush: flushStub } };
 
         await ghostLogger.flush();
 
@@ -244,13 +372,17 @@ describe('Logging', function () {
     });
 
     it('flush swallows an async rejection from a transport', async function () {
+        sandbox.stub(ElasticSearch.prototype, 'flush').rejects(new Error('boom'));
+
         const ghostLogger = new GhostLogger({
-            transports: ['stdout'],
+            transports: ['stdout', 'elasticsearch'],
+            elasticsearch: {
+                index: 'ghost-index',
+                username: 'example',
+                password: 'password',
+                host: 'http://elastic-search-host',
+            },
         });
-        ghostLogger.streams.flushable = {
-            name: 'flushable',
-            transport: { flush: sinon.stub().rejects(new Error('boom')) },
-        };
 
         await assert.doesNotReject(async () => {
             await ghostLogger.flush();
@@ -258,13 +390,17 @@ describe('Logging', function () {
     });
 
     it('flush swallows a synchronous throw from a transport', async function () {
+        sandbox.stub(ElasticSearch.prototype, 'flush').throws(new Error('boom'));
+
         const ghostLogger = new GhostLogger({
-            transports: ['stdout'],
+            transports: ['stdout', 'elasticsearch'],
+            elasticsearch: {
+                index: 'ghost-index',
+                username: 'example',
+                password: 'password',
+                host: 'http://elastic-search-host',
+            },
         });
-        ghostLogger.streams.flushable = {
-            name: 'flushable',
-            transport: { flush: sinon.stub().throws(new Error('boom')) },
-        };
 
         await assert.doesNotReject(async () => {
             await ghostLogger.flush();

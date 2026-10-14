@@ -25,7 +25,8 @@
   "dependencies": {
     "@elastic/elasticsearch": "^8.19.2",
     "@tryghost/debug": "workspace:^",
-    "fetch-extras": "^3.2.1"
+    "fetch-extras": "^3.2.1",
+    "split2": "^4.2.0"
   },
   "devDependencies": {
     "sinon": "catalog:"

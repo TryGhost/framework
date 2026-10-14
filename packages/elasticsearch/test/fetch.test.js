@@ -5,6 +5,7 @@ const debugBase = require('@tryghost/debug')._base;
 const sandbox = sinon.createSandbox();
 
 const ElasticSearch = require('../lib/fetch/ElasticSearch');
+const ElasticSearchBunyan = require('../lib/fetch/ElasticSearchBunyan');
 
 const indexConfig = {
     index: 'test-index',
@@ -399,6 +400,128 @@ describe('ElasticSearch', function () {
 
         await assert.doesNotReject(async () => {
             await es.bulk([{ index: 'metrics-test', document: { value: 1 } }]);
+        });
+    });
+});
+
+describe('ElasticSearch Bunyan', function () {
+    let server;
+    let clientConfig;
+
+    beforeEach(async function () {
+        server = await startServer();
+        clientConfig = { node: server.url, maxRetries: 0 };
+    });
+
+    afterEach(async function () {
+        sandbox.restore();
+        await server.close();
+    });
+
+    it('flush() ships buffered logs in one bulk request', async function () {
+        const es = new ElasticSearchBunyan(clientConfig, indexConfig.index, indexConfig.pipeline);
+
+        const stream = es.getStream();
+        stream.write(`${JSON.stringify({ message: 'one' })}\n`);
+        stream.write(`${JSON.stringify({ message: 'two' })}\n`);
+
+        await es.flush();
+
+        assert.equal(stream.writableEnded, true);
+        assert.equal(server.requests.length, 1);
+        assert.equal(server.requests[0].url, '/_bulk?pipeline=test-pipeline');
+        assert.deepEqual(parseNdjson(server.requests[0].body), [
+            { create: { _index: 'test-index' } },
+            { message: 'one' },
+            { create: { _index: 'test-index' } },
+            { message: 'two' },
+        ]);
+    });
+
+    it('Joins logs split across writes and ignores blank lines', async function () {
+        const es = new ElasticSearchBunyan(clientConfig, indexConfig.index);
+
+        const stream = es.getStream();
+        stream.write('{"message":');
+        stream.write('"one"}\n\n');
+
+        await es.flush();
+
+        assert.equal(server.requests[0].url, '/_bulk');
+        assert.deepEqual(parseNdjson(server.requests[0].body), [
+            { create: { _index: 'test-index' } },
+            { message: 'one' },
+        ]);
+    });
+
+    it('Ships a batch once the flush interval passes', async function () {
+        const clock = sandbox.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+        const es = new ElasticSearchBunyan(clientConfig, indexConfig.index);
+        const bulkSpy = sandbox.spy(es.client, 'bulkLines');
+
+        const stream = es.getStream();
+        stream.write(`${JSON.stringify({ message: 'one' })}\n`);
+        await new Promise(setImmediate);
+
+        assert.equal(bulkSpy.callCount, 0);
+
+        clock.tick(30 * 1000);
+        clock.restore();
+        await es.shipping;
+
+        assert.equal(bulkSpy.callCount, 1);
+        assert.equal(server.requests.length, 1);
+    });
+
+    it('Ships a batch once it reaches the size limit', async function () {
+        const es = new ElasticSearchBunyan(clientConfig, indexConfig.index);
+        const bulkSpy = sandbox.spy(es.client, 'bulkLines');
+        const large = 'x'.repeat(3 * 1000 * 1000);
+
+        const stream = es.getStream();
+        stream.write(`${JSON.stringify({ message: large })}\n`);
+        stream.write(`${JSON.stringify({ message: large })}\n`);
+        await new Promise(setImmediate);
+
+        assert.equal(bulkSpy.callCount, 1);
+
+        await es.flush();
+
+        assert.equal(bulkSpy.callCount, 2);
+        assert.equal(server.requests.length, 2);
+    });
+
+    it('flush() can be called more than once without re-ending the stream', async function () {
+        const es = new ElasticSearchBunyan(clientConfig, indexConfig.index);
+
+        const stream = es.getStream();
+        const endSpy = sandbox.spy(stream, 'end');
+
+        await es.flush();
+        await es.flush();
+
+        assert.equal(stream.writableEnded, true);
+        assert.equal(endSpy.callCount, 1);
+        assert.equal(server.requests.length, 0);
+    });
+
+    it('flush() is a no-op when no stream was created', async function () {
+        const es = new ElasticSearchBunyan(clientConfig, indexConfig.index);
+
+        await assert.doesNotReject(async () => {
+            await es.flush();
+        });
+    });
+
+    it('flush() swallows a failed bulk request', async function () {
+        const es = new ElasticSearchBunyan(clientConfig, indexConfig.index);
+        server.respond({ status: 500, body: { error: { reason: 'boom' } } });
+
+        const stream = es.getStream();
+        stream.write(`${JSON.stringify({ message: 'one' })}\n`);
+
+        await assert.doesNotReject(async () => {
+            await es.flush();
         });
     });
 });

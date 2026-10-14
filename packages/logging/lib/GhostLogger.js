@@ -8,11 +8,24 @@ const bunyan = require('bunyan');
 const fs = require('fs');
 const jsonStringifySafe = require('json-stringify-safe');
 
-// Transports that have been removed. They're skipped with a warning rather than
-// rejected, so existing configs that still list them keep booting.
-const REMOVED_TRANSPORTS = new Set(['elasticsearch', 'gelf']);
-// Removed transports already warned about, so each warns once per process
-const warnedRemovedTransports = new Set();
+// Deprecated transports already warned about, so each warns once per process
+const warnedDeprecatedTransports = new Set();
+
+/**
+ * @description Warn once per process that a transport is deprecated.
+ * @param {string} transport
+ */
+function warnDeprecatedTransport(transport) {
+    if (warnedDeprecatedTransports.has(transport)) {
+        return;
+    }
+
+    warnedDeprecatedTransports.add(transport);
+    process.emitWarning(
+        `The ${transport} logging transport is deprecated and will be removed in a future major version.`,
+        { type: 'DeprecationWarning', code: 'GHOST_LOGGING_TRANSPORT_DEPRECATED' },
+    );
+}
 
 /**
  * @description Wait for a Node writable stream to hand everything it has
@@ -69,11 +82,13 @@ class GhostLogger {
      * mode:            Is used to print short or long log.
      * level:           The level defines the default level of all transports except of stderr.
      * logBody:         Disable or enable if the body of a request should be logged to the target stream.
-     * transports:      An array of comma separated transports (e.g. stdout, stderr, file)
+     * transports:      An array of comma separated transports (e.g. stdout, stderr, gelf, file)
      * rotation:        Enable or disable file rotation.
      * path:            Path where to store log files.
      * filename:        Optional filename template for log files. Supports {env} and {domain} placeholders.
      *                  If not provided, defaults to {domain}_{env} format.
+     * elasticsearch:   Elasticsearch transport configuration (deprecated)
+     * gelf:            Gelf transport configuration (deprecated)
      * http:            HTTP transport configuration
      * useLocalTime:    Use local time instead of UTC.
      * metadata:        Optional set of metadata to attach to each log line
@@ -91,6 +106,8 @@ class GhostLogger {
         this.mode = process.env.MODE || options.mode || 'short';
         this.path = options.path || process.cwd();
         this.filename = options.filename || '{domain}_{env}';
+        this.elasticsearch = options.elasticsearch || {};
+        this.gelf = options.gelf || {};
         this.http = options.http || {};
         this.useLocalTime = options.useLocalTime || false;
         this.metadata = options.metadata || {};
@@ -126,17 +143,6 @@ class GhostLogger {
         }
 
         this.transports.forEach((transport) => {
-            if (REMOVED_TRANSPORTS.has(transport)) {
-                if (!warnedRemovedTransports.has(transport)) {
-                    warnedRemovedTransports.add(transport);
-                    process.emitWarning(
-                        `The ${transport} logging transport has been removed and is ignored.`,
-                        { code: 'GHOST_LOGGING_TRANSPORT_REMOVED' },
-                    );
-                }
-                return;
-            }
-
             let transportFn = `set${upperFirst(transport)}Stream`;
 
             if (!this[transportFn]) {
@@ -230,6 +236,47 @@ class GhostLogger {
         };
     }
 
+    /**
+     * @description Setup ElasticSearch.
+     * @deprecated The elasticsearch transport will be removed in a future major version.
+     */
+    setElasticsearchStream() {
+        warnDeprecatedTransport('elasticsearch');
+
+        const ElasticSearch = require('@tryghost/elasticsearch').BunyanStream;
+
+        const elasticSearchInstance = new ElasticSearch(
+            {
+                implementation: this.elasticsearch.implementation,
+                node: this.elasticsearch.host,
+                auth: {
+                    username: this.elasticsearch.username,
+                    password: this.elasticsearch.password,
+                },
+            },
+            this.elasticsearch.index,
+            this.elasticsearch.pipeline,
+        );
+
+        this.streams.elasticsearch = {
+            name: 'elasticsearch',
+            // Keep a reference to the transport so `flush()` can force the
+            // buffered documents out before the process exits.
+            transport: elasticSearchInstance,
+            log: bunyan.createLogger({
+                name: this.name,
+                streams: [
+                    {
+                        type: 'stream',
+                        stream: elasticSearchInstance.getStream(),
+                        level: this.elasticsearch.level,
+                    },
+                ],
+                serializers: this.serializers,
+            }),
+        };
+    }
+
     setHttpStream() {
         const Http = require('@tryghost/http-stream');
 
@@ -249,6 +296,37 @@ class GhostLogger {
                         type: 'raw',
                         stream: httpStream,
                         level: this.http.level,
+                    },
+                ],
+                serializers: this.serializers,
+            }),
+        };
+    }
+
+    /**
+     * @description Setup gelf.
+     * @deprecated The gelf transport will be removed in a future major version.
+     */
+    setGelfStream() {
+        warnDeprecatedTransport('gelf');
+
+        const gelfStream = require('gelf-stream');
+
+        const stream = gelfStream.forBunyan(
+            this.gelf.host || 'localhost',
+            this.gelf.port || 12201,
+            this.gelf.options || {},
+        );
+
+        this.streams.gelf = {
+            name: 'gelf',
+            log: bunyan.createLogger({
+                name: this.name,
+                streams: [
+                    {
+                        type: 'raw',
+                        stream: stream,
+                        level: this.level,
                     },
                 ],
                 serializers: this.serializers,
@@ -611,8 +689,8 @@ class GhostLogger {
      * size/time threshold, when their stream ends, or on the next tick. On a
      * fatal boot error the process exits before that happens, so the crash
      * reason is never persisted. Awaiting `flush()` before `process.exit()`
-     * forces those buffers out. This covers the file transports
-     * (queued/buffered disk writes).
+     * forces those buffers out. This covers ElasticSearch (buffered bulk
+     * requests) and the file transports (queued/buffered disk writes).
      *
      * Only transports exposing a `flush()` method are awaited; transports that
      * write straight through (stdout, stderr) have nothing to drain. Failures

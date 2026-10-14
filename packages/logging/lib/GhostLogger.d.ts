@@ -1,6 +1,6 @@
 type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
 
-type Transport = 'stdout' | 'stderr' | 'parent' | 'file' | 'http';
+type Transport = 'stdout' | 'stderr' | 'parent' | 'file' | 'gelf' | 'http' | 'elasticsearch';
 
 interface RotationOptions {
     enabled?: boolean;
@@ -14,6 +14,26 @@ interface RotationOptions {
     threshold?: string | number;
     gzip?: boolean;
     rotateExisting?: boolean;
+}
+
+interface ElasticsearchOptions {
+    host?: string;
+    username?: string;
+    password?: string;
+    index?: string;
+    pipeline?: string;
+    level?: LogLevel;
+    /**
+     * Client implementation: `legacy` uses the official Elasticsearch client,
+     * `fetch` uses Node's built-in fetch. @default 'legacy'
+     */
+    implementation?: 'legacy' | 'fetch';
+}
+
+interface GelfOptions {
+    host?: string;
+    port?: number;
+    options?: object;
 }
 
 interface HttpOptions {
@@ -37,7 +57,7 @@ interface GhostLoggerOptions {
     level?: LogLevel;
     /** Whether the body of a request should be logged to the target stream. */
     logBody?: boolean;
-    /** Transports to log to (e.g. `stdout`, `stderr`, `file`). */
+    /** Transports to log to (e.g. `stdout`, `stderr`, `gelf`, `file`). */
     transports?: Transport[];
     /** File rotation configuration. */
     rotation?: RotationOptions;
@@ -48,6 +68,10 @@ interface GhostLoggerOptions {
      * placeholders. Defaults to `{domain}_{env}`.
      */
     filename?: string;
+    /** Elasticsearch transport configuration. @deprecated The transport will be removed in a future major version. */
+    elasticsearch?: ElasticsearchOptions;
+    /** Gelf transport configuration. @deprecated The transport will be removed in a future major version. */
+    gelf?: GelfOptions;
     /** HTTP transport configuration. */
     http?: HttpOptions;
     /** Use local time instead of UTC. */
@@ -72,6 +96,8 @@ declare class GhostLogger {
     mode: string;
     path: string;
     filename: string;
+    elasticsearch: ElasticsearchOptions;
+    gelf: GelfOptions;
     http: HttpOptions;
     useLocalTime: boolean;
     metadata: Record<string, unknown>;
@@ -101,8 +127,8 @@ declare class GhostLogger {
     fatal(...args: unknown[]): void;
 
     /**
-     * Flush buffered logs on any transport that batches writes (file),
-     * forcing them out before the process exits. Resolves once every
+     * Flush buffered logs on any transport that batches writes (ElasticSearch,
+     * file), forcing them out before the process exits. Resolves once every
      * flushable transport has drained; failures are swallowed.
      */
     flush(): Promise<void>;
@@ -112,7 +138,15 @@ declare class GhostLogger {
 }
 
 declare namespace GhostLogger {
-    export { LogLevel, Transport, RotationOptions, HttpOptions, GhostLoggerOptions };
+    export {
+        LogLevel,
+        Transport,
+        RotationOptions,
+        ElasticsearchOptions,
+        GelfOptions,
+        HttpOptions,
+        GhostLoggerOptions,
+    };
 }
 
 export = GhostLogger;

@@ -416,6 +416,9 @@ importers:
       fetch-extras:
         specifier: ^3.2.1
         version: 3.2.1
+      split2:
+        specifier: ^4.2.0
+        version: 4.2.0
     devDependencies:
       sinon:
         specifier: 'catalog:'
@@ -546,6 +549,9 @@ importers:
       '@tryghost/bunyan-rotating-filestream':
         specifier: workspace:^
         version: link:../bunyan-rotating-filestream
+      '@tryghost/elasticsearch':
+        specifier: workspace:^
+        version: link:../elasticsearch
       '@tryghost/http-stream':
         specifier: workspace:^
         version: link:../http-stream
@@ -558,6 +564,9 @@ importers:
       bunyan:
         specifier: ^1.8.15
         version: 1.8.15
+      gelf-stream:
+        specifier: ^1.1.1
+        version: 1.1.1
       json-stringify-safe:
         specifier: ^5.0.1
         version: 5.0.1
@@ -3662,6 +3671,12 @@ packages:
   function-bind@1.1.2:
     resolution: {integrity: sha512-7XHNxH7qX9xG5mIwxkhumTox/MIRNcOgDrxWsMt2pAr23WHp6MrRlN7FBSFpCpr+oVO0F744iUgR82nJMfG2SA==}
 
+  gelf-stream@1.1.1:
+    resolution: {integrity: sha512-kCzCfI6DJ8+aaDhwMcsNm2l6CsBj6y4Is6CCxH2W9sYnZGcXg9WmJ/iZMoJVO6uTwTRL7dbIioAS8lCuGUXSFA==}
+
+  gelfling@0.3.1:
+    resolution: {integrity: sha512-vli3D2RYpLW6XhryNrv7HMjFNbj+ks/CCVDjokxOtZ+p6QYRadj8Zc0ps+LolSsh/I97XO0OduP/ShOej08clA==}
+
   gensync@1.0.0-beta.2:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
     engines: {node: '>=6.9.0'}
@@ -4777,6 +4792,10 @@ packages:
   source-map@0.6.1:
     resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==}
     engines: {node: '>=0.10.0'}
+
+  split2@4.2.0:
+    resolution: {integrity: sha512-UcjcJOWknrNkF6PLX83qcHM6KHgVKNkV62Y8a5uYDVv9ydGQVwAHMKqHdJje1VTWpljG0WYpCDhrCdAOYH4TWg==}
+    engines: {node: '>= 10.x'}
 
   stack-utils@2.0.6:
     resolution: {integrity: sha512-XlkWvfIm6RmsWtNJx+uqtKLS8eqFbxUg0ZzLXqY0caEy9l7hruX8IpiDnjsLavoBgqCCR71TqWO8MaXYheJ3RQ==}
@@ -8002,6 +8021,12 @@ snapshots:
 
   function-bind@1.1.2: {}
 
+  gelf-stream@1.1.1:
+    dependencies:
+      gelfling: 0.3.1
+
+  gelfling@0.3.1: {}
+
   gensync@1.0.0-beta.2: {}
 
   get-caller-file@2.0.5: {}
@@ -9286,6 +9311,8 @@ snapshots:
       source-map: 0.6.1
 
   source-map@0.6.1: {}
+
+  split2@4.2.0: {}
 
   stack-utils@2.0.6:
     dependencies:

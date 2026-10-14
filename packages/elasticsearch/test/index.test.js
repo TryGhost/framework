@@ -6,6 +6,8 @@ const ElasticSearch = require('../index');
 const splitImplementation = require('../lib/implementation');
 const LegacyElasticSearch = require('../lib/legacy/ElasticSearch');
 const FetchElasticSearch = require('../lib/fetch/ElasticSearch');
+const LegacyElasticSearchBunyan = require('../lib/legacy/ElasticSearchBunyan');
+const FetchElasticSearchBunyan = require('../lib/fetch/ElasticSearchBunyan');
 
 const clientConfig = {
     node: 'http://test-elastic-client',
@@ -57,6 +59,46 @@ describe('Implementation selection', function () {
 
             assert.deepEqual(indexStub.firstCall.args, [{ message: 'test' }, 'test-index']);
             assert.deepEqual(bulkStub.firstCall.args, [operations]);
+        });
+    });
+
+    describe('BunyanStream', function () {
+        it('Uses the legacy client by default', function () {
+            const es = new ElasticSearch.BunyanStream(clientConfig, 'test-index', 'test-pipeline');
+
+            assert.ok(es.implementation instanceof LegacyElasticSearchBunyan);
+            assert.equal(es.implementation.index, 'test-index');
+            assert.equal(es.implementation.pipeline, 'test-pipeline');
+        });
+
+        it('Uses fetch when configured', function () {
+            const es = new ElasticSearch.BunyanStream(
+                { ...clientConfig, implementation: 'fetch' },
+                'test-index',
+                'test-pipeline',
+            );
+
+            assert.ok(es.implementation instanceof FetchElasticSearchBunyan);
+            assert.equal(es.implementation.index, 'test-index');
+            assert.equal(es.implementation.pipeline, 'test-pipeline');
+        });
+
+        it('Delegates getStream and flush', async function () {
+            const stream = {};
+            const getStreamStub = sandbox
+                .stub(FetchElasticSearchBunyan.prototype, 'getStream')
+                .returns(stream);
+            const flushStub = sandbox.stub(FetchElasticSearchBunyan.prototype, 'flush').resolves();
+            const es = new ElasticSearch.BunyanStream(
+                { ...clientConfig, implementation: 'fetch' },
+                'test-index',
+            );
+
+            assert.equal(es.getStream(), stream);
+            await es.flush();
+
+            assert.equal(getStreamStub.callCount, 1);
+            assert.equal(flushStub.callCount, 1);
         });
     });
 });
