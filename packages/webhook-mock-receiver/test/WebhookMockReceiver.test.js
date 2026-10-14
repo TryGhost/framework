@@ -126,6 +126,38 @@ describe('Webhook Mock Receiver', function () {
 
             assert.equal(webhookMockReceiver._receiver.isDone(), true);
         });
+
+        it('waits for the request to be recorded after the interceptor is done', async function () {
+            webhookMockReceiver.mock(webhookURL);
+            // Simulate nock marking the interceptor done before the reply callback records the request
+            webhookMockReceiver._receiver = { isDone: () => true };
+
+            setTimeout(() => {
+                webhookMockReceiver.recordRequest(
+                    { avocado: 'toast' },
+                    { headers: { foo: 'bar' } },
+                );
+            }, 20);
+
+            await webhookMockReceiver.receivedRequest();
+
+            assert.deepEqual(webhookMockReceiver.headers, { headers: { foo: 'bar' } });
+            assert.deepEqual(webhookMockReceiver.body, { body: { avocado: 'toast' } });
+        });
+
+        it('ignores requests recorded by a superseded mock', async function () {
+            webhookMockReceiver.mock(webhookURL);
+            const staleReply = webhookMockReceiver._receiver.interceptors[0].replyFunction;
+            webhookMockReceiver.mock(webhookURL);
+
+            // Simulate the first mock's reply callback finishing after it was replaced
+            await staleReply.call({ req: { headers: { stale: 'true' } } }, '/webhook', {
+                stale: true,
+            });
+
+            assert.equal(webhookMockReceiver.headers, undefined);
+            assert.equal(webhookMockReceiver.body, undefined);
+        });
     });
 
     describe('matchBodySnapshot', function () {
