@@ -41,7 +41,7 @@ jobs:
             nx-${{ runner.os }}-node${{ matrix.node }}-${{ hashFiles('pnpm-lock.yaml') }}-
             nx-${{ runner.os }}-node${{ matrix.node }}-
 
-      - uses: nrwl/nx-set-shas@afb73a62d26e41464e9254689e1fd6122ee683c1 # v5
+      - uses: nrwl/nx-set-shas@e602fada7ad5987b0f7b1905e7a99ea1c661514c # v5
         if: github.event_name == 'pull_request'
 
       - run: pnpm install --prefer-offline --frozen-lockfile
@@ -58,7 +58,7 @@ jobs:
 
       - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
 
-      - uses: tryghost/actions/actions/slack-build@833df50a82d329a54cccab891583245d4c80af80 # main
+      - uses: tryghost/actions/actions/slack-build@ba8437db40baaddc2ac8cf8b4dfe9597b0117d66 # main
         if: failure() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           status: ${{ job.status }}

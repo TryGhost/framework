@@ -48,6 +48,29 @@ describe('Webhook Mock Receiver', function () {
     });
 
     describe('mock', function () {
+        it('records text payloads and responds successfully', async function () {
+            webhookMockReceiver.mock(webhookURL);
+            const response = await got.post(webhookURL, {
+                body: 'plain text',
+                headers: { 'content-type': 'text/plain', 'x-webhook-id': '123' },
+            });
+
+            assert.deepEqual(webhookMockReceiver.body, { body: 'plain text' });
+            assert.equal(webhookMockReceiver.headers.headers['x-webhook-id'], '123');
+            assert.equal(response.statusCode, 200);
+            assert.deepEqual(JSON.parse(response.body), { status: 'OK' });
+        });
+
+        it('preserves malformed JSON payloads', async function () {
+            webhookMockReceiver.mock(webhookURL);
+            await got.post(webhookURL, {
+                body: '{invalid json',
+                headers: { 'content-type': 'application/json' },
+            });
+
+            assert.deepEqual(webhookMockReceiver.body, { body: '{invalid json' });
+        });
+
         it('created a mock request receiver base on url', async function () {
             webhookMockReceiver.mock(webhookURL);
 

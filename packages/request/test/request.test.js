@@ -1,5 +1,5 @@
 const assert = require('assert/strict');
-const nock = require('nock');
+const nock = require('nock').default;
 const sinon = require('sinon');
 const rewire = require('rewire');
 
@@ -229,14 +229,23 @@ describe('Request', function () {
                 'User-Agent': 'Mozilla/5.0',
             },
             timeout: {
-                request: 1,
+                request: 20,
             },
             retry: {
                 limit: 0,
             }, // got retries by default so we're disabling this behavior
         };
 
-        nock('http://some-website.com').get('/endpoint/').delay(20).reply(200, 'Response body');
+        nock('http://some-website.com')
+            .get('/endpoint/')
+            .reply(
+                200,
+                async () => {
+                    await new Promise((resolve) => setTimeout(resolve, 100));
+                    return 'Response body';
+                },
+                { 'Content-Length': '13' },
+            );
 
         return request(url, options).then(
             () => {
@@ -252,7 +261,7 @@ describe('Request', function () {
         const url = 'http://some-website.com/post-endpoint/';
         const requestMock = nock('http://some-website.com')
             .post('/post-endpoint/', 'hello')
-            .reply(200, 'ok');
+            .reply(200, 'ok', { 'Content-Length': '2' });
 
         return request(url, { body: 'hello' }).then(function (res) {
             assert.equal(requestMock.isDone(), true);
@@ -265,7 +274,7 @@ describe('Request', function () {
         const payload = { hello: 'world' };
         const requestMock = nock('http://some-website.com')
             .post('/json-endpoint/', payload)
-            .reply(200, 'ok');
+            .reply(200, 'ok', { 'Content-Length': '2' });
 
         return request(url, { json: payload }).then(function (res) {
             assert.equal(requestMock.isDone(), true);
@@ -277,7 +286,7 @@ describe('Request', function () {
         const url = 'http://some-website.com/explicit-method-post-endpoint/';
         const requestMock = nock('http://some-website.com')
             .put('/explicit-method-post-endpoint/', 'hello')
-            .reply(200, 'ok');
+            .reply(200, 'ok', { 'Content-Length': '2' });
 
         return request(url, {
             method: 'PUT',
@@ -321,7 +330,7 @@ describe('Request', function () {
         const url = 'http://some-website.com/unset-env-smoke-endpoint/';
         const requestMock = nock('http://some-website.com')
             .get('/unset-env-smoke-endpoint/')
-            .reply(200, 'ok');
+            .reply(200, 'ok', { 'Content-Length': '2' });
         const originalNodeEnv = process.env.NODE_ENV;
 
         delete process.env.NODE_ENV;

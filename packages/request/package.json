@@ -18,7 +18,7 @@
   },
   "scripts": {
     "dev": "echo \"Implement me!\"",
-    "test": "NODE_ENV=testing vitest run --coverage",
+    "test": "NODE_ENV=testing vitest run --config ../../vitest.config.ts --root . --coverage",
     "lint": "oxlint -c ../../.oxlintrc.json .",
     "posttest": "pnpm run lint"
   },
@@ -31,7 +31,7 @@
     "lodash": "^4.18.1"
   },
   "devDependencies": {
-    "nock": "14.0.17",
+    "nock": "15.0.1",
     "rewire": "9.0.1",
     "sinon": "catalog:"
   },
