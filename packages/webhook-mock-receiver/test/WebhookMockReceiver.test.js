@@ -126,6 +126,24 @@ describe('Webhook Mock Receiver', function () {
 
             assert.equal(webhookMockReceiver._receiver.isDone(), true);
         });
+
+        it('waits for the request to be recorded after the interceptor is done', async function () {
+            webhookMockReceiver.mock(webhookURL);
+            // Simulate nock marking the interceptor done before the reply callback records the request
+            webhookMockReceiver._receiver = { isDone: () => true };
+
+            setTimeout(() => {
+                webhookMockReceiver.recordRequest(
+                    { avocado: 'toast' },
+                    { headers: { foo: 'bar' } },
+                );
+            }, 20);
+
+            await webhookMockReceiver.receivedRequest();
+
+            assert.deepEqual(webhookMockReceiver.headers, { headers: { foo: 'bar' } });
+            assert.deepEqual(webhookMockReceiver.body, { body: { avocado: 'toast' } });
+        });
     });
 
     describe('matchBodySnapshot', function () {

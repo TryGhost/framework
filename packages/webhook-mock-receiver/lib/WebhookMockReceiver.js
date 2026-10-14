@@ -16,7 +16,9 @@ class WebhookMockReceiver {
 
     async receivedRequest() {
         // @NOTE: figure out a better waiting mechanism here, don't allow it to hang forever
-        await pWaitFor(() => this._receiver.isDone());
+        // Nock marks the interceptor done when the request matches, before the
+        // async reply callback records it, so wait for both
+        await pWaitFor(() => this._receiver.isDone() && this.headers !== undefined);
     }
 
     /**
@@ -27,6 +29,8 @@ class WebhookMockReceiver {
     mock(url) {
         const parsedURL = new URL(url);
         const recordRequest = this.recordRequest;
+        this.body = undefined;
+        this.headers = undefined;
 
         this._receiver = nock(parsedURL.origin)
             .post(parsedURL.pathname)
