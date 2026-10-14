@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/elasticsearch",
-  "version": "5.4.13",
+  "version": "6.0.0",
   "license": "MIT",
   "author": "Ghost Foundation",
   "repository": {
