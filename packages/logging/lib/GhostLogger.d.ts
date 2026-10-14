@@ -1,6 +1,6 @@
 type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
 
-type Transport = 'stdout' | 'stderr' | 'parent' | 'file' | 'gelf' | 'http';
+type Transport = 'stdout' | 'stderr' | 'parent' | 'file' | 'http';
 
 interface RotationOptions {
     enabled?: boolean;
@@ -14,12 +14,6 @@ interface RotationOptions {
     threshold?: string | number;
     gzip?: boolean;
     rotateExisting?: boolean;
-}
-
-interface GelfOptions {
-    host?: string;
-    port?: number;
-    options?: object;
 }
 
 interface HttpOptions {
@@ -43,7 +37,7 @@ interface GhostLoggerOptions {
     level?: LogLevel;
     /** Whether the body of a request should be logged to the target stream. */
     logBody?: boolean;
-    /** Transports to log to (e.g. `stdout`, `stderr`, `gelf`, `file`). */
+    /** Transports to log to (e.g. `stdout`, `stderr`, `file`). */
     transports?: Transport[];
     /** File rotation configuration. */
     rotation?: RotationOptions;
@@ -54,8 +48,6 @@ interface GhostLoggerOptions {
      * placeholders. Defaults to `{domain}_{env}`.
      */
     filename?: string;
-    /** Gelf transport configuration. */
-    gelf?: GelfOptions;
     /** HTTP transport configuration. */
     http?: HttpOptions;
     /** Use local time instead of UTC. */
@@ -80,7 +72,6 @@ declare class GhostLogger {
     mode: string;
     path: string;
     filename: string;
-    gelf: GelfOptions;
     http: HttpOptions;
     useLocalTime: boolean;
     metadata: Record<string, unknown>;
@@ -121,7 +112,7 @@ declare class GhostLogger {
 }
 
 declare namespace GhostLogger {
-    export { LogLevel, Transport, RotationOptions, GelfOptions, HttpOptions, GhostLoggerOptions };
+    export { LogLevel, Transport, RotationOptions, HttpOptions, GhostLoggerOptions };
 }
 
 export = GhostLogger;

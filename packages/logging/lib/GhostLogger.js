@@ -8,6 +8,12 @@ const bunyan = require('bunyan');
 const fs = require('fs');
 const jsonStringifySafe = require('json-stringify-safe');
 
+// Transports that have been removed. They're skipped with a warning rather than
+// rejected, so existing configs that still list them keep booting.
+const REMOVED_TRANSPORTS = new Set(['elasticsearch', 'gelf']);
+// Removed transports already warned about, so each warns once per process
+const warnedRemovedTransports = new Set();
+
 /**
  * @description Wait for a Node writable stream to hand everything it has
  * buffered to the OS.
@@ -63,12 +69,11 @@ class GhostLogger {
      * mode:            Is used to print short or long log.
      * level:           The level defines the default level of all transports except of stderr.
      * logBody:         Disable or enable if the body of a request should be logged to the target stream.
-     * transports:      An array of comma separated transports (e.g. stdout, stderr, gelf, file)
+     * transports:      An array of comma separated transports (e.g. stdout, stderr, file)
      * rotation:        Enable or disable file rotation.
      * path:            Path where to store log files.
      * filename:        Optional filename template for log files. Supports {env} and {domain} placeholders.
      *                  If not provided, defaults to {domain}_{env} format.
-     * gelf:            Gelf transport configuration.
      * http:            HTTP transport configuration
      * useLocalTime:    Use local time instead of UTC.
      * metadata:        Optional set of metadata to attach to each log line
@@ -86,7 +91,6 @@ class GhostLogger {
         this.mode = process.env.MODE || options.mode || 'short';
         this.path = options.path || process.cwd();
         this.filename = options.filename || '{domain}_{env}';
-        this.gelf = options.gelf || {};
         this.http = options.http || {};
         this.useLocalTime = options.useLocalTime || false;
         this.metadata = options.metadata || {};
@@ -122,13 +126,14 @@ class GhostLogger {
         }
 
         this.transports.forEach((transport) => {
-            // CASE: the Elasticsearch transport was removed; skip it rather
-            // than failing to boot with an existing config
-            if (transport === 'elasticsearch') {
-                process.emitWarning(
-                    'The elasticsearch logging transport has been removed and is ignored.',
-                    { code: 'GHOST_LOGGING_ELASTICSEARCH_REMOVED' },
-                );
+            if (REMOVED_TRANSPORTS.has(transport)) {
+                if (!warnedRemovedTransports.has(transport)) {
+                    warnedRemovedTransports.add(transport);
+                    process.emitWarning(
+                        `The ${transport} logging transport has been removed and is ignored.`,
+                        { code: 'GHOST_LOGGING_TRANSPORT_REMOVED' },
+                    );
+                }
                 return;
             }
 
@@ -244,34 +249,6 @@ class GhostLogger {
                         type: 'raw',
                         stream: httpStream,
                         level: this.http.level,
-                    },
-                ],
-                serializers: this.serializers,
-            }),
-        };
-    }
-
-    /**
-     * @description Setup gelf.
-     */
-    setGelfStream() {
-        const gelfStream = require('gelf-stream');
-
-        const stream = gelfStream.forBunyan(
-            this.gelf.host || 'localhost',
-            this.gelf.port || 12201,
-            this.gelf.options || {},
-        );
-
-        this.streams.gelf = {
-            name: 'gelf',
-            log: bunyan.createLogger({
-                name: this.name,
-                streams: [
-                    {
-                        type: 'raw',
-                        stream: stream,
-                        level: this.level,
                     },
                 ],
                 serializers: this.serializers,
