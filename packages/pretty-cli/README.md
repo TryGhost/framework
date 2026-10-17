@@ -39,7 +39,7 @@ prettyCLI
 Pretty CLI also provides a common UI interface, providing log functions to output coloured messages to the UI:
 
 ```
-const ui = require('@tryghost/pretty-cli/ui');`
+const ui = require('@tryghost/pretty-cli/lib/ui');
 
 ui.log.info('Done');
 ui.log.warn('Uh Oh', 'Something went wrong');
@@ -49,10 +49,21 @@ You can also grab a fresh instance of the api with `prettyCLI.Api.get()`.
 
 The style rules used are available at `prettyCLI.styles`.
 
+## TypeScript
+
+The package includes declarations for its standard command, option, help and
+output APIs, including the existing `lib/` entry points. Both ESM imports and
+CommonJS `import = require()` are supported. Runtime code remains CommonJS.
+
+Parsed argument values are `unknown` because sywac's option configuration is
+dynamic. Narrow them before use; command `setup` callbacks receive the typed API
+and `parse()` returns a typed result. These declarations do not model sywac's
+internal type factories.
+
 ## Test
 
 - `pnpm lint` runs oxlint
-- `pnpm test` runs lint and tests
+- `pnpm test` runs type checks, runtime tests and lint
 
 # Copyright & License
 

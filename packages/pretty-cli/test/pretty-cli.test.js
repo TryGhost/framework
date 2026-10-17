@@ -38,6 +38,37 @@ describe('API', function () {
     });
 });
 
+describe('sywac compatibility', function () {
+    it('accepts string option and command aliases', async function () {
+        let received;
+        const api = prettyCLI.Api.get({ name: 'test' });
+        api.string({ aliases: 'name' }).command({
+            aliases: 'run',
+            run(argv) {
+                received = argv.name;
+            },
+        });
+        const result = await api.parse(['run', '--name', 'example']);
+        assert.equal(result.code, 0, result.output);
+        assert.equal(received, 'example');
+    });
+
+    it('calls a function-valued version', async function () {
+        let called = 0;
+        const api = prettyCLI.Api.get({ name: 'test' });
+        api.version('--version', {
+            version() {
+                called += 1;
+                return '1.0.0';
+            },
+        });
+        const result = await api.parse(['--version']);
+        assert.equal(result.code, 0, result.output);
+        assert.equal(result.output, '1.0.0');
+        assert.equal(called, 1);
+    });
+});
+
 describe('styles', function () {
     it('usagePrefix styles first word and indents the remainder', function () {
         const out = prettyCLI.styles.usagePrefix('Usage: app --help');
