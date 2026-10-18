@@ -28,7 +28,7 @@
     "bree": "^9.2.9",
     "cron-validate": "^1.5.3",
     "fastq": "^1.20.3",
-    "p-wait-for": "^6.0.0"
+    "p-wait-for": "^7.0.0"
   },
   "devDependencies": {
     "@sinonjs/fake-timers": "15.4.0",
