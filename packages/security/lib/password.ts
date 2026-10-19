@@ -1,4 +1,4 @@
-const bcrypt = require('bcryptjs');
+import bcrypt from 'bcryptjs';
 
 let HASH_ROUNDS = 10;
 
@@ -6,11 +6,11 @@ if (process.env.NODE_ENV?.startsWith('testing')) {
     HASH_ROUNDS = 1;
 }
 
-module.exports.hash = async function hash(plainPassword) {
+export async function hash(plainPassword: string): Promise<string> {
     const salt = await bcrypt.genSalt(HASH_ROUNDS);
     return bcrypt.hash(plainPassword, salt);
-};
+}
 
-module.exports.compare = function compare(plainPassword, hashedPassword) {
+export function compare(plainPassword: string, hashedPassword: string): Promise<boolean> {
     return bcrypt.compare(plainPassword, hashedPassword);
-};
+}

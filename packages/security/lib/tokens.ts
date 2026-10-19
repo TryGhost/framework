@@ -1,10 +1,22 @@
-const crypto = require('crypto');
+import { createHash, type BinaryLike } from 'node:crypto';
 
-module.exports.generateFromContent = function generateFromContent(options) {
-    options = options || {};
+type ContentTokenOptions = { content: BinaryLike };
+type EmailTokenOptions = { expires: number | string; email: string; secret: string };
+type ResetTokenOptions = {
+    expires: number | string;
+    email: string;
+    dbHash: string;
+    password: BinaryLike;
+};
+type ExtractedToken = { expires: number; email: string };
+type TokenComparison = {
+    correct: boolean;
+    reason?: 'invalid_expiry' | 'expired' | 'invalid';
+};
 
-    const hash = crypto.createHash('sha256');
-    const content = options.content;
+export function generateFromContent(options: ContentTokenOptions): string {
+    const hash = createHash('sha256');
+    const content = options?.content;
 
     let text = '';
 
@@ -12,15 +24,13 @@ module.exports.generateFromContent = function generateFromContent(options) {
 
     text += [content, hash.digest('base64')].join('|');
     return Buffer.from(text).toString('base64');
-};
+}
 
-module.exports.generateFromEmail = function generateFromEmail(options) {
-    options = options || {};
-
-    const hash = crypto.createHash('sha256');
-    const expires = options.expires;
-    const email = options.email;
-    const secret = options.secret;
+export function generateFromEmail(options: EmailTokenOptions): string {
+    const hash = createHash('sha256');
+    const expires = options?.expires;
+    const email = options?.email;
+    const secret = options?.secret;
 
     let text = '';
 
@@ -30,17 +40,15 @@ module.exports.generateFromEmail = function generateFromEmail(options) {
 
     text += [expires, email, hash.digest('base64')].join('|');
     return Buffer.from(text).toString('base64');
-};
+}
 
-module.exports.resetToken = {
-    generateHash: function generateHash(options) {
-        options = options || {};
-
-        const hash = crypto.createHash('sha256');
-        const expires = options.expires;
-        const email = options.email;
-        const dbHash = options.dbHash;
-        const password = options.password;
+export const resetToken = {
+    generateHash: function generateHash(options: ResetTokenOptions): string {
+        const hash = createHash('sha256');
+        const expires = options?.expires;
+        const email = options?.email;
+        const dbHash = options?.dbHash;
+        const password = options?.password;
         let text = '';
 
         hash.update(String(expires));
@@ -54,10 +62,8 @@ module.exports.resetToken = {
         text += [expires, email, hash.digest('base64')].join('|');
         return Buffer.from(text).toString('base64');
     },
-    extract: function extract(options) {
-        options = options || {};
-
-        const token = options.token;
+    extract: function extract(options: { token: string }): ExtractedToken | false {
+        const token = options?.token;
         const tokenText = Buffer.from(token, 'base64').toString('ascii');
         let parts;
         let expires;
@@ -78,18 +84,20 @@ module.exports.resetToken = {
             email: email,
         };
     },
-    compare: function compare(options) {
-        options = options || {};
-
-        const tokenToCompare = options.token;
-        const parts = exports.resetToken.extract({ token: tokenToCompare });
-        const dbHash = options.dbHash;
-        const password = options.password;
+    compare: function compare(options: {
+        token: string;
+        dbHash: string;
+        password: BinaryLike;
+    }): TokenComparison {
+        const tokenToCompare = options?.token;
+        const parts = resetToken.extract({ token: tokenToCompare });
+        const dbHash = options?.dbHash;
+        const password = options?.password;
         let generatedToken;
         let diff = 0;
         let i;
 
-        if (isNaN(parts.expires)) {
+        if (!parts || isNaN(parts.expires)) {
             return {
                 correct: false,
                 reason: 'invalid_expiry',
@@ -104,7 +112,7 @@ module.exports.resetToken = {
             };
         }
 
-        generatedToken = exports.resetToken.generateHash({
+        generatedToken = resetToken.generateHash({
             email: parts.email,
             expires: parts.expires,
             dbHash: dbHash,
@@ -119,7 +127,7 @@ module.exports.resetToken = {
             diff |= tokenToCompare.charCodeAt(i) ^ generatedToken.charCodeAt(i);
         }
 
-        const result = {
+        const result: TokenComparison = {
             correct: diff === 0,
         };
 

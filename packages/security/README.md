@@ -33,6 +33,13 @@ const isMatch = await security.password.compare('super-secret', hash);
 - `security.string`: safe slug-style string normalization.
 - `security.identifier`: legacy identifier helper (`uid`, deprecated).
 
+## Development
+
+Source lives in `index.ts` and `lib/*.ts`. `pnpm build` emits CommonJS JavaScript
+and declarations alongside the sources; only compiled files are published.
+
+Run `pnpm test` for the build, type checks, runtime tests, coverage, and lint.
+
 # Copyright & License
 
 Copyright (c) 2013-2026 Ghost Foundation - Released under the [MIT license](LICENSE).
