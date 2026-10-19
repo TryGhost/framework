@@ -1,5 +1,8 @@
 const assert = require('assert/strict');
 const sinon = require('sinon');
+const { mkdtempSync, writeFileSync, rmSync } = require('node:fs');
+const { tmpdir } = require('node:os');
+const { join } = require('node:path');
 const prettyCLI = require('../');
 
 describe('API', function () {
@@ -35,6 +38,110 @@ describe('API', function () {
             'trace',
             'warn',
         ]);
+    });
+});
+
+describe('sywac compatibility', function () {
+    it('accepts string option and command aliases', async function () {
+        let received;
+        const api = prettyCLI.Api.get({ name: 'test' });
+        api.string({ aliases: 'name' }).command({
+            aliases: 'run',
+            run(argv) {
+                received = argv.name;
+            },
+        });
+        const result = await api.parse(['run', '--name', 'example']);
+        assert.equal(result.code, 0, result.output);
+        assert.equal(received, 'example');
+    });
+
+    for (const [name, definition] of [
+        [
+            'a positional map',
+            { '<name>': { desc: 'Name' }, '[destination]': { desc: 'Destination' } },
+        ],
+        ['positional objects and strings', [{ flags: '<name>', desc: 'Name' }, '[destination]']],
+        [
+            'positional options',
+            { params: { '<name>': { desc: 'Name' }, '[destination]': { desc: 'Destination' } } },
+        ],
+    ]) {
+        it(`parses ${name}`, async function () {
+            const api = prettyCLI.Api.get({ name: 'test' });
+            assert.equal(api.positional(definition), api);
+            const result = await api.parse(['example', 'output']);
+            assert.equal(result.code, 0, result.output);
+            assert.equal(result.argv.name, 'example');
+            assert.equal(result.argv.destination, 'output');
+        });
+    }
+
+    for (const mode of ['options only', 'no arguments', 'directory and options']) {
+        it(`loads commands with ${mode}`, async function () {
+            const directory = mkdtempSync(join(tmpdir(), 'pretty-cli-commands-'));
+            const loaderPath = join(directory, 'load.cjs');
+            const defaultPath = join(directory, 'default.js');
+            const customPath = join(directory, 'custom.cjs');
+            try {
+                writeFileSync(
+                    loaderPath,
+                    `module.exports = (api, options) => options
+                    ? api.commandDirectory(options) : api.commandDirectory();`,
+                );
+                for (const [path, command] of [
+                    [defaultPath, 'default'],
+                    [customPath, 'custom'],
+                ]) {
+                    writeFileSync(
+                        path,
+                        `module.exports = {
+                        flags: '${command} <name>',
+                        run(argv) { module.exports.received = argv.name; }
+                    };`,
+                    );
+                }
+                const api = prettyCLI.Api.get({ name: 'test', strictMode: true });
+                const load = require(loaderPath);
+                const returned =
+                    mode === 'directory and options'
+                        ? api.commandDirectory(directory, { extensions: ['.cjs'] })
+                        : load(api, mode === 'options only' ? { extensions: ['.cjs'] } : undefined);
+                assert.equal(returned, api);
+                const command = mode === 'no arguments' ? 'default' : 'custom';
+                const result = await api.parse([command, 'example']);
+                assert.equal(result.code, 0, result.output);
+                assert.equal(
+                    require(command === 'default' ? defaultPath : customPath).received,
+                    'example',
+                );
+                const excluded = await api.parse([
+                    command === 'default' ? 'custom' : 'default',
+                    'example',
+                ]);
+                assert.notEqual(excluded.code, 0);
+            } finally {
+                for (const path of [loaderPath, defaultPath, customPath]) {
+                    delete require.cache[path];
+                }
+                rmSync(directory, { recursive: true, force: true });
+            }
+        });
+    }
+
+    it('calls a function-valued version', async function () {
+        let called = 0;
+        const api = prettyCLI.Api.get({ name: 'test' });
+        api.version('--version', {
+            version() {
+                called += 1;
+                return '1.0.0';
+            },
+        });
+        const result = await api.parse(['--version']);
+        assert.equal(result.code, 0, result.output);
+        assert.equal(result.output, '1.0.0');
+        assert.equal(called, 1);
     });
 });
 
