@@ -33,3 +33,18 @@ api.positional('<command>', { hidden: true })
 const help: string = api.getHelp();
 const label: string = styles.group(help);
 cli.ui.log(label);
+
+// These sywac forms must work for both ESM and CommonJS consumers.
+api.positional({'<name>': {desc: 'Name', required: true}}).help();
+api.positional([{flags: '<name>', desc: 'Name'}, '[destination]']).help();
+api.positional({params: {'<name>': {desc: 'Name'}}}).help();
+api.commandDirectory('commands', {extensions: ['.cjs']}).help();
+api.commandDirectory({extensions: ['.cjs']}).help();
+api.commandDirectory().help();
+
+// @ts-expect-error Positional map entries must use typed option values.
+api.positional({'<name>': {required: 'yes'}});
+// @ts-expect-error Positional array entries must use typed option values.
+api.positional([{flags: '<name>', required: 'yes'}]);
+// @ts-expect-error Directory extensions must be an array of strings.
+api.commandDirectory({extensions: '.cjs'});

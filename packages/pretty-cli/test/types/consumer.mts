@@ -43,3 +43,18 @@ export type Checks = [
     Assert<cli.Args['name'] extends string ? false : true>,
     Assert<boolean extends cli.Flags ? false : true>
 ];
+
+// These sywac forms must work for both ESM and CommonJS consumers.
+fresh.positional({'<name>': {desc: 'Name', required: true}}).help();
+fresh.positional([{flags: '<name>', desc: 'Name'}, '[destination]']).help();
+fresh.positional({params: {'<name>': {desc: 'Name'}}}).help();
+fresh.commandDirectory('commands', {extensions: ['.cjs']}).help();
+fresh.commandDirectory({extensions: ['.cjs']}).help();
+fresh.commandDirectory().help();
+
+// @ts-expect-error Positional map entries must use typed option values.
+fresh.positional({'<name>': {required: 'yes'}});
+// @ts-expect-error Positional array entries must use typed option values.
+fresh.positional([{flags: '<name>', required: 'yes'}]);
+// @ts-expect-error Directory extensions must be an array of strings.
+fresh.commandDirectory({extensions: '.cjs'});

@@ -68,8 +68,9 @@ declare namespace prettyCli {
         asWin32?: boolean;
         coerce?: (value: unknown) => unknown;
     };
+    type PositionalParameters = Array<string | OptionOptions> | Record<string, OptionOptions>;
     type PositionalOptions = OptionOptions & {
-        params?: Array<string | OptionOptions> | Record<string, OptionOptions>;
+        params?: PositionalParameters;
         paramsDescription?: string | string[];
         paramsDesc?: string | string[];
         paramsGroup?: string;
@@ -80,6 +81,7 @@ declare namespace prettyCli {
         setup?: (api: Api) => void;
         run?: CommandHandler;
     };
+    type CommandDirectoryOptions = CommandOptions & { extensions?: string[] };
     type CommandDefinition = CommandOptions & ({ flags: string } | { aliases: Flags });
     type ExampleOptions = { flags?: string; desc?: string; description?: string; group?: string };
     type UsageOptions = {
@@ -130,12 +132,10 @@ declare class CliApi {
 
     command(options: prettyCli.CommandDefinition): this;
     command(flags: string, options?: prettyCli.CommandOptions | prettyCli.CommandHandler): this;
-    commandDirectory(
-        directory: string,
-        options?: prettyCli.CommandOptions & { extensions?: string[] },
-    ): this;
+    commandDirectory(directory: string, options?: prettyCli.CommandDirectoryOptions): this;
+    commandDirectory(options?: prettyCli.CommandDirectoryOptions): this;
     positional(
-        flags: string | string[] | prettyCli.PositionalOptions,
+        flags: string | prettyCli.PositionalParameters | prettyCli.PositionalOptions,
         options?: prettyCli.PositionalOptions,
     ): this;
     option(
