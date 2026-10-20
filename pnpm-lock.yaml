@@ -709,8 +709,8 @@ importers:
         specifier: 3.3.0
         version: 3.3.0(better-sqlite3@13.0.3)(supports-color@8.1.1)
       nock:
-        specifier: 15.0.1
-        version: 15.0.1(supports-color@8.1.1)
+        specifier: 15.0.2
+        version: 15.0.2(supports-color@8.1.1)
       sinon:
         specifier: 'catalog:'
         version: 22.1.0
@@ -746,8 +746,8 @@ importers:
         version: 4.18.1
     devDependencies:
       nock:
-        specifier: 15.0.1
-        version: 15.0.1(supports-color@8.1.1)
+        specifier: 15.0.2
+        version: 15.0.2(supports-color@8.1.1)
       rewire:
         specifier: 9.0.1
         version: 9.0.1(supports-color@8.1.1)
@@ -832,8 +832,8 @@ importers:
         specifier: 16.1.0
         version: 16.1.0
       nock:
-        specifier: 15.0.1
-        version: 15.0.1(supports-color@8.1.1)
+        specifier: 15.0.2
+        version: 15.0.2(supports-color@8.1.1)
       sinon:
         specifier: 'catalog:'
         version: 22.1.0
@@ -4301,8 +4301,8 @@ packages:
     resolution: {integrity: sha512-NMPBRMJgiQHjbd8phG3Vebdx4kZ1H121rbl5IkMqeOsahptB9BKo/d7oJ3zTXqTgagn2bWlNSXkh0QUGM31RYg==}
     engines: {node: '>=18'}
 
-  nock@15.0.1:
-    resolution: {integrity: sha512-Mjx5Xl4t9vP13eUZPWqwwpjjXNjvhUTo1qTdryVM3+7t6Z2w6WHZ9GVZk/zQ8Ym1vbmloWaglye3cloyHAJ8FA==}
+  nock@15.0.2:
+    resolution: {integrity: sha512-kz2EsEGshxe/zw0iMMoJFqdDp3ZBju5tgLA03CepBi9R0NHckyF/UgfmoyEYt2DNFZoe8tpx1V9M187qt43WJg==}
     engines: {node: '>=20.12.1'}
 
   node-addon-api@7.1.1:
@@ -8569,7 +8569,7 @@ snapshots:
     dependencies:
       content-type: 2.1.0
 
-  nock@15.0.1(supports-color@8.1.1):
+  nock@15.0.2(supports-color@8.1.1):
     dependencies:
       '@mswjs/interceptors': 0.44.0(supports-color@8.1.1)
     transitivePeerDependencies:
