@@ -40,15 +40,14 @@ module.exports.resetToken = {
         const expires = options.expires;
         const email = options.email;
         const dbHash = options.dbHash;
-        const password = options.password;
+        const passwordHash = options.passwordHash;
         let text = '';
 
         hash.update(String(expires));
         hash.update(email.toLocaleLowerCase());
         // Reset tokens are not password storage; the current password hash is
         // mixed in only to invalidate old tokens after password changes.
-        // codeql[js/insufficient-password-hash]
-        hash.update(password);
+        hash.update(passwordHash);
         hash.update(String(dbHash));
 
         text += [expires, email, hash.digest('base64')].join('|');
@@ -84,7 +83,7 @@ module.exports.resetToken = {
         const tokenToCompare = options.token;
         const parts = exports.resetToken.extract({ token: tokenToCompare });
         const dbHash = options.dbHash;
-        const password = options.password;
+        const passwordHash = options.passwordHash;
         let generatedToken;
         let diff = 0;
         let i;
@@ -108,7 +107,7 @@ module.exports.resetToken = {
             email: parts.email,
             expires: parts.expires,
             dbHash: dbHash,
-            password: password,
+            passwordHash: passwordHash,
         });
 
         if (tokenToCompare.length !== generatedToken.length) {
