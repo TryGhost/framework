@@ -59,6 +59,23 @@ This option was renamed from `password` to `passwordHash`. Callers must update
 both methods when upgrading. The token format is unchanged, so existing reset
 tokens remain valid with the same stored hash, site secret, and expiry.
 
+### Module imports
+
+CommonJS root and deep imports remain supported:
+
+```js
+const security = require('@tryghost/security');
+const tokens = require('@tryghost/security/lib/tokens');
+```
+
+Deep `lib/*` modules expose named exports. Use named or namespace imports when
+transpiling ES module syntax. In version 4, the compiled deep modules set
+`__esModule`, so transpiler-generated default imports can resolve to `undefined`.
+
+```js
+import { resetToken } from '@tryghost/security/lib/tokens';
+```
+
 ## Development
 
 Source lives in `index.ts` and `lib/*.ts`. `pnpm build` emits CommonJS JavaScript
