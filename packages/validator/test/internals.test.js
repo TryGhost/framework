@@ -46,7 +46,35 @@ describe('Validator internals', function () {
 
         it('isSlug validates slug format', function () {
             assert.equal(validator.isSlug('a-valid_slug-1'), true);
-            assert.equal(validator.isSlug('not valid slug'), false);
+            assert.equal(validator.isSlug('not? valid slug'), false);
+        });
+
+        it('isSlug accepts slugs generated without optional changes', function () {
+            assert.equal(validator.isSlug('-separator-in-beginning'), true);
+            assert.equal(validator.isSlug('-separator-in-beginning-and-end-'), true);
+            assert.equal(validator.isSlug('multiple---separators-in--use'), true);
+            assert.equal(validator.isSlug('different__kinds-of separator___in-the-same-text'), true);
+        });
+    
+        it('isSlug rejects slugs with too many combining marks, but accept some of them', function () {
+            // note that this might break some text editors, so it might need to be removed
+            assert.equal(validator.isSlug('ghost-blo̵̯͝ǵ'), true);
+            assert.equal(validator.isSlug('G̸̛̦̼̜̱̹̦̲̩̰̀̓̆̇̔̎̒̎h̸͕̹̤̿͌́͊͋̈̂͗̕o̶̠͑̍s̷̝̭̰̳̖̣͉̈́̌̐́̈́̒͂̚t̴̩̦̫̟̲̘̆̔̑̅͘̕͠͝͠ ̶̜̺͚̆̈ͅb̸̰͕͔͈̤̾̉͒̂̎ͅl̵̳͚̘̯̀̎o̵̯͝ǵ̴̨̛͍̞͙̲̦̗̖͍̂̈́͆͝'), false);
+        });
+
+        it('isSlug rejects slugs with combining marks in the beginning of a text or a word', function () {
+            // note that this might break some text editors, so it might need to be removed
+            assert.equal(validator.isSlug('ผีในวัฒนธรรมไทย'), true);
+            assert.equal(validator.isSlug('\u0303\u0301\u0302ผีในวัฒนธรรมไทย'), false);
+            assert.equal(validator.isSlug('ghost-\u0301\u0302blog'), false);
+        });
+
+        it('isSlug accepts foreign characters, in this case Japanese', function () {
+            assert.equal(validator.isSlug('に間違いがないか_再度確認してください_再読み込みしてください'), true);
+        });
+
+        it('isSlug rejects non-letter characters, like emojis', function () {
+            assert.equal(validator.isSlug('im-so-happy-today-🙃'), false);
         });
 
         it('custom validators enforce string input', function () {
