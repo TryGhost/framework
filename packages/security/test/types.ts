@@ -1,3 +1,4 @@
+import type { BinaryLike } from 'node:crypto';
 import security = require('../');
 import * as namespace from '../';
 import { expectTypeOf } from 'vitest';
@@ -30,7 +31,7 @@ if (extracted !== false) {
 const comparison = security.tokens.resetToken.compare({
     token: 'token',
     dbHash: 'hash',
-    password: 'password',
+    passwordHash: 'stored-hash',
 });
 expectTypeOf(comparison.correct).toEqualTypeOf<boolean>();
 expectTypeOf(comparison.reason).toEqualTypeOf<
@@ -38,3 +39,22 @@ expectTypeOf(comparison.reason).toEqualTypeOf<
 >();
 expectTypeOf(security.url.encodeBase64).parameter(0).toEqualTypeOf<string>();
 expectTypeOf(security.identifier.uid).parameter(0).toEqualTypeOf<number>();
+expectTypeOf(security.tokens.resetToken.generateHash).parameter(0).toEqualTypeOf<{
+    expires: number | string;
+    email: string;
+    dbHash: string;
+    passwordHash: BinaryLike;
+}>();
+expectTypeOf(security.tokens.resetToken.compare).parameter(0).toEqualTypeOf<{
+    token: string;
+    dbHash: string;
+    passwordHash: BinaryLike;
+}>();
+expectTypeOf(
+    security.tokens.resetToken.generateHash({
+        expires: 4102444800000,
+        email: 'test@example.com',
+        dbHash: 'site-secret',
+        passwordHash: Buffer.from('stored-hash'),
+    }),
+).toEqualTypeOf<string>();

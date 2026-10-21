@@ -6,7 +6,7 @@ type ResetTokenOptions = {
     expires: number | string;
     email: string;
     dbHash: string;
-    password: BinaryLike;
+    passwordHash: BinaryLike;
 };
 type ExtractedToken = { expires: number; email: string };
 type TokenComparison = {
@@ -48,15 +48,14 @@ export const resetToken = {
         const expires = options?.expires;
         const email = options?.email;
         const dbHash = options?.dbHash;
-        const password = options?.password;
+        const passwordHash = options?.passwordHash;
         let text = '';
 
         hash.update(String(expires));
         hash.update(email.toLocaleLowerCase());
         // Reset tokens are not password storage; the current password hash is
         // mixed in only to invalidate old tokens after password changes.
-        // codeql[js/insufficient-password-hash]
-        hash.update(password);
+        hash.update(passwordHash);
         hash.update(String(dbHash));
 
         text += [expires, email, hash.digest('base64')].join('|');
@@ -87,12 +86,12 @@ export const resetToken = {
     compare: function compare(options: {
         token: string;
         dbHash: string;
-        password: BinaryLike;
+        passwordHash: BinaryLike;
     }): TokenComparison {
         const tokenToCompare = options?.token;
         const parts = resetToken.extract({ token: tokenToCompare });
         const dbHash = options?.dbHash;
-        const password = options?.password;
+        const passwordHash = options?.passwordHash;
         let generatedToken;
         let diff = 0;
         let i;
@@ -116,7 +115,7 @@ export const resetToken = {
             email: parts.email,
             expires: parts.expires,
             dbHash: dbHash,
-            password: password,
+            passwordHash: passwordHash,
         });
 
         if (tokenToCompare.length !== generatedToken.length) {
