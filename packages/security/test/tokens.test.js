@@ -225,6 +225,18 @@ describe('Utils: tokens', function () {
         assert.equal(result, false);
     });
 
+    it('compare rejects invalid token structure with invalid_expiry', function () {
+        const token = Buffer.from('one|two').toString('base64');
+        assert.deepEqual(
+            security.tokens.resetToken.compare({
+                token,
+                dbHash: 'hash',
+                passwordHash: passwordHash,
+            }),
+            { correct: false, reason: 'invalid_expiry' },
+        );
+    });
+
     it('can validate an URI encoded reset token', function () {
         const expires = Date.now() + 60 * 1000;
         const email = 'test1@ghost.org';

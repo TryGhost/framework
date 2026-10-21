@@ -30,6 +30,11 @@ describe('Lib: Security - Secret', function () {
         assert.match(secret, /[0-9a-z]+/);
     });
 
+    it('uses the default length for numeric strings and non-integer numbers', function () {
+        assert.equal(security.secret.create('15').length, 64);
+        assert.equal(security.secret.create(15.5).length, 64);
+    });
+
     it('generates a 32 byte secret by default', function () {
         let secret = security.secret.create();
         assert.equal(typeof secret, 'string');

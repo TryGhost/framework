@@ -59,6 +59,13 @@ This option was renamed from `password` to `passwordHash`. Callers must update
 both methods when upgrading. The token format is unchanged, so existing reset
 tokens remain valid with the same stored hash, site secret, and expiry.
 
+## Development
+
+Source lives in `index.ts` and `lib/*.ts`. `pnpm build` emits CommonJS JavaScript
+and declarations alongside the sources; only compiled files are published.
+
+Run `pnpm test` for the build, type checks, runtime tests, coverage, and lint.
+
 # Copyright & License
 
 Copyright (c) 2013-2026 Ghost Foundation - Released under the [MIT license](LICENSE).

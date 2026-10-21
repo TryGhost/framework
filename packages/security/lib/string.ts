@@ -1,9 +1,9 @@
-const slugify = require('@tryghost/string').slugify;
+import { slugify } from '@tryghost/string';
 
 /**
  * @param {string} string
  * @param {{importing?: boolean}} [options]
  */
-module.exports.safe = function safe(string, options = {}) {
+export function safe(string?: string | null, options: { importing?: boolean } = {}): string {
     return slugify(string, { requiredChangesOnly: options.importing === true });
-};
+}
