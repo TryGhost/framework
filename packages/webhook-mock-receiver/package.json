@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "got": "16.1.0",
-    "nock": "15.0.4",
+    "nock": "15.0.5",
     "sinon": "catalog:"
   },
   "peerDependencies": {
