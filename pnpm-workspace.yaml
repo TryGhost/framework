@@ -28,3 +28,5 @@ minimumReleaseAgeExclude:
   # Renovate security update: nx@23.2.1
   - nx@23.2.1
   - '@nx/js@23.2.1'
+  # Renovate security update: multer@2.5.0
+  - multer@2.5.0
