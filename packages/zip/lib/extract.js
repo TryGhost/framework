@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const { Transform } = require('stream');
 const { pipeline } = require('stream/promises');
 const errors = require('@tryghost/errors');
 const { S_IFMT, S_IFLNK, getEntryMode } = require('./entry-mode');
@@ -202,26 +201,28 @@ module.exports = async (zipToExtract, destination, options) => {
         }
     };
 
-    await extractZip(zipToExtract, opts, limits);
+    await extractZip(zipToExtract, opts);
 
     return { path: destination };
 };
 
-// Minimal yauzl-based replacement for extract-zip. Two reasons we don't use
-// extract-zip directly:
-//   1. extract-zip is unmaintained (no release since 2020).
-//   2. yauzl's built-in `AssertByteCountStream` is supposed to error when an
-//      entry's actual decompressed bytes exceed its declared `uncompressedSize`,
-//      but yauzl overrides that stream's `destroy` so the error never surfaces
-//      to `extract-zip`'s pipeline — which then hangs forever. We open yauzl
-//      with `validateEntrySizes: false` and run our own size guard below.
-async function extractZip(zipPath, opts, limits) {
+// yauzl's entry size validation rejects an entry whose actual data does not
+// match its declared `uncompressedSize` with one of these messages.
+const ENTRY_SIZE_MISMATCH = /^(too many|not enough) bytes in the stream\b/;
+
+// Minimal yauzl-based replacement for extract-zip, which is unmaintained (no
+// release since 2020).
+//
+// yauzl's default `validateEntrySizes` guarantees an entry never yields more
+// bytes than its declared `uncompressedSize`, so the declared-size checks in
+// `onEntry` also bound the bytes actually written to disk.
+async function extractZip(zipPath, opts) {
     const yauzl = require('yauzl');
     await fs.promises.mkdir(opts.dir, { recursive: true });
     const dir = await fs.promises.realpath(opts.dir);
 
     const zipfile = await new Promise((resolve, reject) => {
-        yauzl.open(zipPath, { lazyEntries: true, validateEntrySizes: false }, (err, z) => {
+        yauzl.open(zipPath, { lazyEntries: true }, (err, z) => {
             if (err) return reject(err);
             resolve(z);
         });
@@ -244,7 +245,7 @@ async function extractZip(zipPath, opts, limits) {
             });
             zipfile.on('entry', (entry) => {
                 if (settled) return;
-                extractEntry(entry, zipfile, opts, limits, dir)
+                extractEntry(entry, zipfile, opts, dir)
                     .then(() => settled || zipfile.readEntry())
                     .catch(fail);
             });
@@ -260,7 +261,7 @@ async function extractZip(zipPath, opts, limits) {
     }
 }
 
-async function extractEntry(entry, zipfile, opts, limits, dir) {
+async function extractEntry(entry, zipfile, opts, dir) {
     // Skip macOS resource-fork entries — extract-zip did the same.
     if (entry.fileName.startsWith('__MACOSX/')) return;
 
@@ -301,31 +302,22 @@ async function extractEntry(entry, zipfile, opts, limits, dir) {
         zipfile.openReadStream(entry, (err, s) => (err ? reject(err) : resolve(s)));
     });
 
-    // Streaming size enforcement on ACTUAL decompressed bytes. The pre-flight
-    // check above bounds declared metadata; this catches archives whose central
-    // directory lies about its uncompressed size (zip-bomb shape).
-    let entryActualBytes = 0;
-    const counter = new Transform({
-        transform(chunk, _encoding, cb) {
-            entryActualBytes += chunk.length;
-            if (entryActualBytes > limits.perEntryUncompressedBytes) {
-                return cb(
-                    new errors.UnsupportedMediaTypeError({
-                        message: 'Zip entry exceeds maximum uncompressed size.',
-                        context:
-                            'The zip contains an entry that exceeds the maximum uncompressed size.',
-                        code: 'ENTRY_TOO_LARGE',
-                        errorDetails: {
-                            entryName: entry.fileName,
-                            observedBytes: entryActualBytes,
-                            limitBytes: limits.perEntryUncompressedBytes,
-                        },
-                    }),
-                );
-            }
-            cb(null, chunk);
-        },
-    });
+    try {
+        await pipeline(readStream, fs.createWriteStream(entryPath, { mode }));
+    } catch (err) {
+        if (!ENTRY_SIZE_MISMATCH.test(err.message)) {
+            throw err;
+        }
 
-    await pipeline(readStream, counter, fs.createWriteStream(entryPath, { mode }));
+        throw new errors.UnsupportedMediaTypeError({
+            message: 'Zip entry data does not match its declared uncompressed size.',
+            context: 'The zip contains an entry with invalid uncompressed size metadata.',
+            code: 'INVALID_ENTRY_SIZE',
+            errorDetails: {
+                entryName: entry.fileName,
+                declaredBytes: entry.uncompressedSize,
+            },
+            err,
+        });
+    }
 }

@@ -368,9 +368,9 @@ describe('Extract zip', function () {
         }
     });
 
-    it('rejects a zip whose central directory understates an entry size (streaming defence)', async function () {
-        // The metadata-only pre-flight check sees a tiny declared size and lets it
-        // through; the streaming counter sees the real 1 MB payload and rejects.
+    it('rejects a zip whose central directory understates an entry size', async function () {
+        // The declared-size check sees a tiny size and lets it through; yauzl's
+        // entry size validation sees the real 1 MB payload and rejects.
         await createZipWithEntries(zipDestination, [
             { name: 'lying.txt', content: Buffer.alloc(1024 * 1024, 'a') },
         ]);
@@ -382,10 +382,29 @@ describe('Extract zip', function () {
                     limits: { perEntryUncompressedBytes: 100 },
                 }),
             (err) => {
-                assert.equal(err.code, 'ENTRY_TOO_LARGE');
-                assert.equal(err.errorDetails.entryName, 'lying.txt');
-                assert.equal(err.errorDetails.limitBytes, 100);
-                assert.equal(err.errorDetails.observedBytes > 100, true);
+                assert.equal(err.errorType, 'UnsupportedMediaTypeError');
+                assert.equal(err.code, 'INVALID_ENTRY_SIZE');
+                assert.deepEqual(err.errorDetails, {
+                    entryName: 'lying.txt',
+                    declaredBytes: 5,
+                });
+                return true;
+            },
+        );
+    });
+
+    it('rejects a zip whose central directory overstates an entry size', async function () {
+        await createZipWithEntries(zipDestination, [{ name: 'short.txt', content: '12345' }]);
+        forgeCentralUncompressedSize(zipDestination, 50);
+
+        await assert.rejects(
+            () => extract(zipDestination, unzipDestination),
+            (err) => {
+                assert.equal(err.code, 'INVALID_ENTRY_SIZE');
+                assert.deepEqual(err.errorDetails, {
+                    entryName: 'short.txt',
+                    declaredBytes: 50,
+                });
                 return true;
             },
         );
