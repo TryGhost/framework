@@ -1,12 +1,10 @@
 const fs = require('fs');
 const path = require('path');
-const { promisify } = require('util');
-const { pipeline, Transform } = require('stream');
+const { Transform } = require('stream');
+const { pipeline } = require('stream/promises');
 const errors = require('@tryghost/errors');
 const { S_IFMT, S_IFLNK, getEntryMode } = require('./entry-mode');
 const ensureOwnerPermissions = require('./ensure-owner-permissions');
-
-const pipelineAsync = promisify(pipeline);
 
 const defaultOptions = {};
 
@@ -329,5 +327,5 @@ async function extractEntry(entry, zipfile, opts, limits, dir) {
         },
     });
 
-    await pipelineAsync(readStream, counter, fs.createWriteStream(entryPath, { mode }));
+    await pipeline(readStream, counter, fs.createWriteStream(entryPath, { mode }));
 }
