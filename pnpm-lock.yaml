@@ -175,7 +175,6 @@ overrides:
   axios: ^1.15.0
   fast-xml-parser: ^5.7.0
   js-yaml@<3.15.0: 5.4.3
-  yauzl: 3.4.0
 
 importers:
 
@@ -854,7 +853,7 @@ importers:
         specifier: ^8.0.0
         version: 8.0.0
       yauzl:
-        specifier: 3.4.0
+        specifier: ^3.4.0
         version: 3.4.0
     devDependencies:
       folder-hash:
