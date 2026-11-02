@@ -221,43 +221,12 @@ async function extractZip(zipPath, opts) {
     await fs.promises.mkdir(opts.dir, { recursive: true });
     const dir = await fs.promises.realpath(opts.dir);
 
-    const zipfile = await new Promise((resolve, reject) => {
-        yauzl.open(zipPath, { lazyEntries: true }, (err, z) => {
-            if (err) return reject(err);
-            resolve(z);
-        });
-    });
+    // openPromise() forces lazyEntries and keeps autoClose on, so eachEntry()
+    // closes the zipfile once iteration finishes or throws.
+    const zipfile = await yauzl.openPromise(zipPath);
 
-    try {
-        await new Promise((resolve, reject) => {
-            let settled = false;
-            const fail = (err) => {
-                if (settled) return;
-                settled = true;
-                reject(err);
-            };
-
-            zipfile.on('error', fail);
-            zipfile.on('end', () => {
-                if (settled) return;
-                settled = true;
-                resolve();
-            });
-            zipfile.on('entry', (entry) => {
-                if (settled) return;
-                extractEntry(entry, zipfile, opts, dir)
-                    .then(() => settled || zipfile.readEntry())
-                    .catch(fail);
-            });
-
-            zipfile.readEntry();
-        });
-    } finally {
-        try {
-            zipfile.close();
-        } catch {
-            // best-effort
-        }
+    for await (const entry of zipfile.eachEntry()) {
+        await extractEntry(entry, zipfile, opts, dir);
     }
 }
 
@@ -298,9 +267,7 @@ async function extractEntry(entry, zipfile, opts, dir) {
         return;
     }
 
-    const readStream = await new Promise((resolve, reject) => {
-        zipfile.openReadStream(entry, (err, s) => (err ? reject(err) : resolve(s)));
-    });
+    const readStream = await zipfile.openReadStreamPromise(entry);
 
     try {
         await pipeline(readStream, fs.createWriteStream(entryPath, { mode }));

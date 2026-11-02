@@ -263,18 +263,12 @@ describe('Extract zip', function () {
         Module._load = function (request, parent, isMain) {
             if (request === 'yauzl') {
                 return {
-                    open(_zipPath, _opts, cb) {
-                        const zipfile = new EventEmitter();
-                        let emitted = false;
-                        zipfile.readEntry = () => {
-                            setImmediate(() => {
-                                if (emitted) return zipfile.emit('end');
-                                emitted = true;
-                                zipfile.emit('entry', entry);
-                            });
+                    async openPromise() {
+                        return {
+                            async *eachEntry() {
+                                yield entry;
+                            },
                         };
-                        zipfile.close = () => {};
-                        cb(null, zipfile);
                     },
                 };
             }
