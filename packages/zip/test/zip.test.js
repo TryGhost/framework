@@ -404,6 +404,23 @@ describe('Extract zip', function () {
         );
     });
 
+    it('rejects a zip whose stored entry declares a mismatched uncompressed size', async function () {
+        await createZip(zipDestination, (archive) => {
+            archive.append('12345', { name: 'stored.txt', store: true });
+        });
+        forgeCentralUncompressedSize(zipDestination, 50);
+
+        await assert.rejects(
+            () => extract(zipDestination, unzipDestination),
+            (err) => {
+                assert.equal(err.errorType, 'UnsupportedMediaTypeError');
+                assert.equal(err.code, 'INVALID_ENTRY_SIZE');
+                assert.equal(err.errorDetails, undefined);
+                return true;
+            },
+        );
+    });
+
     it('throws when an entry exceeds the per-entry uncompressed size limit', async function () {
         await createZipWithEntries(zipDestination, [{ name: 'big-file.txt', content: '12345' }]);
 

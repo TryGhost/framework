@@ -206,9 +206,12 @@ module.exports = async (zipToExtract, destination, options) => {
     return { path: destination };
 };
 
-// yauzl's entry size validation rejects an entry whose actual data does not
-// match its declared `uncompressedSize` with one of these messages.
-const ENTRY_SIZE_MISMATCH = /^(too many|not enough) bytes in the stream\b/;
+// yauzl's entry size validation rejects an entry whose data does not match its
+// declared sizes with one of these messages. Stored entries are checked while
+// reading the central directory, before the entry is handed to us; other
+// entries are checked while their data is streamed.
+const ENTRY_SIZE_MISMATCH =
+    /^((too many|not enough) bytes in the stream|compressed\/uncompressed size mismatch for stored file)\b/;
 
 // Minimal yauzl-based replacement for extract-zip, which is unmaintained (no
 // release since 2020).
@@ -225,8 +228,34 @@ async function extractZip(zipPath, opts) {
     // closes the zipfile once iteration finishes or throws.
     const zipfile = await yauzl.openPromise(zipPath);
 
-    for await (const entry of zipfile.eachEntry()) {
-        await extractEntry(entry, zipfile, opts, dir);
+    // Tracks the entry being written so a size error raised while streaming it
+    // can be attributed to it. A stored-entry error is raised before yauzl
+    // hands the entry over, so there is no entry to name.
+    let currentEntry = null;
+
+    try {
+        for await (const entry of zipfile.eachEntry()) {
+            currentEntry = entry;
+            await extractEntry(entry, zipfile, opts, dir);
+            currentEntry = null;
+        }
+    } catch (err) {
+        if (!ENTRY_SIZE_MISMATCH.test(err.message)) {
+            throw err;
+        }
+
+        throw new errors.UnsupportedMediaTypeError({
+            message: 'Zip entry data does not match its declared uncompressed size.',
+            context: 'The zip contains an entry with invalid uncompressed size metadata.',
+            code: 'INVALID_ENTRY_SIZE',
+            errorDetails: currentEntry
+                ? {
+                      entryName: currentEntry.fileName,
+                      declaredBytes: currentEntry.uncompressedSize,
+                  }
+                : undefined,
+            err,
+        });
     }
 }
 
@@ -269,22 +298,5 @@ async function extractEntry(entry, zipfile, opts, dir) {
 
     const readStream = await zipfile.openReadStreamPromise(entry);
 
-    try {
-        await pipeline(readStream, fs.createWriteStream(entryPath, { mode }));
-    } catch (err) {
-        if (!ENTRY_SIZE_MISMATCH.test(err.message)) {
-            throw err;
-        }
-
-        throw new errors.UnsupportedMediaTypeError({
-            message: 'Zip entry data does not match its declared uncompressed size.',
-            context: 'The zip contains an entry with invalid uncompressed size metadata.',
-            code: 'INVALID_ENTRY_SIZE',
-            errorDetails: {
-                entryName: entry.fileName,
-                declaredBytes: entry.uncompressedSize,
-            },
-            err,
-        });
-    }
+    await pipeline(readStream, fs.createWriteStream(entryPath, { mode }));
 }
