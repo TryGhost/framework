@@ -585,6 +585,31 @@ describe('Extract zip with ensureOwnerPermissions', function () {
         }
     });
 
+    it('does not change the mode of the extraction root for a ./ entry', async function () {
+        await createZipWithModedEntries(zipDestination, [
+            { name: './', type: 'directory', mode: 0o777 },
+            { name: 'file.txt', content: 'x' },
+        ]);
+        fs.mkdirSync(unzipDestination, { mode: 0o700 });
+        fs.chmodSync(unzipDestination, 0o700);
+
+        await extract(zipDestination, unzipDestination);
+
+        assert.equal(permissionBits(unzipDestination), 0o700);
+        assert.equal(fs.existsSync(path.join(unzipDestination, 'file.txt')), true);
+    });
+
+    it('applies the process umask to directory entry modes', async function () {
+        await createZipWithModedEntries(zipDestination, [
+            { name: 'open-dir/', type: 'directory', mode: 0o777 },
+        ]);
+
+        await extract(zipDestination, unzipDestination);
+
+        const umask = process.umask();
+        assert.equal(permissionBits(path.join(unzipDestination, 'open-dir')), 0o777 & ~umask);
+    });
+
     it('preserves default read-only directory permissions when the option is omitted', async function () {
         await createZipWithModedEntries(zipDestination, [
             { name: 'readonly-dir/', type: 'directory', mode: 0o555 },

@@ -280,10 +280,19 @@ async function extractEntry(entry, zipfile, opts, dir) {
         : (opts.defaultFileMode && parseInt(opts.defaultFileMode, 10)) || 0o644;
     const mode = (rawMode === 0 ? defaultMode : rawMode) & 0o777;
 
-    // Path-traversal guard — port of extract-zip's realpath/relative check.
     const entryPath = path.join(dir, entry.fileName);
     const containerDir = isDir ? entryPath : path.dirname(entryPath);
-    await fs.promises.mkdir(containerDir, { recursive: true });
+
+    // Create missing parents with default permissions, then create a directory
+    // entry with its own mode. As with extract-zip, a directory that already
+    // exists (including the extraction root, e.g. for a `./` entry) keeps its
+    // mode, and the process umask applies.
+    await fs.promises.mkdir(path.dirname(entryPath), { recursive: true });
+    if (isDir) {
+        await fs.promises.mkdir(entryPath, { recursive: true, mode });
+    }
+
+    // Path-traversal guard — port of extract-zip's realpath/relative check.
     const canonicalContainerDir = await fs.promises.realpath(containerDir);
     if (path.relative(dir, canonicalContainerDir).split(path.sep).includes('..')) {
         throw new Error(
@@ -292,7 +301,6 @@ async function extractEntry(entry, zipfile, opts, dir) {
     }
 
     if (isDir) {
-        await fs.promises.chmod(entryPath, mode).catch(() => {});
         return;
     }
 
