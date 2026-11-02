@@ -1,4 +1,3 @@
-import type { BinaryLike } from 'node:crypto';
 import security = require('../');
 import * as namespace from '../';
 import { expectTypeOf } from 'vitest';
@@ -15,6 +14,12 @@ expectTypeOf(security.string.safe(null)).toEqualTypeOf<string>();
 expectTypeOf(
     security.tokens.generateFromContent({ content: Buffer.from('content') }),
 ).toEqualTypeOf<string>();
+expectTypeOf(security.tokens.generateFromContent).parameter(0).toEqualTypeOf<{
+    content: string | NodeJS.ArrayBufferView;
+}>();
+expectTypeOf<ArrayBuffer>().not.toExtend<
+    Parameters<typeof security.tokens.generateFromContent>[0]['content']
+>();
 expectTypeOf(
     security.tokens.generateFromEmail({
         email: 'test@example.com',
@@ -43,12 +48,12 @@ expectTypeOf(security.tokens.resetToken.generateHash).parameter(0).toEqualTypeOf
     expires: number | string;
     email: string;
     dbHash: string;
-    passwordHash: BinaryLike;
+    passwordHash: string | NodeJS.ArrayBufferView;
 }>();
 expectTypeOf(security.tokens.resetToken.compare).parameter(0).toEqualTypeOf<{
     token: string;
     dbHash: string;
-    passwordHash: BinaryLike;
+    passwordHash: string | NodeJS.ArrayBufferView;
 }>();
 expectTypeOf(
     security.tokens.resetToken.generateHash({

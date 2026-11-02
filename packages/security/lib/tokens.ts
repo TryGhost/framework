@@ -1,12 +1,13 @@
-import { createHash, type BinaryLike } from 'node:crypto';
+import { createHash, type Hash } from 'node:crypto';
 
-type ContentTokenOptions = { content: BinaryLike };
+type HashInput = Parameters<Hash['update']>[0];
+type ContentTokenOptions = { content: HashInput };
 type EmailTokenOptions = { expires: number | string; email: string; secret: string };
 type ResetTokenOptions = {
     expires: number | string;
     email: string;
     dbHash: string;
-    passwordHash: BinaryLike;
+    passwordHash: HashInput;
 };
 type ExtractedToken = { expires: number; email: string };
 type TokenComparison = {
@@ -86,7 +87,7 @@ export const resetToken = {
     compare: function compare(options: {
         token: string;
         dbHash: string;
-        passwordHash: BinaryLike;
+        passwordHash: HashInput;
     }): TokenComparison {
         const tokenToCompare = options?.token;
         const parts = resetToken.extract({ token: tokenToCompare });
