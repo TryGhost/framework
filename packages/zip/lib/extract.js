@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+const { pipeline } = require('stream/promises');
 const errors = require('@tryghost/errors');
 const { S_IFMT, S_IFLNK, getEntryMode } = require('./entry-mode');
 const ensureOwnerPermissions = require('./ensure-owner-permissions');
@@ -166,8 +169,6 @@ module.exports = async (zipToExtract, destination, options) => {
     let totalUncompressedBytes = 0;
     let entriesProcessed = 0;
 
-    const extract = require('extract-zip');
-
     opts.dir = destination;
 
     const shouldEnsureOwnerPermissions = opts.ensureOwnerPermissions === true;
@@ -193,14 +194,117 @@ module.exports = async (zipToExtract, destination, options) => {
             originalOnEntry(entry, zipfile);
         }
 
-        // Normalize permissions last, immediately before extract-zip writes the
-        // entry. Do not add async work here: extract-zip does not await onEntry.
+        // Normalize permissions last, immediately before extractZip() writes the
+        // entry. Do not add async work here: extractZip() does not await onEntry.
         if (shouldEnsureOwnerPermissions) {
             ensureOwnerPermissions(entry, opts);
         }
     };
 
-    await extract(zipToExtract, opts);
+    await extractZip(zipToExtract, opts);
 
     return { path: destination };
 };
+
+// yauzl's entry size validation rejects an entry whose data does not match its
+// declared sizes with one of these messages. Stored entries are checked while
+// reading the central directory, before the entry is handed to us; other
+// entries are checked while their data is streamed.
+const ENTRY_SIZE_MISMATCH =
+    /^((too many|not enough) bytes in the stream|compressed\/uncompressed size mismatch for stored file)\b/;
+
+// Minimal yauzl-based replacement for extract-zip, which is unmaintained (no
+// release since 2020).
+//
+// yauzl's default `validateEntrySizes` guarantees an entry never yields more
+// bytes than its declared `uncompressedSize`, so the declared-size checks in
+// `onEntry` also bound the bytes actually written to disk.
+async function extractZip(zipPath, opts) {
+    const yauzl = require('yauzl');
+    await fs.promises.mkdir(opts.dir, { recursive: true });
+    const dir = await fs.promises.realpath(opts.dir);
+
+    // openPromise() forces lazyEntries and keeps autoClose on, so eachEntry()
+    // closes the zipfile once iteration finishes or throws.
+    const zipfile = await yauzl.openPromise(zipPath);
+
+    // Tracks the entry being written so a size error raised while streaming it
+    // can be attributed to it. A stored-entry error is raised before yauzl
+    // hands the entry over, so there is no entry to name.
+    let currentEntry = null;
+
+    try {
+        for await (const entry of zipfile.eachEntry()) {
+            currentEntry = entry;
+            await extractEntry(entry, zipfile, opts, dir);
+            currentEntry = null;
+        }
+    } catch (err) {
+        if (!ENTRY_SIZE_MISMATCH.test(err.message)) {
+            throw err;
+        }
+
+        throw new errors.UnsupportedMediaTypeError({
+            message: 'Zip entry data does not match its declared uncompressed size.',
+            context: 'The zip contains an entry with invalid uncompressed size metadata.',
+            code: 'INVALID_ENTRY_SIZE',
+            errorDetails: currentEntry
+                ? {
+                      entryName: currentEntry.fileName,
+                      declaredBytes: currentEntry.uncompressedSize,
+                  }
+                : undefined,
+            err,
+        });
+    }
+}
+
+async function extractEntry(entry, zipfile, opts, dir) {
+    // Skip macOS resource-fork entries — extract-zip did the same.
+    if (entry.fileName.startsWith('__MACOSX/')) return;
+
+    // Existing pre-flight checks (size, symlinks, filename length, onEntry hook).
+    opts.onEntry(entry, zipfile);
+
+    // Stat the entry: mode bits, directory marker, filesystem-mode resolution.
+    // Mirrors extract-zip's logic verbatim so behaviour is preserved.
+    const rawMode = (entry.externalFileAttributes >> 16) & 0xffff;
+    const IFMT = 61440;
+    const IFDIR = 16384;
+    const isDir =
+        (rawMode & IFMT) === IFDIR ||
+        entry.fileName.endsWith('/') ||
+        (entry.versionMadeBy >> 8 === 0 && entry.externalFileAttributes === 16);
+    const defaultMode = isDir
+        ? (opts.defaultDirMode && parseInt(opts.defaultDirMode, 10)) || 0o755
+        : (opts.defaultFileMode && parseInt(opts.defaultFileMode, 10)) || 0o644;
+    const mode = (rawMode === 0 ? defaultMode : rawMode) & 0o777;
+
+    const entryPath = path.join(dir, entry.fileName);
+    const containerDir = isDir ? entryPath : path.dirname(entryPath);
+
+    // Create missing parents with default permissions, then create a directory
+    // entry with its own mode. As with extract-zip, a directory that already
+    // exists (including the extraction root, e.g. for a `./` entry) keeps its
+    // mode, and the process umask applies.
+    await fs.promises.mkdir(path.dirname(entryPath), { recursive: true });
+    if (isDir) {
+        await fs.promises.mkdir(entryPath, { recursive: true, mode });
+    }
+
+    // Path-traversal guard — port of extract-zip's realpath/relative check.
+    const canonicalContainerDir = await fs.promises.realpath(containerDir);
+    if (path.relative(dir, canonicalContainerDir).split(path.sep).includes('..')) {
+        throw new Error(
+            `Out of bound path "${canonicalContainerDir}" found while processing file ${entry.fileName}`,
+        );
+    }
+
+    if (isDir) {
+        return;
+    }
+
+    const readStream = await zipfile.openReadStreamPromise(entry);
+
+    await pipeline(readStream, fs.createWriteStream(entryPath, { mode }));
+}
