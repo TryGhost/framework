@@ -31,7 +31,7 @@
     "lodash": "^4.18.1"
   },
   "devDependencies": {
-    "nock": "15.0.5",
+    "nock": "15.0.6",
     "rewire": "9.0.1",
     "sinon": "catalog:"
   },
