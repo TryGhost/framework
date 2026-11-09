@@ -4,29 +4,53 @@ import * as errors from './errors';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyObject = Record<string, any>;
 
+function isPlainObject(value: object): boolean {
+    const proto = Object.getPrototypeOf(value);
+    return proto === Object.prototype || proto === null;
+}
+
 // structuredClone doesn't preserve custom properties on Error subclasses
 // (see https://github.com/ungap/structured-clone/issues/12)
+//
+// Only Errors, Arrays, Dates and plain objects are cloned. Anything else
+// (streams, sockets, Buffers, class instances) is copied by reference, since
+// recursing into those is slow and fragile. Visited objects are tracked so
+// circular references (e.g. AWS SDK errors carrying `$response`) point back
+// at the clone instead of recursing forever.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function deepCloneValue(value: any): any {
+function deepCloneValue(value: any, seen: WeakMap<object, any> = new WeakMap()): any {
     if (value === null || typeof value !== 'object') {
         return value;
     }
+    if (seen.has(value)) {
+        return seen.get(value);
+    }
     if (value instanceof Error) {
         const clone = Object.create(Object.getPrototypeOf(value));
+        seen.set(value, clone);
         for (const key of Object.getOwnPropertyNames(value)) {
-            clone[key] = deepCloneValue((value as AnyObject)[key]);
+            clone[key] = deepCloneValue((value as AnyObject)[key], seen);
         }
         return clone;
     }
     if (Array.isArray(value)) {
-        return value.map(deepCloneValue);
+        const clone: unknown[] = [];
+        seen.set(value, clone);
+        for (const item of value) {
+            clone.push(deepCloneValue(item, seen));
+        }
+        return clone;
     }
     if (value instanceof Date) {
         return new Date(value.getTime());
     }
-    const clone: AnyObject = {};
+    if (!isPlainObject(value)) {
+        return value;
+    }
+    const clone: AnyObject = Object.create(Object.getPrototypeOf(value));
+    seen.set(value, clone);
     for (const key of Object.keys(value)) {
-        clone[key] = deepCloneValue(value[key]);
+        clone[key] = deepCloneValue(value[key], seen);
     }
     return clone;
 }
