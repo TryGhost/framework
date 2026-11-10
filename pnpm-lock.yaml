@@ -855,10 +855,6 @@ importers:
       yauzl:
         specifier: ^3.4.0
         version: 3.4.0
-    devDependencies:
-      folder-hash:
-        specifier: 4.1.4
-        version: 4.1.4(supports-color@8.1.1)
 
 packages:
 
@@ -3610,11 +3606,6 @@ packages:
   flatted@3.4.4:
     resolution: {integrity: sha512-5+ybhBZANEJxaH3X5evAFatUxLfEHSr7n6kYJ+1Qd0mUqr4eu9gIf6GDbWHf8RJijHrjjO8G+la14SlL2SeS1Q==}
 
-  folder-hash@4.1.4:
-    resolution: {integrity: sha512-BhHpJCYoTej4YH0C3HY4X49C2uOcWntjSD24T1GBYlfWcW/7mkHZov9HbvzCHQO+ZLbJ3VRE+cL1uEiaQvacLw==}
-    engines: {node: '>=10.10.0'}
-    hasBin: true
-
   follow-redirects@1.16.2:
     resolution: {integrity: sha512-/kVP2U8z596Ia0gwFrwyIeo74ta5aVmSeU1FfAUMAmcEP5EP7zydmag3SLiN64NaRKef3lxsq7i/g7ltJQDGow==}
     engines: {node: '>=4.0'}
@@ -4203,10 +4194,6 @@ packages:
 
   minimatch@3.1.5:
     resolution: {integrity: sha512-VgjWUsnnT6n+NUk6eZq77zeFdpW2LWDzP6zFGrCbHXiYNul5Dzqk2HHQ5uFH2DNW5Xbp8+jVzaeNt94ssEEl4w==}
-
-  minimatch@7.4.9:
-    resolution: {integrity: sha512-Brg/fp/iAVDOQoHxkuN5bEYhyQlZhxddI78yWsCbeEwTHXQjlNLtiJDUsp1GIptVqMI7/gkJMz4vVAc01mpoBw==}
-    engines: {node: '>=10'}
 
   minimatch@9.0.9:
     resolution: {integrity: sha512-OBwBN9AL4dqmETlpS2zasx+vTeWclWzkblfZk7KTA5j3jeOONz/tRCnZomUyvNg83wL5Zv9Ss6HMJXAgL8R2Yg==}
@@ -7865,13 +7852,6 @@ snapshots:
 
   flatted@3.4.4: {}
 
-  folder-hash@4.1.4(supports-color@8.1.1):
-    dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
-      minimatch: 7.4.9
-    transitivePeerDependencies:
-      - supports-color
-
   follow-redirects@1.16.2(debug@4.4.3(supports-color@8.1.1)):
     optionalDependencies:
       debug: 4.4.3(supports-color@8.1.1)
@@ -8437,10 +8417,6 @@ snapshots:
   minimatch@3.1.5:
     dependencies:
       brace-expansion: 1.1.21
-
-  minimatch@7.4.9:
-    dependencies:
-      brace-expansion: 2.1.7
 
   minimatch@9.0.9:
     dependencies:

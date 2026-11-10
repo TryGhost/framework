@@ -26,8 +26,5 @@
     "@tryghost/errors": "workspace:^",
     "archiver": "^8.0.0",
     "yauzl": "^3.4.0"
-  },
-  "devDependencies": {
-    "folder-hash": "4.1.4"
   }
 }
