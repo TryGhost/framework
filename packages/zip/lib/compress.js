@@ -6,8 +6,26 @@ const defaultIgnore = ['node_modules'];
 
 // Ignore entries are relative path prefixes using `/` separators. A trailing
 // `/` or `/**` is accepted for readability and stripped.
+function trimTrailingSlashes(value) {
+    let end = value.length;
+
+    while (end > 0 && value[end - 1] === '/') {
+        end -= 1;
+    }
+
+    return value.slice(0, end);
+}
+
 function normalizeIgnore(ignore) {
-    return ignore.map((entry) => entry.replace(/\\/g, '/').replace(/(\/\*\*)?\/*$/, ''));
+    return ignore.map((entry) => {
+        let prefix = trimTrailingSlashes(entry.replaceAll('\\', '/'));
+
+        if (prefix.endsWith('/**')) {
+            prefix = trimTrailingSlashes(prefix.slice(0, -3));
+        }
+
+        return prefix;
+    });
 }
 
 function isIgnored(relativePath, ignore) {
