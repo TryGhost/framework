@@ -87,7 +87,7 @@ describe('Jest Snapshot', function () {
         const firstTestTitle = 'My first test';
         const secondTestTitle = 'My second test';
 
-        it('snapshot matching works as expected when using beforeAll and beforeEach', function () {
+        it('snapshot matching works as expected when using beforeAll and beforeEach', async function () {
             // Setup some spies
             const resetRegistrySpy = sinon.spy(snapshotTools.snapshotManager, 'resetRegistry');
             const setCurrentTestSpy = sinon.spy(snapshotTools.snapshotManager, 'setCurrentTest');
@@ -112,7 +112,7 @@ describe('Jest Snapshot', function () {
             assert.deepEqual(snapshotTools.snapshotManager.registry, {});
 
             // Execute a test calling beforeEach and using match
-            snapshotTools.mochaHooks.beforeEach.call({ currentTest: firstTest });
+            await snapshotTools.mochaHooks.beforeEach.call({ currentTest: firstTest });
             testResult = snapshotTools.snapshotManager.match(expectedResult);
 
             // Check the test was called how we expected
@@ -131,7 +131,7 @@ describe('Jest Snapshot', function () {
             });
 
             // Execute a second test
-            snapshotTools.mochaHooks.beforeEach.call({ currentTest: secondTest });
+            await snapshotTools.mochaHooks.beforeEach.call({ currentTest: secondTest });
             testResult = snapshotTools.snapshotManager.match(expectedResult);
 
             sinon.assert.calledTwice(setCurrentTestSpy);
@@ -150,7 +150,7 @@ describe('Jest Snapshot', function () {
             });
 
             // Execute a third test, which is the second test duplicated
-            snapshotTools.mochaHooks.beforeEach.call({ currentTest: secondTest });
+            await snapshotTools.mochaHooks.beforeEach.call({ currentTest: secondTest });
             testResult = snapshotTools.snapshotManager.match(expectedResult);
 
             sinon.assert.calledThrice(setCurrentTestSpy);
@@ -168,5 +168,20 @@ describe('Jest Snapshot', function () {
                 },
             });
         });
+    });
+
+    it('afterAll saves snapshots', async function () {
+        const saveStub = sinon.stub(snapshotTools.snapshotManager, 'saveSnapshots').resolves();
+        await snapshotTools.mochaHooks.afterAll();
+        sinon.assert.calledOnce(saveStub);
+    });
+
+    it('exports asymmetric matchers that serialize like jest', function () {
+        const { any, anything, stringMatching } = snapshotTools;
+        assert.equal(any(String).toAsymmetricMatcher(), 'Any<String>');
+        assert.equal(any(String).asymmetricMatch('x'), true);
+        assert.equal(anything().asymmetricMatch(0), true);
+        assert.equal(stringMatching(/a/).asymmetricMatch('cat'), true);
+        assert.equal(stringMatching(/a/).toString(), 'StringMatching');
     });
 });
