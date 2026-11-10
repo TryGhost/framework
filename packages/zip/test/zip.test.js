@@ -1,7 +1,7 @@
 const assert = require('assert/strict');
 const path = require('path');
 const fs = require('fs');
-const { hashElement } = require('folder-hash');
+const crypto = require('crypto');
 const EventEmitter = require('events');
 const Module = require('module');
 const createArchive = require('../lib/create-archive');
@@ -85,6 +85,24 @@ function createZipWithModedEntries(zipPath, entries) {
     });
 }
 
+// Returns a sorted list of `relative/path:sha256` entries for every file under
+// root, so two directory trees can be compared for identical structure and content.
+function hashTree(root) {
+    return fs
+        .readdirSync(root, { recursive: true, withFileTypes: true })
+        .filter((entry) => entry.isFile())
+        .map((entry) => {
+            const fullPath = path.join(entry.parentPath, entry.name);
+            const relativePath = path.relative(root, fullPath).split(path.sep).join('/');
+            const hash = crypto
+                .createHash('sha256')
+                .update(fs.readFileSync(fullPath))
+                .digest('hex');
+            return `${relativePath}:${hash}`;
+        })
+        .sort();
+}
+
 // Reads the permission bits (lowest 9 bits) of a path's mode.
 function permissionBits(targetPath) {
     return fs.statSync(targetPath).mode & 0o777;
@@ -127,7 +145,8 @@ describe('Compress and Extract should be opposite functions', function () {
     it('ensure symlinks work', async function () {
         fs.symlinkSync(themeFolder, symlinkPath);
 
-        const originalHash = await hashElement(symlinkPath);
+        const originalTree = hashTree(fs.realpathSync(symlinkPath));
+        assert.ok(originalTree.length > 0);
 
         const compressRes = await compress(symlinkPath, zipDestination);
         assert.equal(typeof compressRes, 'object');
@@ -138,8 +157,7 @@ describe('Compress and Extract should be opposite functions', function () {
         assert.equal(typeof extractRes, 'object');
         assert.equal(extractRes.path, unzipDestination);
 
-        const extractedHash = await hashElement(unzipDestination);
-        assert.equal(originalHash.children.toString(), extractedHash.children.toString());
+        assert.deepEqual(hashTree(unzipDestination), originalTree);
     });
 
     it('rejects when archiver emits an async error event', async function () {
