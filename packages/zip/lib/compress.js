@@ -34,12 +34,32 @@ function isIgnored(relativePath, ignore) {
     );
 }
 
+// yazl writes the DOS timestamp clamped to 1980 but writes the extended
+// timestamp field with writeUInt32LE, which throws for pre-1970 mtimes. Clamp
+// to the DOS minimum (local time, as yazl computes it) so both fields agree.
+const MIN_MTIME = new Date(1980, 0, 1);
+
+function clampMtime(mtime) {
+    return mtime < MIN_MTIME ? MIN_MTIME : mtime;
+}
+
+function compareNames(a, b) {
+    if (a.name === b.name) {
+        return 0;
+    }
+
+    return a.name < b.name ? -1 : 1;
+}
+
 // Walks the folder depth-first in sorted order, skipping ignored paths without
-// descending into them (so a large node_modules is never read).
-function collectEntries(root, ignore, relativeDir = '', entries = []) {
-    const dirents = fs
-        .readdirSync(path.join(root, relativeDir), { withFileTypes: true })
-        .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+// descending into them (so a large node_modules is never read). Everything that
+// can fail on the filesystem (stat, readlink) happens here, before the
+// destination is opened.
+async function collectEntries(root, ignore, relativeDir = '', entries = []) {
+    const dirents = await fs.promises.readdir(path.join(root, relativeDir), {
+        withFileTypes: true,
+    });
+    dirents.sort(compareNames);
 
     for (const dirent of dirents) {
         const relativePath = relativeDir ? `${relativeDir}/${dirent.name}` : dirent.name;
@@ -49,41 +69,117 @@ function collectEntries(root, ignore, relativeDir = '', entries = []) {
         }
 
         const fullPath = path.join(root, relativePath);
+        let type;
 
         if (dirent.isDirectory()) {
-            entries.push({ type: 'directory', fullPath, relativePath });
-            collectEntries(root, ignore, relativePath, entries);
+            type = 'directory';
         } else if (dirent.isSymbolicLink()) {
-            entries.push({ type: 'symlink', fullPath, relativePath });
+            type = 'symlink';
         } else if (dirent.isFile()) {
-            entries.push({ type: 'file', fullPath, relativePath });
+            type = 'file';
+        } else {
+            // Sockets, FIFOs and devices cannot be zipped meaningfully.
+            continue;
+        }
+
+        const stats = await fs.promises.lstat(fullPath);
+        const entry = {
+            type,
+            fullPath,
+            relativePath,
+            options: { mode: stats.mode, mtime: clampMtime(stats.mtime) },
+        };
+
+        if (type === 'file') {
+            entry.options.size = stats.size;
+        } else if (type === 'symlink') {
+            entry.linkTarget = await fs.promises.readlink(fullPath);
+        }
+
+        entries.push(entry);
+
+        if (type === 'directory') {
+            await collectEntries(root, ignore, relativePath, entries);
         }
     }
 
     return entries;
 }
 
-function addEntry(zipfile, entry) {
-    if (entry.type === 'file') {
-        // yazl stats the file itself and keeps its mode and mtime.
-        zipfile.addFile(entry.fullPath, entry.relativePath);
-        return;
-    }
+function writeZip(entries, destination) {
+    return new Promise((resolve, reject) => {
+        const zipfile = new yazl.ZipFile();
+        const output = fs.createWriteStream(destination);
+        // Source streams yazl is currently reading, so a failure can close them
+        // rather than leaving their descriptors open.
+        const openStreams = new Set();
+        let settled = false;
 
-    const stats = fs.lstatSync(entry.fullPath);
-    const options = { mode: stats.mode, mtime: stats.mtime };
+        const fail = (err) => {
+            if (settled) {
+                return;
+            }
 
-    if (entry.type === 'directory') {
-        zipfile.addEmptyDirectory(entry.relativePath, options);
-    } else {
-        // Store symlinks as symlink entries (link target as data), not as the
-        // file they point to.
-        zipfile.addBuffer(
-            Buffer.from(fs.readlinkSync(entry.fullPath)),
-            entry.relativePath,
-            options,
-        );
-    }
+            settled = true;
+            for (const stream of openStreams) {
+                stream.destroy();
+            }
+            zipfile.outputStream.unpipe(output);
+            zipfile.outputStream.destroy();
+            output.destroy();
+            reject(err);
+        };
+
+        const openReadStream = (fullPath) => (callback) => {
+            const stream = fs.createReadStream(fullPath);
+            openStreams.add(stream);
+            stream.on('close', () => openStreams.delete(stream));
+            // yazl pipes the stream without listening for its errors.
+            stream.on('error', fail);
+            callback(null, stream);
+        };
+
+        zipfile.on('error', fail);
+        output.on('error', fail);
+        output.on('close', () => {
+            if (settled) {
+                return;
+            }
+
+            settled = true;
+            resolve({ path: destination, size: output.bytesWritten });
+        });
+
+        zipfile.outputStream.pipe(output);
+
+        try {
+            for (const entry of entries) {
+                if (entry.type === 'directory') {
+                    zipfile.addEmptyDirectory(entry.relativePath, entry.options);
+                } else if (entry.type === 'symlink') {
+                    // Store symlinks as symlink entries (link target as data),
+                    // not as the file they point to.
+                    zipfile.addBuffer(
+                        Buffer.from(entry.linkTarget),
+                        entry.relativePath,
+                        entry.options,
+                    );
+                } else {
+                    // Lazy, so only one source file is open at a time.
+                    zipfile.addReadStreamLazy(
+                        entry.relativePath,
+                        entry.options,
+                        openReadStream(entry.fullPath),
+                    );
+                }
+            }
+        } catch (err) {
+            fail(err);
+            return;
+        }
+
+        zipfile.end();
+    });
 }
 
 /**
@@ -97,54 +193,16 @@ function addEntry(zipfile, entry) {
  * @param {String[]} [options.ignore] - relative path prefixes to leave out, defaults to `['node_modules']`
  * @returns {Promise<{path: String, size: Number}>}
  */
-module.exports = (folderToZip, destination, options = {}) => {
+module.exports = async (folderToZip, destination, options = {}) => {
     const ignore = normalizeIgnore(options.ignore ?? defaultIgnore);
 
-    return new Promise((resolve, reject) => {
-        // If folder to zip is a symlink, we want to get the target
-        // of the link and zip that instead of zipping the symlink
-        if (fs.lstatSync(folderToZip).isSymbolicLink()) {
-            folderToZip = fs.realpathSync(folderToZip);
-        }
+    // If folder to zip is a symlink, we want to get the target
+    // of the link and zip that instead of zipping the symlink
+    if ((await fs.promises.lstat(folderToZip)).isSymbolicLink()) {
+        folderToZip = await fs.promises.realpath(folderToZip);
+    }
 
-        const entries = collectEntries(folderToZip, ignore);
-        const zipfile = new yazl.ZipFile();
-        let output;
-        let settled = false;
+    const entries = await collectEntries(folderToZip, ignore);
 
-        const fail = (err) => {
-            if (settled) {
-                return;
-            }
-
-            settled = true;
-            if (output) {
-                zipfile.outputStream.unpipe(output);
-                output.destroy();
-            }
-            reject(err);
-        };
-
-        zipfile.on('error', fail);
-
-        // Adding entries can throw synchronously (e.g. an unreadable symlink),
-        // so do it before the destination file is opened.
-        for (const entry of entries) {
-            addEntry(zipfile, entry);
-        }
-
-        output = fs.createWriteStream(destination);
-        output.on('error', fail);
-        output.on('close', () => {
-            if (settled) {
-                return;
-            }
-
-            settled = true;
-            resolve({ path: destination, size: fs.statSync(destination).size });
-        });
-
-        zipfile.outputStream.pipe(output);
-        zipfile.end();
-    });
+    return writeZip(entries, destination);
 };

@@ -222,12 +222,67 @@ describe('Compress folder contents', function () {
     });
 
     it('rejects without creating the destination when an entry cannot be read', async function () {
-        vi.spyOn(fs, 'readlinkSync').mockImplementation(() => {
-            throw new Error('readlink failed');
-        });
+        vi.spyOn(fs.promises, 'readlink').mockRejectedValue(new Error('readlink failed'));
 
         await assert.rejects(() => compress(sourceFolder, zipDestination), /readlink failed/);
         assert.equal(fs.existsSync(zipDestination), false);
+    });
+
+    it('clamps modification times before 1980 instead of crashing', async function () {
+        const oldDate = new Date('1960-06-15T12:00:00Z');
+        fs.utimesSync(path.join(sourceFolder, 'script.sh'), oldDate, oldDate);
+        fs.utimesSync(path.join(sourceFolder, 'empty-dir'), oldDate, oldDate);
+
+        await compress(sourceFolder, zipDestination);
+
+        const zipfile = await yauzl.openPromise(zipDestination);
+        const years = {};
+        for await (const entry of zipfile.eachEntry()) {
+            years[entry.fileName] = entry.getLastModDate().getFullYear();
+        }
+
+        assert.equal(years['script.sh'], 1980);
+        assert.equal(years['empty-dir/'], 1980);
+    });
+
+    it('rejects and closes source streams when a source file cannot be read', async function () {
+        const createReadStream = fs.createReadStream;
+        vi.spyOn(fs, 'createReadStream').mockImplementation(() =>
+            createReadStream(path.join(sourceFolder, 'missing-file')),
+        );
+
+        await assert.rejects(() => compress(sourceFolder, zipDestination), { code: 'ENOENT' });
+    });
+
+    it('rejects when the zip writer throws while adding entries', async function () {
+        vi.spyOn(yazl.ZipFile.prototype, 'addEmptyDirectory').mockImplementation(() => {
+            throw new Error('invalid entry');
+        });
+
+        await assert.rejects(() => compress(sourceFolder, zipDestination), /invalid entry/);
+    });
+
+    it('closes source streams when the destination cannot be written', async function () {
+        const bigFolder = fs.mkdtempSync(path.join(__dirname, 'fixtures', 'compress-big-'));
+        fs.writeFileSync(path.join(bigFolder, 'big.bin'), Buffer.alloc(4 * 1024 * 1024, 'a'));
+
+        const streams = [];
+        const createReadStream = fs.createReadStream;
+        vi.spyOn(fs, 'createReadStream').mockImplementation((...args) => {
+            const stream = createReadStream(...args);
+            streams.push(stream);
+            return stream;
+        });
+
+        try {
+            const missingDir = path.join(bigFolder, 'does-not-exist', 'out.zip');
+            await assert.rejects(() => compress(bigFolder, missingDir), { code: 'ENOENT' });
+
+            assert.equal(streams.length, 1);
+            assert.equal(streams[0].destroyed, true);
+        } finally {
+            fs.rmSync(bigFolder, { recursive: true, force: true });
+        }
     });
 });
 
