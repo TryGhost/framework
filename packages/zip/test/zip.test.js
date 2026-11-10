@@ -2,86 +2,50 @@ const assert = require('assert/strict');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
-const EventEmitter = require('events');
 const Module = require('module');
-const createArchive = require('../lib/create-archive');
+const yauzl = require('yauzl');
+const yazl = require('yazl');
 const ensureOwnerPermissions = require('../lib/ensure-owner-permissions');
 
 // Mimic how we expect this to be required
 const { compress, extract } = require('../');
 
-function createZip(zipPath, addEntries) {
-    return new Promise((resolve, reject) => {
-        const output = fs.createWriteStream(zipPath);
-        const archive = createArchive('zip');
-        let settled = false;
-
-        const cleanup = () => {
-            output.off('close', onClose);
-            output.off('error', onError);
-            archive.off('error', onError);
-        };
-
-        const onClose = () => {
-            if (settled) {
-                return;
-            }
-
-            settled = true;
-            cleanup();
-            resolve();
-        };
-
-        const onError = (err) => {
-            if (settled) {
-                return;
-            }
-
-            settled = true;
-            cleanup();
-            archive.abort();
-            output.destroy();
-            reject(err);
-        };
-
-        output.on('close', onClose);
-        output.on('error', onError);
-        archive.on('error', onError);
-        archive.pipe(output);
-
-        addEntries(archive);
-
-        archive.finalize();
-    });
-}
-
+// Builds a zip fixture with yazl. Each entry is `{name, content}` for a file,
+// `{name, type: 'directory'}` for a directory or `{name, type: 'symlink', target}`
+// for a symlink, and may carry an explicit `mode` (e.g. a read-only `0o555`
+// directory) and `compress: false` to store it uncompressed.
 function createZipWithEntries(zipPath, entries) {
-    return createZip(zipPath, (archive) => {
-        for (const entry of entries) {
-            archive.append(entry.content, { name: entry.name });
-        }
-    });
-}
+    return new Promise((resolve, reject) => {
+        const zipfile = new yazl.ZipFile();
+        const output = fs.createWriteStream(zipPath);
 
-// Builds a zip where each entry can carry an explicit `mode` and `type`
-// (e.g. a read-only `0o555` directory). Only defined keys are forwarded so that
-// archiver applies its own defaults for the rest. A `null` source produces an
-// empty entry, which is what directory entries need.
-function createZipWithModedEntries(zipPath, entries) {
-    return createZip(zipPath, (archive) => {
-        for (const entry of entries) {
-            const data = { name: entry.name };
+        zipfile.on('error', reject);
+        output.on('error', reject);
+        output.on('close', resolve);
+        zipfile.outputStream.pipe(output);
 
-            if (entry.type) {
-                data.type = entry.type;
-            }
+        for (const entry of entries) {
+            const options = {};
 
             if (typeof entry.mode === 'number') {
-                data.mode = entry.mode;
+                options.mode = entry.mode;
             }
 
-            archive.append(entry.content === undefined ? null : entry.content, data);
+            if (entry.type === 'directory') {
+                zipfile.addEmptyDirectory(entry.name, options);
+            } else if (entry.type === 'symlink') {
+                options.mode = 0o120777;
+                zipfile.addBuffer(Buffer.from(entry.target), entry.name, options);
+            } else {
+                if (entry.compress === false) {
+                    options.compress = false;
+                }
+
+                zipfile.addBuffer(Buffer.from(entry.content), entry.name, options);
+            }
         }
+
+        zipfile.end();
     });
 }
 
@@ -101,6 +65,18 @@ function hashTree(root) {
             return `${relativePath}:${hash}`;
         })
         .sort();
+}
+
+// Lists a zip's entries as {fileName: mode} using the POSIX mode bits.
+async function listZipEntries(zipPath) {
+    const zipfile = await yauzl.openPromise(zipPath);
+    const entries = {};
+
+    for await (const entry of zipfile.eachEntry()) {
+        entries[entry.fileName] = (entry.externalFileAttributes >>> 16) & 0xffff;
+    }
+
+    return entries;
 }
 
 // Reads the permission bits (lowest 9 bits) of a path's mode.
@@ -160,31 +136,98 @@ describe('Compress and Extract should be opposite functions', function () {
         assert.deepEqual(hashTree(unzipDestination), originalTree);
     });
 
-    it('rejects when archiver emits an async error event', async function () {
-        const originalLoad = Module._load;
-        Module._load = function (request, parent, isMain) {
-            if (request === 'archiver') {
-                return {
-                    ZipArchive: class extends EventEmitter {
-                        glob() {}
-
-                        pipe() {}
-
-                        finalize() {
-                            setTimeout(() => this.emit('error', new Error('archive failed')), 0);
-                        }
-                    },
-                };
-            }
-
-            return originalLoad(request, parent, isMain);
-        };
+    it('rejects when the zip writer emits an error', async function () {
+        const endSpy = vi.spyOn(yazl.ZipFile.prototype, 'end').mockImplementation(function () {
+            setImmediate(() => this.emit('error', new Error('archive failed')));
+        });
 
         try {
             await assert.rejects(() => compress(themeFolder, zipDestination), /archive failed/);
         } finally {
-            Module._load = originalLoad;
+            endSpy.mockRestore();
         }
+    });
+
+    it('rejects when the destination cannot be written', async function () {
+        const missingDir = path.join(__dirname, 'fixtures', 'does-not-exist', 'theme.zip');
+
+        await assert.rejects(() => compress(themeFolder, missingDir), { code: 'ENOENT' });
+    });
+});
+
+describe('Compress folder contents', function () {
+    let sourceFolder, zipDestination;
+
+    beforeEach(function () {
+        sourceFolder = fs.mkdtempSync(path.join(__dirname, 'fixtures', 'compress-src-'));
+        zipDestination = `${sourceFolder}.zip`;
+
+        fs.mkdirSync(path.join(sourceFolder, 'node_modules', 'dep'), { recursive: true });
+        fs.writeFileSync(path.join(sourceFolder, 'node_modules', 'dep', 'index.js'), 'dep');
+        fs.mkdirSync(path.join(sourceFolder, 'nested', 'node_modules'), { recursive: true });
+        fs.writeFileSync(path.join(sourceFolder, 'nested', 'node_modules', 'keep.js'), 'keep');
+        fs.mkdirSync(path.join(sourceFolder, 'empty-dir'));
+        fs.mkdirSync(path.join(sourceFolder, '.hidden-dir'));
+        fs.writeFileSync(path.join(sourceFolder, '.hidden-dir', 'file.txt'), 'hidden');
+        fs.writeFileSync(path.join(sourceFolder, '.dotfile'), 'dot');
+        fs.writeFileSync(path.join(sourceFolder, 'script.sh'), '#!/bin/sh\n', { mode: 0o755 });
+        fs.chmodSync(path.join(sourceFolder, 'script.sh'), 0o755);
+        fs.symlinkSync('script.sh', path.join(sourceFolder, 'link-to-script'));
+    });
+
+    afterEach(function () {
+        vi.restoreAllMocks();
+        fs.rmSync(sourceFolder, { recursive: true, force: true });
+        fs.rmSync(zipDestination, { force: true });
+    });
+
+    it('includes dotfiles, empty directories and symlinks, and skips the top-level node_modules', async function () {
+        const res = await compress(sourceFolder, zipDestination);
+
+        assert.equal(res.path, zipDestination);
+        assert.equal(res.size, fs.statSync(zipDestination).size);
+
+        const entries = await listZipEntries(zipDestination);
+        assert.deepEqual(Object.keys(entries), [
+            '.dotfile',
+            '.hidden-dir/',
+            '.hidden-dir/file.txt',
+            'empty-dir/',
+            'link-to-script',
+            'nested/',
+            'nested/node_modules/',
+            'nested/node_modules/keep.js',
+            'script.sh',
+        ]);
+
+        assert.equal(entries['empty-dir/'] & 0o170000, 0o040000);
+        assert.equal(entries['script.sh'] & 0o777, 0o755);
+        assert.equal(entries['link-to-script'] & 0o170000, 0o120000);
+    });
+
+    it('accepts custom ignore prefixes', async function () {
+        await compress(sourceFolder, zipDestination, {
+            ignore: ['nested/**', '.hidden-dir/', 'link-to-script'],
+        });
+
+        const entries = await listZipEntries(zipDestination);
+        assert.deepEqual(Object.keys(entries), [
+            '.dotfile',
+            'empty-dir/',
+            'node_modules/',
+            'node_modules/dep/',
+            'node_modules/dep/index.js',
+            'script.sh',
+        ]);
+    });
+
+    it('rejects without creating the destination when an entry cannot be read', async function () {
+        vi.spyOn(fs, 'readlinkSync').mockImplementation(() => {
+            throw new Error('readlink failed');
+        });
+
+        await assert.rejects(() => compress(sourceFolder, zipDestination), /readlink failed/);
+        assert.equal(fs.existsSync(zipDestination), false);
     });
 });
 
@@ -244,9 +287,9 @@ describe('Extract zip', function () {
     });
 
     it('throws when the zip contains symlink entries', async function () {
-        await createZip(zipDestination, (archive) => {
-            archive.symlink('themes/test-target', 'symlink-entry');
-        });
+        await createZipWithEntries(zipDestination, [
+            { name: 'themes/test-target', type: 'symlink', target: 'symlink-entry' },
+        ]);
 
         await assert.rejects(
             () => extract(zipDestination, unzipDestination),
@@ -423,9 +466,9 @@ describe('Extract zip', function () {
     });
 
     it('rejects a zip whose stored entry declares a mismatched uncompressed size', async function () {
-        await createZip(zipDestination, (archive) => {
-            archive.append('12345', { name: 'stored.txt', store: true });
-        });
+        await createZipWithEntries(zipDestination, [
+            { name: 'stored.txt', content: '12345', compress: false },
+        ]);
         forgeCentralUncompressedSize(zipDestination, 50);
 
         await assert.rejects(
@@ -604,7 +647,7 @@ describe('Extract zip with ensureOwnerPermissions', function () {
     });
 
     it('does not change the mode of the extraction root for a ./ entry', async function () {
-        await createZipWithModedEntries(zipDestination, [
+        await createZipWithEntries(zipDestination, [
             { name: './', type: 'directory', mode: 0o777 },
             { name: 'file.txt', content: 'x' },
         ]);
@@ -618,7 +661,7 @@ describe('Extract zip with ensureOwnerPermissions', function () {
     });
 
     it('applies the process umask to directory entry modes', async function () {
-        await createZipWithModedEntries(zipDestination, [
+        await createZipWithEntries(zipDestination, [
             { name: 'open-dir/', type: 'directory', mode: 0o777 },
         ]);
 
@@ -629,7 +672,7 @@ describe('Extract zip with ensureOwnerPermissions', function () {
     });
 
     it('preserves default read-only directory permissions when the option is omitted', async function () {
-        await createZipWithModedEntries(zipDestination, [
+        await createZipWithEntries(zipDestination, [
             { name: 'readonly-dir/', type: 'directory', mode: 0o555 },
         ]);
 
@@ -642,7 +685,7 @@ describe('Extract zip with ensureOwnerPermissions', function () {
     });
 
     it('extracts an archive with a read-only directory and read-only files', async function () {
-        await createZipWithModedEntries(zipDestination, [
+        await createZipWithEntries(zipDestination, [
             { name: 'readonly-dir/', type: 'directory', mode: 0o555 },
             { name: 'readonly-dir/nested.txt', content: 'nested content', mode: 0o444 },
             { name: 'readonly-file.txt', content: 'top-level content', mode: 0o444 },
@@ -675,7 +718,7 @@ describe('Extract zip with ensureOwnerPermissions', function () {
     });
 
     it('keeps execute bits on executable files while adding owner write', async function () {
-        await createZipWithModedEntries(zipDestination, [
+        await createZipWithEntries(zipDestination, [
             { name: 'script.sh', content: '#!/bin/sh\necho hi\n', mode: 0o555 },
         ]);
 
@@ -691,9 +734,9 @@ describe('Extract zip with ensureOwnerPermissions', function () {
     });
 
     it('still rejects symlink entries when ensureOwnerPermissions is enabled', async function () {
-        await createZip(zipDestination, (archive) => {
-            archive.symlink('themes/test-target', 'symlink-entry');
-        });
+        await createZipWithEntries(zipDestination, [
+            { name: 'themes/test-target', type: 'symlink', target: 'symlink-entry' },
+        ]);
 
         await assert.rejects(
             () =>

@@ -26,6 +26,24 @@ let res = await zip.compress('path/to/a/folder', 'path/to/archive.zip', [options
 let res = await zip.extract('path/to/archive.zip', 'path/to/files', [options])
 ```
 
+### `compress` options
+
+`compress` zips every file in the folder, including dotfiles, empty directories and symlinks (stored as symlink entries). If the folder itself is a symlink, its target is zipped. It resolves to `{path, size}`, where `size` is the size of the written zip in bytes.
+
+- `ignore` (default `['node_modules']`) — relative path prefixes, using `/` separators, to leave out. A prefix matches that exact path and everything below it, so `'node_modules'` skips the top-level `node_modules` folder only. A trailing `/` or `/**` is accepted and ignored.
+
+    ```
+    let res = await zip.compress('path/to/theme', 'path/to/theme.zip', {ignore: ['node_modules', '.git']})
+    ```
+
+#### Breaking changes in 5.0.0
+
+`compress` now writes zips with [yazl](https://github.com/thejoshwolfe/yazl) instead of archiver.
+
+- The `type` option has been removed; `compress` only produces zip files (tar and json output are no longer supported).
+- The `glob` and `dot` options have been removed; all files are included and dotfiles are always included.
+- `ignore` takes relative path prefixes instead of glob patterns. The old default `['node_modules/**']` still works because a trailing `/**` is stripped, but other glob syntax (`*`, `?`, `{a,b}`) is not supported.
+
 ### `extract` options
 
 - `limits.perEntryUncompressedBytes` / `limits.totalUncompressedBytes` — reject archives whose entries exceed the given uncompressed sizes.
