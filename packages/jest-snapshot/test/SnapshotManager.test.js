@@ -384,6 +384,36 @@ describe('Snapshot Manager', function () {
             assert.equal(again.pass, true);
         });
 
+        it('merges any() matchers inside arrays of objects like jest', async function () {
+            // Regression: @vitest/snapshot's own merge copies the matcher's
+            // $$typeof onto the object and serialization then throws
+            const snapshotManager = new SnapshotManager();
+            await snapshotManager.setCurrentTest({ testPath, testTitle: 'arrays' });
+
+            const result = snapshotManager.match(
+                { users: [{ id: '1', roles: [{ name: 'Owner' }] }] },
+                { users: [{ id: new Any(String), roles: [new Any(Object)] }] },
+                '[body]',
+            );
+            assert.equal(result.pass, true);
+
+            await snapshotManager.saveSnapshots();
+            const written = fs.readFileSync(
+                path.join(tmpDir, '__snapshots__', 'my.test.js.snap'),
+                'utf8',
+            );
+            assert.match(written, /"roles": Array \[\n {8}Any<Object>,\n {6}\]/);
+        });
+
+        it('fails when properties are used with a non-object value', async function () {
+            const snapshotManager = new SnapshotManager();
+            await snapshotManager.setCurrentTest({ testPath, testTitle: 'primitive' });
+
+            const result = snapshotManager.match('foo', { id: new Any(String) });
+            assert.equal(result.pass, false);
+            assert.match(result.message(), /Expected properties/);
+        });
+
         it('reports a diff when the snapshot does not match', async function () {
             fs.mkdirSync(path.join(tmpDir, '__snapshots__'));
             fs.writeFileSync(

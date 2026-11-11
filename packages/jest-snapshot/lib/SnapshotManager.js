@@ -35,6 +35,54 @@ function willUpdate() {
     return updateSnapshots ? 'all' : 'new';
 }
 
+// Ported from jest-snapshot (MIT, Meta Platforms) so property matchers merge
+// exactly as they did under Jest.
+const isObject = (item) => item !== null && typeof item === 'object' && !Array.isArray(item);
+
+const isAnyOrAnything = (input) =>
+    '$$typeof' in input &&
+    input.$$typeof === Symbol.for('jest.asymmetricMatcher') &&
+    ['Any', 'Anything'].includes(input.constructor.name);
+
+function deepMergeArray(target, source) {
+    const mergedOutput = [...target];
+    for (const [index, sourceElement] of source.entries()) {
+        const targetElement = mergedOutput[index];
+        if (Array.isArray(target[index]) && Array.isArray(sourceElement)) {
+            mergedOutput[index] = deepMergeArray(target[index], sourceElement);
+        } else if (isObject(targetElement) && !isAnyOrAnything(sourceElement)) {
+            mergedOutput[index] = deepMerge(target[index], sourceElement);
+        } else {
+            // Source does not exist in target or target is primitive and cannot be deep merged
+            mergedOutput[index] = sourceElement;
+        }
+    }
+    return mergedOutput;
+}
+
+function deepMerge(target, source) {
+    if (isObject(target) && isObject(source)) {
+        const mergedOutput = { ...target };
+        for (const key of Object.keys(source)) {
+            if (isObject(source[key]) && !source[key].$$typeof) {
+                if (key in target) {
+                    mergedOutput[key] = deepMerge(target[key], source[key]);
+                } else {
+                    Object.assign(mergedOutput, { [key]: source[key] });
+                }
+            } else if (Array.isArray(source[key])) {
+                mergedOutput[key] = deepMergeArray(target[key], source[key]);
+            } else {
+                Object.assign(mergedOutput, { [key]: source[key] });
+            }
+        }
+        return mergedOutput;
+    } else if (Array.isArray(target) && Array.isArray(source)) {
+        return deepMergeArray(target, source);
+    }
+    return target;
+}
+
 class JestCompatSnapshotEnvironment extends NodeSnapshotEnvironment {
     /**
      * @param {SnapshotManager} manager
@@ -63,10 +111,7 @@ class SnapshotManager {
         this.willUpdate = willUpdate();
 
         this.snapshotEnvironment = new JestCompatSnapshotEnvironment(this);
-        this.client = new SnapshotClient({
-            isEqual: (received, expected) =>
-                equals(received, expected, [iterableEquality, subsetEquality]),
-        });
+        this.client = new SnapshotClient();
 
         /** @type {Promise<void>} */
         this._pendingSetup = Promise.resolve();
@@ -260,14 +305,42 @@ class SnapshotManager {
 
         // Mirror jest's key format: `${currentTestName}: ${hint} ${count}`
         const name = hint ? `${snapshotName}: ${hint}` : snapshotName;
+        const hasProperties = !!properties && Object.keys(properties).length > 0;
         const header = `expect(received).toMatchSnapshot(${properties ? 'properties' : ''}${hint ? `${properties ? ', ' : ''}hint` : ''})`;
 
+        // Property matchers are checked and merged here rather than by
+        // @vitest/snapshot: its deepMergeArray merges Any/Anything matchers into
+        // object array elements (e.g. `roles: [any(Object)]`), copying `$$typeof`
+        // onto a plain object that then fails to serialize. jest guards that case.
+        let value = received;
+        if (hasProperties) {
+            const propertiesPass =
+                typeof received === 'object' &&
+                received !== null &&
+                equals(received, properties, [iterableEquality, subsetEquality]);
+
+            if (!propertiesPass) {
+                const body = diff(properties, received, {
+                    aAnnotation: 'Expected properties',
+                    bAnnotation: 'Received value',
+                    includeChangeCounts: true,
+                });
+                return {
+                    pass: false,
+                    actual: received,
+                    expected: properties,
+                    message: () => `${header}\n\nSnapshot name: \`${name} 1\`\n\n${body}`,
+                };
+            }
+
+            value = deepMerge(received, properties);
+        }
+
         const result = this.client.match({
-            received,
+            received: value,
             filepath: testPath,
             name,
             testId: testTitle,
-            properties: properties && Object.keys(properties).length ? properties : undefined,
             assertionName: 'toMatchSnapshot',
         });
 
@@ -275,18 +348,11 @@ class SnapshotManager {
             return result;
         }
 
-        const propertiesFailed = result.expected === properties;
-        const body = propertiesFailed
-            ? diff(properties, received, {
-                  aAnnotation: 'Expected properties',
-                  bAnnotation: 'Received value',
-                  includeChangeCounts: true,
-              })
-            : diff(result.expected, result.actual, {
-                  aAnnotation: 'Snapshot',
-                  bAnnotation: 'Received',
-                  includeChangeCounts: true,
-              });
+        const body = diff(result.expected, result.actual, {
+            aAnnotation: 'Snapshot',
+            bAnnotation: 'Received',
+            includeChangeCounts: true,
+        });
 
         return {
             ...result,
