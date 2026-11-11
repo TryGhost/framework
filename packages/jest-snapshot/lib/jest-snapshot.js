@@ -1,4 +1,4 @@
-const { jestExpect } = require('@jest/expect');
+const { Any, Anything, StringMatching } = require('@vitest/expect');
 const SnapshotManager = require('./SnapshotManager');
 const snapshotManager = new SnapshotManager();
 
@@ -25,7 +25,7 @@ const mochaHooks = {
      * Passes the current test config to the snapshot manager
      * If we're running a retry, reset the registry for this test only
      */
-    beforeEach() {
+    async beforeEach() {
         const { currentTest } = this;
 
         if (currentTest.currentRetry() > 0) {
@@ -33,14 +33,25 @@ const mochaHooks = {
             snapshotManager.resetRegistryForCurrentTest();
         }
 
-        snapshotManager.setCurrentTest({
+        await snapshotManager.setCurrentTest({
             testPath: currentTest.file,
             testTitle: currentTest.fullTitle(),
         });
     },
+
+    /**
+     * Runs after all tests
+     * Writes new/updated snapshots to disk
+     */
+    async afterAll() {
+        await snapshotManager.saveSnapshots();
+    },
 };
 
-const { any, anything, stringMatching } = jestExpect;
+// Same shape as jest's expect.any / expect.anything / expect.stringMatching
+const any = (sample) => new Any(sample);
+const anything = () => new Anything();
+const stringMatching = (expected) => new StringMatching(expected);
 
 module.exports = {
     mochaHooks,
