@@ -54,8 +54,9 @@ function compareNames(a, b) {
 // Walks the folder depth-first in sorted order, skipping ignored paths without
 // descending into them (so a large node_modules is never read). Everything that
 // can fail on the filesystem (stat, readlink) happens here, before the
-// destination is opened.
-async function collectEntries(root, ignore, relativeDir = '', entries = []) {
+// destination is opened. `exclude` is the destination's full path, so a zip
+// written inside the folder being zipped never includes itself.
+async function collectEntries(root, ignore, exclude, relativeDir = '', entries = []) {
     const dirents = await fs.promises.readdir(path.join(root, relativeDir), {
         withFileTypes: true,
     });
@@ -69,6 +70,11 @@ async function collectEntries(root, ignore, relativeDir = '', entries = []) {
         }
 
         const fullPath = path.join(root, relativePath);
+
+        if (fullPath === exclude) {
+            continue;
+        }
+
         let type;
 
         if (dirent.isDirectory()) {
@@ -90,16 +96,17 @@ async function collectEntries(root, ignore, relativeDir = '', entries = []) {
             options: { mode: stats.mode, mtime: clampMtime(stats.mtime) },
         };
 
-        if (type === 'file') {
-            entry.options.size = stats.size;
-        } else if (type === 'symlink') {
+        // No `size` for files: yazl would then reject the whole zip if a file
+        // changes size between this stat and the read. It only uses `size` to
+        // precompute the zip size, and decides on ZIP64 either way.
+        if (type === 'symlink') {
             entry.linkTarget = await fs.promises.readlink(fullPath);
         }
 
         entries.push(entry);
 
         if (type === 'directory') {
-            await collectEntries(root, ignore, relativePath, entries);
+            await collectEntries(root, ignore, exclude, relativePath, entries);
         }
     }
 
@@ -126,8 +133,21 @@ function writeZip(entries, destination) {
             }
             zipfile.outputStream.unpipe(output);
             zipfile.outputStream.destroy();
-            output.destroy();
-            reject(err);
+
+            // Remove the partly written zip once its descriptor is closed.
+            const removePartialZip = () => {
+                fs.promises
+                    .rm(destination, { force: true })
+                    .catch(() => {})
+                    .then(() => reject(err));
+            };
+
+            if (output.closed) {
+                removePartialZip();
+            } else {
+                output.once('close', removePartialZip);
+                output.destroy();
+            }
         };
 
         const openReadStream = (fullPath) => (callback) => {
@@ -182,6 +202,22 @@ function writeZip(entries, destination) {
     });
 }
 
+// The destination's full path with its directory's symlinks resolved, to
+// compare against paths under the (already resolved) folder being zipped.
+async function resolveDestination(destination) {
+    const resolved = path.resolve(destination);
+
+    try {
+        return path.join(
+            await fs.promises.realpath(path.dirname(resolved)),
+            path.basename(resolved),
+        );
+    } catch {
+        // The directory does not exist; opening the destination will fail.
+        return resolved;
+    }
+}
+
 /**
  * Compress
  *
@@ -202,7 +238,8 @@ module.exports = async (folderToZip, destination, options = {}) => {
         folderToZip = await fs.promises.realpath(folderToZip);
     }
 
-    const entries = await collectEntries(folderToZip, ignore);
+    const destinationPath = await resolveDestination(destination);
+    const entries = await collectEntries(folderToZip, ignore, destinationPath);
 
     return writeZip(entries, destination);
 };

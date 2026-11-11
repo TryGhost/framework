@@ -252,6 +252,41 @@ describe('Compress folder contents', function () {
         );
 
         await assert.rejects(() => compress(sourceFolder, zipDestination), { code: 'ENOENT' });
+        // The partly written zip is removed.
+        assert.equal(fs.existsSync(zipDestination), false);
+    });
+
+    it('zips a file whose size changed after the folder was walked', async function () {
+        const { Readable } = require('stream');
+        const createReadStream = fs.createReadStream;
+        vi.spyOn(fs, 'createReadStream').mockImplementation((filePath, ...args) => {
+            if (filePath.endsWith('script.sh')) {
+                return Readable.from([Buffer.from('#!/bin/sh\necho grown\n')]);
+            }
+
+            return createReadStream(filePath, ...args);
+        });
+
+        await compress(sourceFolder, zipDestination);
+
+        const zipfile = await yauzl.openPromise(zipDestination);
+        for await (const entry of zipfile.eachEntry()) {
+            if (entry.fileName === 'script.sh') {
+                assert.equal(entry.uncompressedSize, '#!/bin/sh\necho grown\n'.length);
+            }
+        }
+    });
+
+    it('never includes the destination when it is inside the folder being zipped', async function () {
+        const insideDestination = path.join(sourceFolder, 'out.zip');
+
+        await compress(sourceFolder, insideDestination);
+        // Second run: out.zip now exists in the folder and must still be left out.
+        await compress(sourceFolder, insideDestination);
+
+        const entries = await listZipEntries(insideDestination);
+        assert.equal('out.zip' in entries, false);
+        assert.equal('script.sh' in entries, true);
     });
 
     it('rejects when the zip writer throws while adding entries', async function () {
