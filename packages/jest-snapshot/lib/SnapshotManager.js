@@ -1,15 +1,29 @@
-const { SnapshotState, toMatchSnapshot, EXTENSION } = require('jest-snapshot');
+const { SnapshotClient } = require('@vitest/snapshot');
+const { NodeSnapshotEnvironment } = require('@vitest/snapshot/environment');
+const { equals, iterableEquality, subsetEquality } = require('@vitest/expect');
+const { diff } = require('@vitest/utils/diff');
 const errors = require('@tryghost/errors');
-const utils = require('@jest/expect-utils');
 const assert = require('assert');
 const path = require('path');
 const { makeMessageFromMatchMessage } = require('./utils');
 
-const DOT_EXTENSION = `.${EXTENSION}`;
+const DOT_EXTENSION = '.snap';
+
+// Keep the header jest-snapshot wrote so existing snapshot files are not
+// rewritten just because the engine changed.
+const SNAPSHOT_HEADER = '// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing';
+
+// jest-snapshot used pretty-format's defaults (no snapshotFormat passed),
+// which print `Object {` / `Array [` and escape quotes inside strings.
+// @vitest/snapshot defaults both of these to false.
+const SNAPSHOT_FORMAT = {
+    printBasicPrototype: true,
+    escapeString: true,
+};
 
 /**
  * Determines whether to update all snapshots or only new ones
- * @returns {string} e.g. 'all' or 'new'
+ * @returns {'all' | 'new'}
  */
 function willUpdate() {
     const updateSnapshots =
@@ -21,6 +35,58 @@ function willUpdate() {
     return updateSnapshots ? 'all' : 'new';
 }
 
+/**
+ * Merges property matchers into the received value, as jest-snapshot does
+ * before serializing: matchers (and primitives) replace the received value,
+ * plain objects and arrays merge key-by-key / index-by-index, and anything in
+ * `received` that `properties` doesn't mention is kept.
+ *
+ * @param {unknown} received
+ * @param {unknown} properties
+ * @returns {unknown}
+ */
+function mergeProperties(received, properties) {
+    if (Array.isArray(received) && Array.isArray(properties)) {
+        const merged = [...received];
+        properties.forEach((value, index) => {
+            merged[index] = mergeProperties(received[index], value);
+        });
+        return merged;
+    }
+
+    const isMergeable = (value) =>
+        value !== null && typeof value === 'object' && !Array.isArray(value) && !value.$$typeof;
+
+    if (isMergeable(received) && isMergeable(properties)) {
+        const merged = { ...received };
+        for (const key of Object.keys(properties)) {
+            merged[key] =
+                key in received ? mergeProperties(received[key], properties[key]) : properties[key];
+        }
+        return merged;
+    }
+
+    return properties;
+}
+
+class JestCompatSnapshotEnvironment extends NodeSnapshotEnvironment {
+    /**
+     * @param {SnapshotManager} manager
+     */
+    constructor(manager) {
+        super();
+        this.manager = manager;
+    }
+
+    getHeader() {
+        return SNAPSHOT_HEADER;
+    }
+
+    async resolvePath(filepath) {
+        return this.manager._resolveSnapshotFilePath(filepath);
+    }
+}
+
 class SnapshotManager {
     constructor() {
         this.registry = {};
@@ -29,6 +95,12 @@ class SnapshotManager {
 
         // Set willUpdate once, as it  can't change whilst we are running
         this.willUpdate = willUpdate();
+
+        this.snapshotEnvironment = new JestCompatSnapshotEnvironment(this);
+        this.client = new SnapshotClient();
+
+        /** @type {Promise<void>} */
+        this._pendingSetup = Promise.resolve();
     }
 
     /**
@@ -67,7 +139,7 @@ class SnapshotManager {
     /**
      * Returns config for the current test
      * Throws an error if the current test is not configured
-     * @returns {Object} e.g. {snapshotPath: 'test/__snapshots__/my-fake.test.js.snap', snapshotName: 'My fake test title 1', willUpdate: 'new'}
+     * @returns {{testPath: string, testTitle: string, snapshotName: string, snapshotPath: string}}
      */
     _getConfig() {
         if (!this.currentTest.testPath || !this.currentTest.testTitle) {
@@ -84,7 +156,7 @@ class SnapshotManager {
         const snapshotName = this._getNameForSnapshot(testPath, testTitle);
         const snapshotPath = this._resolveSnapshotFilePath(testPath);
 
-        return { snapshotPath, snapshotName };
+        return { testPath, testTitle, snapshotName, snapshotPath };
     }
 
     /**
@@ -96,34 +168,76 @@ class SnapshotManager {
 
     /**
      * Resets the registry for the current test only
+     * Also clears any snapshot keys the engine recorded for this test so a
+     * retry produces the same keys as the first attempt.
      */
     resetRegistryForCurrentTest() {
         const { testPath, testTitle } = this.currentTest;
         if (testPath in this.registry && testTitle in this.registry[testPath]) {
             delete this.registry[testPath][testTitle];
         }
+        if (testPath && this.client.snapshotStateMap.has(testPath)) {
+            const state = this.client.getSnapshotState(testPath);
+            this.client.clearTest(testPath, testTitle);
+
+            // clearTest resets keys the cleared attempt *added* to `undefined`
+            // rather than removing them, so save() would crash if the retry
+            // never reaches those assertions. Drop them.
+            const data = state._snapshotData;
+            if (data) {
+                for (const key of Object.keys(data)) {
+                    if (data[key] === undefined) {
+                        delete data[key];
+                    }
+                }
+            }
+        }
     }
 
     /**
+     * Sets the current test and starts loading its snapshot file.
+     * Loading is async; callers that can wait should `await` the result (or
+     * `await snapshotManager.ready()`) before matching.
+     *
      * @param {Object} testConfig
      * @param {String} testConfig.testPath full path to the test file
      * @param {String} testConfig.testTitle the full title of the test - all the describe and it names concatenated
+     * @returns {Promise<void>}
      */
     setCurrentTest(testConfig) {
         this.currentTest = testConfig;
+
+        if (testConfig && testConfig.testPath) {
+            this._pendingSetup = this.client.setup(testConfig.testPath, {
+                updateSnapshot: this.willUpdate,
+                snapshotEnvironment: this.snapshotEnvironment,
+                snapshotFormat: SNAPSHOT_FORMAT,
+            });
+        }
+
+        return this._pendingSetup;
     }
 
     /**
-     * Gets a SnapshotState instance for the current test
-     * @param {string} snapshotPath e.g. 'test/__snapshots__/my-fake.test.js.snap'
-     * @returns {SnapshotState}
+     * Resolves once the snapshot file for the current test has been loaded
+     * @returns {Promise<void>}
      */
-    getSnapshotState(snapshotPath) {
-        // Initialize the SnapshotState, it’s responsible for actually matching
-        // actual snapshot with expected one and storing results
-        return new SnapshotState(snapshotPath, {
-            updateSnapshot: this.willUpdate,
-        });
+    ready() {
+        return this._pendingSetup;
+    }
+
+    /**
+     * Writes every loaded snapshot file to disk (when changed), then forgets
+     * them. Obsolete snapshots are kept, matching the previous jest-snapshot
+     * behaviour.
+     * @returns {Promise<void>}
+     */
+    async saveSnapshots() {
+        await this._pendingSetup;
+        const states = [...this.client.snapshotStateMap.values()];
+        await Promise.all(states.map((state) => state.save()));
+        // Only forget the states once every write succeeded, so a failed save can be retried
+        this.client.clear();
     }
 
     /**
@@ -170,40 +284,74 @@ class SnapshotManager {
     }
 
     /**
-     * Calls Jest's toMatchSnapshot function
-     * Binds the snapshotState, currentTestName, utils and equals function to the matcher
-     * Executes the matcher
-     * Saves the snapshot state
+     * Matches `received` against the stored snapshot for the current test.
+     * Synchronous: the snapshot file must already be loaded (see setCurrentTest/ready).
      *
      * @param {Object} received - our actual value
      * @param {Object} [properties] - the properties we want to match against
      * @param {string} [hint] - a hint to help with the match
-     * @returns {Object} result of the match
+     * @returns {{pass: boolean, message: () => string, actual?: string, expected?: string}}
      */
     match(received, properties = {}, hint) {
-        const { snapshotPath, snapshotName } = this._getConfig();
+        const { testPath, testTitle, snapshotName } = this._getConfig();
 
-        const snapshotState = this.getSnapshotState(snapshotPath);
-
-        const matcher = toMatchSnapshot.bind({
-            snapshotState,
-            currentTestName: snapshotName,
-            utils,
-            equals: utils.equals,
-        });
-
-        // Execute the matcher
-        let result;
-        if (properties) {
-            result = matcher(received, properties, hint);
-        } else {
-            result = matcher(received, hint);
+        if (!this.client.snapshotStateMap.has(testPath)) {
+            throw new errors.IncorrectUsageError({
+                message: 'Unable to run snapshot tests, snapshot file was not loaded',
+                context: `No snapshot state for ${testPath}`,
+                help: 'Await snapshotManager.setCurrentTest() (or snapshotManager.ready()) before matching',
+            });
         }
 
-        // Store the state of snapshot, depending on updateSnapshot value
-        snapshotState.save();
+        // Mirror jest's key format: `${currentTestName}: ${hint} ${count}`
+        const name = hint ? `${snapshotName}: ${hint}` : snapshotName;
+        const failure = (snapshotKey, body, extra) => ({
+            pass: false,
+            ...extra,
+            message: () =>
+                `expect(received).toMatchSnapshot()\n\nSnapshot name: \`${snapshotKey}\`\n\n${body}`,
+        });
 
-        return result;
+        // Property matchers are checked and merged here rather than by
+        // @vitest/snapshot, whose merge copies Any/Anything matchers inside
+        // arrays of objects (e.g. `roles: [any(Object)]`) onto the object.
+        let value = received;
+        if (properties && Object.keys(properties).length) {
+            const propertiesPass =
+                typeof received === 'object' &&
+                received !== null &&
+                equals(received, properties, [iterableEquality, subsetEquality]);
+
+            if (!propertiesPass) {
+                const body = diff(properties, received, {
+                    aAnnotation: 'Expected properties',
+                    bAnnotation: 'Received value',
+                    includeChangeCounts: true,
+                });
+                return failure(`${name} 1`, body, { actual: received, expected: properties });
+            }
+
+            value = mergeProperties(received, properties);
+        }
+
+        const result = this.client.match({
+            received: value,
+            filepath: testPath,
+            name,
+            testId: testTitle,
+            assertionName: 'toMatchSnapshot',
+        });
+
+        if (result.pass) {
+            return result;
+        }
+
+        const body = diff(result.expected, result.actual, {
+            aAnnotation: 'Snapshot',
+            bAnnotation: 'Received',
+            includeChangeCounts: true,
+        });
+        return failure(`${name} 1`, body, { actual: result.actual, expected: result.expected });
     }
 }
 

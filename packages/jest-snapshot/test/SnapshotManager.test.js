@@ -1,5 +1,6 @@
 const { assert, sinon } = require('./utils');
 
+const path = require('path');
 const SnapshotManager = require('../lib/SnapshotManager');
 
 describe('Snapshot Manager', function () {
@@ -262,16 +263,17 @@ describe('Snapshot Manager', function () {
     });
 
     describe('match', function () {
-        it('returns a failure when the snapshot does not match', function () {
+        it('returns a failure when the snapshot does not match', async function () {
             const snapshotManager = new SnapshotManager();
 
             // Ensure this doesn't result in files being written
             snapshotManager.willUpdate = 'none';
 
-            const configStub = sinon.stub(snapshotManager, '_getConfig').returns({
-                snapshotPath: 'test/__snapshots__/foo.js.snap',
-                snapshotName: 'testing bar 1',
+            await snapshotManager.setCurrentTest({
+                testPath: path.join(__dirname, 'foo.js'),
+                testTitle: 'testing bar',
             });
+            const configStub = sinon.spy(snapshotManager, '_getConfig');
 
             const result = snapshotManager.match({});
             sinon.assert.calledOnce(configStub);
@@ -280,16 +282,17 @@ describe('Snapshot Manager', function () {
             assert.match(result.message(), /testing bar 1/);
         });
 
-        it('match can accept a name hint for failure messages', function () {
+        it('match can accept a name hint for failure messages', async function () {
             const snapshotManager = new SnapshotManager();
 
             // Ensure this doesn't result in files being written
             snapshotManager.willUpdate = 'none';
 
-            const configStub = sinon.stub(snapshotManager, '_getConfig').returns({
-                snapshotPath: 'test/__snapshots__/foo.js.snap',
-                snapshotName: 'testing bar 1',
+            await snapshotManager.setCurrentTest({
+                testPath: path.join(__dirname, 'foo.js'),
+                testTitle: 'testing bar',
             });
+            const configStub = sinon.spy(snapshotManager, '_getConfig');
 
             const result = snapshotManager.match({}, {}, '[headers]');
             sinon.assert.calledOnce(configStub);
@@ -297,21 +300,209 @@ describe('Snapshot Manager', function () {
             assert.match(result.message(), /testing bar 1:.*?\[headers\]/);
         });
 
-        it('executes matcher without properties', function () {
+        it('executes matcher without properties', async function () {
             const snapshotManager = new SnapshotManager();
 
             // Ensure this doesn't result in files being written
             snapshotManager.willUpdate = 'none';
 
-            const configStub = sinon.stub(snapshotManager, '_getConfig').returns({
-                snapshotPath: 'test/__snapshots__/foo.js.snap',
-                snapshotName: 'testing bar 1',
+            await snapshotManager.setCurrentTest({
+                testPath: path.join(__dirname, 'foo.js'),
+                testTitle: 'testing bar',
             });
+            const configStub = sinon.spy(snapshotManager, '_getConfig');
 
             const result = snapshotManager.match('foo', null, '[html]');
             sinon.assert.calledOnce(configStub);
             assert.equal(result.pass, false);
             assert.equal(typeof result.message, 'function');
+        });
+    });
+
+    describe('vitest snapshot engine', function () {
+        const fs = require('fs');
+        const os = require('os');
+        const { Any, StringMatching } = require('@vitest/expect');
+
+        let tmpDir;
+        let testPath;
+
+        beforeEach(function () {
+            tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'jest-snapshot-'));
+            testPath = path.join(tmpDir, 'my.test.js');
+        });
+
+        afterEach(function () {
+            fs.rmSync(tmpDir, { recursive: true, force: true });
+        });
+
+        it('writes new snapshots in the jest-compatible format', async function () {
+            const snapshotManager = new SnapshotManager();
+            await snapshotManager.setCurrentTest({ testPath, testTitle: 'writes' });
+            await snapshotManager.ready();
+
+            const result = snapshotManager.match(
+                { id: 'abc', quote: 'say "hi"', list: [1], when: 'x' },
+                { id: new Any(String), when: new StringMatching(/x/) },
+                '[body]',
+            );
+            assert.equal(result.pass, true);
+
+            await snapshotManager.saveSnapshots();
+
+            const written = fs.readFileSync(
+                path.join(tmpDir, '__snapshots__', 'my.test.js.snap'),
+                'utf8',
+            );
+            assert.equal(
+                written,
+                [
+                    '// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing',
+                    '',
+                    'exports[`writes 1: [body] 1`] = `',
+                    'Object {',
+                    '  "id": Any<String>,',
+                    '  "list": Array [',
+                    '    1,',
+                    '  ],',
+                    '  "quote": "say \\\\"hi\\\\"",',
+                    '  "when": StringMatching /x/,',
+                    '}',
+                    '`;',
+                    '',
+                ].join('\n'),
+            );
+
+            // A fresh manager matches the written file
+            const second = new SnapshotManager();
+            await second.setCurrentTest({ testPath, testTitle: 'writes' });
+            const again = second.match(
+                { id: 'def', quote: 'say "hi"', list: [1], when: 'x' },
+                { id: new Any(String), when: new StringMatching(/x/) },
+                '[body]',
+            );
+            assert.equal(again.pass, true);
+        });
+
+        it('merges any() matchers inside arrays of objects like jest', async function () {
+            // Regression: @vitest/snapshot's own merge copies the matcher's
+            // $$typeof onto the object and serialization then throws
+            const snapshotManager = new SnapshotManager();
+            await snapshotManager.setCurrentTest({ testPath, testTitle: 'arrays' });
+
+            const result = snapshotManager.match(
+                { users: [{ id: '1', roles: [{ name: 'Owner' }] }] },
+                { users: [{ id: new Any(String), roles: [new Any(Object)] }] },
+                '[body]',
+            );
+            assert.equal(result.pass, true);
+
+            await snapshotManager.saveSnapshots();
+            const written = fs.readFileSync(
+                path.join(tmpDir, '__snapshots__', 'my.test.js.snap'),
+                'utf8',
+            );
+            assert.match(written, /"roles": Array \[\n {8}Any<Object>,\n {6}\]/);
+        });
+
+        it('fails when properties are used with a non-object value', async function () {
+            const snapshotManager = new SnapshotManager();
+            await snapshotManager.setCurrentTest({ testPath, testTitle: 'primitive' });
+
+            const result = snapshotManager.match('foo', { id: new Any(String) });
+            assert.equal(result.pass, false);
+            assert.match(result.message(), /Expected properties/);
+        });
+
+        it('reports a diff when the snapshot does not match', async function () {
+            fs.mkdirSync(path.join(tmpDir, '__snapshots__'));
+            fs.writeFileSync(
+                path.join(tmpDir, '__snapshots__', 'my.test.js.snap'),
+                '// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing\n\nexports[`diff 1 1`] = `\nObject {\n  "foo": "bar",\n}\n`;\n',
+            );
+            const snapshotManager = new SnapshotManager();
+            await snapshotManager.setCurrentTest({ testPath, testTitle: 'diff' });
+
+            const result = snapshotManager.match({ foo: 'baz' });
+            assert.equal(result.pass, false);
+            assert.match(result.message(), /Snapshot name: `diff 1 1`/);
+            assert.match(result.message(), /Snapshot {2}- 1/);
+            assert.match(result.message(), /Received {2}\+ 1/);
+        });
+
+        it('reports a diff when properties do not match', async function () {
+            const snapshotManager = new SnapshotManager();
+            await snapshotManager.setCurrentTest({ testPath, testTitle: 'props' });
+
+            const result = snapshotManager.match({ id: 1 }, { id: new Any(String) }, '[body]');
+            assert.equal(result.pass, false);
+            assert.match(result.message(), /Snapshot name: `props 1: \[body\] 1`/);
+            assert.match(result.message(), /Expected properties/);
+        });
+
+        it('drops snapshots a failed attempt added when the retry does not reach them', async function () {
+            const snapshotManager = new SnapshotManager();
+            await snapshotManager.setCurrentTest({ testPath, testTitle: 'fewer' });
+            assert.equal(snapshotManager.match({ first: true }).pass, true);
+            assert.equal(snapshotManager.match({ second: true }).pass, true);
+
+            // Retry only reaches the first assertion
+            snapshotManager.resetRegistryForCurrentTest();
+            assert.equal(snapshotManager.match({ first: true }).pass, true);
+            await snapshotManager.saveSnapshots();
+
+            const written = fs.readFileSync(
+                path.join(tmpDir, '__snapshots__', 'my.test.js.snap'),
+                'utf8',
+            );
+            assert.match(written, /exports\[`fewer 1 1`\]/);
+            assert.doesNotMatch(written, /fewer 2 1/);
+        });
+
+        it('keeps snapshot state when saving fails so it can be retried', async function () {
+            const snapshotManager = new SnapshotManager();
+            await snapshotManager.setCurrentTest({ testPath, testTitle: 'save' });
+            snapshotManager.match({ ok: true });
+
+            const saveStub = sinon
+                .stub(snapshotManager.snapshotEnvironment, 'saveSnapshotFile')
+                .rejects(new Error('disk full'));
+            await assert.rejects(snapshotManager.saveSnapshots(), /disk full/);
+            assert.equal(snapshotManager.client.snapshotStateMap.size, 1);
+
+            saveStub.restore();
+            await snapshotManager.saveSnapshots();
+            assert.equal(snapshotManager.client.snapshotStateMap.size, 0);
+            assert.ok(fs.existsSync(path.join(tmpDir, '__snapshots__', 'my.test.js.snap')));
+        });
+
+        it('throws a helpful error when the snapshot file was not loaded', function () {
+            const snapshotManager = new SnapshotManager();
+            snapshotManager.currentTest = { testPath, testTitle: 'not loaded' };
+
+            assert.throws(() => snapshotManager.match({}), {
+                message: 'Unable to run snapshot tests, snapshot file was not loaded',
+            });
+        });
+
+        it('resetRegistryForCurrentTest lets a retried test reuse its snapshot keys', async function () {
+            const snapshotManager = new SnapshotManager();
+            await snapshotManager.setCurrentTest({ testPath, testTitle: 'retry' });
+            assert.equal(snapshotManager.match({ attempt: 1 }).pass, true);
+
+            // Retry: the first attempt's unsaved snapshot is discarded and the
+            // retry writes under the same key instead of `retry 1 2`
+            snapshotManager.resetRegistryForCurrentTest();
+            assert.equal(snapshotManager.match({ attempt: 2 }).pass, true);
+            await snapshotManager.saveSnapshots();
+
+            const written = fs.readFileSync(
+                path.join(tmpDir, '__snapshots__', 'my.test.js.snap'),
+                'utf8',
+            );
+            assert.match(written, /exports\[`retry 1 1`\]/);
+            assert.match(written, /"attempt": 2/);
+            assert.doesNotMatch(written, /retry 1 2|"attempt": 1/);
         });
     });
 });

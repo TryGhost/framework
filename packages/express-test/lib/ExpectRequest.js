@@ -123,14 +123,18 @@ class ExpectRequest extends Request {
                 return callback(error);
             }
 
-            try {
-                if (this.assertions && this.assertions.length) {
-                    this._assertAll(response);
-                }
-                return callback(null, response);
-            } catch (_error) {
-                return callback(_error);
-            }
+            // Snapshot files load asynchronously; wait for the current test's
+            // file before running the (synchronous) assertions.
+            Promise.resolve(this.snapshotManager.ready && this.snapshotManager.ready())
+                .then(() => {
+                    if (this.assertions && this.assertions.length) {
+                        this._assertAll(response);
+                    }
+                })
+                .then(
+                    () => callback(null, response),
+                    (_error) => callback(_error),
+                );
         });
     }
 
