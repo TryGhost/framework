@@ -335,6 +335,22 @@ describe('Compress folder contents', function () {
         }
     });
 
+    it('excludes the file a symlinked destination points to', async function () {
+        const linkDestination = `${sourceFolder}-link.zip`;
+        fs.symlinkSync(path.join(sourceFolder, '.dotfile'), linkDestination);
+
+        try {
+            await compress(sourceFolder, linkDestination);
+
+            // The writer followed the link, so the zip is now at the target path.
+            const entries = await listZipEntries(path.join(sourceFolder, '.dotfile'));
+            assert.equal('.dotfile' in entries, false);
+            assert.equal('script.sh' in entries, true);
+        } finally {
+            fs.rmSync(linkDestination, { force: true });
+        }
+    });
+
     it('rejects when the zip writer throws while adding entries', async function () {
         vi.spyOn(yazl.ZipFile.prototype, 'addEmptyDirectory').mockImplementation(() => {
             throw new Error('invalid entry');

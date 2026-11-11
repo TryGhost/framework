@@ -214,10 +214,18 @@ function writeZip(entries, destination) {
     });
 }
 
-// The destination's full path with its directory's symlinks resolved, to
-// compare against paths under the (already resolved) folder being zipped.
+// The destination's canonical path, to compare against paths under the
+// (already resolved) folder being zipped. If the destination exists it is
+// resolved fully, so a symlink to a file in the folder is excluded rather than
+// read while the writer truncates it.
 async function resolveDestination(destination) {
     const resolved = path.resolve(destination);
+
+    try {
+        return await fs.promises.realpath(resolved);
+    } catch {
+        // Not there yet (or a dangling symlink): resolve the directory instead.
+    }
 
     try {
         return path.join(
