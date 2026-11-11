@@ -368,7 +368,8 @@ describe('Compress folder contents', function () {
         } finally {
             fs.rmSync(manyDirs, { recursive: true, force: true });
         }
-    });
+        // Creating and zipping 20000 directories takes several seconds.
+    }, 30000);
 
     it('does not open source files after the zip has failed', async function () {
         const lateFolder = fs.mkdtempSync(path.join(__dirname, 'fixtures', 'compress-src-'));
