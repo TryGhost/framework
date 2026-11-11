@@ -188,7 +188,7 @@ describe('Compress folder contents', function () {
         assert.equal(res.size, fs.statSync(zipDestination).size);
 
         const entries = await listZipEntries(zipDestination);
-        assert.deepEqual(Object.keys(entries), [
+        assert.deepEqual(Object.keys(entries).sort(), [
             '.dotfile',
             '.hidden-dir/',
             '.hidden-dir/file.txt',
@@ -211,7 +211,7 @@ describe('Compress folder contents', function () {
         });
 
         const entries = await listZipEntries(zipDestination);
-        assert.deepEqual(Object.keys(entries), [
+        assert.deepEqual(Object.keys(entries).sort(), [
             '.dotfile',
             'empty-dir/',
             'node_modules/',
@@ -348,6 +348,107 @@ describe('Compress folder contents', function () {
             assert.equal('script.sh' in entries, true);
         } finally {
             fs.rmSync(linkDestination, { force: true });
+        }
+    });
+
+    it('zips many empty directories after a file without overflowing the stack', async function () {
+        // Enough to overflow yazl's recursion inside a Vitest worker thread.
+        const DIR_COUNT = 20000;
+        const manyDirs = fs.mkdtempSync(path.join(__dirname, 'fixtures', 'compress-src-'));
+
+        try {
+            fs.writeFileSync(path.join(manyDirs, '0-file.txt'), 'x');
+            for (let i = 0; i < DIR_COUNT; i++) {
+                fs.mkdirSync(path.join(manyDirs, `d${String(i).padStart(5, '0')}`));
+            }
+
+            await compress(manyDirs, zipDestination);
+
+            assert.equal(Object.keys(await listZipEntries(zipDestination)).length, DIR_COUNT + 1);
+        } finally {
+            fs.rmSync(manyDirs, { recursive: true, force: true });
+        }
+    });
+
+    it('does not open source files after the zip has failed', async function () {
+        const lateFolder = fs.mkdtempSync(path.join(__dirname, 'fixtures', 'compress-src-'));
+        fs.symlinkSync('z-big.bin', path.join(lateFolder, 'a-link'));
+        fs.writeFileSync(path.join(lateFolder, 'z-big.bin'), Buffer.alloc(8 * 1024 * 1024, 'b'));
+
+        let rejected = false;
+        const openedAfterReject = [];
+        const createReadStream = fs.createReadStream;
+        vi.spyOn(fs, 'createReadStream').mockImplementation((...args) => {
+            const stream = createReadStream(...args);
+            if (rejected) {
+                openedAfterReject.push(stream);
+            }
+            return stream;
+        });
+
+        try {
+            const missingDir = path.join(lateFolder, 'does-not-exist', 'out.zip');
+            await assert.rejects(() => compress(lateFolder, missingDir), { code: 'ENOENT' });
+            rejected = true;
+            // Give the queued symlink entry time to finish and pump the next one.
+            await new Promise((resolve) => setTimeout(resolve, 200));
+
+            assert.equal(openedAfterReject.length, 0);
+        } finally {
+            fs.rmSync(lateFolder, { recursive: true, force: true });
+        }
+    });
+
+    it('stores symlink targets relative to the link', async function () {
+        fs.symlinkSync(
+            path.join(sourceFolder, '.hidden-dir', 'file.txt'),
+            path.join(sourceFolder, 'absolute-link'),
+        );
+
+        await compress(sourceFolder, zipDestination);
+
+        const zipfile = await yauzl.openPromise(zipDestination);
+        let target;
+        for await (const entry of zipfile.eachEntry()) {
+            if (entry.fileName === 'absolute-link') {
+                const chunks = [];
+                for await (const chunk of await zipfile.openReadStreamPromise(entry)) {
+                    chunks.push(chunk);
+                }
+                target = Buffer.concat(chunks).toString();
+            }
+        }
+
+        assert.equal(target, '.hidden-dir/file.txt');
+    });
+
+    it('keeps names that look like Windows drive paths', async function () {
+        fs.writeFileSync(path.join(sourceFolder, 'a:b.txt'), 'colon');
+        const unzipDestination = `${sourceFolder}-unzipped`;
+        fs.rmSync(path.join(sourceFolder, 'link-to-script'));
+
+        try {
+            await compress(sourceFolder, zipDestination);
+            assert.equal('./a:b.txt' in (await listZipEntries(zipDestination)), true);
+
+            await extract(zipDestination, unzipDestination);
+            assert.equal(fs.readFileSync(path.join(unzipDestination, 'a:b.txt'), 'utf8'), 'colon');
+        } finally {
+            fs.rmSync(unzipDestination, { recursive: true, force: true });
+        }
+    });
+
+    it('keeps modification times after 2038', async function () {
+        const future = new Date(2100, 5, 15, 12, 0, 0);
+        fs.utimesSync(path.join(sourceFolder, 'script.sh'), future, future);
+
+        await compress(sourceFolder, zipDestination);
+
+        const zipfile = await yauzl.openPromise(zipDestination);
+        for await (const entry of zipfile.eachEntry()) {
+            if (entry.fileName === 'script.sh') {
+                assert.equal(entry.getLastModDate().getFullYear(), 2100);
+            }
         }
     });
 

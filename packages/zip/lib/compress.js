@@ -39,8 +39,22 @@ function isIgnored(relativePath, ignore) {
 // to the DOS minimum (local time, as yazl computes it) so both fields agree.
 const MIN_MTIME = new Date(1980, 0, 1);
 
-function clampMtime(mtime) {
-    return mtime < MIN_MTIME ? MIN_MTIME : mtime;
+// The extended timestamp field is a signed 32-bit Unix time, so yazl caps it
+// at January 2038. For later dates write only the DOS field (good to 2107).
+const MAX_EXTENDED_MTIME = new Date(0x7fffffff * 1000);
+
+function timestampOptions(mtime) {
+    if (mtime < MIN_MTIME) {
+        return { mtime: MIN_MTIME };
+    }
+
+    return { mtime, forceDosTimestamp: mtime > MAX_EXTENDED_MTIME };
+}
+
+// yazl rejects names that look like Windows drive paths (`c:foo`). Prefix them
+// with `./`, which keeps the real name when extracted.
+function toEntryName(relativePath) {
+    return /^[a-zA-Z]:/.test(relativePath) ? `./${relativePath}` : relativePath;
 }
 
 function compareNames(a, b) {
@@ -92,15 +106,19 @@ async function collectEntries(root, ignore, exclude, relativeDir = '', entries =
         const entry = {
             type,
             fullPath,
-            relativePath,
-            options: { mode: stats.mode, mtime: clampMtime(stats.mtime) },
+            name: toEntryName(relativePath),
+            options: { mode: stats.mode, ...timestampOptions(stats.mtime) },
         };
 
         // No `size` for files: yazl would then reject the whole zip if a file
         // changes size between this stat and the read. It only uses `size` to
         // precompute the zip size, and decides on ZIP64 either way.
         if (type === 'symlink') {
-            entry.linkTarget = await fs.promises.readlink(fullPath);
+            // Store the target relative to the link, as archiver did, so an
+            // absolute target does not bake this machine's paths into the zip.
+            const linkDir = path.dirname(fullPath);
+            const target = path.resolve(linkDir, await fs.promises.readlink(fullPath));
+            entry.linkTarget = path.relative(linkDir, target).split(path.sep).join('/');
         }
 
         entries.push(entry);
@@ -163,6 +181,12 @@ function writeZip(entries, destination) {
         };
 
         const openReadStream = (fullPath) => (callback) => {
+            // yazl keeps pumping queued entries after a failure; never open a
+            // source once the zip has settled.
+            if (settled) {
+                return;
+            }
+
             const stream = fs.createReadStream(fullPath);
             openStreams.add(stream);
             stream.on('close', () => openStreams.delete(stream));
@@ -184,22 +208,27 @@ function writeZip(entries, destination) {
 
         zipfile.outputStream.pipe(output);
 
+        // Directories go first. yazl writes a directory entry synchronously and
+        // then recurses into the next queued entry, so a long run of
+        // directories queued behind an unfinished file overflows the stack.
+        // Added while nothing is pending, each one is written immediately.
+        const ordered = [
+            ...entries.filter((entry) => entry.type === 'directory'),
+            ...entries.filter((entry) => entry.type !== 'directory'),
+        ];
+
         try {
-            for (const entry of entries) {
+            for (const entry of ordered) {
                 if (entry.type === 'directory') {
-                    zipfile.addEmptyDirectory(entry.relativePath, entry.options);
+                    zipfile.addEmptyDirectory(entry.name, entry.options);
                 } else if (entry.type === 'symlink') {
                     // Store symlinks as symlink entries (link target as data),
                     // not as the file they point to.
-                    zipfile.addBuffer(
-                        Buffer.from(entry.linkTarget),
-                        entry.relativePath,
-                        entry.options,
-                    );
+                    zipfile.addBuffer(Buffer.from(entry.linkTarget), entry.name, entry.options);
                 } else {
                     // Lazy, so only one source file is open at a time.
                     zipfile.addReadStreamLazy(
-                        entry.relativePath,
+                        entry.name,
                         entry.options,
                         openReadStream(entry.fullPath),
                     );
