@@ -20,6 +20,7 @@ catalog:
   sinon: 22.1.0
   typescript: 7.0.2
 minimumReleaseAgeExclude:
+  - '@tryghost/*'
   # Renovate security update: nx@23.2.1
   - nx@23.2.1
   - '@nx/js@23.2.1'
