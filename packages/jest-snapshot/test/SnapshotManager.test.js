@@ -440,6 +440,42 @@ describe('Snapshot Manager', function () {
             assert.match(result.message(), /Expected properties/);
         });
 
+        it('drops snapshots a failed attempt added when the retry does not reach them', async function () {
+            const snapshotManager = new SnapshotManager();
+            await snapshotManager.setCurrentTest({ testPath, testTitle: 'fewer' });
+            assert.equal(snapshotManager.match({ first: true }).pass, true);
+            assert.equal(snapshotManager.match({ second: true }).pass, true);
+
+            // Retry only reaches the first assertion
+            snapshotManager.resetRegistryForCurrentTest();
+            assert.equal(snapshotManager.match({ first: true }).pass, true);
+            await snapshotManager.saveSnapshots();
+
+            const written = fs.readFileSync(
+                path.join(tmpDir, '__snapshots__', 'my.test.js.snap'),
+                'utf8',
+            );
+            assert.match(written, /exports\[`fewer 1 1`\]/);
+            assert.doesNotMatch(written, /fewer 2 1/);
+        });
+
+        it('keeps snapshot state when saving fails so it can be retried', async function () {
+            const snapshotManager = new SnapshotManager();
+            await snapshotManager.setCurrentTest({ testPath, testTitle: 'save' });
+            snapshotManager.match({ ok: true });
+
+            const saveStub = sinon
+                .stub(snapshotManager.snapshotEnvironment, 'saveSnapshotFile')
+                .rejects(new Error('disk full'));
+            await assert.rejects(snapshotManager.saveSnapshots(), /disk full/);
+            assert.equal(snapshotManager.client.snapshotStateMap.size, 1);
+
+            saveStub.restore();
+            await snapshotManager.saveSnapshots();
+            assert.equal(snapshotManager.client.snapshotStateMap.size, 0);
+            assert.ok(fs.existsSync(path.join(tmpDir, '__snapshots__', 'my.test.js.snap')));
+        });
+
         it('throws a helpful error when the snapshot file was not loaded', function () {
             const snapshotManager = new SnapshotManager();
             snapshotManager.currentTest = { testPath, testTitle: 'not loaded' };

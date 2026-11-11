@@ -39,9 +39,15 @@ const { snapshotManager } = require('@tryghost/jest-snapshot');
 beforeAll(() => snapshotManager.resetRegistry());
 
 beforeEach(async (context) => {
+    // Build a mocha-style full title: every describe name plus the test name
+    const titleParts = [context.task.name];
+    for (let suite = context.task.suite; suite && suite.name; suite = suite.suite) {
+        titleParts.unshift(suite.name);
+    }
+
     await snapshotManager.setCurrentTest({
         testPath: context.task.file.filepath,
-        testTitle: fullTitleOf(context.task),
+        testTitle: titleParts.join(' '),
     });
 });
 

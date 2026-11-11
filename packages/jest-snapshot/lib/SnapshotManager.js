@@ -177,7 +177,20 @@ class SnapshotManager {
             delete this.registry[testPath][testTitle];
         }
         if (testPath && this.client.snapshotStateMap.has(testPath)) {
+            const state = this.client.getSnapshotState(testPath);
             this.client.clearTest(testPath, testTitle);
+
+            // clearTest resets keys the cleared attempt *added* to `undefined`
+            // rather than removing them, so save() would crash if the retry
+            // never reaches those assertions. Drop them.
+            const data = state._snapshotData;
+            if (data) {
+                for (const key of Object.keys(data)) {
+                    if (data[key] === undefined) {
+                        delete data[key];
+                    }
+                }
+            }
         }
     }
 
@@ -214,7 +227,7 @@ class SnapshotManager {
     }
 
     /**
-     * Writes every loaded snapshot file to disk (when changed) and forgets
+     * Writes every loaded snapshot file to disk (when changed), then forgets
      * them. Obsolete snapshots are kept, matching the previous jest-snapshot
      * behaviour.
      * @returns {Promise<void>}
@@ -222,8 +235,9 @@ class SnapshotManager {
     async saveSnapshots() {
         await this._pendingSetup;
         const states = [...this.client.snapshotStateMap.values()];
-        this.client.clear();
         await Promise.all(states.map((state) => state.save()));
+        // Only forget the states once every write succeeded, so a failed save can be retried
+        this.client.clear();
     }
 
     /**
