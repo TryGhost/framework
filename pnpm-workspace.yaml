@@ -1,9 +1,7 @@
 packages:
   - 'packages/*'
 overrides:
-  axios: ^1.15.0
-  fast-xml-parser: ^5.7.0
-  js-yaml@<3.15.0: 5.5.0
+  readdir-glob: ^4.0.0
 strictDepBuilds: true
 blockExoticSubdeps: true
 allowBuilds:
@@ -21,8 +19,4 @@ catalog:
   typescript: 7.0.2
 minimumReleaseAgeExclude:
   - '@tryghost/*'
-  # Renovate security update: nx@23.2.1
-  - nx@23.2.1
-  - '@nx/js@23.2.1'
-  # Renovate security update: multer@2.5.0
-  - multer@2.5.0
+  - 'readdir-glob@4.0.0'
