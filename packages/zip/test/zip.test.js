@@ -289,6 +289,52 @@ describe('Compress folder contents', function () {
         assert.equal('script.sh' in entries, true);
     });
 
+    it('leaves an existing destination alone when it cannot be opened', async function () {
+        // Root can write to read-only files, so the open would not fail.
+        if (process.getuid?.() === 0) {
+            return;
+        }
+
+        fs.writeFileSync(zipDestination, 'original');
+        fs.chmodSync(zipDestination, 0o444);
+
+        try {
+            await assert.rejects(() => compress(sourceFolder, zipDestination), {
+                code: 'EACCES',
+            });
+            assert.equal(fs.readFileSync(zipDestination, 'utf8'), 'original');
+        } finally {
+            fs.chmodSync(zipDestination, 0o644);
+        }
+    });
+
+    it('excludes the destination when the source path is relative', async function () {
+        const insideDestination = path.join(sourceFolder, 'out.zip');
+        const relativeSource = path.relative(process.cwd(), sourceFolder);
+
+        await compress(relativeSource, insideDestination);
+        await compress(relativeSource, insideDestination);
+
+        assert.equal('out.zip' in (await listZipEntries(insideDestination)), false);
+    });
+
+    it('excludes the destination when the source is under a symlinked parent', async function () {
+        const linkedParent = `${sourceFolder}-parent-link`;
+        fs.symlinkSync(path.dirname(sourceFolder), linkedParent);
+
+        try {
+            const linkedSource = path.join(linkedParent, path.basename(sourceFolder));
+            const insideDestination = path.join(sourceFolder, 'out.zip');
+
+            await compress(linkedSource, insideDestination);
+            await compress(linkedSource, insideDestination);
+
+            assert.equal('out.zip' in (await listZipEntries(insideDestination)), false);
+        } finally {
+            fs.rmSync(linkedParent, { force: true });
+        }
+    });
+
     it('rejects when the zip writer throws while adding entries', async function () {
         vi.spyOn(yazl.ZipFile.prototype, 'addEmptyDirectory').mockImplementation(() => {
             throw new Error('invalid entry');

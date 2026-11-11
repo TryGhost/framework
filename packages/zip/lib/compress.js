@@ -120,7 +120,12 @@ function writeZip(entries, destination) {
         // Source streams yazl is currently reading, so a failure can close them
         // rather than leaving their descriptors open.
         const openStreams = new Set();
+        let opened = false;
         let settled = false;
+
+        output.once('open', () => {
+            opened = true;
+        });
 
         const fail = (err) => {
             if (settled) {
@@ -134,8 +139,15 @@ function writeZip(entries, destination) {
             zipfile.outputStream.unpipe(output);
             zipfile.outputStream.destroy();
 
-            // Remove the partly written zip once its descriptor is closed.
-            const removePartialZip = () => {
+            // Remove the partly written zip once its descriptor is closed, but
+            // only if this call opened it: when opening failed (e.g. EACCES on
+            // an existing read-only file) the file there is not ours.
+            const finish = () => {
+                if (!opened) {
+                    reject(err);
+                    return;
+                }
+
                 fs.promises
                     .rm(destination, { force: true })
                     .catch(() => {})
@@ -143,9 +155,9 @@ function writeZip(entries, destination) {
             };
 
             if (output.closed) {
-                removePartialZip();
+                finish();
             } else {
-                output.once('close', removePartialZip);
+                output.once('close', finish);
                 output.destroy();
             }
         };
@@ -232,11 +244,9 @@ async function resolveDestination(destination) {
 module.exports = async (folderToZip, destination, options = {}) => {
     const ignore = normalizeIgnore(options.ignore ?? defaultIgnore);
 
-    // If folder to zip is a symlink, we want to get the target
-    // of the link and zip that instead of zipping the symlink
-    if ((await fs.promises.lstat(folderToZip)).isSymbolicLink()) {
-        folderToZip = await fs.promises.realpath(folderToZip);
-    }
+    // Resolve the folder fully: a symlinked folder is zipped as its target,
+    // and entry paths must be canonical to compare against the destination.
+    folderToZip = await fs.promises.realpath(folderToZip);
 
     const destinationPath = await resolveDestination(destination);
     const entries = await collectEntries(folderToZip, ignore, destinationPath);
