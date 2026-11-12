@@ -466,6 +466,40 @@ describe('Request', function () {
             assert.equal(response.text, 'Hello World!');
         });
 
+        it('completes a streamed response larger than the socket buffer', async function () {
+            // Large enough that res.write() returns false and waits for 'drain'
+            const chunk = 'x'.repeat(64 * 1024);
+            const chunkCount = 16;
+            const fn = (req, res) => {
+                const source = Stream.Readable.from(
+                    Array.from({ length: chunkCount }, () => chunk),
+                    { objectMode: false },
+                );
+                Stream.pipeline(source, res, () => {});
+            };
+            const jar = {};
+            const opts = new RequestOptions();
+            const request = new Request(fn, jar, opts);
+
+            stubCookies(request);
+
+            let timer;
+            const timeout = new Promise((resolve, reject) => {
+                timer = setTimeout(() => {
+                    reject(new Error('Streamed response never finished'));
+                }, 2000);
+            });
+
+            try {
+                const response = await Promise.race([request, timeout]);
+
+                assert.equal(response.statusCode, 200);
+                assert.equal(response.text.length, chunk.length * chunkCount);
+            } finally {
+                clearTimeout(timer);
+            }
+        });
+
         it('converts body to text correctly for json', async function () {
             const fn = (req, res) => {
                 res.json({ hello: 'world' });

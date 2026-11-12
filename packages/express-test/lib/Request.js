@@ -182,6 +182,15 @@ class Request {
         const res = new http.ServerResponse(req);
         res.assignSocket(socket);
 
+        // Node's HTTP server forwards socket 'drain' to the response; assignSocket()
+        // alone doesn't. Without it, a streamed response that fills the socket buffer
+        // waits for 'drain' forever and the request never finishes.
+        socket.on('drain', () => {
+            if (res.writableNeedDrain) {
+                res.emit('drain');
+            }
+        });
+
         // Apply Express prototypes so res.send(), res.json(), etc. are available
         Object.setPrototypeOf(req, express.request);
         Object.setPrototypeOf(res, express.response);
