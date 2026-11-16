@@ -9,11 +9,12 @@ export declare function pipeline(tasks: Task[], ...args: unknown[]): Promise<any
 
 /**
  * Run tasks one after another, each called with the same arguments.
- * Resolves to the results in input order. Tasks may return different types.
+ * Resolves to the results in input order. Tasks may return different types,
+ * and every task must accept the given arguments.
  */
-export declare function sequence<T extends Task>(
+export declare function sequence<Args extends unknown[], T extends (...args: Args) => unknown>(
     tasks: readonly T[],
-    ...args: unknown[]
+    ...args: Args
 ): Promise<Array<Awaited<ReturnType<T>>>>;
 
 /**

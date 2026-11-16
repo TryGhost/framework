@@ -2,13 +2,18 @@
  * Create a Nodemailer transporter for one of Ghost's supported transports.
  * The name is case-insensitive. Throws an `EmailError` for unknown transports.
  *
- * The returned transporter's `verify()` signature depends on the transport,
- * so pass the transport name as a literal to get the precise type.
+ * The returned transporter's `verify()` signature depends on the transport
+ * actually selected, so pass the transport name (and any transport-selecting
+ * options such as `service`) as literals to get the precise type.
  */
-declare function createTransporter<Name extends string>(
+declare function createTransporter<
+    Name extends string,
+    Options extends object = {},
+    Service extends string = never,
+>(
     transport: Name,
-    options?: Record<string, any>,
-): createTransporter.Transporter<Lowercase<Name>>;
+    options?: Options & { service?: Service },
+): createTransporter.Transporter<Lowercase<Name>, Options, Service>;
 
 declare namespace createTransporter {
     type TransportName = 'smtp' | 'mailgun' | 'sendmail' | 'ses' | 'direct' | 'stub';
@@ -31,23 +36,62 @@ declare namespace createTransporter {
         verify(callback: VerifyCallback): void;
     }
 
-    type VerifyFor<Name extends string> = Name extends 'smtp' | 'ses' | 'direct'
+    /** Transport name not known at compile time, or options that may switch it. */
+    interface UnknownVerify {
+        verify(): Promise<true> | false;
+        verify(callback: VerifyCallback): void | false;
+    }
+
+    /** Options that make Nodemailer pick a different transport than SMTP. */
+    type TransportSelectingOption = 'sendmail' | 'streamTransport' | 'jsonTransport' | 'SES';
+
+    /**
+     * Whether the options may switch the transport away from SMTP. Options
+     * typed with open keys (e.g. `Record<string, any>`) are treated as maybe.
+     */
+    type MaySwitchTransport<Options> = string extends keyof Options
+        ? true
+        : Extract<keyof Options, TransportSelectingOption> extends never
+          ? false
+          : true;
+
+    /** `service: 'sendmail'` (any case) switches smtp to Sendmail. */
+    type SmtpServiceVerify<Service extends string> = [Service] extends [never]
         ? PromiseVerify
-        : Name extends 'sendmail' | 'mailgun'
-          ? NoVerify
-          : Name extends 'stub'
-            ? CallbackVerify
-            : {
-                  verify(): Promise<true> | false;
-                  verify(callback: VerifyCallback): void | false;
-              };
+        : string extends Service
+          ? UnknownVerify
+          : Extract<Lowercase<Service>, 'sendmail'> extends never
+            ? PromiseVerify
+            : Lowercase<Service> extends 'sendmail'
+              ? NoVerify
+              : UnknownVerify;
+
+    type VerifyFor<Name extends string, Options, Service extends string> = Name extends 'smtp'
+        ? MaySwitchTransport<Options> extends true
+            ? UnknownVerify
+            : SmtpServiceVerify<Service>
+        : Name extends 'direct'
+          ? MaySwitchTransport<Options> extends true
+              ? UnknownVerify
+              : PromiseVerify
+          : Name extends 'ses'
+            ? PromiseVerify
+            : Name extends 'sendmail' | 'mailgun'
+              ? NoVerify
+              : Name extends 'stub'
+                ? CallbackVerify
+                : UnknownVerify;
 
     /**
      * The parts of a Nodemailer `Transporter` that callers use. For full
      * types, cast to `import('nodemailer').Transporter` with
      * `@types/nodemailer` installed.
      */
-    type Transporter<Name extends string = string> = VerifyFor<Name> & {
+    type Transporter<
+        Name extends string = string,
+        Options = {},
+        Service extends string = never,
+    > = VerifyFor<Name, Options, Service> & {
         sendMail(mail: object): Promise<any>;
         sendMail(mail: object, callback: (err: Error | null, info: any) => void): void;
         close(): void;
