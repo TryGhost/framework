@@ -2,7 +2,7 @@ import type { Agent as HttpAgent, IncomingHttpHeaders, IncomingMessage } from 'n
 import type { Agent as HttpsAgent } from 'node:https';
 import type { LookupFunction } from 'node:net';
 import type { Readable } from 'node:stream';
-import type { SecureContextOptions } from 'node:tls';
+import type { PeerCertificate, SecureContextOptions } from 'node:tls';
 
 /**
  * Make an HTTP request with `got`, after validating `url` and applying Ghost's
@@ -18,11 +18,19 @@ import type { SecureContextOptions } from 'node:tls';
  */
 declare function request(
     url: string,
-    options?: request.RequestOptions & { resolveBodyOnly?: false; responseType?: 'text' },
+    options?: request.RequestOptions & {
+        resolveBodyOnly?: false;
+        responseType?: 'text';
+        decompress?: true;
+    },
 ): Promise<request.Response<string>>;
 declare function request<T = unknown>(
     url: string,
-    options: request.RequestOptions & { resolveBodyOnly?: false; responseType: 'json' },
+    options: request.RequestOptions & {
+        resolveBodyOnly?: false;
+        responseType: 'json';
+        decompress?: true;
+    },
 ): Promise<request.Response<T>>;
 declare function request(
     url: string,
@@ -30,17 +38,61 @@ declare function request(
 ): Promise<request.Response<Uint8Array>>;
 declare function request(
     url: string,
-    options: request.RequestOptions & { resolveBodyOnly: true; responseType?: 'text' },
+    options: request.RequestOptions & {
+        resolveBodyOnly: true;
+        responseType?: 'text';
+        decompress?: true;
+    },
 ): Promise<string>;
 declare function request<T = unknown>(
     url: string,
-    options: request.RequestOptions & { resolveBodyOnly: true; responseType: 'json' },
+    options: request.RequestOptions & {
+        resolveBodyOnly: true;
+        responseType: 'json';
+        decompress?: true;
+    },
 ): Promise<T>;
 declare function request(
     url: string,
     options: request.RequestOptions & { resolveBodyOnly: true; responseType: 'buffer' },
 ): Promise<Uint8Array>;
-/** `responseType` or `resolveBodyOnly` not known statically. */
+/**
+ * With `decompress: false`, a compressed (`content-encoding`) response body is
+ * left as raw bytes whatever `responseType` says.
+ */
+declare function request(
+    url: string,
+    options: request.RequestOptions & {
+        resolveBodyOnly?: false;
+        responseType?: 'text';
+        decompress: false;
+    },
+): Promise<request.Response<string | Uint8Array>>;
+declare function request<T = unknown>(
+    url: string,
+    options: request.RequestOptions & {
+        resolveBodyOnly?: false;
+        responseType: 'json';
+        decompress: false;
+    },
+): Promise<request.Response<T | Uint8Array>>;
+declare function request(
+    url: string,
+    options: request.RequestOptions & {
+        resolveBodyOnly: true;
+        responseType?: 'text';
+        decompress: false;
+    },
+): Promise<string | Uint8Array>;
+declare function request<T = unknown>(
+    url: string,
+    options: request.RequestOptions & {
+        resolveBodyOnly: true;
+        responseType: 'json';
+        decompress: false;
+    },
+): Promise<T | Uint8Array>;
+/** `responseType`, `resolveBodyOnly` or `decompress` not known statically. */
 declare function request(url: string, options?: request.RequestOptions): Promise<unknown>;
 
 declare namespace request {
@@ -112,7 +164,7 @@ declare namespace request {
     interface HttpsOptions {
         alpnProtocols?: string[];
         rejectUnauthorized?: boolean;
-        checkServerIdentity?: (hostname: string, certificate: unknown) => Error | undefined;
+        checkServerIdentity?: (hostname: string, certificate: PeerCertificate) => Error | undefined;
         serverName?: string;
         certificateAuthority?: SecureContextOptions['ca'];
         key?: SecureContextOptions['key'];
@@ -230,13 +282,20 @@ declare namespace request {
         };
     }
 
-    /** A got response: Node's `IncomingMessage` plus got's fields. */
-    interface Response<Body = string> extends IncomingMessage {
+    /**
+     * A got response. Usually Node's `IncomingMessage` with got's fields added,
+     * but a cache hit (with the `cache` option) is a plain readable stream with
+     * only these fields, so `IncomingMessage` members such as `socket` or
+     * `httpVersion` are not part of this type.
+     */
+    interface Response<Body = string> extends Readable {
         /** Parsed body, depending on `responseType`. */
         body: Body;
         rawBody: Uint8Array;
         statusCode: number;
-        statusMessage: string;
+        statusMessage?: string;
+        headers: IncomingHttpHeaders;
+        complete: boolean;
         /** The final URL, after redirects. */
         url: string;
         requestUrl: URL;
@@ -245,7 +304,8 @@ declare namespace request {
         isFromCache: boolean;
         ip?: string;
         retryCount: number;
-        timings: Timings;
+        /** Not set for responses served from the cache. */
+        timings?: Timings;
         /** The got request that produced this response. */
         request: {
             options: {
