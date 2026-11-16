@@ -299,7 +299,6 @@ declare namespace request {
         url: string;
         requestUrl: URL;
         redirectUrls: URL[];
-        ok: boolean;
         isFromCache: boolean;
         /** Not set for responses served from the cache. */
         ip?: string;
@@ -323,6 +322,11 @@ declare namespace request {
         rawBody: Uint8Array;
         /** The final URL, after redirects. */
         url: string;
+        /**
+         * Whether the response is 2xx, or a 3xx that was not followed. Not
+         * set yet when a redirect response reaches `followRedirect`.
+         */
+        ok: boolean;
     }
 
     /**
