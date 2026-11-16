@@ -1,6 +1,6 @@
 {
   "name": "@tryghost/email-mock-receiver",
-  "version": "2.3.22",
+  "version": "2.4.0",
   "license": "MIT",
   "author": "Ghost Foundation",
   "repository": {
