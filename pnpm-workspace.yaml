@@ -8,7 +8,7 @@ allowBuilds:
   dtrace-provider: false
   'esbuild@0.28.2': true
   # Nx uses its prebuilt platform package; leave the new postinstall disabled.
-  'nx@24.0.5': false
+  nx: false
   'better-sqlite3@13.0.3': true
   sqlite3: false
   # The watcher ships platform binaries; do not run its unreviewed install script.
