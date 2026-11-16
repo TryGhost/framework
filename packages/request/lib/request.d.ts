@@ -1,9 +1,12 @@
 import type { IncomingHttpHeaders } from 'node:http';
 import type { Readable } from 'node:stream';
 import type {
+    BeforeRedirectHook as GotBeforeRedirectHook,
     Method as GotMethod,
     OptionsInit,
+    RequestError as GotRequestError,
     ResponseType as GotResponseType,
+    RetryObject as GotRetryObject,
     Timings as GotTimings,
 } from 'got' with { 'resolution-mode': 'import' };
 
@@ -107,11 +110,55 @@ declare namespace request {
      * Options passed through to got v16 (merged over Ghost's defaults), using
      * got's own option types. got rejects unknown option names. `url` is left
      * out because got rejects it in options: pass it as the first argument.
-     * `followRedirect` is narrowed to the fields a redirect response really has.
+     * Callbacks that receive a response (`followRedirect`, the response and
+     * error hooks, `retry.calculateDelay`) are narrowed to fields that cached
+     * responses also have; see `RedirectResponse`.
      */
-    interface RequestOptions extends Omit<OptionsInit, 'url' | 'followRedirect'> {
+    interface RequestOptions extends Omit<
+        OptionsInit,
+        'url' | 'followRedirect' | 'hooks' | 'retry'
+    > {
         /** Whether to follow redirects, or a callback deciding per redirect response. */
         followRedirect?: boolean | ((response: RedirectResponse) => boolean);
+        hooks?: Hooks;
+        retry?: RetryOptions;
+    }
+
+    /** got's hooks, with response-bearing hooks narrowed to cache-safe types. */
+    interface Hooks extends Omit<
+        NonNullable<OptionsInit['hooks']>,
+        'afterResponse' | 'beforeRedirect' | 'beforeError' | 'beforeRetry'
+    > {
+        afterResponse?: Array<
+            (
+                response: Response<unknown>,
+                retryWithMergedOptions: (options: RequestOptions) => never,
+            ) => Response<unknown> | PromiseLike<Response<unknown>>
+        >;
+        beforeRedirect?: Array<
+            (
+                updatedOptions: Parameters<GotBeforeRedirectHook>[0],
+                response: RedirectResponse,
+            ) => void | PromiseLike<void>
+        >;
+        beforeError?: Array<(error: HookError) => Error | PromiseLike<Error>>;
+        beforeRetry?: Array<(error: HookError, retryCount: number) => void | PromiseLike<void>>;
+    }
+
+    /** got's retry options, with `calculateDelay` getting a cache-safe error. */
+    interface RetryOptions extends Omit<NonNullable<OptionsInit['retry']>, 'calculateDelay'> {
+        calculateDelay?: (
+            retryObject: Omit<GotRetryObject, 'error'> & { error: HookError },
+        ) => number | PromiseLike<number>;
+    }
+
+    /**
+     * A got error as hooks and `retry.calculateDelay` see it: before
+     * `request` copies the response fields onto it, and with `response`
+     * narrowed to a cache-safe `Response`.
+     */
+    interface HookError extends Omit<GotRequestError, 'response'> {
+        readonly response?: Response<unknown>;
     }
 
     /**
