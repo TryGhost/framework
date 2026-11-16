@@ -12,8 +12,10 @@ declare class WebhookMockReceiver {
     constructor(options: { snapshotManager: WebhookMockReceiver.SnapshotManager });
 
     /**
-     * Record a received request. Bound to the instance, so it can be passed
-     * directly as a nock reply callback.
+     * Record a received request's body and headers. Bound to the instance.
+     * Its arguments do not match a nock reply callback's `(uri, requestBody)`,
+     * so adapt them rather than passing this method to `.reply()` directly;
+     * `mock()` already does this.
      */
     recordRequest(body: unknown, options: { headers: Record<string, unknown> }): void;
 

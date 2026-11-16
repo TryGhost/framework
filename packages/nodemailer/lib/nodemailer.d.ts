@@ -36,9 +36,21 @@ declare namespace createTransporter {
         verify(callback: VerifyCallback): void;
     }
 
-    /** Transport name not known at compile time, or options that may switch it. */
+    /**
+     * smtp or direct with options that may switch the transport: promise or
+     * `false` without a callback (none of the switched-to transports is stub).
+     */
     interface UnknownVerify {
         verify(): Promise<true> | false;
+        verify(callback: VerifyCallback): void | false;
+    }
+
+    /**
+     * Transport name not known at compile time. It could be `stub`, whose
+     * `verify()` throws asynchronously without a callback, so only the
+     * callback form is allowed. Narrow the name to get the promise form.
+     */
+    interface UnknownNameVerify {
         verify(callback: VerifyCallback): void | false;
     }
 
@@ -80,7 +92,7 @@ declare namespace createTransporter {
               ? NoVerify
               : Name extends 'stub'
                 ? CallbackVerify
-                : UnknownVerify;
+                : UnknownNameVerify;
 
     /**
      * The parts of a Nodemailer `Transporter` that callers use. For full
