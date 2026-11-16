@@ -80,6 +80,26 @@ describe('RotatingFileStream', function () {
         await stream.flush();
     });
 
+    it('Rotates an existing file that is already over the threshold on start-up', async function () {
+        const logPath = 'logs/oversized.log';
+        const backupPath = 'logs/oversized.0.log';
+        await fs.rm(logPath, { force: true });
+        await fs.rm(backupPath, { force: true });
+        await fs.writeFile(logPath, 'x'.repeat(2048));
+
+        const stream = new RotatingFileStream({
+            path: logPath,
+            threshold: '1k',
+        });
+        await stream.write('fresh\n');
+        await stream.flush();
+
+        assert.strictEqual(await fs.readFile(backupPath, 'utf8'), 'x'.repeat(2048));
+        assert.strictEqual(await fs.readFile(logPath, 'utf8'), 'fresh\n');
+
+        await stream.end();
+    });
+
     it('Sets up period correctly', async function () {
         const stream = new RotatingFileStream({
             period: '1w',

@@ -11,7 +11,7 @@ class ThresholdTrigger extends EventEmitter {
 
     newFile(fileInfo) {
         this._totalWritten = fileInfo.size;
-        if (this._totalWritten > this.threshold) {
+        if (this._totalWritten > this._threshold) {
             // Case where initial file is larger than threshold - usually on config change between boots
             this.emit(Rotate);
         }
