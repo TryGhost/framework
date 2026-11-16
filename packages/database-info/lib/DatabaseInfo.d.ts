@@ -16,23 +16,33 @@ declare class DatabaseInfo {
     getVersion(): string;
 
     /** Whether the knex instance uses a SQLite driver. */
-    static isSQLite(knex: DatabaseInfo.KnexLike): boolean;
+    static isSQLite(knex: DatabaseInfo.KnexClientLike): boolean;
     /** Whether a knex config object uses a SQLite driver. */
     static isSQLiteConfig(config: { client?: unknown }): boolean;
     /** Whether the knex instance uses a MySQL driver. */
-    static isMySQL(knex: DatabaseInfo.KnexLike): boolean;
+    static isMySQL(knex: DatabaseInfo.KnexClientLike): boolean;
     /** Whether a knex config object uses a MySQL driver. */
     static isMySQLConfig(config: { client?: unknown }): boolean;
 }
 
 declare namespace DatabaseInfo {
     /**
-     * The parts of a knex instance that `DatabaseInfo` reads.
+     * The parts of a knex instance (or transaction) that the static
+     * `isSQLite()` / `isMySQL()` checks read.
+     */
+    interface KnexClientLike {
+        client: { config: { client?: unknown } };
+    }
+
+    /**
+     * The parts of a knex instance that the constructor and `init()` read.
+     * `driver` is the loaded database driver module; `init()` reads
+     * `driver.VERSION` for SQLite.
      */
     interface KnexLike {
         client: {
             config: { client: string };
-            driver?: { VERSION?: string };
+            driver: { VERSION?: string };
         };
         raw(sql: string): PromiseLike<any>;
     }
