@@ -7,8 +7,8 @@ declare class EmailMockReceiver {
     /** Record a message and resolve to the configured `sendResponse`. */
     send(message: EmailMockReceiver.EmailMessage): Promise<unknown>;
 
-    /** Get a sent email by zero-based index (default `0`). */
-    getSentEmail(index?: number): EmailMockReceiver.EmailMessage;
+    /** Get a sent email by zero-based index (default `0`), or `undefined` if there is none. */
+    getSentEmail(index?: number): EmailMockReceiver.EmailMessage | undefined;
 
     assertSentEmailCount(count: number): this;
 

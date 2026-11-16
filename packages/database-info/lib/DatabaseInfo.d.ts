@@ -31,7 +31,7 @@ declare namespace DatabaseInfo {
      */
     interface KnexLike {
         client: {
-            config: { client?: unknown };
+            config: { client: string };
             driver?: { VERSION?: string };
         };
         raw(sql: string): PromiseLike<any>;

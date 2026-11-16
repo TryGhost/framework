@@ -1,4 +1,4 @@
-type Task<T = unknown> = (...args: any[]) => T | Promise<T>;
+type Task = (...args: any[]) => unknown;
 
 /**
  * Run tasks one after another, passing each task's result as the arguments of
@@ -9,15 +9,18 @@ export declare function pipeline(tasks: Task[], ...args: unknown[]): Promise<any
 
 /**
  * Run tasks one after another, each called with the same arguments.
- * Resolves to the results in input order.
+ * Resolves to the results in input order. Tasks may return different types.
  */
-export declare function sequence<T>(tasks: Array<Task<T>>, ...args: unknown[]): Promise<T[]>;
+export declare function sequence<T extends Task>(
+    tasks: readonly T[],
+    ...args: unknown[]
+): Promise<Array<Awaited<ReturnType<T>>>>;
 
 /**
  * Run tasks with at most `maxConcurrent` running at once.
- * Resolves to the results in input order.
+ * Resolves to the results in input order. Tasks may return different types.
  */
-export declare function pool<T>(
-    tasks: Array<() => T | Promise<T>>,
+export declare function pool<T extends () => unknown>(
+    tasks: readonly T[],
     maxConcurrent: number,
-): Promise<T[]>;
+): Promise<Array<Awaited<ReturnType<T>>>>;

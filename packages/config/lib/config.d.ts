@@ -12,18 +12,18 @@ declare namespace config {
     interface Config {
         /** Read a value by colon-delimited key, or the whole config when no key is given. */
         get(key?: string): any;
-        /** Set a value by colon-delimited key. */
-        set(key: string, value: unknown): Config;
-        /** Remove a value by colon-delimited key. */
-        clear(key: string): Config;
-        /** Merge an object into the value at a colon-delimited key. */
-        merge(key: string, value: unknown): Config;
+        /** Set a value by colon-delimited key. Returns the store's result, not the provider. */
+        set(key: string, value: unknown): boolean;
+        /** Remove a value by colon-delimited key. Returns the store's result, not the provider. */
+        clear(key: string): boolean;
+        /** Merge an object into the value at a colon-delimited key. Returns the store's result, not the provider. */
+        merge(key: string, value: unknown): boolean;
         /** Reset all stores. */
         reset(callback?: (err?: Error) => void): void;
         /** Return the first key that has a value. */
         any(keys: string[]): any;
-        /** Throw unless all the given keys have values. */
-        required(keys: string[]): Config;
+        /** Throw unless all the given keys have values; returns `true` otherwise. */
+        required(keys: string[]): true;
         defaults(options: object): Config;
         overrides(options: object): Config;
     }

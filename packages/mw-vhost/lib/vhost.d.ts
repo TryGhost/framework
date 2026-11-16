@@ -13,13 +13,14 @@ declare function vhost<
 declare namespace vhost {
     /**
      * Data attached to `req.vhost` when the hostname matches. Numeric keys
-     * hold the values captured by `*` wildcards (or regexp groups).
+     * hold the values captured by `*` wildcards (or regexp groups);
+     * unmatched optional groups are `undefined`.
      */
     interface VhostData {
         host: string | undefined;
         hostname: string;
         length: number;
-        [index: number]: string;
+        [index: number]: string | undefined;
     }
 
     type Request = IncomingMessage & { hostname?: string; host?: string; vhost?: VhostData };
