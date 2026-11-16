@@ -11,6 +11,12 @@ declare class WebhookMockReceiver {
 
     constructor(options: { snapshotManager: WebhookMockReceiver.SnapshotManager });
 
+    /**
+     * Record a received request. Bound to the instance, so it can be passed
+     * directly as a nock reply callback.
+     */
+    recordRequest(body: unknown, options: { headers: Record<string, unknown> }): void;
+
     /** Intercept POST requests to `url`. Clears anything previously recorded. */
     mock(url: string): this;
 
