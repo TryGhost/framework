@@ -1,4 +1,4 @@
-import type { Agent as HttpAgent, IncomingHttpHeaders, IncomingMessage } from 'node:http';
+import type { Agent as HttpAgent, IncomingHttpHeaders } from 'node:http';
 import type { Agent as HttpsAgent } from 'node:https';
 import type { LookupFunction } from 'node:net';
 import type { Readable } from 'node:stream';
@@ -215,7 +215,8 @@ declare namespace request {
         timeout?: Timeouts;
         retry?: RetryOptions;
         hooks?: Hooks;
-        followRedirect?: boolean | ((response: IncomingMessage) => boolean);
+        /** Whether to follow redirects, or a callback deciding per redirect response. */
+        followRedirect?: boolean | ((response: RedirectResponse) => boolean);
         maxRedirects?: number;
         methodRewriting?: boolean;
         throwHttpErrors?: boolean;
@@ -283,25 +284,24 @@ declare namespace request {
     }
 
     /**
-     * A got response. Usually Node's `IncomingMessage` with got's fields added,
-     * but a cache hit (with the `cache` option) is a plain readable stream with
-     * only these fields, so `IncomingMessage` members such as `socket` or
-     * `httpVersion` are not part of this type.
+     * Response fields got sets on every response, including redirect
+     * responses passed to `followRedirect` (which have no body yet). Responses
+     * are usually Node `IncomingMessage`-like streams, but a cache hit (with
+     * the `cache` option) is a plain readable stream with only these fields,
+     * so members such as `socket` or `httpVersion` are not part of this type.
      */
-    interface Response<Body = string> extends Readable {
-        /** Parsed body, depending on `responseType`. */
-        body: Body;
-        rawBody: Uint8Array;
+    interface RedirectResponse extends Readable {
         statusCode: number;
         statusMessage?: string;
         headers: IncomingHttpHeaders;
         complete: boolean;
-        /** The final URL, after redirects. */
+        /** The URL of this response. */
         url: string;
         requestUrl: URL;
         redirectUrls: URL[];
         ok: boolean;
         isFromCache: boolean;
+        /** Not set for responses served from the cache. */
         ip?: string;
         retryCount: number;
         /** Not set for responses served from the cache. */
@@ -314,6 +314,15 @@ declare namespace request {
                 [option: string]: unknown;
             };
         };
+    }
+
+    /** A got response, with its body. See `RedirectResponse` for caveats. */
+    interface Response<Body = string> extends RedirectResponse {
+        /** Parsed body, depending on `responseType` and `decompress`. */
+        body: Body;
+        rawBody: Uint8Array;
+        /** The final URL, after redirects. */
+        url: string;
     }
 
     /**
