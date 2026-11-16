@@ -13,7 +13,7 @@ corepack pnpm install --frozen-lockfile
 ```
 
 The local Node version is pinned in `.nvmrc` to Node 24. CI runs tests on Node
-22 and Node 24, so avoid introducing APIs that do not work on Node 22 unless
+22, 24 and 26, so avoid introducing APIs that do not work on Node 22 unless
 the package support policy is changed deliberately.
 
 ## Common Commands

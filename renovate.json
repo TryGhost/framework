@@ -7,6 +7,12 @@
       "description": "Runtime deps ship to npm, so keep them as caret ranges. Exact pins in every package force duplicate installs downstream (e.g. multiple lodash copies in Ghost core). Only bump the manifest when a release falls outside the existing range.",
       "matchDepTypes": ["dependencies"],
       "rangeStrategy": "replace"
+    },
+    {
+      "description": "Ghost runs on Node 22 and 24, so .nvmrc stays on the newest version Ghost supports. Node 26 is covered by the test matrix.",
+      "matchDepNames": ["node"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
     }
   ]
 }
