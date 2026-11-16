@@ -165,10 +165,10 @@ declare namespace request {
     /**
      * A got error as hooks and `retry.calculateDelay` see it: before
      * `request` copies the response fields onto it, and with `response`
-     * narrowed to a cache-safe `Response`.
+     * narrowed to a cache-safe `ErrorResponse`.
      */
     interface HookError extends Omit<GotRequestError, 'response'> {
-        readonly response?: Response<unknown>;
+        readonly response?: ErrorResponse;
     }
 
     /**
@@ -218,6 +218,17 @@ declare namespace request {
     }
 
     /**
+     * The `response` on an error. The body may be missing: when the
+     * connection fails or times out while reading the body, got keeps the
+     * response without `body` or `rawBody`.
+     */
+    interface ErrorResponse extends RedirectResponse {
+        body?: unknown;
+        rawBody?: Uint8Array;
+        ok?: boolean;
+    }
+
+    /**
      * Shape of the errors `request` rejects with: got's `RequestError`
      * subclasses (with the response fields copied on when there was a
      * response), or Ghost's `InternalServerError` for an invalid URL.
@@ -232,7 +243,7 @@ declare namespace request {
         rawBody?: Uint8Array;
         url?: string;
         timings?: Timings;
-        response?: Response<unknown>;
+        response?: ErrorResponse;
     }
 }
 
