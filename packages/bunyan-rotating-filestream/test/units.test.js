@@ -152,6 +152,18 @@ describe('ThresholdTrigger', function () {
         assert.strictEqual(rotations, 1);
         trigger.shutdown();
     });
+
+    it('Emits a rotate event when the existing file is already over the threshold', function () {
+        const trigger = new ThresholdTrigger('1k');
+        let rotations = 0;
+        trigger.on(Rotate, () => rotations++);
+
+        trigger.newFile({ size: 1024 });
+        assert.strictEqual(rotations, 0);
+        trigger.newFile({ size: 1025 });
+        assert.strictEqual(rotations, 1);
+        trigger.shutdown();
+    });
 });
 
 describe('WriteQueue', function () {
