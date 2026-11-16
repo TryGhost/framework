@@ -124,6 +124,16 @@ declare namespace request {
         retry?: RetryOptions;
     }
 
+    /**
+     * Options for `afterResponse`'s `retryWithMergedOptions`. That retry goes
+     * to got directly, so unlike `request`'s own options it accepts `url`
+     * (absolute, or relative to the current URL), which skips `request`'s URL
+     * validation.
+     */
+    interface MergedRetryOptions extends RequestOptions {
+        url?: string | URL;
+    }
+
     /** got's hooks, with response-bearing hooks narrowed to cache-safe types. */
     interface Hooks extends Omit<
         NonNullable<OptionsInit['hooks']>,
@@ -132,7 +142,7 @@ declare namespace request {
         afterResponse?: Array<
             (
                 response: Response<unknown>,
-                retryWithMergedOptions: (options: RequestOptions) => never,
+                retryWithMergedOptions: (options: MergedRetryOptions) => never,
             ) => Response<unknown> | PromiseLike<Response<unknown>>
         >;
         beforeRedirect?: Array<
