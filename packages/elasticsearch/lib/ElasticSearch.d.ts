@@ -1,17 +1,12 @@
 /**
- * Ships documents to Elasticsearch through one of two implementations:
- * `legacy` (the default) wraps the official `@elastic/elasticsearch` client,
- * `fetch` uses Node's built-in `fetch`.
+ * Ships documents to Elasticsearch using Node's built-in `fetch`.
  *
- * Both implementations swallow request failures (they are reported through
- * `@tryghost/debug` under `logging:elasticsearch`), so the returned promises
- * always resolve.
+ * Request failures are swallowed (they are reported through `@tryghost/debug`
+ * under `logging:elasticsearch`), so the returned promises always resolve.
  */
 declare class ElasticSearch {
     /**
-     * @param clientConfig Client config, plus `implementation` to choose
-     * between `legacy` (default) and `fetch`. At runtime any value other than
-     * `'fetch'` selects `legacy`.
+     * @param clientConfig Client config. `implementation: 'fetch'` is required.
      */
     constructor(clientConfig: ElasticSearch.ClientConfig);
 
@@ -39,7 +34,7 @@ declare class ElasticSearch {
 
 declare namespace ElasticSearch {
     /**
-     * The surface shared by the `legacy` and `fetch` implementations.
+     * The client that calls are delegated to.
      */
     interface Implementation {
         index(data: object, index: string | IndexParams): Promise<void>;
@@ -47,9 +42,8 @@ declare namespace ElasticSearch {
     }
 
     /**
-     * Index name plus extra request parameters. With `legacy` the parameters
-     * are passed to the client's `index()` call; with `fetch` they are sent as
-     * query string parameters, leaving out `null` and `undefined` values.
+     * Index name plus extra request parameters, which are sent as query string
+     * parameters. `null` and `undefined` values are left out.
      */
     interface IndexParams {
         index: string;
@@ -75,60 +69,10 @@ declare namespace ElasticSearch {
     }
 
     /**
-     * API key auth, supported by the `legacy` implementation.
+     * Client options.
      */
-    interface ApiKeyAuth {
-        apiKey: string | { id: string; api_key: string };
-    }
-
-    /**
-     * Bearer token auth, supported by the `legacy` implementation.
-     */
-    interface BearerAuth {
-        bearer: string;
-    }
-
-    /**
-     * A node definition accepted by the `@elastic/elasticsearch` client.
-     */
-    interface LegacyNodeOptions {
-        url: URL;
-        [option: string]: unknown;
-    }
-
-    type LegacyNode = string | string[] | LegacyNodeOptions | LegacyNodeOptions[];
-
-    /**
-     * Options for the `legacy` implementation, which are passed to the
-     * `@elastic/elasticsearch` `Client` constructor. Only the commonly used
-     * options are listed; any other client option is passed through.
-     *
-     * The underlying client is a process-wide singleton created from the first
-     * config, so later instances reuse its connection pool and ignore their own
-     * config.
-     */
-    interface LegacyClientOptions {
-        implementation?: 'legacy';
-        auth?: BasicAuth | ApiKeyAuth | BearerAuth;
-        /** Request timeout in milliseconds. */
-        requestTimeout?: number;
-        /** Retries for failed requests. */
-        maxRetries?: number;
-        /** Proxy URL; `null` or absent means no proxy. */
-        proxy?: string | URL | null;
-        [option: string]: unknown;
-    }
-
-    /**
-     * `legacy` config. The client requires one of `node`, `nodes` or `cloud`.
-     */
-    type LegacyClientConfig = LegacyClientOptions &
-        ({ node: LegacyNode } | { nodes: LegacyNode } | { cloud: { id: string } });
-
-    /**
-     * Options for the `fetch` implementation.
-     */
-    interface FetchClientConfig {
+    interface ClientConfig {
+        /** Use the `fetch`-based client. */
         implementation: 'fetch';
         /**
          * Elasticsearch URL. Credentials embedded in the URL are moved into a
@@ -142,8 +86,6 @@ declare namespace ElasticSearch {
         /** Retries for network errors and retryable status codes. @default 3 */
         maxRetries?: number;
     }
-
-    type ClientConfig = LegacyClientConfig | FetchClientConfig;
 }
 
 export = ElasticSearch;
