@@ -28,6 +28,36 @@ const requestLogger = logging.child({ requestId: 'abc123' });
 requestLogger.warn('slow response');
 ```
 
+### Building your own instance
+
+`@tryghost/logging/factory` is a side-effect free entry point for applications
+that build their logger themselves. Importing it constructs nothing and reads
+no `loggingrc`:
+
+```js
+const { createLogger, setInstance, GhostLogger } = require('@tryghost/logging/factory');
+
+const logger = createLogger({ name: 'my-app', transports: ['stdout'] });
+setInstance(logger);
+
+// From here on, every require of the main entry returns `logger`
+require('@tryghost/logging') === logger; // true
+```
+
+- `createLogger(options)` returns `new GhostLogger(options)`. It uses only the
+  options passed in, registers nothing, and does not switch to the `parent`
+  transport in worker threads.
+- `setInstance(instance)` makes `instance` the logger the main entry returns
+  for the current thread (see [Shared singleton](#shared-singleton)) and
+  returns it. Call it before anything requires `@tryghost/logging`: if a
+  different instance already exists it throws instead of silently leaving two
+  loggers in the process. Calling it again with the same instance is a no-op.
+- The main entry attaches `GhostLogger` and `resetForTesting` to whichever
+  instance it returns, including one registered with `setInstance()`.
+
+The package has no `exports` map, so ES modules must import the file by name:
+`import factory from '@tryghost/logging/factory.js'`.
+
 ### Flushing before exit
 
 Transports that batch writes, like the file transports (queued disk writes),
