@@ -314,14 +314,14 @@ importers:
         version: 4.18.1
     devDependencies:
       better-sqlite3:
-        specifier: 13.1.1
-        version: 13.1.1
+        specifier: 13.2.0
+        version: 13.2.0
       bookshelf:
         specifier: 1.2.0
-        version: 1.2.0(knex@3.3.0(better-sqlite3@13.1.1)(supports-color@7.2.0))
+        version: 1.2.0(knex@3.3.0(better-sqlite3@13.2.0)(supports-color@7.2.0))
       knex:
         specifier: 3.3.0
-        version: 3.3.0(better-sqlite3@13.1.1)(supports-color@7.2.0)
+        version: 3.3.0(better-sqlite3@13.2.0)(supports-color@7.2.0)
 
   packages/bookshelf-plugins:
     dependencies:
@@ -394,7 +394,7 @@ importers:
     devDependencies:
       knex:
         specifier: 3.3.0
-        version: 3.3.0(better-sqlite3@13.1.1)(supports-color@7.2.0)
+        version: 3.3.0(better-sqlite3@13.2.0)(supports-color@7.2.0)
 
   packages/debug:
     dependencies:
@@ -713,7 +713,7 @@ importers:
         version: 5.3.0(supports-color@7.2.0)
       knex:
         specifier: 3.3.0
-        version: 3.3.0(better-sqlite3@13.1.1)(supports-color@7.2.0)
+        version: 3.3.0(better-sqlite3@13.2.0)(supports-color@7.2.0)
       nock:
         specifier: 15.0.6
         version: 15.0.6(supports-color@7.2.0)
@@ -2658,8 +2658,8 @@ packages:
     resolution: {integrity: sha512-GlF5wPWnSa/X5LKM1o0wz0suXIINz1iHRLvTS+sLyi7XPbe5ycmYI3DlZqVGZZtDgl4DmasFg7gOB3JYbphV5g==}
     hasBin: true
 
-  better-sqlite3@13.1.1:
-    resolution: {integrity: sha512-JjyLCATp+VLxZVFyWkicyzKYwpEFLCrV4MmshW97xv3JXdhw5jBDcsbEWRGm2L/96E+k7rtjON8q9nml05h3Pw==}
+  better-sqlite3@13.2.0:
+    resolution: {integrity: sha512-Z8Q/9x/uNyKxA1v4FNodyItRVRw1TeKBrmj32JhxhR0ceNcBY+wMobt/Bv7M7TzwPAXjnZRtNaEsATnUZSKWZQ==}
     engines: {node: '>=22'}
 
   bintrees@1.0.2:
@@ -6563,7 +6563,7 @@ snapshots:
 
   bcryptjs@3.0.3: {}
 
-  better-sqlite3@13.1.1:
+  better-sqlite3@13.2.0:
     dependencies:
       node-addon-api: 8.9.2
 
@@ -6591,12 +6591,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  bookshelf@1.2.0(knex@3.3.0(better-sqlite3@13.1.1)(supports-color@7.2.0)):
+  bookshelf@1.2.0(knex@3.3.0(better-sqlite3@13.2.0)(supports-color@7.2.0)):
     dependencies:
       bluebird: 3.7.2
       create-error: 0.3.1
       inflection: 1.13.4
-      knex: 3.3.0(better-sqlite3@13.1.1)(supports-color@7.2.0)
+      knex: 3.3.0(better-sqlite3@13.2.0)(supports-color@7.2.0)
       lodash: 4.18.1
 
   bowser@2.15.0: {}
@@ -7362,7 +7362,7 @@ snapshots:
     dependencies:
       '@keyv/serialize': 1.1.1
 
-  knex@3.3.0(better-sqlite3@13.1.1)(supports-color@7.2.0):
+  knex@3.3.0(better-sqlite3@13.2.0)(supports-color@7.2.0):
     dependencies:
       colorette: 2.0.19
       commander: 10.0.1
@@ -7379,7 +7379,7 @@ snapshots:
       tarn: 3.1.2
       tildify: 2.0.0
     optionalDependencies:
-      better-sqlite3: 13.1.1
+      better-sqlite3: 13.2.0
     transitivePeerDependencies:
       - supports-color
 
