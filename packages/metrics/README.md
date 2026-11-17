@@ -29,6 +29,44 @@ const custom = new metrics.GhostMetrics({
 });
 ```
 
+### Building your own instance
+
+`@tryghost/metrics/factory` is a side-effect free entry point for applications
+that build their metrics instance themselves. Importing it constructs nothing
+and reads no `loggingrc`:
+
+```js
+const { createMetrics, setInstance, GhostMetrics } = require('@tryghost/metrics/factory');
+
+const metrics = createMetrics({
+    domain: 'my-service',
+    metrics: { transports: ['stdout'] },
+});
+setInstance(metrics);
+
+// From here on, every require of the main entry returns `metrics`
+require('@tryghost/metrics') === metrics; // true
+```
+
+- `createMetrics(options)` returns `new GhostMetrics(options)`. It uses only
+  the options passed in and registers nothing.
+- `setInstance(instance)` makes `instance` the one the main entry returns and
+  returns it. Call it before anything requires `@tryghost/metrics`: if a
+  different instance already exists (set earlier, or built by the main entry)
+  it throws instead of silently leaving two instances in the process. Calling
+  it again with the same instance is a no-op.
+- The registered instance is stored on `globalThis` under
+  `Symbol.for('@tryghost/metrics@<major>')`, so every copy of the same major
+  in the `node_modules` tree returns it. `globalThis` is per thread: a worker
+  thread does not see an instance set on the main thread.
+- Without `setInstance()` nothing changes: each copy of the package builds its
+  own instance from `loggingrc` on first require.
+- The main entry attaches `GhostMetrics` to whichever instance it returns,
+  including one registered with `setInstance()`.
+
+The package has no `exports` map, so ES modules must import the file by name:
+`import factory from '@tryghost/metrics/factory.js'`.
+
 ### Elasticsearch client implementation
 
 `elasticsearch.implementation` picks how the Elasticsearch transport talks to
