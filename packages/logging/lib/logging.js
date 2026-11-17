@@ -2,7 +2,7 @@ const path = require('path');
 const { isMainThread } = require('worker_threads');
 const { getProcessRoot } = require('@tryghost/root-utils');
 const GhostLogger = require('./GhostLogger');
-const { version } = require('../package.json');
+const { registryKey } = require('./registry');
 
 /**
  * Reuse a single logger instance across duplicate copies of this package that
@@ -24,8 +24,10 @@ const { version } = require('../package.json');
  * dedupe failure) share safely, but an incompatible major — which may have a
  * different config shape or API — gets its own instance rather than silently
  * reusing one built by a different major.
+ *
+ * The key itself lives in `./registry` so `@tryghost/logging/factory` can
+ * register an instance without loading this file.
  */
-const registryKey = Symbol.for(`@tryghost/logging@${parseInt(version, 10)}`);
 
 function createLogger() {
     let loggingConfig;
