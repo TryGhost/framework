@@ -1,3 +1,5 @@
+import EventBus = require('./EventBus');
+
 /**
  * A simple in-process event bus for domain events. Events are keyed by their
  * class name, so subscribers pass the event class and dispatchers pass an
@@ -43,6 +45,14 @@ interface DomainEvents {
      * Clear the await queue and reset dispatch/processed counts. Test-only.
      */
     resetTrackingStateForTest(): void;
+
+    /**
+     * Build an event bus that is independent of this static one and takes its
+     * logger as an argument. Also available from
+     * `@tryghost/domain-events/factory`, which does not load
+     * `@tryghost/logging`.
+     */
+    createEventBus(options: EventBus.EventBusOptions): EventBus;
 }
 
 declare const DomainEvents: DomainEvents;
@@ -57,6 +67,10 @@ declare namespace DomainEvents {
         timestamp: Date;
         data: Data;
     }
+
+    type EventBus = import('./EventBus');
+    type EventBusOptions = import('./EventBus').EventBusOptions;
+    type Logger = import('./EventBus').Logger;
 }
 
 export = DomainEvents;

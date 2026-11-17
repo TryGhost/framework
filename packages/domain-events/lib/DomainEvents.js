@@ -1,5 +1,6 @@
 const EventEmitter = require('events').EventEmitter;
 const logging = require('@tryghost/logging');
+const { createEventBus } = require('./factory');
 
 /**
  * @template T
@@ -13,12 +14,21 @@ const logging = require('@tryghost/logging');
  * @prop {Data} data
  */
 
+// The static API below is a thin wrapper over this one default bus.
+const defaultBus = createEventBus({ logging });
+
 class DomainEvents {
     /**
      * @private
      * @type EventEmitter
      */
     static ee = new EventEmitter();
+
+    /**
+     * Build an event bus that is independent of the static one and takes its
+     * logger as an argument.
+     */
+    static createEventBus = createEventBus;
 
     /**
      * @template Data
@@ -29,19 +39,7 @@ class DomainEvents {
      * @returns {void}
      */
     static subscribe(Event, handler) {
-        DomainEvents.ee.on(Event.name, async (event) => {
-            try {
-                await handler(event);
-            } catch (e) {
-                logging.error('Unhandled error in event handler for event: ' + Event.name);
-                logging.error(e);
-            }
-            if (this.#trackingEnabled) {
-                this.#onProcessed();
-            } else {
-                // Tracking is disabled outside tests.
-            }
-        });
+        defaultBus.subscribe(Event, handler);
     }
 
     /**
@@ -50,7 +48,7 @@ class DomainEvents {
      * @returns {void}
      */
     static dispatch(event) {
-        DomainEvents.dispatchRaw(event.constructor.name, event);
+        defaultBus.dispatch(event);
     }
 
     /**
@@ -61,45 +59,16 @@ class DomainEvents {
      * @returns {void}
      */
     static dispatchRaw(name, data) {
-        if (this.#trackingEnabled) {
-            this.#dispatchCount += DomainEvents.ee.listenerCount(name);
-        } else {
-            // Tracking is disabled outside tests.
-        }
-        DomainEvents.ee.emit(name, data);
+        defaultBus.dispatchRaw(name, data);
     }
 
-    // Methods and properties below are only for testing purposes
-    static #awaitQueue = [];
-    static #dispatchCount = 0;
-    static #processedCount = 0;
-    static #trackingEnabled = process.env.NODE_ENV?.startsWith('test');
+    // Methods below are only for testing purposes
 
     /**
      * Waits for all the events in the queue to be dispatched and fully processed (async).
      */
     static allSettled() {
-        return new Promise((resolve) => {
-            if (this.#processedCount >= this.#dispatchCount) {
-                // Resolve immediately if there are no events in the queue
-                resolve();
-                return;
-            } else {
-                this.#awaitQueue.push({ resolve });
-            }
-        });
-    }
-
-    static #onProcessed() {
-        this.#processedCount += 1;
-        if (this.#processedCount >= this.#dispatchCount) {
-            for (const item of this.#awaitQueue) {
-                item.resolve();
-            }
-            this.#awaitQueue = [];
-        } else {
-            // Wait for the remaining tracked listeners.
-        }
+        return defaultBus.allSettled();
     }
 
     /**
@@ -107,17 +76,24 @@ class DomainEvents {
      * @param {boolean} enabled
      */
     static setTrackingEnabledForTest(enabled) {
-        this.#trackingEnabled = enabled;
+        defaultBus.setTrackingEnabledForTest(enabled);
     }
 
     /**
      * Clear the await queue and reset dispatch/processed counts. Test-only.
      */
     static resetTrackingStateForTest() {
-        this.#awaitQueue = [];
-        this.#dispatchCount = 0;
-        this.#processedCount = 0;
+        defaultBus.resetTrackingStateForTest();
     }
 }
+
+// `DomainEvents.ee` stays the emitter of record, as it was when the class owned
+// the listeners: the default bus reads it on every call, so replacing it still
+// takes effect.
+Object.defineProperty(defaultBus, 'ee', {
+    get() {
+        return DomainEvents.ee;
+    },
+});
 
 module.exports = DomainEvents;
