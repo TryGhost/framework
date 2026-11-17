@@ -47,6 +47,18 @@ describe('DomainEvents static API over the default bus', function () {
         assert.equal(handler.calledOnceWithExactly(data), true);
     });
 
+    it('dispatch goes through the static dispatchRaw', function () {
+        const dispatchRaw = sinon.stub(DomainEvents, 'dispatchRaw');
+        const handler = sinon.stub();
+        const event = new TestEvent();
+
+        DomainEvents.subscribe(TestEvent, handler);
+        DomainEvents.dispatch(event);
+
+        assert.equal(dispatchRaw.calledOnceWithExactly('TestEvent', event), true);
+        assert.equal(handler.called, false);
+    });
+
     it('follows DomainEvents.ee when it is replaced', async function () {
         const before = sinon.stub();
         const after = sinon.stub();

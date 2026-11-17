@@ -58,7 +58,9 @@ class DomainEvents {
      * @returns {void}
      */
     static dispatch(event) {
-        defaultBus.dispatch(event);
+        // Goes through the static dispatchRaw, as it always has, so replacing
+        // `DomainEvents.dispatchRaw` still affects dispatch().
+        DomainEvents.dispatchRaw(event.constructor.name, event);
     }
 
     /**
