@@ -56,6 +56,8 @@ A bus has the same methods as the static API (`subscribe`, `dispatch`,
 class and never loads `@tryghost/logging`. `createEventBus` is also available
 on the main entry as `DomainEvents.createEventBus`. The static `DomainEvents`
 API is a wrapper over one default bus that logs through `@tryghost/logging`.
+That bus only loads `@tryghost/logging` the first time a handler throws, so
+requiring `@tryghost/domain-events` does not build the process-wide logger.
 
 The package has no `exports` map, so ES modules must import the file by name:
 `import factory from '@tryghost/domain-events/factory.js'`.

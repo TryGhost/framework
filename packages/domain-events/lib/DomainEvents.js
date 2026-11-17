@@ -1,5 +1,4 @@
 const EventEmitter = require('events').EventEmitter;
-const logging = require('@tryghost/logging');
 const { createEventBus } = require('./factory');
 
 /**
@@ -15,7 +14,18 @@ const { createEventBus } = require('./factory');
  */
 
 // The static API below is a thin wrapper over this one default bus.
-const defaultBus = createEventBus({ logging });
+//
+// `@tryghost/logging` builds its process-wide logger when it is first required,
+// so it is only loaded when there is an error to log. Requiring this package
+// therefore does not create the logger, which leaves an application free to
+// register its own with `@tryghost/logging/factory` after this file has loaded.
+const defaultBus = createEventBus({
+    logging: {
+        error(...args) {
+            return require('@tryghost/logging').error(...args);
+        },
+    },
+});
 
 class DomainEvents {
     /**
