@@ -8,7 +8,8 @@ declare const factory: {
     GhostMetrics: typeof GhostMetricsClass;
     /**
      * Build a metrics instance from the given options. Reads no `loggingrc`
-     * and registers nothing.
+     * and registers nothing. The constructor's environment overrides (`MODE`,
+     * `LOIN`) still apply.
      */
     createMetrics(options?: GhostMetricsClass.GhostMetricsOptions): GhostMetricsClass;
     /**

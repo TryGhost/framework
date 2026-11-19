@@ -44,9 +44,11 @@ setInstance(logger);
 require('@tryghost/logging') === logger; // true
 ```
 
-- `createLogger(options)` returns `new GhostLogger(options)`. It uses only the
-  options passed in, registers nothing, and does not switch to the `parent`
-  transport in worker threads.
+- `createLogger(options)` returns `new GhostLogger(options)`. It reads no
+  `loggingrc`, registers nothing, and does not switch to the `parent`
+  transport in worker threads. The constructor's environment overrides still
+  apply: `LEVEL` and `MODE` take priority over `options.level` and
+  `options.mode`, and `LOIN` forces level `info` and mode `long`.
 - `setInstance(instance)` makes `instance` the logger the main entry returns
   for the current thread (see [Shared singleton](#shared-singleton)) and
   returns it. Call it before anything requires `@tryghost/logging`: if a

@@ -48,8 +48,10 @@ setInstance(metrics);
 require('@tryghost/metrics') === metrics; // true
 ```
 
-- `createMetrics(options)` returns `new GhostMetrics(options)`. It uses only
-  the options passed in and registers nothing.
+- `createMetrics(options)` returns `new GhostMetrics(options)`. It reads no
+  `loggingrc` and registers nothing. The constructor's environment overrides
+  still apply: `MODE` takes priority over `options.mode`, and `LOIN` forces
+  mode `long`.
 - `setInstance(instance)` makes `instance` the one the main entry returns and
   returns it. Call it before anything requires `@tryghost/metrics`: if a
   different instance already exists (set earlier, or built by the main entry)

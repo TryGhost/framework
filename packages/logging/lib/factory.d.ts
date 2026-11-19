@@ -8,7 +8,9 @@ declare const factory: {
     GhostLogger: typeof GhostLoggerClass;
     /**
      * Build a logger from the given options. Reads no `loggingrc`, registers
-     * nothing and does not adjust transports in worker threads.
+     * nothing and does not adjust transports in worker threads. The
+     * constructor's environment overrides (`LEVEL`, `MODE`, `LOIN`) still
+     * apply.
      */
     createLogger(options?: GhostLoggerClass.GhostLoggerOptions): GhostLoggerClass;
     /**
