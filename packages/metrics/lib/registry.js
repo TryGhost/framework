@@ -1,41 +1,22 @@
 const { version } = require('../package.json');
 
-const major = parseInt(version, 10);
+/**
+ * Key of the `globalThis` slot that holds the process-wide (per-thread)
+ * metrics instance. See `lib/metrics.js` for why it is a `Symbol.for` key
+ * gated on the MAJOR version.
+ */
+const registryKey = Symbol.for(`@tryghost/metrics@${parseInt(version, 10)}`);
 
 /**
- * `globalThis` slot holding the instance registered with `setInstance()`.
+ * @description Get the process-wide metrics instance, if one exists yet.
  *
- * `Symbol.for` resolves to the same symbol in every physical copy of this
- * package in the node_modules tree, so a registered instance is returned by
- * the main entry of every copy of the same MAJOR version. Incompatible majors
- * get their own slot. `globalThis` is per thread, so nothing is shared with
- * worker threads.
- */
-const registryKey = Symbol.for(`@tryghost/metrics@${major}`);
-
-/**
- * `globalThis` slot remembering the first instance a main entry built for
- * itself from `loggingrc`. It only exists so a too-late `setInstance()` can be
- * detected; main entries never read an instance back from it.
- */
-const defaultBuiltKey = Symbol.for(`@tryghost/metrics@${major}:default`);
-
-/**
- * @description Get the instance registered with `setInstance()`, if any
+ * Builds nothing: returns `undefined` until the main entry point has built its
+ * instance or `setInstance()` has registered one.
+ *
  * @returns {object | undefined}
  */
-function getRegisteredInstance() {
+function getInstance() {
     return globalThis[registryKey];
-}
-
-/**
- * @description Record that a main entry built its own default instance
- * @param {object} instance The instance the main entry built
- * @returns {object} The same instance
- */
-function markDefaultBuilt(instance) {
-    globalThis[defaultBuiltKey] ??= instance;
-    return instance;
 }
 
 /**
@@ -43,9 +24,10 @@ function markDefaultBuilt(instance) {
  *
  * Must run before anything loads the main entry point (in any copy of this
  * major): once a different instance exists, earlier importers already hold it,
- * so this throws instead of leaving two instances in the process.
+ * so this throws instead of leaving two instances in the process. Use
+ * `getInstance()` first to adopt an existing instance rather than build one.
  *
- * @param {object} instance The instance to register, e.g. from `createMetrics()`
+ * @param {object} instance The instance to register
  * @returns {object} The registered instance
  */
 function setInstance(instance) {
@@ -53,7 +35,7 @@ function setInstance(instance) {
         throw new TypeError('@tryghost/metrics: setInstance() requires a metrics instance');
     }
 
-    const existing = globalThis[registryKey] || globalThis[defaultBuiltKey];
+    const existing = globalThis[registryKey];
 
     if (existing && existing !== instance) {
         throw new Error(
@@ -66,10 +48,4 @@ function setInstance(instance) {
     return instance;
 }
 
-module.exports = {
-    registryKey,
-    defaultBuiltKey,
-    getRegisteredInstance,
-    markDefaultBuilt,
-    setInstance,
-};
+module.exports = { registryKey, getInstance, setInstance };

@@ -1,18 +1,6 @@
 const GhostMetrics = require('./GhostMetrics');
-const { setInstance } = require('./registry');
+const { getInstance, setInstance } = require('./registry');
 
-/**
- * @description Build a metrics instance from the options passed in.
- *
- * Unlike the main entry point this reads no `loggingrc` and does not register
- * the instance anywhere. The constructor's environment overrides (`MODE`,
- * `LOIN`) still apply.
- *
- * @param {object} [options] `GhostMetrics` constructor options
- * @returns {GhostMetrics}
- */
-function createMetrics(options) {
-    return new GhostMetrics(options);
-}
-
-module.exports = { GhostMetrics, createMetrics, setInstance };
+// Side-effect free entry point: importing this builds no metrics instance and
+// reads no `loggingrc`, unlike the main entry point.
+module.exports = { GhostMetrics, getInstance, setInstance };

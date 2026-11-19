@@ -36,35 +36,33 @@ that build their metrics instance themselves. Importing it constructs nothing
 and reads no `loggingrc`:
 
 ```js
-const { createMetrics, setInstance, GhostMetrics } = require('@tryghost/metrics/factory');
+const { GhostMetrics, getInstance, setInstance } = require('@tryghost/metrics/factory');
 
-const metrics = createMetrics({
-    domain: 'my-service',
-    metrics: { transports: ['stdout'] },
-});
-setInstance(metrics);
+const metrics =
+    getInstance() ??
+    setInstance(
+        new GhostMetrics({
+            domain: 'my-service',
+            metrics: { transports: ['stdout'] },
+        }),
+    );
 
 // From here on, every require of the main entry returns `metrics`
 require('@tryghost/metrics') === metrics; // true
 ```
 
-- `createMetrics(options)` returns `new GhostMetrics(options)`. It reads no
-  `loggingrc` and registers nothing. The constructor's environment overrides
-  still apply: `MODE` takes priority over `options.mode`, and `LOIN` forces
-  mode `long`.
-- `setInstance(instance)` makes `instance` the one the main entry returns and
-  returns it. Call it before anything requires `@tryghost/metrics`: if a
-  different instance already exists (set earlier, or built by the main entry)
-  it throws instead of silently leaving two instances in the process. Calling
-  it again with the same instance is a no-op.
-- The registered instance is stored on `globalThis` under
-  `Symbol.for('@tryghost/metrics@<major>')`, so every copy of the same major
-  in the `node_modules` tree returns it. `globalThis` is per thread: a worker
-  thread does not see an instance set on the main thread.
-- Without `setInstance()` nothing changes: each copy of the package builds its
-  own instance from `loggingrc` on first require.
-- The main entry attaches `GhostMetrics` to whichever instance it returns,
-  including one registered with `setInstance()`.
+- `getInstance()` returns the instance the main entry returns for the current
+  thread (see [Shared singleton](#shared-singleton)), or `undefined` if nothing
+  has built or registered one yet.
+- `setInstance(instance)` makes `instance` that instance and returns it. Call it
+  before anything requires `@tryghost/metrics`: if a different instance already
+  exists it throws instead of silently leaving two instances in the process.
+  Calling it again with the same instance is a no-op.
+- An instance you build yourself reads no `loggingrc`. The constructor's
+  environment overrides still apply: `MODE` takes priority over `options.mode`,
+  and `LOIN` forces mode `long`.
+- The main entry attaches `GhostMetrics` and `resetForTesting` to whichever
+  instance it returns, including one registered with `setInstance()`.
 
 The package has no `exports` map, so ES modules must import the file by name:
 `import factory from '@tryghost/metrics/factory.js'`.
@@ -220,6 +218,22 @@ import metrics = require('@tryghost/metrics');
 const custom: metrics.GhostMetrics = new metrics.GhostMetrics({ domain: 'my-service' });
 const options: metrics.GhostMetricsOptions = {};
 ```
+
+## Shared singleton
+
+The package's default export is a single `GhostMetrics` instance per thread.
+To survive cases where the package fails to dedupe and more than one physical
+copy ends up in the `node_modules` tree, that instance is cached on
+`globalThis` and reused across every copy in the same thread, so the process
+has one set of transports and one Elasticsearch client. Worker threads each
+have their own `globalThis`, so a worker builds its own instance.
+
+The cache is keyed on the **major** version only
+(`Symbol.for('@tryghost/metrics@<major>')`), so copies that share an installed
+major share one instance while an incompatible major gets its own.
+
+Because the instance outlives `require`-cache resets, tests that need a fresh
+instance call `metrics.resetForTesting()`.
 
 ## Develop
 

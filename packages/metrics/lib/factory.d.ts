@@ -7,11 +7,10 @@ import GhostMetricsClass = require('./GhostMetrics');
 declare const factory: {
     GhostMetrics: typeof GhostMetricsClass;
     /**
-     * Build a metrics instance from the given options. Reads no `loggingrc`
-     * and registers nothing. The constructor's environment overrides (`MODE`,
-     * `LOIN`) still apply.
+     * The process-wide (per-thread) metrics instance, or `undefined` if none
+     * has been built or registered yet. Builds nothing.
      */
-    createMetrics(options?: GhostMetricsClass.GhostMetricsOptions): GhostMetricsClass;
+    getInstance(): GhostMetricsClass | undefined;
     /**
      * Make `instance` the process-wide (per-thread) metrics instance returned
      * by `require('@tryghost/metrics')`. Returns the instance.

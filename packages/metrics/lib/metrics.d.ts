@@ -6,6 +6,10 @@ import GhostMetricsClass = require('./GhostMetrics');
  */
 declare const metrics: GhostMetricsClass & {
     GhostMetrics: typeof GhostMetricsClass;
+    /**
+     * Clear the cached process-wide metrics instance. Intended for tests only.
+     */
+    resetForTesting(): void;
 };
 
 declare namespace metrics {

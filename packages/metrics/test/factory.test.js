@@ -4,9 +4,7 @@ const { Worker } = require('worker_threads');
 const rootUtils = require('@tryghost/root-utils');
 const { version } = require('../package.json');
 
-const major = parseInt(version, 10);
-const registryKey = Symbol.for(`@tryghost/metrics@${major}`);
-const defaultBuiltKey = Symbol.for(`@tryghost/metrics@${major}:default`);
+const registryKey = Symbol.for(`@tryghost/metrics@${parseInt(version, 10)}`);
 
 const indexPath = require.resolve('../index');
 const metricsPath = require.resolve('../lib/metrics');
@@ -28,7 +26,6 @@ function clearModules() {
 
 function clearRegistry() {
     delete globalThis[registryKey];
-    delete globalThis[defaultBuiltKey];
 }
 
 function loadFactory() {
@@ -61,11 +58,10 @@ describe('@tryghost/metrics/factory', function () {
 
             assert.deepEqual(Object.keys(factory).sort(), [
                 'GhostMetrics',
-                'createMetrics',
+                'getInstance',
                 'setInstance',
             ]);
             assert.equal(globalThis[registryKey], undefined);
-            assert.equal(globalThis[defaultBuiltKey], undefined);
             assert.equal(getProcessRoot.called, false);
             assert.equal(require.cache[metricsPath], undefined);
             assert.equal(require.cache[indexPath], undefined);
@@ -80,46 +76,47 @@ describe('@tryghost/metrics/factory', function () {
         });
     });
 
-    describe('createMetrics', function () {
-        it('builds a GhostMetrics from the options passed in', function () {
-            const { createMetrics, GhostMetrics } = loadFactory();
-
-            const metrics = createMetrics({
-                domain: 'factory-test',
-                metrics: { transports: [], metadata: { id: 'abc' } },
-            });
-
-            assert.ok(metrics instanceof GhostMetrics);
-            assert.equal(metrics.domain, 'factory-test');
-            assert.deepEqual(metrics.transports, []);
-            assert.deepEqual(metrics.metadata, { id: 'abc' });
-        });
-
-        it('works without options', function () {
-            const { createMetrics, GhostMetrics } = loadFactory();
-
-            assert.ok(createMetrics() instanceof GhostMetrics);
-        });
-
-        it('returns a new instance each call and registers none of them', function () {
+    describe('getInstance', function () {
+        it('returns undefined and builds nothing before any instance exists', function () {
             const getProcessRoot = sinon.spy(rootUtils, 'getProcessRoot');
-            const { createMetrics } = loadFactory();
+            const { getInstance } = loadFactory();
 
-            const first = createMetrics();
-            const second = createMetrics();
-
-            assert.notEqual(first, second);
+            assert.equal(getInstance(), undefined);
             assert.equal(globalThis[registryKey], undefined);
-            assert.equal(globalThis[defaultBuiltKey], undefined);
             assert.equal(getProcessRoot.called, false);
+        });
+
+        it('returns the instance the main entry built', function () {
+            const metrics = loadMainEntry();
+            const { getInstance } = loadFactory();
+
+            assert.equal(getInstance(), metrics);
+        });
+
+        it('returns the registered instance', function () {
+            const { GhostMetrics, getInstance, setInstance } = loadFactory();
+            const instance = setInstance(new GhostMetrics());
+
+            assert.equal(getInstance(), instance);
+        });
+
+        it('lets a caller adopt an existing instance instead of building one', function () {
+            const metrics = loadMainEntry();
+            const { GhostMetrics, getInstance, setInstance } = loadFactory();
+            const build = sinon.spy(() => new GhostMetrics());
+
+            const instance = getInstance() ?? setInstance(build());
+
+            assert.equal(instance, metrics);
+            assert.equal(build.called, false);
         });
     });
 
     describe('setInstance', function () {
         it('makes the instance the one the main entry returns', function () {
             const getProcessRoot = sinon.spy(rootUtils, 'getProcessRoot');
-            const { createMetrics, setInstance, GhostMetrics } = loadFactory();
-            const instance = createMetrics({ domain: 'set-instance-test' });
+            const { GhostMetrics, setInstance } = loadFactory();
+            const instance = new GhostMetrics({ domain: 'set-instance-test' });
 
             assert.equal(setInstance(instance), instance);
             assert.equal(globalThis[registryKey], instance);
@@ -130,14 +127,14 @@ describe('@tryghost/metrics/factory', function () {
             assert.equal(metrics.domain, 'set-instance-test');
             // The main entry did not build its own instance
             assert.equal(getProcessRoot.called, false);
-            assert.equal(globalThis[defaultBuiltKey], undefined);
-            // The main entry still attaches the class
+            // The main entry still attaches its usual extras
             assert.equal(metrics.GhostMetrics, GhostMetrics);
+            assert.equal(typeof metrics.resetForTesting, 'function');
         });
 
         it('is returned by every copy of the main entry', function () {
-            const { createMetrics, setInstance } = loadFactory();
-            const instance = setInstance(createMetrics());
+            const { GhostMetrics, setInstance } = loadFactory();
+            const instance = setInstance(new GhostMetrics());
 
             const first = loadMainEntry();
             clearMainEntry();
@@ -148,8 +145,8 @@ describe('@tryghost/metrics/factory', function () {
         });
 
         it('is a no-op when called again with the same instance', function () {
-            const { createMetrics, setInstance } = loadFactory();
-            const instance = createMetrics();
+            const { GhostMetrics, setInstance } = loadFactory();
+            const instance = new GhostMetrics();
 
             setInstance(instance);
 
@@ -169,33 +166,32 @@ describe('@tryghost/metrics/factory', function () {
 
         it('throws when the main entry already built a different instance', function () {
             const metrics = loadMainEntry();
-            const { createMetrics, setInstance } = loadFactory();
+            const { GhostMetrics, setInstance } = loadFactory();
 
-            assert.equal(globalThis[defaultBuiltKey], metrics);
-            assert.throws(() => setInstance(createMetrics()), {
+            assert.throws(() => setInstance(new GhostMetrics()), {
                 name: 'Error',
                 message: ALREADY_EXISTS,
             });
-            assert.equal(globalThis[registryKey], undefined);
+            assert.equal(globalThis[registryKey], metrics);
         });
 
         it('throws when a different instance was already set', function () {
-            const { createMetrics, setInstance } = loadFactory();
-            const first = setInstance(createMetrics());
+            const { GhostMetrics, setInstance } = loadFactory();
+            const first = setInstance(new GhostMetrics());
 
-            assert.throws(() => setInstance(createMetrics()), ALREADY_EXISTS);
+            assert.throws(() => setInstance(new GhostMetrics()), ALREADY_EXISTS);
             assert.equal(globalThis[registryKey], first);
         });
 
         it('throws when a different copy of the factory registered an instance', function () {
             const first = loadFactory();
-            const instance = first.setInstance(first.createMetrics());
+            const instance = first.setInstance(new first.GhostMetrics());
 
             clearModules();
             const second = loadFactory();
 
             assert.notEqual(second.setInstance, first.setInstance);
-            assert.throws(() => second.setInstance(second.createMetrics()), ALREADY_EXISTS);
+            assert.throws(() => second.setInstance(new second.GhostMetrics()), ALREADY_EXISTS);
             assert.equal(second.setInstance(instance), instance);
         });
 
@@ -212,8 +208,8 @@ describe('@tryghost/metrics/factory', function () {
         });
 
         it('is not visible in a worker thread', async function () {
-            const { createMetrics, setInstance } = loadFactory();
-            setInstance(createMetrics({ domain: 'main-thread' }));
+            const { GhostMetrics, setInstance } = loadFactory();
+            setInstance(new GhostMetrics({ domain: 'main-thread' }));
 
             const worker = new Worker(
                 `const { parentPort } = require('worker_threads');
@@ -236,15 +232,23 @@ describe('@tryghost/metrics/factory', function () {
     });
 
     describe('main entry without setInstance', function () {
-        it('still builds a separate instance per copy', function () {
+        it('shares one instance across copies', function () {
             const first = loadMainEntry();
             clearMainEntry();
             const second = loadMainEntry();
 
+            assert.equal(second, first);
+            assert.equal(globalThis[registryKey], first);
+        });
+
+        it('builds a fresh instance after resetForTesting()', function () {
+            const first = loadMainEntry();
+            first.resetForTesting();
+            clearMainEntry();
+            const second = loadMainEntry();
+
             assert.notEqual(second, first);
-            assert.equal(globalThis[registryKey], undefined);
-            // Only the first default instance is remembered
-            assert.equal(globalThis[defaultBuiltKey], first);
+            assert.equal(globalThis[registryKey], second);
         });
     });
 });
