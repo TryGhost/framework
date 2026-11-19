@@ -46,7 +46,7 @@ describe('@tryghost/logging/factory', function () {
 
             assert.deepEqual(Object.keys(factory).sort(), [
                 'GhostLogger',
-                'createLogger',
+                'getInstance',
                 'setInstance',
             ]);
             assert.equal(globalThis[registryKey], undefined);
@@ -64,41 +64,47 @@ describe('@tryghost/logging/factory', function () {
         });
     });
 
-    describe('createLogger', function () {
-        it('builds a GhostLogger from the options passed in', function () {
-            const { createLogger, GhostLogger } = loadFactory();
-
-            const logger = createLogger({ name: 'factory-test', transports: [] });
-
-            assert.ok(logger instanceof GhostLogger);
-            assert.equal(logger.name, 'factory-test');
-            assert.deepEqual(logger.transports, []);
-        });
-
-        it('works without options', function () {
-            const { createLogger, GhostLogger } = loadFactory();
-
-            assert.ok(createLogger() instanceof GhostLogger);
-        });
-
-        it('returns a new instance each call and registers none of them', function () {
+    describe('getInstance', function () {
+        it('returns undefined and builds nothing before any logger exists', function () {
             const getProcessRoot = sinon.spy(rootUtils, 'getProcessRoot');
-            const { createLogger } = loadFactory();
+            const { getInstance } = loadFactory();
 
-            const first = createLogger({ transports: [] });
-            const second = createLogger({ transports: [] });
-
-            assert.notEqual(first, second);
+            assert.equal(getInstance(), undefined);
             assert.equal(globalThis[registryKey], undefined);
             assert.equal(getProcessRoot.called, false);
+        });
+
+        it('returns the logger the main entry built', function () {
+            const logging = loadMainEntry();
+            const { getInstance } = loadFactory();
+
+            assert.equal(getInstance(), logging);
+        });
+
+        it('returns the registered logger', function () {
+            const { GhostLogger, getInstance, setInstance } = loadFactory();
+            const logger = setInstance(new GhostLogger({ transports: [] }));
+
+            assert.equal(getInstance(), logger);
+        });
+
+        it('lets a caller adopt an existing logger instead of building one', function () {
+            const logging = loadMainEntry();
+            const { GhostLogger, getInstance, setInstance } = loadFactory();
+            const build = sinon.spy(() => new GhostLogger({ transports: [] }));
+
+            const logger = getInstance() ?? setInstance(build());
+
+            assert.equal(logger, logging);
+            assert.equal(build.called, false);
         });
     });
 
     describe('setInstance', function () {
         it('makes the instance the one the main entry returns', function () {
             const getProcessRoot = sinon.spy(rootUtils, 'getProcessRoot');
-            const { createLogger, setInstance, GhostLogger } = loadFactory();
-            const logger = createLogger({ name: 'set-instance-test', transports: [] });
+            const { GhostLogger, setInstance } = loadFactory();
+            const logger = new GhostLogger({ name: 'set-instance-test', transports: [] });
 
             assert.equal(setInstance(logger), logger);
             assert.equal(globalThis[registryKey], logger);
@@ -115,8 +121,8 @@ describe('@tryghost/logging/factory', function () {
         });
 
         it('is shared with a duplicate copy of the main entry', function () {
-            const { createLogger, setInstance } = loadFactory();
-            const logger = setInstance(createLogger({ transports: [] }));
+            const { GhostLogger, setInstance } = loadFactory();
+            const logger = setInstance(new GhostLogger({ transports: [] }));
 
             const first = loadMainEntry();
             delete require.cache[indexPath];
@@ -128,8 +134,8 @@ describe('@tryghost/logging/factory', function () {
         });
 
         it('is a no-op when called again with the same instance', function () {
-            const { createLogger, setInstance } = loadFactory();
-            const logger = createLogger({ transports: [] });
+            const { GhostLogger, setInstance } = loadFactory();
+            const logger = new GhostLogger({ transports: [] });
 
             setInstance(logger);
 
@@ -149,9 +155,9 @@ describe('@tryghost/logging/factory', function () {
 
         it('throws when the main entry already built a different instance', function () {
             const logging = loadMainEntry();
-            const { createLogger, setInstance } = loadFactory();
+            const { GhostLogger, setInstance } = loadFactory();
 
-            assert.throws(() => setInstance(createLogger({ transports: [] })), {
+            assert.throws(() => setInstance(new GhostLogger({ transports: [] })), {
                 name: 'Error',
                 message: /setInstance\(\) was called after a different logger instance was created/,
             });
@@ -159,11 +165,11 @@ describe('@tryghost/logging/factory', function () {
         });
 
         it('throws when a different instance was already set', function () {
-            const { createLogger, setInstance } = loadFactory();
-            const first = setInstance(createLogger({ transports: [] }));
+            const { GhostLogger, setInstance } = loadFactory();
+            const first = setInstance(new GhostLogger({ transports: [] }));
 
             assert.throws(
-                () => setInstance(createLogger({ transports: [] })),
+                () => setInstance(new GhostLogger({ transports: [] })),
                 /setInstance\(\) was called after a different logger instance was created/,
             );
             assert.equal(globalThis[registryKey], first);
@@ -171,25 +177,25 @@ describe('@tryghost/logging/factory', function () {
 
         it('throws when a different copy of the factory registered an instance', function () {
             const first = loadFactory();
-            const logger = first.setInstance(first.createLogger({ transports: [] }));
+            const logger = first.setInstance(new first.GhostLogger({ transports: [] }));
 
             clearModules();
             const second = loadFactory();
 
             assert.notEqual(second.setInstance, first.setInstance);
             assert.throws(
-                () => second.setInstance(second.createLogger({ transports: [] })),
+                () => second.setInstance(new second.GhostLogger({ transports: [] })),
                 /setInstance\(\) was called after a different logger instance was created/,
             );
             assert.equal(second.setInstance(logger), logger);
         });
 
         it('can set a new instance after resetForTesting()', function () {
-            const { createLogger, setInstance } = loadFactory();
-            setInstance(createLogger({ transports: [] }));
+            const { GhostLogger, setInstance } = loadFactory();
+            setInstance(new GhostLogger({ transports: [] }));
             loadMainEntry().resetForTesting();
 
-            const replacement = createLogger({ transports: [] });
+            const replacement = new GhostLogger({ transports: [] });
 
             assert.equal(setInstance(replacement), replacement);
             assert.equal(globalThis[registryKey], replacement);
@@ -208,8 +214,8 @@ describe('@tryghost/logging/factory', function () {
         });
 
         it('does not change what a worker thread builds', async function () {
-            const { createLogger, setInstance } = loadFactory();
-            const logger = setInstance(createLogger({ transports: [] }));
+            const { GhostLogger, setInstance } = loadFactory();
+            const logger = setInstance(new GhostLogger({ transports: [] }));
             const info = sinon.spy(logger, 'info');
 
             // The fixture requires the main entry and logs 'Hello!'. A worker has

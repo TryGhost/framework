@@ -7,12 +7,10 @@ import GhostLoggerClass = require('./GhostLogger');
 declare const factory: {
     GhostLogger: typeof GhostLoggerClass;
     /**
-     * Build a logger from the given options. Reads no `loggingrc`, registers
-     * nothing and does not adjust transports in worker threads. The
-     * constructor's environment overrides (`LEVEL`, `MODE`, `LOIN`) still
-     * apply.
+     * The process-wide (per-thread) logger, or `undefined` if none has been
+     * built or registered yet. Builds nothing.
      */
-    createLogger(options?: GhostLoggerClass.GhostLoggerOptions): GhostLoggerClass;
+    getInstance(): GhostLoggerClass | undefined;
     /**
      * Make `instance` the process-wide (per-thread) logger returned by
      * `require('@tryghost/logging')`. Returns the instance.

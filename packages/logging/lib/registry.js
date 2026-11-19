@@ -8,13 +8,26 @@ const { version } = require('../package.json');
 const registryKey = Symbol.for(`@tryghost/logging@${parseInt(version, 10)}`);
 
 /**
+ * @description Get the process-wide logger, if one exists yet.
+ *
+ * Builds nothing: returns `undefined` until the main entry point has built its
+ * logger or `setInstance()` has registered one.
+ *
+ * @returns {object | undefined}
+ */
+function getInstance() {
+    return globalThis[registryKey];
+}
+
+/**
  * @description Make `instance` the process-wide logger that `require('@tryghost/logging')` returns.
  *
  * Must run before anything loads the main entry point (in any copy of this
  * major): once a different instance exists, replacing it would leave earlier
- * importers holding a second logger, so this throws instead.
+ * importers holding a second logger, so this throws instead. Use
+ * `getInstance()` first to adopt an existing logger rather than build one.
  *
- * @param {object} instance The logger to register, e.g. from `createLogger()`
+ * @param {object} instance The logger to register
  * @returns {object} The registered instance
  */
 function setInstance(instance) {
@@ -35,4 +48,4 @@ function setInstance(instance) {
     return instance;
 }
 
-module.exports = { registryKey, setInstance };
+module.exports = { registryKey, getInstance, setInstance };
