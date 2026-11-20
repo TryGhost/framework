@@ -11,6 +11,8 @@
   "files": [
     "index.js",
     "index.d.ts",
+    "factory.js",
+    "factory.d.ts",
     "lib"
   ],
   "main": "index.js",

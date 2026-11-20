@@ -6,6 +6,7 @@ const ElasticSearch = require('@tryghost/elasticsearch');
 const PrettyStream = require('@tryghost/pretty-stream');
 const { getProcessRoot } = require('@tryghost/root-utils');
 const GhostMetrics = require('../lib/GhostMetrics');
+const { registryKey } = require('../lib/registry');
 const sandbox = sinon.createSandbox();
 
 // Vitest sets process.env.MODE to 'test' which interferes with GhostMetrics mode detection
@@ -25,6 +26,9 @@ const loggingConfigPath = path.join(getProcessRoot(), 'loggingrc');
 
 describe('Metrics config', function () {
     afterEach(function () {
+        // The main entry caches its instance on globalThis, which outlives the
+        // require cache
+        delete globalThis[registryKey];
         delete require.cache[require.resolve('../lib/metrics')];
         delete require.cache[require.resolve('../index')];
         delete require.cache[loggingConfigPath];
