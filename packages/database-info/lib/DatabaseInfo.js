@@ -1,3 +1,11 @@
+const dialect = require('./dialect');
+
+/**
+ * Holds what `describeDatabase()` found for one knex instance.
+ *
+ * Kept for existing callers. New code that must not hold state can use the
+ * functions in `@tryghost/database-info/dialect` directly.
+ */
 module.exports = class DatabaseInfo {
     /**
      * @param {import('knex').Knex} knex
@@ -24,46 +32,8 @@ module.exports = class DatabaseInfo {
     }
 
     async init() {
-        switch (this._driver) {
-            case 'sqlite3':
-            case 'better-sqlite3':
-                this._databaseDetails.database = 'SQLite';
-                this._databaseDetails.engine = 'sqlite3';
-                this._databaseDetails.version = this._client.driver.VERSION;
-                break;
-            case 'mysql':
-            case 'mysql2':
-                try {
-                    const version = await this._knex.raw('SELECT version() as version;');
-                    const mysqlVersion = version[0][0].version;
-
-                    if (mysqlVersion.includes('MariaDB')) {
-                        this._databaseDetails.database = 'MariaDB';
-                        this._databaseDetails.engine = 'mariadb';
-                        this._databaseDetails.version = mysqlVersion.split('-')[0];
-                    } else {
-                        this._databaseDetails.database = 'MySQL';
-
-                        if (mysqlVersion.startsWith('5')) {
-                            this._databaseDetails.engine = 'mysql5';
-                        } else if (mysqlVersion.startsWith('8')) {
-                            this._databaseDetails.engine = 'mysql8';
-                        } else {
-                            this._databaseDetails.engine = 'mysql';
-                        }
-
-                        this._databaseDetails.version = mysqlVersion;
-                    }
-                } catch {
-                    return this._databaseDetails;
-                }
-                break;
-            default:
-                // This driver isn't supported so we should just leave the return
-                // object alone with the "unknown" strings
-                break;
-        }
-
+        const details = await dialect.describeDatabase(this._knex);
+        this._databaseDetails = { ...details, driver: this._driver };
         return this._databaseDetails;
     }
 
@@ -89,8 +59,7 @@ module.exports = class DatabaseInfo {
      * @param {import('knex').Knex} knex
      */
     static isSQLite(knex) {
-        const driver = knex.client.config.client;
-        return ['sqlite3', 'better-sqlite3'].includes(driver);
+        return dialect.isSQLite(knex);
     }
 
     /**
@@ -99,7 +68,7 @@ module.exports = class DatabaseInfo {
      * @param {object} config
      */
     static isSQLiteConfig(config) {
-        return ['sqlite3', 'better-sqlite3'].includes(config.client);
+        return dialect.isSQLiteConfig(config);
     }
 
     /**
@@ -108,8 +77,7 @@ module.exports = class DatabaseInfo {
      * @param {import('knex').Knex} knex
      */
     static isMySQL(knex) {
-        const driver = knex.client.config.client;
-        return ['mysql', 'mysql2'].includes(driver);
+        return dialect.isMySQL(knex);
     }
 
     /**
@@ -118,6 +86,6 @@ module.exports = class DatabaseInfo {
      * @param {object} config
      */
     static isMySQLConfig(config) {
-        return ['mysql', 'mysql2'].includes(config.client);
+        return dialect.isMySQLConfig(config);
     }
 };

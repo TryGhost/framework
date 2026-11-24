@@ -11,6 +11,8 @@
   "files": [
     "index.js",
     "index.d.ts",
+    "dialect.js",
+    "dialect.d.ts",
     "lib"
   ],
   "main": "index.js",
