@@ -259,8 +259,8 @@ importers:
         specifier: workspace:^
         version: link:../errors
       '@tryghost/nql':
-        specifier: ^0.13.4
-        version: 0.13.5(supports-color@7.2.0)
+        specifier: ^0.14.0
+        version: 0.14.0(supports-color@7.2.0)
       '@tryghost/tpl':
         specifier: workspace:^
         version: link:../tpl
@@ -2246,17 +2246,17 @@ packages:
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
-  '@tryghost/mongo-knex@0.11.2':
-    resolution: {integrity: sha512-0l7L/J609p+12+rA15Muya1JoIeSfBxIUZRB2FfROtJ2U+FTEOzZ/c0HgxB8eAArJMW2VXECmLCAbNUwygRzfg==}
+  '@tryghost/mongo-knex@0.13.0':
+    resolution: {integrity: sha512-8X0gOSn0CAVCBz2hPVTs1oI8kh7mnkwULbqqqDztl+mnXQRHE2NXc8mg1qOUjGye/sMRtaenck8/4bcK/89qyw==}
 
-  '@tryghost/mongo-utils@0.6.6':
-    resolution: {integrity: sha512-CeWSgFKfUhFqD/dk22zEugawFdzVpa9avRgzFExbogiIFmNOfMOuD4G12/GUwFYOGjyCRAdQyKp8xgWSF97SRg==}
+  '@tryghost/mongo-utils@0.7.0':
+    resolution: {integrity: sha512-4Jk9+XNTIUFhjkI505Gmnk67/M1ynxRjKT+Cf7ug/a2vlXP4KEUNv/68Z5q6MuYX0lNl/3OsklxZyC52nbkWUA==}
 
-  '@tryghost/nql-lang@0.7.1':
-    resolution: {integrity: sha512-I61vJTAlJNTYZO0zF5hGBzVBzIBlxOtxMQPA9BuHZ15buKMukIru3Jnf82umP44nkF0WMinjlH2kOVbNFgS4Aw==}
+  '@tryghost/nql-lang@0.8.0':
+    resolution: {integrity: sha512-rvbQIC+qfGh3R/WU2/G/5sN9zXaOh4OtyJ8YF41N8L19TUu7pXPXgvHEZNFddFSQU4qZHYX8KpPj+WqlBNmu+g==}
 
-  '@tryghost/nql@0.13.5':
-    resolution: {integrity: sha512-3bkeCCA7Z2pmlKdViGZfscudXwummmCzX/CTxxBOWNjZ3k/8dXKvOJsNuT1KcgI1OoKcaFlsK9EY6ABWHVFzfg==}
+  '@tryghost/nql@0.14.0':
+    resolution: {integrity: sha512-3DNu5IxlRox+5hGxh5+D1UWFrkKcnYi3z4WCGHUUU5e4qZtejktYF7pEQ8l8dBQ7VoPd3BBK06M/Vu5I2ZzGBg==}
 
   '@tryghost/string@0.3.10':
     resolution: {integrity: sha512-bXf8EWBujR0Vvz3DwWK61VfDG7XcIq0j4++mTLnKjS05HgojeqYyM3g7iF3YvFjkytPaVVfNS7jmdpZL3LTn0Q==}
@@ -6204,26 +6204,26 @@ snapshots:
 
   '@standard-schema/spec@1.1.0': {}
 
-  '@tryghost/mongo-knex@0.11.2(supports-color@7.2.0)':
+  '@tryghost/mongo-knex@0.13.0(supports-color@7.2.0)':
     dependencies:
       debug: 4.4.3(supports-color@7.2.0)
       lodash: 4.18.1
     transitivePeerDependencies:
       - supports-color
 
-  '@tryghost/mongo-utils@0.6.6':
+  '@tryghost/mongo-utils@0.7.0':
     dependencies:
       lodash: 4.18.1
 
-  '@tryghost/nql-lang@0.7.1':
+  '@tryghost/nql-lang@0.8.0':
     dependencies:
       luxon: 3.7.2
 
-  '@tryghost/nql@0.13.5(supports-color@7.2.0)':
+  '@tryghost/nql@0.14.0(supports-color@7.2.0)':
     dependencies:
-      '@tryghost/mongo-knex': 0.11.2(supports-color@7.2.0)
-      '@tryghost/mongo-utils': 0.6.6
-      '@tryghost/nql-lang': 0.7.1
+      '@tryghost/mongo-knex': 0.13.0(supports-color@7.2.0)
+      '@tryghost/mongo-utils': 0.7.0
+      '@tryghost/nql-lang': 0.8.0
       lodash: 4.18.1
       mingo: 2.5.3
     transitivePeerDependencies:
